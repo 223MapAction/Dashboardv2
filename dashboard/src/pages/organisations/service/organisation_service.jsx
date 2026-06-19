@@ -25,7 +25,7 @@ export const createOrganisationService = async (data) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const formData = new FormData();
-    
+
     Object.keys(data).forEach((key) => {
       if (data[key] === null) {
         formData.append(key, '');
@@ -35,7 +35,7 @@ export const createOrganisationService = async (data) => {
     });
 
     const response = await axios.post(
-      `${API_URL_BASE}/MapApi/organisations/`, 
+      `${API_URL_BASE}/MapApi/organisations/`,
       formData,
       {
         headers: {
@@ -77,7 +77,7 @@ export const updateOrganisationService = async (id, data) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const formData = new FormData();
-    
+
     Object.keys(data).forEach((key) => {
       if (data[key] === null) {
         formData.append(key, '');
@@ -87,7 +87,7 @@ export const updateOrganisationService = async (id, data) => {
     });
 
     const response = await axios.put(
-      `${API_URL_BASE}/MapApi/organisations/${id}/`, 
+      `${API_URL_BASE}/MapApi/organisations/${id}/`,
       formData,
       {
         headers: {

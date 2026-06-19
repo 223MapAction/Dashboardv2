@@ -43,7 +43,8 @@ export const InviteOrgModal = () => {
 
     setIsInvolvePrivate,
     workMode,
-    setWorkMode
+    setWorkMode,
+    takingOrg
   } = useIncidentDetail();
 
   if (!joinOpen) return null;
@@ -88,8 +89,8 @@ export const InviteOrgModal = () => {
 
           {!safeIncident.isOwner && (
             <>
-              {/* Choix du mode de travail si l'incident n'est pas encore pris en charge (déclaré) */}
-              {safeIncident?.etat === 'declared' && (
+              {/* Choix du mode de travail si l'incident n'est pas encore pris en charge (déclaré) ou s'il a déjà un mode de prise en charge */}
+              {(safeIncident?.etat === 'declared' || safeIncident?.take_in_charge_mode) && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)', marginBottom: 'var(--spacing-5)' }}>
                   <label className="join-modal-label">
                     Mode de travail <span className="required">*</span>
@@ -101,6 +102,7 @@ export const InviteOrgModal = () => {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-3)' }}>
                     <button
                       type="button"
+                      disabled={!!safeIncident?.take_in_charge_mode}
                       className={`work-mode-option ${workMode === 'interne' ? 'is-selected' : ''}`}
                       onClick={() => {
                         setWorkMode('interne');
@@ -116,7 +118,9 @@ export const InviteOrgModal = () => {
                         backgroundColor: workMode === 'interne' ? 'rgba(58, 162, 221, 0.08)' : 'var(--color-surface)',
                         borderRadius: 'var(--radius-md)',
                         border: workMode === 'interne' ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
-                        cursor: 'pointer',
+                        cursor: safeIncident?.take_in_charge_mode ? 'not-allowed' : 'pointer',
+                        opacity: safeIncident?.take_in_charge_mode ? 0.5 : 1,
+                        pointerEvents: safeIncident?.take_in_charge_mode ? 'none' : 'auto',
                         transition: 'all 0.2s ease',
                         gap: '8px',
                         minHeight: '100px'
@@ -128,10 +132,10 @@ export const InviteOrgModal = () => {
                         fontWeight: 'var(--font-weight-bold)',
                         color: workMode === 'interne' ? 'var(--color-primary)' : 'var(--color-text-primary)'
                       }}>
-                        Travailler en interne
+                        Agir en interne
                       </div>
                       <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)', textAlign: 'center', lineHeight: '1.3' }}>
-                        Privé et invisible pour les autres
+                        Je vais le gérer avec mes équipes en interne simplement
                       </div>
                     </button>
 
@@ -186,8 +190,14 @@ export const InviteOrgModal = () => {
                     Choisissez le rôle que vous souhaitez avoir dans ce projet.
                   </p>
                   <div className="role-options">
-                    {/* Le rôle leader n'est disponible que si l'incident est déclaré */}
-                    {ROLE_OPTIONS.filter((role) => safeIncident?.etat === 'declared' || role.id !== 'leader').map((role) => {
+                    {/* Le rôle leader n'est disponible que si l'incident est déclaré et non pris en charge en interne */}
+                    {ROLE_OPTIONS.filter((role) => {
+                      const isInternal = safeIncident?.take_in_charge_mode === 'internal' || safeIncident?.take_in_charge_mode === 'interne';
+                      if (isInternal) {
+                        return role.id !== 'leader';
+                      }
+                      return safeIncident?.etat === 'declared' || role.id !== 'leader';
+                    }).map((role) => {
                       const RoleIcon = role.icon;
                       const isSelected = selfRole === role.id;
                       return (
@@ -224,14 +234,14 @@ export const InviteOrgModal = () => {
               {safeIncident?.etat === 'declared' && workMode === 'interne' && (
                 <div style={{
                   padding: 'var(--spacing-5)',
-                  backgroundColor: 'rgba(239, 68, 68, 0.08)',
+                  backgroundColor: 'rgba(58, 162, 221, 0.08)',
                   borderRadius: 'var(--radius-md)',
-                  border: '1px solid rgba(239, 68, 68, 0.2)',
+                  border: '1px solid rgba(58, 162, 221, 0.2)',
                   marginBottom: 'var(--spacing-5)'
                 }}>
-                  <p style={{ margin: 0, color: 'var(--color-danger)', fontSize: 'var(--font-size-body)', lineHeight: '1.6' }}>
-                    <strong>S'impliquer en interne (Privé)</strong><br />
-                    Vous allez prendre en charge cet incident en tant que leader unique. L'incident deviendra <strong>privé</strong> et ne sera plus visible par les autres organisations sur la carte.
+                  <p style={{ margin: 0, color: 'var(--color-primary)', fontSize: 'var(--font-size-body)', lineHeight: '1.6' }}>
+                    <strong>Agir en interne</strong><br />
+                    Vous allez prendre en charge cet incident en interne. Vous le gérerez avec vos propres équipes simplement sans qu'il ne devienne privé.
                   </p>
                 </div>
               )}

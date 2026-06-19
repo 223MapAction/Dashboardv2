@@ -10,8 +10,9 @@ import {
   ShimmerButton
 } from 'react-shimmer-effects';
 import { takeInChargeIncidentService, getIncidentService, getIncidentPredictionService, togglePublicIncidentService } from '../../service/incident_service';
-import { requestCollaborationService } from '../../service/collaboration_service';
+import { requestCollaborationService, getCollaborationsService } from '../../service/collaboration_service';
 import { getIncidentChatHistoryService, sendIncidentChatMessageService } from '../../service/chat_service';
+import { authService } from '../../../auth/services/authService';
 import { suggestCollaborationPartnerService } from '../../../collaboration-detail/service/collab_detail_service';
 import {
   ArrowLeft2,
@@ -237,6 +238,16 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
     }
   );
 
+  const { data: collaborations, mutate: mutateCollaborations } = useSWR(
+    'collaborations',
+    getCollaborationsService,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      revalidateIfStale: false
+    }
+  );
+
   const isCurrentlyLoading = isLoading || isSwrLoading || (incident?.id && !swrIncident?.title);
 
   // Récupérer la prédiction de l'incident
@@ -251,8 +262,8 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
 
   const pred = (Array.isArray(prediction) && prediction.length > 0) ? prediction[0] : (prediction || null);
 
-  // Utiliser les données de SWR si disponibles, sinon les props
-  const currentIncident = swrIncident || incident;
+  // Utiliser les données de SWR fusionnées avec les props initiales pour conserver les champs déjà mappés (ex: organisation_name)
+  const currentIncident = swrIncident ? { ...incident, ...swrIncident } : incident;
 
   // Récupérer l'ID de l'utilisateur connecté
   const currentUserId = sessionStorage.getItem('user_id');
@@ -529,7 +540,8 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
   const openJoinModal = () => {
     setJoinClosing(false);
     setJoinOpen(true);
-    if (safeIncident?.etat === 'declared') {
+    const isInternal = safeIncident?.take_in_charge_mode === 'internal' || safeIncident?.take_in_charge_mode === 'interne';
+    if (safeIncident?.etat === 'declared' && !isInternal) {
       setSelfRole('leader');
       setWorkMode('collaboration');
     } else {
@@ -722,20 +734,12 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
       if (isNotTakenInCharge && selfRole === 'leader') {
         // Si l'incident n'est pas pris en charge et que le rôle choisi est leader, prendre en charge (devenir leader)
         const result = await takeInChargeIncidentService(safeIncident.id, {
-          mode: workMode === 'interne' ? 'internal' : 'collaborative'
+          mode: workMode === 'interne' ? 'internal' : 'collaborative',
+          role: 'leader'
         });
         console.log('Incident pris en charge:', result);
         if (result.status == "success") {
-          // Si l'utilisateur a demandé à s'impliquer en privé ou travailler en interne, on bascule la visibilité en privée
-          if ((isInvolvePrivate || workMode === 'interne') && safeIncident.is_public) {
-            try {
-              await togglePublicIncidentService(safeIncident.id);
-              console.log('Incident basculé en privé avec succès');
-            } catch (err) {
-              console.error('Erreur lors du basculement en privé:', err);
-            }
-          }
-
+          // L'incident reste public (l'utilisateur le gère simplement en interne avec ses équipes)
           setAlertType('success');
           setAlertMessage('Vous êtes maintenant le leader de cet incident !');
 
@@ -762,6 +766,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
 
         const result = await requestCollaborationService(collaborationData);
         console.log('Demande de collaboration envoyée:', result);
+        mutateCollaborations();
         setAlertType('success');
         setAlertMessage(
           isNotTakenInCharge
@@ -978,6 +983,129 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
     userRoleVal.toLowerCase() === 'contributeur'
   );
 
+  const userObj = authService.getCurrentUser();
+  const myOrgId = userObj?.organisation_member;
+  const myOrgName = userObj?.organisation_name || 'Mon Organisation';
+
+  const getTakingOrg = (inc) => {
+    if (!inc?.taken_by) return null;
+
+    let isMe = false;
+    let name = '';
+
+    if (typeof inc.taken_by === 'object') {
+      const takenByUserId = inc.taken_by.id;
+      const takenByOrgId = inc.taken_by.organisation_member || inc.taken_by.organisation;
+      const takenByOrgName = inc.taken_by.organisation_name || 
+        (inc.taken_by.organisation_member && typeof inc.taken_by.organisation_member === 'object' ? inc.taken_by.organisation_member.name : null) || 
+        (inc.taken_by.organisation && typeof inc.taken_by.organisation === 'object' ? inc.taken_by.organisation.name : null) || 
+        (typeof inc.taken_by.organisation === 'string' ? inc.taken_by.organisation : null);
+
+      if (currentUserId && takenByUserId && parseInt(takenByUserId) === parseInt(currentUserId)) {
+        isMe = true;
+      } else if (myOrgId && takenByOrgId && (
+        parseInt(takenByOrgId) === parseInt(myOrgId) || 
+        (typeof takenByOrgId === 'object' && takenByOrgId?.id && parseInt(takenByOrgId.id) === parseInt(myOrgId))
+      )) {
+        isMe = true;
+      }
+      name = takenByOrgName || (isMe ? myOrgName : (
+        (inc.organisation_name && inc.organisation_name !== 'Non spécifié')
+          ? inc.organisation_name
+          : (inc.user_id?.organisation_name || inc.user?.organisation_name || 'Autre Organisation')
+      ));
+    } else {
+      const takenByUserId = parseInt(inc.taken_by);
+      if (currentUserId && !isNaN(takenByUserId) && takenByUserId === parseInt(currentUserId)) {
+        isMe = true;
+      }
+
+      if (inc.isOwner) {
+        isMe = true;
+      }
+
+      name = isMe ? myOrgName : (
+        (inc.organisation_name && inc.organisation_name !== 'Non spécifié')
+          ? inc.organisation_name
+          : (inc.user_id?.organisation_name || inc.user?.organisation_name || 'Autre Organisation')
+      );
+    }
+
+    if (isMe) {
+      name = myOrgName;
+    }
+
+    return { isMe, name };
+  };
+
+  const takingOrg = getTakingOrg(safeIncident);
+
+  const showInvolvementButton = !hasParticipantRole && (
+    safeIncident?.isOwner
+      ? (safeIncident?.take_in_charge_mode !== 'internal' && safeIncident?.take_in_charge_mode !== 'interne')
+      : (!safeIncident?.take_in_charge_mode ||
+        (safeIncident?.take_in_charge_mode !== 'internal' && safeIncident?.take_in_charge_mode !== 'interne') ||
+        (takingOrg && !takingOrg.isMe))
+  );
+
+  const collabList = Array.isArray(collaborations)
+    ? collaborations
+    : Array.isArray(collaborations?.results)
+      ? collaborations.results
+      : [];
+  const collabRequest = collabList.find(c => c.incident === safeIncident?.id);
+  const hasPendingRequest = collabRequest && collabRequest.status?.toLowerCase() === 'pending';
+
+  const getCollabBadgeStyle = (status) => {
+    const norm = status?.toLowerCase();
+    const isAccepted = norm === 'accepted' || norm === 'in-progress';
+    const isPending = norm === 'pending';
+    const isRejected = norm === 'rejected' || norm === 'refused';
+
+    if (isAccepted) {
+      return {
+        color: 'var(--color-success)',
+        bg: 'rgba(34, 197, 94, 0.12)',
+        border: 'rgba(34, 197, 94, 0.3)'
+      };
+    } else if (isPending) {
+      return {
+        color: 'var(--color-warning)',
+        bg: 'rgba(245, 158, 11, 0.12)',
+        border: 'rgba(245, 158, 11, 0.3)'
+      };
+    } else if (isRejected) {
+      return {
+        color: 'var(--color-danger)',
+        bg: 'rgba(239, 68, 68, 0.12)',
+        border: 'rgba(239, 68, 68, 0.3)'
+      };
+    }
+    return {
+      color: 'var(--color-text-secondary)',
+      bg: 'rgba(108, 114, 120, 0.12)',
+      border: 'rgba(108, 114, 120, 0.3)'
+    };
+  };
+
+  const getRoleLabel = (r) => {
+    if (!r) return '';
+    const norm = r.toLowerCase();
+    if (norm === 'leader') return 'Leader';
+    if (norm === 'contributor' || norm === 'contributeur') return 'Contributeur';
+    if (norm === 'observer' || norm === 'observateur') return 'Observateur';
+    return r;
+  };
+
+  const getStatusLabel = (s) => {
+    if (!s) return '';
+    const norm = s.toLowerCase();
+    if (norm === 'accepted' || norm === 'in-progress') return 'Acceptée';
+    if (norm === 'pending') return 'En attente';
+    if (norm === 'rejected' || norm === 'refused') return 'Refusée';
+    return s;
+  };
+
   const contextValue = {
     joinOpen,
     joinClosing,
@@ -1010,7 +1138,8 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
     isInvolvePrivate,
     setIsInvolvePrivate,
     workMode,
-    setWorkMode
+    setWorkMode,
+    takingOrg
   };
 
   return (
@@ -1046,7 +1175,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
               {currentStatus.label}
             </span>
             {/* Badge public/privé */}
-            <span className="detail-visibility-badge-custom" style={{
+            {/* <span className="detail-visibility-badge-custom" style={{
               display: 'inline-flex',
               alignItems: 'center',
               padding: '4px 12px',
@@ -1060,7 +1189,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
             }}>
               {visibilityBadge.icon}
               {visibilityBadge.label}
-            </span>
+            </span> */}
 
             {/* Badge mode d'implication (Interne/Collaboratif) */}
             {modeBadge && (
@@ -1102,38 +1231,87 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
               </span>
             )}
 
-            {/* Bouton Prendre en compte / Inviter - Masqué si l'incident est géré en interne ou si l'utilisateur a déjà un rôle */}
-            {!(safeIncident?.take_in_charge_mode === 'internal' || safeIncident?.take_in_charge_mode === 'interne') && !hasParticipantRole && (
+            {/* Badge de demande de collaboration envoyée */}
+            {collabRequest && (
+              <span className="detail-collab-request-badge-custom" style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                padding: '4px 12px',
+                borderRadius: '20px',
+                fontSize: '12px',
+                fontWeight: '600',
+                backgroundColor: getCollabBadgeStyle(collabRequest.status).bg,
+                color: getCollabBadgeStyle(collabRequest.status).color,
+                border: `1px solid ${getCollabBadgeStyle(collabRequest.status).border}`,
+                whiteSpace: 'nowrap',
+                marginLeft: '8px'
+              }}>
+                <span style={{
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  backgroundColor: 'currentColor',
+                  marginRight: '6px'
+                }}></span>
+                Demande {getRoleLabel(collabRequest.role)} : {getStatusLabel(collabRequest.status)}
+              </span>
+            )}
+
+            {/* Bouton Prendre en compte / Inviter - Masqué si l'incident est géré en interne par nous ou si l'utilisateur a déjà un rôle */}
+            {showInvolvementButton && (
               <button
                 type="button"
                 className="detail-action-btn-custom"
                 onClick={openJoinModal}
+                disabled={!!hasPendingRequest}
                 style={{
                   marginLeft: 'auto',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '8px',
                   padding: '8px 16px',
-                  backgroundColor: 'var(--color-primary)',
-                  color: 'var(--color-surface)',
-                  border: 'none',
+                  backgroundColor: hasPendingRequest ? 'rgba(245, 158, 11, 0.12)' : 'var(--color-primary)',
+                  color: hasPendingRequest ? 'var(--color-warning)' : 'var(--color-surface)',
+                  border: hasPendingRequest ? '1px solid rgba(245, 158, 11, 0.3)' : 'none',
                   borderRadius: '8px',
                   fontSize: '14px',
                   fontWeight: '600',
-                  cursor: 'pointer',
+                  cursor: hasPendingRequest ? 'not-allowed' : 'pointer',
                   transition: 'all 0.2s ease',
                   whiteSpace: 'nowrap'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2E8BC0'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--color-primary)'}
+                onMouseEnter={(e) => {
+                  if (!hasPendingRequest) {
+                    e.currentTarget.style.backgroundColor = '#2E8BC0';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!hasPendingRequest) {
+                    e.currentTarget.style.backgroundColor = 'var(--color-primary)';
+                  }
+                }}
               >
-                <UserAdd size={18} variant="Bold" color="var(--color-surface)" />
-                {safeIncident.isOwner
-                  ? 'Inviter des organisations'
-                  : safeIncident?.etat === 'declared'
-                    ? "S'impliquer"
-                    : "Rejoindre l'action"
-                }
+                {hasPendingRequest ? (
+                  <>
+                    <span style={{
+                      width: '6px',
+                      height: '6px',
+                      borderRadius: '50%',
+                      backgroundColor: 'currentColor'
+                    }}></span>
+                    Demande en attente
+                  </>
+                ) : (
+                  <>
+                    <UserAdd size={18} variant="Bold" color="var(--color-surface)" />
+                    {safeIncident.isOwner
+                      ? 'Inviter des organisations'
+                      : safeIncident?.etat === 'declared'
+                        ? "Agir sur cet incident"
+                        : "Rejoindre l'action"
+                    }
+                  </>
+                )}
               </button>
             )}
           </div>
@@ -1154,6 +1332,63 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
         </div>
 
         <div className="incident-dark-dashboard">
+          {/* Banner pour la collaboration sans leader */}
+          {safeIncident?.take_in_charge_mode && (safeIncident.take_in_charge_mode === 'collaborative' || safeIncident.take_in_charge_mode === 'collaboratif') && !safeIncident.taken_by && (
+            <div style={{
+              gridColumn: '1 / -1',
+              padding: '16px 20px',
+              borderRadius: '12px',
+              background: 'rgba(245, 158, 11, 0.08)',
+              border: '1px solid rgba(245, 158, 11, 0.25)',
+              color: 'var(--color-text-primary)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              marginBottom: '20px',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.02)'
+            }}>
+              <People size={20} variant="Bold" color="var(--color-warning)" />
+              <div style={{ fontSize: '14px', fontWeight: '500' }}>
+                <span>
+                  <strong>Incident ouvert à la collaboration :</strong> Des organisations se mobilisent déjà pour intervenir, mais aucun leader n'est encore désigné pour coordonner les actions. Prenez le leadership ou rejoignez l'effort !
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Banner pour le travail en interne */}
+          {safeIncident?.take_in_charge_mode && (safeIncident.take_in_charge_mode === 'internal' || safeIncident.take_in_charge_mode === 'interne') && (() => {
+            if (!takingOrg) return null;
+
+            return (
+              <div style={{
+                gridColumn: '1 / -1',
+                padding: '16px 20px',
+                borderRadius: '12px',
+                background: takingOrg.isMe ? 'rgba(34, 197, 94, 0.08)' : 'rgba(58, 162, 221, 0.08)',
+                border: takingOrg.isMe ? '1px solid rgba(34, 197, 94, 0.25)' : '1px solid rgba(58, 162, 221, 0.25)',
+                color: 'var(--color-text-primary)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                marginBottom: '20px',
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.02)'
+              }}>
+                <Briefcase size={20} variant="Bold" color={takingOrg.isMe ? 'var(--color-success)' : 'var(--color-primary)'} />
+                <div style={{ fontSize: '14px', fontWeight: '500' }}>
+                  {takingOrg.isMe ? (
+                    <span>
+                      <strong>Incident géré en interne :</strong> Votre organisation travaille actuellement sur cet incident en interne avec ses propres équipes.
+                    </span>
+                  ) : (
+                    <span>
+                      <strong>Incident géré en interne :</strong> L'organisation <strong>{takingOrg.name}</strong> a pris en charge cet incident et travaille dessus en interne avec ses propres équipes.
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* ── Colonne gauche ── */}
           <div className="dashboard-col-left">

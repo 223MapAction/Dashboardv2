@@ -16,7 +16,7 @@ export const Header = ({ onMenuToggle, user }) => {
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
 
   const languages = ['Bambara', 'Fulfulde', 'Français'];
-  
+
   // Charger les notifications
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -33,12 +33,12 @@ export const Header = ({ onMenuToggle, user }) => {
     };
 
     fetchNotifications();
-    
+
     // Rafraîchir toutes les 30 secondes
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
   }, []);
-  
+
   const unreadCount = notifications.filter(n => !n.read).length;
 
   // Formater le temps relatif
@@ -61,7 +61,7 @@ export const Header = ({ onMenuToggle, user }) => {
     if (!notification.read) {
       try {
         await markNotificationAsRead(notification.id);
-        setNotifications(prev => 
+        setNotifications(prev =>
           prev.map(n => n.id === notification.id ? { ...n, read: true } : n)
         );
       } catch (error) {
@@ -69,7 +69,7 @@ export const Header = ({ onMenuToggle, user }) => {
       }
     }
   };
-  
+
   // Fonction pour obtenir l'icône (toutes les notifs sont de type collaboration)
   const getNotificationIcon = () => {
     return <People size={20} variant="Bold" color="#3AA2DD" />;
@@ -78,25 +78,25 @@ export const Header = ({ onMenuToggle, user }) => {
   return (
     <header className="app-header">
       <div className="header-left">
-        <button 
+        <button
           className="menu-toggle btn btn-icon"
           onClick={onMenuToggle}
           aria-label="Toggle menu"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path d="M3 12h18M3 6h18M3 18h18" strokeWidth="2" strokeLinecap="round"/>
+            <path d="M3 12h18M3 6h18M3 18h18" strokeWidth="2" strokeLinecap="round" />
           </svg>
         </button>
 
-       
+
       </div>
 
       <div className="header-right">
-    
+
 
         <div className="notification-dropdown">
-          <button 
-            className="btn btn-icon notification-btn" 
+          <button
+            className="btn btn-icon notification-btn"
             onClick={() => setShowNotifications(!showNotifications)}
             aria-label="Notifications"
           >
@@ -112,9 +112,9 @@ export const Header = ({ onMenuToggle, user }) => {
                 <h3>Notifications</h3>
                 <span className="notification-count">{unreadCount} non lues</span>
               </div>
-              
+
               <div className="notification-menu-divider"></div>
-              
+
               <div className="notification-list">
                 {isLoadingNotifications ? (
                   <div style={{ padding: '20px', textAlign: 'center', color: '#6C7278' }}>
@@ -126,8 +126,8 @@ export const Header = ({ onMenuToggle, user }) => {
                   </div>
                 ) : (
                   notifications.map((notification) => (
-                    <div 
-                      key={notification.id} 
+                    <div
+                      key={notification.id}
                       className={`notification-item ${!notification.read ? 'unread' : ''}`}
                       onClick={() => handleNotificationClick(notification)}
                       style={{ cursor: 'pointer' }}
@@ -145,9 +145,9 @@ export const Header = ({ onMenuToggle, user }) => {
                   ))
                 )}
               </div>
-              
+
               <div className="notification-menu-divider"></div>
-              
+
               <button className="notification-menu-footer">
                 Voir toutes les notifications
               </button>
@@ -169,12 +169,12 @@ export const Header = ({ onMenuToggle, user }) => {
                 />
               ) : (
                 <>
-                  <div style={{color:"white",fontWeight: "bold"}}>
+                  <div style={{ color: "white", fontWeight: "bold" }}>
                     {currentUser?.first_name?.charAt(0).toUpperCase() || 'U'}
                   </div>
-                  
+
                   <div className="header-profile-fallback" >
-                    <User size={18} variant="Bold" style={{fill:"white"}} />
+                    <User size={18} variant="Bold" style={{ fill: "white" }} />
                   </div>
                 </>
               )}
@@ -186,7 +186,7 @@ export const Header = ({ onMenuToggle, user }) => {
                   <div className="profile-name">{currentUser?.first_name || 'Utilisateur'}</div>
                   <div className="profile-email">{currentUser?.email}</div>
                 </div>
-                
+
                 <div className="profile-menu-items">
                   <button
                     className="profile-menu-item"
@@ -198,12 +198,9 @@ export const Header = ({ onMenuToggle, user }) => {
                     <User size={18} variant="Outline" />
                     <span>Mon profil</span>
                   </button>
-                  
-                  <button className="profile-menu-item">
-                    <Setting2 size={18} variant="Outline" />
-                    <span>Paramètres</span>
-                  </button>
-                  
+
+
+
                   <button
                     className="profile-menu-item logout"
                     onClick={() => {

@@ -4,8 +4,8 @@ import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { CloseCircle, TickCircle, SearchNormal1, UserTick, Profile } from 'iconsax-react';
-import { useIncidentModalContext } from './IncidentModalContext';
-import { assignIncidentToAgentService, getIncidentAssignmentsService } from '../service/incident_service';
+import { useMesInterventionsModalContext } from '../MesInterventionsModalContext';
+import { assignIncidentToAgentService, getIncidentAssignmentsService } from '../../incident/service/incident_service';
 import { getOrganisationMembersService } from '../../agents/service/members_service';
 import { authService } from '../../auth/services/authService';
 
@@ -33,13 +33,13 @@ const formatDatetimeLocal = (isoString) => {
     const date = new Date(isoString);
     if (isNaN(date.getTime())) return '';
     const pad = (num) => String(num).padStart(2, '0');
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
   } catch (e) {
     return '';
   }
 };
 
-export const IncidentAssignModal = () => {
+export const MesInterventionsAssignModal = () => {
   const {
     assignModal,
     assignClosing,
@@ -49,7 +49,7 @@ export const IncidentAssignModal = () => {
     setAssignAlert,
     closeAssignModal,
     mutateIncidents
-  } = useIncidentModalContext();
+  } = useMesInterventionsModalContext();
 
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -105,7 +105,7 @@ export const IncidentAssignModal = () => {
           };
         });
       } catch (err) {
-        console.error(`[IncidentAssignModal] Erreur chargement agents org ${userOrgId}:`, err);
+        console.error(`[MesInterventionsAssignModal] Erreur chargement agents org ${userOrgId}:`, err);
         return [];
       }
     },
@@ -165,7 +165,7 @@ export const IncidentAssignModal = () => {
         deadline: ''
       });
     }
-  }, [assignModal.open, assignModal.incident, agents, reset]);
+  }, [assignModal.open, assignModal.incident, agents, reset, setAssignAlert]);
 
   const handleSelectAgent = (agent) => {
     if (selectedAgentId === String(agent.id)) {
@@ -203,7 +203,7 @@ export const IncidentAssignModal = () => {
       incident: incident.id,
       agent: parseInt(data.agent)
     };
-    console.log(payload);
+    console.log('[MesInterventionsAssignModal] Payload assignation:', payload);
 
     try {
       await assignIncidentToAgentService(incident.id, payload);
@@ -229,7 +229,7 @@ export const IncidentAssignModal = () => {
         });
       }, 1500);
     } catch (err) {
-      console.error('[IncidentAssignModal] Erreur lors de l\'assignation:', err);
+      console.error('[MesInterventionsAssignModal] Erreur lors de l\'assignation:', err);
 
       if (err?.response?.status === 400 && err?.response?.data) {
         const serverErrors = err.response.data;
@@ -312,12 +312,10 @@ export const IncidentAssignModal = () => {
           />
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} id="assign-incident-form" className="am-offcanvas-body" noValidate>
-
-
+        <form onSubmit={handleSubmit(onSubmit)} id="assign-mes-interventions-form" className="am-offcanvas-body" noValidate>
           {/* Barre de recherche d'agent */}
           <div className="am-field">
-            <label className="am-label" htmlFor="agent-search">
+            <label className="am-label" htmlFor="agent-suivi-search">
               Rechercher un collaborateur
             </label>
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
@@ -328,7 +326,7 @@ export const IncidentAssignModal = () => {
                 style={{ position: 'absolute', left: '12px' }}
               />
               <input
-                id="agent-search"
+                id="agent-suivi-search"
                 type="text"
                 className="am-input"
                 placeholder="Tapez le nom, email ou organisation..."
@@ -438,11 +436,11 @@ export const IncidentAssignModal = () => {
           {/* Date limite / Deadline */}
           {selectedAgent && (
             <div className="am-field animate-fade-in" style={{ marginTop: 'var(--spacing-4)' }}>
-              <label className="am-label" htmlFor="assign-deadline">
+              <label className="am-label" htmlFor="assign-suivi-deadline">
                 Date limite (Deadline)
               </label>
               <input
-                id="assign-deadline"
+                id="assign-suivi-deadline"
                 type="date"
                 className="am-input"
                 {...register('deadline')}
@@ -472,8 +470,6 @@ export const IncidentAssignModal = () => {
                 </div>
               )}
             </div>
-
-
           )}
         </form>
 
@@ -488,7 +484,7 @@ export const IncidentAssignModal = () => {
           </button>
           <button
             type="submit"
-            form="assign-incident-form"
+            form="assign-mes-interventions-form"
             className="am-btn am-btn--primary"
             disabled={!selectedAgent || !deadline || isAssigning || assignAlert.type === 'success'}
           >
@@ -501,4 +497,4 @@ export const IncidentAssignModal = () => {
   );
 };
 
-export default IncidentAssignModal;
+export default MesInterventionsAssignModal;

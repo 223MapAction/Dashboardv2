@@ -1,14 +1,20 @@
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { Trash } from 'iconsax-react';
+import { deleteTaskService } from '../../incident/service/task_service';
 
 export const DeleteTaskModal = ({
   isOpen,
   onClose,
   onConfirm,
   taskTitle,
-  isDeleting
+  taskId,
+  isDeleting: propIsDeleting
 }) => {
+  const { id: incidentId } = useParams();
   const [shouldRender, setShouldRender] = useState(isOpen);
+  const [localIsDeleting, setLocalIsDeleting] = useState(false);
+  const isDeleting = propIsDeleting || localIsDeleting;
   const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
@@ -30,6 +36,21 @@ export const DeleteTaskModal = ({
     setTimeout(() => {
       onClose();
     }, 250);
+  };
+
+  const handleConfirm = async () => {
+    if (!taskId) return;
+    try {
+      setLocalIsDeleting(true);
+      await deleteTaskService(incidentId, taskId);
+      if (onConfirm) {
+        await onConfirm(taskId);
+      }
+    } catch (error) {
+      console.error('[DeleteTaskModal] Erreur lors de la suppression de la tâche:', error);
+    } finally {
+      setLocalIsDeleting(false);
+    }
   };
 
   if (!shouldRender) return null;
@@ -88,7 +109,7 @@ export const DeleteTaskModal = ({
           <button
             type="button"
             className="am-btn am-btn--danger"
-            onClick={onConfirm}
+            onClick={handleConfirm}
             disabled={isDeleting}
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
           >

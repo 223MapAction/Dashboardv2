@@ -7,10 +7,12 @@ const COLLABORATION_URL = "collaboration"
  * Récupère toutes les collaborations de l'utilisateur
  * @returns {Promise<Array>} Liste des collaborations
  */
-export const getCollaborationsService = async () => {
+export const getCollaborationsService = async (params = {}) => {
   try {
     const axios = authService.createAuthenticatedAxios();
-    const response = await axios.get(`${API_URL_BASE}/MapApi/${COLLABORATION_URL}/`);
+    const response = await axios.get(`${API_URL_BASE}/MapApi/collaborations/dashboard/`, {
+      params
+    });
 
     console.log('[Collaboration] Collaborations récupérées:', response.data);
     return response?.data?.results || response?.data || [];

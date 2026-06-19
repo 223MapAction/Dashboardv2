@@ -1,16 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Element4, People, ProfileCircle, Clock, Briefcase, Award, Trash, Buildings2, Profile2User, Lock1 } from 'iconsax-react';
+import { authService } from '../../pages/auth/services/authService';
+import {
+  Element4,
+  Briefcase, Award, Trash, Buildings2, Profile2User, Lock1
+} from 'iconsax-react';
 import logoMapAction from '../../assets/logo.svg';
 import logoMapActionMin from '../../assets/logo-min.svg';
 import './sidebar.css';
-import { 
+import {
   User,          // Mon profil
   Setting2,      // Paramètres
   LogoutCurve,   // Déconnexion
-  People as IconsaxPeople  
+  People as IconsaxPeople
 } from 'iconsax-react';
- 
+
 export const Sidebar = ({ isOpen, onClose, isCollapsed: controlledCollapsed, onCollapsedChange, onToggleCollapse }) => {
   const [internalCollapsed, setInternalCollapsed] = useState(false);
   const isCollapsed = controlledCollapsed !== undefined ? controlledCollapsed : internalCollapsed;
@@ -48,10 +52,10 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed: controlledCollapsed, onC
       path: '/incidents'
     },
     {
-      id: 'implication-privee',
-      label: 'Implication privée',
+      id: 'mes-interventions',
+      label: 'Mes interventions',
       icon: Lock1,
-      path: '/implication-privee'
+      path: '/mes-interventions'
     },
     {
       id: 'organisations',
@@ -71,7 +75,7 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed: controlledCollapsed, onC
       icon: Award,
       path: '/impact'
     },
-  
+
 
     {
       id: 'profile',
@@ -87,6 +91,17 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed: controlledCollapsed, onC
     }
   ];
 
+  const user = authService.getCurrentUser();
+  const orgRole = user?.org_role || 'super_admin';
+
+  const filteredNavItems = useMemo(() => {
+    if (orgRole === 'org_admin' || orgRole === 'bureau_agent') {
+      const allowedIds = ['dashboard', 'collaboration', 'incidents', 'mes-interventions', 'agents', 'profile', 'impact'];
+      return navItems.filter(item => allowedIds.includes(item.id));
+    }
+    return navItems;
+  }, [orgRole]);
+
   const handleItemClick = (path) => {
     navigate(path);
     if (window.innerWidth < 1024) {
@@ -95,6 +110,10 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed: controlledCollapsed, onC
   };
 
   const isActive = (path) => {
+    const fromTab = location.state?.from;
+    if (fromTab) {
+      return path === fromTab;
+    }
     if (location.pathname === path) return true;
     if (path !== '/' && location.pathname.startsWith(path + '/')) return true;
     if (path === '/collaboration' && location.pathname.startsWith('/collaboration-detail')) return true;
@@ -105,8 +124,8 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed: controlledCollapsed, onC
     <>
       {/* Overlay pour mobile */}
       {isOpen && (
-        <div 
-          className="sidebar-overlay" 
+        <div
+          className="sidebar-overlay"
           onClick={onClose}
           aria-hidden="true"
         />
@@ -115,7 +134,7 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed: controlledCollapsed, onC
       {/* Sidebar */}
       <aside className={`app-sidebar ${isOpen ? 'open' : ''} ${isCollapsed ? 'collapsed' : ''}`}>
         {/* Bouton Toggle Flottant - Au-dessus de tout */}
-        <button 
+        <button
           className="sidebar-toggle-btn"
           onClick={() => {
             // Sur mobile: fermer l'overlay
@@ -130,13 +149,13 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed: controlledCollapsed, onC
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
             {isCollapsed ? (
-              <path d="M6 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M6 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
             ) : (
-              <path d="M10 4L6 8l4 4" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M10 4L6 8l4 4" strokeLinecap="round" strokeLinejoin="round" />
             )}
           </svg>
         </button>
-        
+
         {/* Logo Section */}
         <div className="sidebar-header">
           <div className="sidebar-logo">
@@ -150,7 +169,7 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed: controlledCollapsed, onC
 
         {/* Navigation */}
         <nav className="sidebar-nav" role="navigation">
-          {navItems.map((item) => (
+          {filteredNavItems.map((item) => (
             <button
               key={item.id}
               className={`sidebar-item ${isActive(item.path) ? 'active' : ''}`}
@@ -165,8 +184,8 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed: controlledCollapsed, onC
           ))}
         </nav>
 
-       
-      
+
+
       </aside>
     </>
   );

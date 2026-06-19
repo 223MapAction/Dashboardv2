@@ -570,6 +570,7 @@ export const CollaborationDetail = () => {
   }, [tasksData, collaboration]);
 
   const hasUnresolvedOrFailedTasks = useMemo(() => {
+    if (currentTasks.length === 0) return true;
     return currentTasks.some(task => !task.completed || task.failed);
   }, [currentTasks]);
 
@@ -588,16 +589,7 @@ export const CollaborationDetail = () => {
             <div className="collaboration-detail-page">
               {/* Header Shimmer */}
               <header className="collab-detail-header">
-                <button
-                  className="menu-toggle btn btn-icon"
-                  onClick={() => setSidebarOpen(!sidebarOpen)}
-                  aria-label="Toggle menu"
-                  style={{ display: isMobile ? 'flex' : 'none', marginRight: '8px' }}
-                >
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M3 12h18M3 6h18M3 18h18" strokeWidth="2" strokeLinecap="round" />
-                  </svg>
-                </button>
+
                 <button
                   type="button"
                   className="detail-back-btn"
@@ -1619,16 +1611,7 @@ export const CollaborationDetail = () => {
             <div className="collaboration-detail-page">
               {/* Header */}
               <header className="collab-detail-header">
-                <button
-                  className="menu-toggle btn btn-icon"
-                  onClick={() => setSidebarOpen(!sidebarOpen)}
-                  aria-label="Toggle menu"
-                  style={{ display: isMobile ? 'flex' : 'none', marginRight: '8px' }}
-                >
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M3 12h18M3 6h18M3 18h18" strokeWidth="2" strokeLinecap="round" />
-                  </svg>
-                </button>
+
                 <button
                   type="button"
                   className="detail-back-btn"
@@ -1655,7 +1638,7 @@ export const CollaborationDetail = () => {
                     onClick={openCloseModal}
                     className='btn btn-success'
                     disabled={hasUnresolvedOrFailedTasks}
-                    title={hasUnresolvedOrFailedTasks ? "Toutes les tâches doivent être complétées et aucune ne doit avoir échoué pour résoudre l'incident." : "Résoudre l'incident"}
+                    title={hasUnresolvedOrFailedTasks ? (currentTasks.length === 0 ? "Vous devez créer au moins une tâche avant de résoudre l'incident." : "Toutes les tâches doivent être complétées et aucune ne doit avoir échoué pour résoudre l'incident.") : "Résoudre l'incident"}
                   >
                     Résoudre l'incident
                   </button>
@@ -2883,14 +2866,12 @@ export const CollaborationDetail = () => {
               <DeleteTaskModal
                 isOpen={taskToDelete !== null}
                 onClose={() => setTaskToDelete(null)}
+                taskId={taskToDelete?.id}
                 onConfirm={async () => {
-                  if (taskToDelete) {
-                    await deleteTask(taskToDelete.id);
-                    setTaskToDelete(null);
-                  }
+                  await mutateTasks();
+                  setTaskToDelete(null);
                 }}
                 taskTitle={taskToDelete?.title || ''}
-                isDeleting={taskToDelete ? deletingTaskIds.includes(taskToDelete.id) : false}
               />
 
               {/* Modal de prévisualisation de preuve en grand */}

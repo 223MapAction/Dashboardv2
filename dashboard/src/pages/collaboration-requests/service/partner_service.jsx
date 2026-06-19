@@ -206,7 +206,7 @@ export const getIncidentCollaborationsService = async (incidentId) => {
  * @param {number} [params.page_size]
  * @returns {Promise<Object>}
  */
-export const listCollaborationsService = async (params = {}) => {
+export const listDemandeDeCollaborationsService = async (params = {}) => {
     try {
         const axios = authService.createAuthenticatedAxios();
         const response = await axios.get(`${API_URL_BASE}/MapApi/collaboration/`, { params });
@@ -342,7 +342,7 @@ export default {
     getMyPendingContributorInvitationsService,
     getAcceptedIncidentSuggestionsService,
     getIncidentCollaborationsService,
-    listCollaborationsService,
+    listDemandeDeCollaborationsService,
     getCollaborationDashboardService,
     getCollaborationDetailService,
     updateCollaborationDetailService,

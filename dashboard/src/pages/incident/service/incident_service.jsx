@@ -226,7 +226,7 @@ export const getIncidentsByCategoryService = async (categoryId) => {
  * @param {string} source - Source des incidents (agents|citizens|all, default: all)
  * @returns {Promise<Array>} Liste des incidents
  */
-export const getOrgIncidentsService = async (source = 'all') => {
+export const getOrgIncidentsService = async (source = 'agents') => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.get(
@@ -268,7 +268,7 @@ export const togglePublicIncidentService = async (incidentId) => {
  * Récupère les assignations d'incident a un agents
  * @returns {Promise<Array>} 
  */
-export const assignIncidentToAgentService = async (incidentId = null, data = null) => {
+export const getAssignIncidentToAgentService = async (incidentId = null, data = null) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     if (incidentId) {
@@ -302,6 +302,56 @@ export const assignIncidentToAgentService = async (incidentId = null, data = nul
     throw error;
   }
 };
+/**
+ * Assignation d'incident a un agents
+ * @returns {Promise<Array>} 
+ */
+export const assignIncidentToAgentService = async (incidentId = null, data = null) => {
+  try {
+    const axios = authService.createAuthenticatedAxios();
+    if (incidentId) {
+      console.log('[Incident]  assigner incident a un agents via assignIncidentToAgentService:', data);
+      const response = await axios.post(
+        `${API_URL_BASE}/MapApi/incidents/${incidentId}/assignments/`,
+        data
+      );
+      console.log('[Incident] Incident assigné:', response.data);
+      return response.data;
+    }
+
+    return response.data?.results || response.data || [];
+  } catch (error) {
+    console.error(
+      `[Incident] Erreur ${incidentId ? 'assignation' : 'récupération'} incidents assignés:`,
+      error.response?.status,
+      error.response?.data
+    );
+    throw error;
+  }
+};
+
+/**
+ * Récupère les assignations (agents assignés) d'un incident spécifique
+ * @param {number} incidentId - ID de l'incident
+ * @returns {Promise<Array>} Liste des assignations
+ */
+export const getIncidentAssignmentsService = async (incidentId) => {
+  try {
+    const axios = authService.createAuthenticatedAxios();
+    const response = await axios.get(
+      `${API_URL_BASE}/MapApi/incidents/${incidentId}/assignments/`
+    );
+    console.log('[Incident] Assignations de l\'incident récupérées:', response.data);
+    return response.data?.results || response.data || [];
+  } catch (error) {
+    console.error(
+      `[Incident] Erreur récupération assignations pour l'incident ${incidentId}:`,
+      error.response?.status,
+      error.response?.data
+    );
+    throw error;
+  }
+};
 
 /**
  * Clôture un incident (leader uniquement)
@@ -312,7 +362,7 @@ export const assignIncidentToAgentService = async (incidentId = null, data = nul
 export const closeIncidentService = async (incidentId, data) => {
   try {
     const axios = authService.createAuthenticatedAxios();
-    
+
     let payload = data;
     let headers = {};
 
@@ -473,6 +523,7 @@ export default {
   getOrgIncidentsService,
   togglePublicIncidentService,
   assignIncidentToAgentService,
+  getIncidentAssignmentsService,
   takeInChargeIncidentService,
   closeIncidentService,
   getTrashIncidentsService,

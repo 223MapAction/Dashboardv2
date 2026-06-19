@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import useSWR from 'swr';
 import { useSidebarState } from '../../hooks/useSidebarState';
 import { Header, Sidebar } from '../../components/layout';
@@ -6,7 +6,7 @@ import {
   SearchNormal1, ArrowDown2, Add, Edit2, Trash,
   People, TickCircle, ShieldTick, Briefcase,
 } from 'iconsax-react';
-import { ShimmerTable } from 'react-shimmer-effects';
+import { ShimmerThumbnail, ShimmerTitle, ShimmerText, ShimmerCircularImage } from 'react-shimmer-effects';
 import { ROLES, AVATAR_COLORS } from './data/agents';
 import { getOrganisationsService } from '../organisations/service/organisation_service';
 import { getOrganisationMembersService } from './service/members_service';
@@ -27,6 +27,55 @@ const getInitials = (name) =>
 
 const EMPTY_ARRAY = [];
 
+const AgentTableSkeleton = () => (
+  <div className="agents-table-wrap">
+    <table className="agents-table">
+      <thead>
+        <tr>
+          <th>Agent</th>
+          <th>Rôle</th>
+          <th>Organisation</th>
+          <th>Depuis</th>
+          <th>Statut</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {[...Array(5)].map((_, idx) => (
+          <tr key={idx}>
+            <td>
+              <div className="agents-cell-identity" style={{ opacity: 0.7 }}>
+                <ShimmerCircularImage size={32} style={{ margin: 0 }} />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
+                  <ShimmerTitle line={1} gap={0} width={120} style={{ margin: 0 }} />
+                  <ShimmerText line={1} width={160} style={{ margin: 0 }} />
+                </div>
+              </div>
+            </td>
+            <td>
+              <ShimmerThumbnail height={20} width={70} rounded style={{ margin: 0 }} />
+            </td>
+            <td>
+              <ShimmerText line={1} width={100} style={{ margin: 0 }} />
+            </td>
+            <td>
+              <ShimmerText line={1} width={80} style={{ margin: 0 }} />
+            </td>
+            <td>
+              <ShimmerThumbnail height={20} width={60} rounded style={{ margin: 0 }} />
+            </td>
+            <td>
+              <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                <ShimmerThumbnail height={24} width={24} rounded style={{ margin: 0 }} />
+                <ShimmerThumbnail height={24} width={24} rounded style={{ margin: 0 }} />
+              </div>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+);
 
 const fetcher = async ([, organisationsList]) => {
   if (!organisationsList || organisationsList.length === 0) return [];
@@ -46,11 +95,14 @@ const fetcher = async ([, organisationsList]) => {
           lastName: m.last_name || '',
           fullName: `${m.first_name || ''} ${m.last_name || ''}`.trim() || m.email,
           email: m.email,
+          phone: m.phone || '',
+          address: m.address || '',
           role,
           organisationId: org.id,
-          organisationName: org.name,
-          status: 'active',
+          organisationName: m.organisation_name || org.name,
+          status: m.is_active ? 'active' : 'inactive',
           avatarColor: AVATAR_COLORS[Math.abs(m.id) % AVATAR_COLORS.length] || '#3AA2DD',
+          joinedAt: m.date_joined || new Date().toISOString()
         });
       });
     } catch (err) {
@@ -69,10 +121,16 @@ export const Agents = () => {
   } = useSidebarState();
 
   // ── Chargement des données ────────────────────────────────────
-  const { data: rawOrgs } = useSWR('organisation_list', getOrganisationsService);
-  const organisationsList = rawOrgs || EMPTY_ARRAY;
-
-
+  const { data: rawOrgs, isLoading: loadingOrgs } = useSWR(
+    'organisation_list',
+    getOrganisationsService,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      revalidateIfStale: false,
+    }
+  );
+  const organisationsList = useMemo(() => rawOrgs || EMPTY_ARRAY, [rawOrgs]);
 
   const {
     data: fetchedAgents,
@@ -84,16 +142,17 @@ export const Agents = () => {
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
+      revalidateIfStale: false,
     }
   );
 
+  const isDataLoading = loadingOrgs || (organisationsList.length > 0 && loadingMembers);
   const agents = fetchedAgents || EMPTY_ARRAY;
 
   // ── Filtres ───────────────────────────────────────────────────
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [orgFilter, setOrgFilter] = useState('');
 
   // ── Modal form ────────────────────────────────────────────────
   const [formModal, setFormModal] = useState({ open: false, mode: 'create', agent: null });
@@ -173,8 +232,7 @@ export const Agents = () => {
       a.organisationName?.toLowerCase().includes(q);
     const matchRole = !roleFilter || a.role === roleFilter;
     const matchStatus = !statusFilter || a.status === statusFilter;
-    const matchOrg = !orgFilter || a.organisationId === orgFilter;
-    return matchSearch && matchRole && matchStatus && matchOrg;
+    return matchSearch && matchRole && matchStatus;
   });
 
   // ── contextValue (même pattern que Organisations.jsx) ─────────
@@ -298,15 +356,7 @@ export const Agents = () => {
                   <ArrowDown2 size={14} variant="Linear" color="var(--color-text-muted)" />
                 </div>
 
-                <div className="agents-select-wrap">
-                  <select value={orgFilter} onChange={(e) => setOrgFilter(e.target.value)}>
-                    <option value="">Toutes les organisations</option>
-                    {organisationsList.map((o) => (
-                      <option key={o.id} value={o.id}>{o.name}</option>
-                    ))}
-                  </select>
-                  <ArrowDown2 size={14} variant="Linear" color="var(--color-text-muted)" />
-                </div>
+
 
                 <div className="agents-select-wrap">
                   <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
@@ -323,10 +373,8 @@ export const Agents = () => {
               </div>
 
               {/* ── Tableau ── */}
-              {loadingMembers ? (
-                <div className="agents-table-wrap">
-                  <ShimmerTable loading={loadingMembers} mode="light" row={5} col={6} />
-                </div>
+              {isDataLoading ? (
+                <AgentTableSkeleton />
               ) : (
                 <div className="agents-table-wrap">
                   <table className="agents-table">

@@ -12,7 +12,7 @@ export const getCollaborationsService = async () => {
       `${API_URL_BASE}/MapApi/collaboration/`
     );
     
-    return response.data || [];
+    return response.data?.results || response.data || [];
   } catch (error) {
     console.error('[Liste Collaborations] Erreur:', error.response?.status, error.response?.data);
     throw error;

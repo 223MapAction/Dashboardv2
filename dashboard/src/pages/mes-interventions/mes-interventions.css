@@ -1,15 +1,15 @@
 /* ============================================
-   IMPLICATION PRIVÉE PAGE - Incidents Assignés
+   INCIDENT SUIVI PAGE - Incidents Assignés
    ============================================ */
 
-.implication-page {
+.mes-interventions-page {
   display: flex;
   height: 100vh;
   overflow: hidden;
   background-color: var(--color-background);
 }
 
-.implication-page-main {
+.mes-interventions-page-main {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -19,22 +19,23 @@
   transition: margin-left 0.3s ease;
 }
 
-.implication-content {
+.mes-interventions-content {
   flex: 1;
-  padding: var(--spacing-6);
+  padding: 80px var(--spacing-6) var(--spacing-6) var(--spacing-6);
   overflow-y: auto;
-  margin-top: 60px;
+  margin-top: 0;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-5);
+  min-height: 0;
 }
 
 /* ── Header ────────────────────────────── */
-.implication-header {
+.mes-interventions-header {
   margin-bottom: var(--spacing-2);
 }
 
-.implication-title {
+.mes-interventions-title {
   font-size: var(--font-size-h2);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
@@ -42,7 +43,7 @@
   letter-spacing: var(--tracking-tight);
 }
 
-.implication-subtitle {
+.mes-interventions-subtitle {
   font-size: var(--font-size-body-small);
   color: var(--color-text-secondary);
   margin: 0;
@@ -50,7 +51,7 @@
 }
 
 /* ── Filtres et Recherche ───────────────── */
-.implication-filters {
+.mes-interventions-filters {
   display: flex;
   align-items: center;
   gap: var(--spacing-3);
@@ -70,7 +71,7 @@
   padding-right: calc(var(--spacing-4) + var(--spacing-2));
 }
 
-.implication-search {
+.mes-interventions-search {
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
@@ -83,12 +84,12 @@
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.implication-search:focus-within {
+.mes-interventions-search:focus-within {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(58, 162, 221, 0.1);
 }
 
-.implication-search input {
+.mes-interventions-search input {
   flex: 1;
   border: none;
   outline: none;
@@ -98,11 +99,11 @@
   font-family: var(--font-family);
 }
 
-.implication-search input::placeholder {
+.mes-interventions-search input::placeholder {
   color: var(--color-text-muted);
 }
 
-.implication-select-wrapper {
+.mes-interventions-select-wrapper {
   position: relative;
   display: flex;
   align-items: center;
@@ -113,11 +114,11 @@
   transition: border-color 0.2s ease;
 }
 
-.implication-select-wrapper:focus-within {
+.mes-interventions-select-wrapper:focus-within {
   border-color: var(--color-primary);
 }
 
-.implication-select-wrapper select {
+.mes-interventions-select-wrapper select {
   border: none;
   outline: none;
   background: transparent;
@@ -129,43 +130,46 @@
   padding-right: var(--spacing-5);
 }
 
-.implication-select-wrapper > svg {
+.mes-interventions-select-wrapper > svg {
   pointer-events: none;
   margin-left: calc(var(--spacing-2) * -1);
 }
 
 /* ── Table de données ───────────────────── */
-.implication-table-wrap {
+.mes-interventions-table-wrap,
+.incident-table-wrap {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   overflow-x: auto;
+  flex-shrink: 0;
 }
 
 /* Scrollbar personnalisée premium */
-.implication-table-wrap::-webkit-scrollbar {
+.mes-interventions-table-wrap::-webkit-scrollbar {
   height: 6px;
 }
-.implication-table-wrap::-webkit-scrollbar-track {
+.mes-interventions-table-wrap::-webkit-scrollbar-track {
   background: transparent;
 }
-.implication-table-wrap::-webkit-scrollbar-thumb {
+.mes-interventions-table-wrap::-webkit-scrollbar-thumb {
   background: var(--color-border);
   border-radius: var(--radius-full);
 }
-.implication-table-wrap::-webkit-scrollbar-thumb:hover {
+.mes-interventions-table-wrap::-webkit-scrollbar-thumb:hover {
   background: var(--color-text-muted);
 }
 
-.implication-table {
+.mes-interventions-table {
   width: 100%;
+  min-width: 1000px;
   border-collapse: collapse;
   text-align: left;
   font-size: var(--font-size-body);
 }
 
-.implication-table th {
+.mes-interventions-table th {
   padding: var(--spacing-4) var(--spacing-5);
   font-weight: var(--font-weight-semibold);
   font-size: var(--font-size-body-small);
@@ -177,14 +181,14 @@
   white-space: nowrap;
 }
 
-.implication-table td {
+.mes-interventions-table td {
   padding: var(--spacing-4) var(--spacing-5);
   border-bottom: 1px solid var(--color-border);
   vertical-align: middle;
 }
 
 /* Fixer la première colonne (Incident) pour éviter de la perdre de vue lors du défilement */
-.implication-table th:first-child {
+.mes-interventions-table th:first-child {
   position: sticky;
   left: 0;
   z-index: 3;
@@ -193,7 +197,7 @@
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.03);
 }
 
-.implication-table td:first-child {
+.mes-interventions-table td:first-child {
   position: sticky;
   left: 0;
   z-index: 2;
@@ -202,36 +206,36 @@
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.03);
 }
 
-.implication-row-clickable {
+.mes-interventions-row-clickable {
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
 
-.implication-row-clickable:hover {
+.mes-interventions-row-clickable:hover {
   background-color: rgba(58, 162, 221, 0.02);
 }
 
-.implication-row-clickable:hover td:first-child {
+.mes-interventions-row-clickable:hover td:first-child {
   background-color: #F8FAFC;
 }
 
-.implication-row-clickable:active {
+.mes-interventions-row-clickable:active {
   background-color: rgba(58, 162, 221, 0.05);
 }
 
-.implication-row-clickable:active td:first-child {
+.mes-interventions-row-clickable:active td:first-child {
   background-color: #F1F5F9;
 }
 
 /* Cellule principale de l'incident */
-.implication-main-cell {
+.mes-interventions-main-cell {
   display: flex;
   align-items: center;
   gap: var(--spacing-4);
   min-width: 250px;
 }
 
-.implication-img {
+.mes-interventions-img {
   width: 50px;
   height: 50px;
   border-radius: var(--radius-md);
@@ -240,7 +244,7 @@
   border: 1px solid var(--color-border);
 }
 
-.implication-row-title {
+.mes-interventions-row-title {
   display: block;
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-semibold);
@@ -252,7 +256,7 @@
   max-width: 280px;
 }
 
-.implication-row-desc {
+.mes-interventions-row-desc {
   display: block;
   font-size: var(--font-size-caption);
   color: var(--color-text-muted);
@@ -264,14 +268,14 @@
 }
 
 /* Textes de cellule */
-.implication-cell-text {
+.mes-interventions-cell-text {
   font-size: var(--font-size-body-small);
   color: var(--color-text-secondary);
   white-space: nowrap;
 }
 
 /* Badges de date */
-.implication-date-badge {
+.mes-interventions-date-badge {
   display: inline-flex;
   align-items: center;
   font-size: 11px;
@@ -280,25 +284,25 @@
   border-radius: var(--radius-sm);
 }
 
-.implication-date-badge.is-pending {
+.mes-interventions-date-badge.is-pending {
   background-color: rgba(245, 158, 11, 0.08);
   color: var(--color-warning);
 }
 
-.implication-date-badge.is-resolved {
+.mes-interventions-date-badge.is-resolved {
   background-color: rgba(34, 197, 94, 0.08);
   color: var(--color-success);
 }
 
 /* Progression */
-.implication-progress-container {
+.mes-interventions-progress-container {
   display: flex;
   align-items: center;
   gap: var(--spacing-3);
   min-width: 120px;
 }
 
-.implication-progress-bar-bg {
+.mes-interventions-progress-bar-bg {
   flex: 1;
   height: 6px;
   background-color: var(--color-border);
@@ -306,14 +310,14 @@
   overflow: hidden;
 }
 
-.implication-progress-bar-fill {
+.mes-interventions-progress-bar-fill {
   height: 100%;
   background-color: var(--color-primary);
   border-radius: var(--radius-full);
   transition: width 0.3s ease;
 }
 
-.implication-progress-label {
+.mes-interventions-progress-label {
   font-size: 12px;
   font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
@@ -322,7 +326,7 @@
 }
 
 /* Badges d'état */
-.implication-badge-glow {
+.mes-interventions-badge-glow {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -334,50 +338,50 @@
   letter-spacing: 0.02em;
 }
 
-.implication-badge-glow .badge-dot {
+.mes-interventions-badge-glow .badge-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
 }
 
 /* Declared (Déclaré) */
-.implication-badge-glow.variant-declared {
+.mes-interventions-badge-glow.variant-declared {
   background-color: #F1F5F9;
   color: #64748B;
 }
-.implication-badge-glow.variant-declared .badge-dot {
+.mes-interventions-badge-glow.variant-declared .badge-dot {
   background-color: #64748B;
 }
 
 /* Taken (Pris en compte) */
-.implication-badge-glow.variant-taken {
+.mes-interventions-badge-glow.variant-taken {
   background-color: #EFF6FF;
   color: var(--color-primary);
 }
-.implication-badge-glow.variant-taken .badge-dot {
+.mes-interventions-badge-glow.variant-taken .badge-dot {
   background-color: var(--color-primary);
 }
 
 /* In Progress (En cours) */
-.implication-badge-glow.variant-in-progress {
+.mes-interventions-badge-glow.variant-in-progress {
   background-color: #FFFBEB;
   color: var(--color-warning);
 }
-.implication-badge-glow.variant-in-progress .badge-dot {
+.mes-interventions-badge-glow.variant-in-progress .badge-dot {
   background-color: var(--color-warning);
 }
 
 /* Resolved (Résolu) */
-.implication-badge-glow.variant-resolved {
+.mes-interventions-badge-glow.variant-resolved {
   background-color: #ECFDF5;
   color: var(--color-success);
 }
-.implication-badge-glow.variant-resolved .badge-dot {
+.mes-interventions-badge-glow.variant-resolved .badge-dot {
   background-color: var(--color-success);
 }
 
 /* Boutons d'action */
-.implication-action-btn {
+.mes-interventions-action-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -391,15 +395,15 @@
   transition: all 0.2s ease;
 }
 
-.implication-action-btn:hover {
+.mes-interventions-action-btn:hover {
   background-color: rgba(58, 162, 221, 0.08);
   color: var(--color-primary);
   border-color: var(--color-primary);
 }
 
 /* ── États vides et erreurs ─────────────── */
-.implication-empty,
-.implication-error-card {
+.mes-interventions-empty,
+.mes-interventions-error-card {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -411,8 +415,8 @@
   border-radius: var(--radius-lg);
 }
 
-.implication-empty p,
-.implication-error-card p {
+.mes-interventions-empty p,
+.mes-interventions-error-card p {
   font-size: var(--font-size-body);
   color: var(--color-text-secondary);
   max-width: 400px;
@@ -421,16 +425,16 @@
 
 /* ── Responsive ──────────────────────────── */
 @media (max-width: 768px) {
-  .implication-content {
+  .mes-interventions-content {
     padding: var(--spacing-4);
   }
 
-  .implication-filters {
+  .mes-interventions-filters {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .implication-select-wrapper {
+  .mes-interventions-select-wrapper {
     width: 100%;
   }
 }

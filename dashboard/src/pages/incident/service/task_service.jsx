@@ -17,6 +17,7 @@ export const getTasksService = async (incidentId) => {
     console.error('[Task] Erreur récupération tâches:', error?.response?.status, error?.response?.data);
     throw error;
   }
+  
 };
 
 /**

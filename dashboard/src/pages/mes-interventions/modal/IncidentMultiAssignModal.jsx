@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useImplicationModalContext } from '../ImplicationModalContext';
+import { useMesInterventionsModalContext } from '../MesInterventionsModalContext';
 import { CloseCircle, TickCircle, SearchNormal1, Profile } from 'iconsax-react';
 
 const getInitials = (name = '') =>
@@ -17,7 +17,7 @@ export const IncidentMultiAssignModal = () => {
     assignments,
     assignAgentsToIncident,
     allMockAgents
-  } = useImplicationModalContext();
+  } = useMesInterventionsModalContext();
 
   const [selectedAgents, setSelectedAgents] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');

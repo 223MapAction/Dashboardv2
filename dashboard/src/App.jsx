@@ -10,7 +10,7 @@ import { Profile } from './pages/profile';
 import { TrashPage } from './pages/trash';
 import { Organisations } from './pages/organisations';
 import { Agents } from './pages/agents';
-import { ImplicationPrivee } from './pages/implication-privee';
+import { MesInterventions } from './pages/mes-interventions';
 import { ProtectedRoute } from './components/auth';
 import { authService } from './pages/auth/services/authService';
 
@@ -85,10 +85,10 @@ function App() {
           }
         />
         <Route
-          path="/implication-privee"
+          path="/mes-interventions"
           element={
             <ProtectedRoute>
-              <ImplicationPrivee />
+              <MesInterventions />
             </ProtectedRoute>
           }
         />

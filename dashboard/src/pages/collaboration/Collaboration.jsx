@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import useSWR from 'swr';
 import { useSidebarState } from '../../hooks/useSidebarState';
 import DatePicker, { registerLocale } from 'react-datepicker';
@@ -64,7 +64,13 @@ export const Collaboration = () => {
     isCollapsed: sidebarCollapsed,
     setCollapsed: setSidebarCollapsed,
   } = useSidebarState();
-  const [activeTab, setActiveTab] = useState('collaborations'); // 'collaborations' | 'requests'
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') === 'requests' ? 'requests' : 'collaborations';
+  const setActiveTab = (tab) => {
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('tab', tab);
+    setSearchParams(newParams);
+  };
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -115,8 +121,20 @@ export const Collaboration = () => {
 
   // Utiliser useSWR pour charger les collaborations
   const { data: swrData, error: swrError, isLoading, mutate } = useSWR(
-    'collaborations',
-    getCollaborationsService,
+    ['collaborations', search, dateFrom, dateTo],
+    () => {
+      const params = { status: 'accepted' };
+      if (search.trim()) {
+        params.search = search.trim();
+      }
+      if (dateFrom) {
+        params.date_from = dateFrom.toISOString().slice(0, 10);
+      }
+      if (dateTo) {
+        params.date_to = dateTo.toISOString().slice(0, 10);
+      }
+      return getCollaborationsService(params);
+    },
     {
       revalidateOnFocus: false
     }
@@ -529,7 +547,6 @@ export const Collaboration = () => {
                 className={`collab-tab ${activeTab === 'collaborations' ? 'is-active' : ''}`}
                 onClick={() => setActiveTab('collaborations')}
               >
-                <People size={18} variant="Bold" />
                 Mes collaborations
               </button>
               <button
@@ -537,7 +554,6 @@ export const Collaboration = () => {
                 className={`collab-tab ${activeTab === 'requests' ? 'is-active' : ''}`}
                 onClick={() => setActiveTab('requests')}
               >
-                <TaskSquare size={18} variant="Bold" />
                 Demandes
               </button>
             </div>
@@ -651,7 +667,7 @@ export const Collaboration = () => {
                   <div className="collab-grid">
                     {[...Array(6)].map((_, idx) => (
                       <article key={idx} className="collab-card" style={{ cursor: 'default' }}>
-                        <ShimmerThumbnail height={180} rounded className="m-0"  />
+                        <ShimmerThumbnail height={180} rounded className="m-0" />
                         <div className="collab-card-body" style={{ padding: '20px' }}>
                           {/* Org name shimmer */}
                           <div style={{ width: '120px', marginBottom: '8px' }}>

@@ -15,14 +15,26 @@ import './incident.css';
 const adaptIncidentData = (incident, currentUserId = null) => {
   if (!incident) return null;
 
-  // Mapper l'état de l'incident vers un badge
+  const isOwner = currentUserId && incident.taken_by ? parseInt(incident.taken_by) === parseInt(currentUserId) : false;
+
+  // Mapper l'état de l'incident vers un badge en prenant en compte le propriétaire
   const getBadgeFromEtat = (etat) => {
-    const badges = {
-      'declared': { label: 'DÉCLARÉ', variant: 'declared' },
-      'taken_into_account': { label: 'PRIS EN COMPTE', variant: 'taken' },
-      'resolved': { label: 'RÉSOLU', variant: 'resolved' }
-    };
-    return badges[etat] || { label: 'EN COURS', variant: 'in-progress' };
+    if (etat === 'taken_into_account') {
+      return {
+        label: isOwner ? 'PRIS EN COMPTE (PAR MOI)' : incident.taken_by ? 'PRIS EN COMPTE (PAR AUTRE)' : 'PRIS EN COMPTE',
+        variant: isOwner ? 'taken-me' : incident.taken_by ? 'taken-other' : 'taken'
+      };
+    }
+    if (etat === 'resolved') {
+      return {
+        label: isOwner ? 'RÉSOLU (PAR MOI)' : incident.taken_by ? 'RÉSOLU (PAR AUTRE)' : 'RÉSOLU',
+        variant: isOwner ? 'resolved-me' : incident.taken_by ? 'resolved-other' : 'resolved'
+      };
+    }
+    if (etat === 'declared') {
+      return { label: 'DÉCLARÉ', variant: 'declared' };
+    }
+    return { label: 'EN COURS', variant: 'in-progress' };
   };
 
   return {
@@ -194,7 +206,7 @@ export const Incident = () => {
             <IncidentList
               incidents={incidents}
               isLoading={isLoadingIncidents}
-              onSelectIncident={(id) => navigate(`/incidents/${id}`)}
+              onSelectIncident={(incident) => navigate(`/incidents/${incident.id}`, { state: { incident } })}
             />
           </div>
         </div>

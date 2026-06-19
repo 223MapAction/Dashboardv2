@@ -90,7 +90,7 @@ const HOT_OSM_STYLE = {
 const MAP_STYLES = {
   humanitarian: {
     id: 'humanitarian',
-    label: 'Humanitaire',
+    label: 'Carte',
     style: HOT_OSM_STYLE
   },
   satellite: {
