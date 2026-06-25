@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import useSWR from 'swr';
 import { useSidebarState } from '../../hooks/useSidebarState';
 import {
   User,
@@ -21,6 +22,8 @@ import {
 } from 'iconsax-react';
 import { Header, Sidebar } from '../../components/layout';
 import { authService } from '../auth/services/authService';
+import { getUserProfileService, updateUserProfileService } from './service/profile_service';
+import { BlurryImage } from '../../components/atoms/BlurryImage';
 import './profile.css';
 
 const TABS = [
@@ -63,12 +66,37 @@ export const Profile = () => {
     setCollapsed: setSidebarCollapsed,
   } = useSidebarState();
 
+  const userId = sessionStorage.getItem('user_id');
+
+  const { data: userProfile, error: swrError, isLoading: swrLoading, mutate } = useSWR(
+    userId ? `/MapApi/user/${userId}/` : null,
+    () => getUserProfileService(userId),
+    {
+      revalidateOnFocus: false,
+    }
+  );
+
   const [profile, setProfile] = useState(getInitialProfile);
   const [draft, setDraft] = useState(getInitialProfile);
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('personal');
   const [savedFlash, setSavedFlash] = useState(false);
   const fileInputRef = useRef(null);
+
+  // Synchroniser l'état local avec les données chargées par SWR
+  useEffect(() => {
+    if (userProfile) {
+      const normalizedProfile = {
+        ...userProfile,
+        address: userProfile.address || userProfile.adress || '',
+      };
+      setProfile(normalizedProfile);
+      if (!isEditing) {
+        setDraft(normalizedProfile);
+      }
+    }
+  }, [userProfile, isEditing]);
 
   // Password
   const [pwd, setPwd] = useState({ current: '', next: '', confirm: '' });
@@ -82,8 +110,6 @@ export const Profile = () => {
   const handleField = (key, value) =>
     setDraft((d) => ({ ...d, [key]: value }));
 
-
-
   const handleAvatarChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -94,12 +120,50 @@ export const Profile = () => {
     setIsEditing(true);
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e?.preventDefault?.();
-    setProfile(draft);
-    setIsEditing(false);
-    setSavedFlash(true);
-    setTimeout(() => setSavedFlash(false), 2400);
+    if (!userId) return;
+    setIsSaving(true);
+    try {
+      const payload = {
+        first_name: draft.first_name,
+        last_name: draft.last_name,
+        email: draft.email,
+        adress: draft.address,
+        address: draft.address,
+      };
+
+      if (draft.avatar && draft.avatar !== profile.avatar) {
+        payload.avatar = draft.avatar;
+      }
+
+      const updatedProfile = await updateUserProfileService(userId, payload);
+      const normalizedUpdated = {
+        ...updatedProfile,
+        address: updatedProfile.address || updatedProfile.adress || '',
+      };
+
+      // Mettre à jour sessionStorage
+      sessionStorage.setItem('user', JSON.stringify(normalizedUpdated));
+      if (normalizedUpdated.first_name) {
+        sessionStorage.setItem('first_name', normalizedUpdated.first_name);
+      }
+      if (normalizedUpdated.address) {
+        sessionStorage.setItem('zone', normalizedUpdated.address);
+      }
+
+      // Mettre à jour le cache SWR local
+      await mutate(normalizedUpdated, { revalidate: false });
+
+      setProfile(normalizedUpdated);
+      setIsEditing(false);
+      setSavedFlash(true);
+      setTimeout(() => setSavedFlash(false), 2400);
+    } catch (err) {
+      console.error('Erreur lors de la modification du profil:', err);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCancel = () => {
@@ -207,7 +271,7 @@ export const Profile = () => {
                 <div className="profile-avatar-wrap">
                   <div className="profile-avatar-large">
                     {draft.avatar || draft.logo || draft.logo_url ? (
-                      <img src={draft.avatar || draft.logo || draft.logo_url} alt="Avatar/Logo" />
+                      <BlurryImage src={draft.avatar || draft.logo || draft.logo_url} alt="Avatar/Logo" />
                     ) : (
                       <span>{initials}</span>
                     )}
@@ -267,6 +331,7 @@ export const Profile = () => {
                       type="button"
                       className="profile-btn profile-btn-ghost"
                       onClick={handleCancel}
+                      disabled={isSaving}
                     >
                       Annuler
                     </button>
@@ -274,13 +339,14 @@ export const Profile = () => {
                       type="button"
                       className="profile-btn profile-btn-primary"
                       onClick={handleSave}
+                      disabled={isSaving}
                     >
                       <TickCircle
                         size={16}
                         variant="Bold"
                         color="#FFFFFF"
                       />
-                      Enregistrer
+                      {isSaving ? 'Enregistrement...' : 'Enregistrer'}
                     </button>
                   </div>
                 )}

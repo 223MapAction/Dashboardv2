@@ -1,27 +1,88 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Location, Chart2, Warning2, ArrowRight2 } from 'iconsax-react';
 import './stats-widgets.css';
 
-export const StatsWidgets = () => {
-  const locationStats = [
-    { name: 'Commune IV', count: 342 },
-    { name: 'Commune I', count: 215 },
-    { name: 'Kati', count: 189 },
-    { name: 'Ségou', count: 156 },
-    { name: 'Kayes', count: 124 }
-  ];
+// Détermine la sévérité d'un incident
+const getSeverity = (incident) => {
+  const baseSeverity = incident.base_severity ?? incident.incident_details?.prediction_details?.base_severity;
+  if (baseSeverity !== undefined && baseSeverity !== null) {
+    const val = parseFloat(baseSeverity);
+    if (val >= 7) return 'high';
+    if (val >= 4) return 'medium';
+    return 'low';
+  }
+  const badges = (incident.badges || []).map((b) => b.variant);
+  if (badges.includes('critical') || badges.includes('high') || badges.includes('expert-needed')) return 'high';
+  if (badges.includes('in-progress') || badges.includes('medium')) return 'medium';
+  return 'low';
+};
 
-  const topIncidents = [
-    { name: 'DÉFORESTATION', percentage: 42 },
-    { name: 'POLLUTION EAU', percentage: 28 },
-    { name: 'INCENDIE', percentage: 15 }
-  ];
+export const StatsWidgets = ({ incidents = [] }) => {
+  // Normaliser les incidents
+  const normalizedIncidents = useMemo(() => {
+    const data = Array.isArray(incidents)
+      ? incidents
+      : (incidents && Array.isArray(incidents.results) ? incidents.results : []);
+    return data.filter(inc => !inc.is_deleted);
+  }, [incidents]);
 
-  const severityData = [
-    { label: 'Critique', percentage: 12, color: 'var(--color-severity-high)' },
-    { label: 'Grave', percentage: 23, color: 'var(--color-severity-medium)' },
-    { label: 'Modéré', percentage: 65, color: 'var(--color-severity-low)' }
-  ];
+  // Calculer les statistiques par localité
+  const locationStats = useMemo(() => {
+    const locationMap = {};
+    normalizedIncidents.forEach(inc => {
+      const zone = inc.zone || 'Non spécifié';
+      locationMap[zone] = (locationMap[zone] || 0) + 1;
+    });
+    return Object.entries(locationMap)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+  }, [normalizedIncidents]);
+
+  // Calculer le top 5 des incidents par catégorie/titre
+  const topIncidents = useMemo(() => {
+    const categoryMap = {};
+    normalizedIncidents.forEach(inc => {
+      const category = inc.title || 'Incident anonyme';
+      categoryMap[category] = (categoryMap[category] || 0) + 1;
+    });
+    const total = normalizedIncidents.length || 1;
+    return Object.entries(categoryMap)
+      .map(([name, count]) => ({ 
+        name: name.toUpperCase(), 
+        percentage: Math.round((count / total) * 100),
+        count 
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+  }, [normalizedIncidents]);
+
+  // Calculer les statistiques par gravité
+  const severityData = useMemo(() => {
+    const severityMap = { high: 0, medium: 0, low: 0 };
+    normalizedIncidents.forEach(inc => {
+      const severity = getSeverity(inc);
+      severityMap[severity]++;
+    });
+    const total = normalizedIncidents.length || 1;
+    return [
+      { 
+        label: 'Critique', 
+        percentage: Math.round((severityMap.high / total) * 100), 
+        color: 'var(--color-severity-high)' 
+      },
+      { 
+        label: 'Grave', 
+        percentage: Math.round((severityMap.medium / total) * 100), 
+        color: 'var(--color-severity-medium)' 
+      },
+      { 
+        label: 'Modéré', 
+        percentage: Math.round((severityMap.low / total) * 100), 
+        color: 'var(--color-severity-low)' 
+      }
+    ];
+  }, [normalizedIncidents]);
 
   return (
     <div className="stats-widgets">

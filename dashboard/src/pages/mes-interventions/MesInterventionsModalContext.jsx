@@ -7,6 +7,8 @@ export const MesInterventionsModalProvider = ({ children }) => {
   const [assignClosing, setAssignClosing] = useState(false);
   const [agentsModal, setAgentsModal] = useState({ open: false, incident: null });
   const [agentsClosing, setAgentsClosing] = useState(false);
+  const [reportsModal, setReportsModal] = useState({ open: false, incident: null, reports: [] });
+  const [reportsClosing, setReportsClosing] = useState(false);
 
   // States required for the assignment form and feedback
   const [isAssigning, setIsAssigning] = useState(false);
@@ -41,6 +43,19 @@ export const MesInterventionsModalProvider = ({ children }) => {
     }, 280);
   };
 
+  const openReportsModal = (incident, reports) => {
+    setReportsModal({ open: true, incident, reports });
+    setReportsClosing(false);
+  };
+
+  const closeReportsModal = () => {
+    setReportsClosing(true);
+    setTimeout(() => {
+      setReportsModal({ open: false, incident: null, reports: [] });
+      setReportsClosing(false);
+    }, 280);
+  };
+
   return (
     <MesInterventionsModalContext.Provider
       value={{
@@ -54,6 +69,11 @@ export const MesInterventionsModalProvider = ({ children }) => {
         agentsClosing,
         openAgentsModal,
         closeAgentsModal,
+        reportsModal,
+        setReportsModal,
+        reportsClosing,
+        openReportsModal,
+        closeReportsModal,
         isAssigning,
         setIsAssigning,
         assignAlert,

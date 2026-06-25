@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import useSWR from 'swr';
 import { useSidebarState } from '../../hooks/useSidebarState';
 import { Clock, CloseCircle } from 'iconsax-react';
@@ -9,6 +9,7 @@ import StatsWidgets from './components/widgets/StatsWidgets';
 import ActivityPanel from './components/activity/ActivityPanel';
 import './dashboard.css';
 import { getIncidentsService } from './service/dashboard_service';
+import { logStats } from '../../utils/incidentStatsHelper';
 
 export const Dashboard = () => {
   const {
@@ -52,6 +53,12 @@ export const Dashboard = () => {
     }, 250);
   };
 
+  // Logger les statistiques quand les incidents sont chargés
+  useEffect(() => {
+    if (incidents && incidents.length > 0) {
+      logStats(incidents);
+    }
+  }, [incidents]);
 
   return (
     <div className="dashboard-layout">
@@ -79,10 +86,10 @@ export const Dashboard = () => {
             <MapContainer incidents={incidents} isLoading={isLoadingIncidents} />
             
             {/* 3 cartes métriques */}
-            <MetricsCards />
+            <MetricsCards incidents={incidents} />
             
             {/* 3 widgets statistiques */}
-            <StatsWidgets />
+            <StatsWidgets incidents={incidents} />
           </div>
         </main>
         

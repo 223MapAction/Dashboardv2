@@ -97,7 +97,7 @@ export const Incident = () => {
     mutate: mutateIncidents
   } = useSWR(
     '/incidents/all',
-    () => getIncidentsService('all'),
+    () => getIncidentsService(),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: true,

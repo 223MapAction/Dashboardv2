@@ -3,62 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import useSWR from 'swr';
 import { useSidebarState } from '../../hooks/useSidebarState';
 import { Header, Sidebar } from '../../components/layout';
-import { SearchNormal1, ArrowDown2, Eye, EyeSlash, DirectboxReceive, People, UserAdd } from 'iconsax-react';
+import { SearchNormal1, ArrowDown2, Eye, EyeSlash, DirectboxReceive, People, UserAdd, DocumentText, Calendar, User, Location } from 'iconsax-react';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText, ShimmerCircularImage } from 'react-shimmer-effects';
 import { MesInterventionsModalProvider, useMesInterventionsModalContext } from './MesInterventionsModalContext';
 import { MesInterventionsAssignModal } from './modal/MesInterventionsAssignModal';
 import { IncidentAgentsListModal } from './modal/IncidentAgentsListModal';
-import { getOrgIncidentsService, getOrgInternalIncidentsService, toggleIncidentPublicService } from './service/mes_interventions_service';
+import { IncidentReportsModal } from './modal/IncidentReportsModal';
+import { getOrgIncidentsService, getOrgInternalIncidentsService, toggleIncidentPublicService, getFieldReportsService } from './service/mes_interventions_service';
 import { getIncidentAssignmentsService } from '../incident/service/incident_service';
+import { getCollaborationsService } from '../incident/service/collaboration_service';
+import { BlurryImage } from '../../components/atoms/BlurryImage';
 import './mes-interventions.css';
 
-// Fausses données premium d'incidents
-const MOCK_ASSIGNED_INCIDENTS = [
-  {
-    id: 101,
-    title: "Inondation de la Route Nationale 1",
-    description: "Suite aux fortes pluies diluviennes, la chaussée est submergée au kilomètre 12, bloquant complètement l'accès principal de Dakar.",
-    zone: "Rufisque / Dakar",
-    created_at: "2026-06-01T08:00:00Z",
-    resolution_end_date: null,
-    progress: 45,
-    etat: "in_progress",
-    photo: "https://images.unsplash.com/photo-1547683905-f686c993aae5?auto=format&fit=crop&q=80&w=300"
-  },
-  {
-    id: 102,
-    title: "Éboulement sur la falaise de Popenguine",
-    description: "Des rochers de taille importante se sont détachés de la falaise principale et menacent directement les habitations situées en contrebas.",
-    zone: "Popenguine / Thiès",
-    created_at: "2026-05-28T14:30:00Z",
-    resolution_end_date: null,
-    progress: 15,
-    etat: "taken_into_account",
-    photo: "https://images.unsplash.com/photo-1525824236856-8c0a31dfe3be?auto=format&fit=crop&q=80&w=300"
-  },
-  {
-    id: 103,
-    title: "Pollution chimique dans la lagune de Hann",
-    description: "Déversement accidentel de produits industriels non identifiés par une usine locale. Prélèvement d'échantillons et confinement de la zone effectués.",
-    zone: "Baie de Hann / Dakar",
-    created_at: "2026-05-15T10:15:00Z",
-    resolution_end_date: "2026-06-03T18:00:00Z",
-    progress: 100,
-    etat: "resolved",
-    photo: "https://images.unsplash.com/photo-1618477388954-7852f32655ec?auto=format&fit=crop&q=80&w=300"
-  },
-  {
-    id: 104,
-    title: "Feu de brousse à la lisière de la forêt de Bandia",
-    description: "Départ de feu suspect signalé par des éco-gardes. Les équipes de secours sont en route pour maîtriser le foyer avant la tombée de la nuit.",
-    zone: "Forêt de Bandia / Mbour",
-    created_at: "2026-06-08T09:00:00Z",
-    resolution_end_date: null,
-    progress: 0,
-    etat: "declared",
-    photo: "https://images.unsplash.com/photo-1602164940761-073f8373b52d?auto=format&fit=crop&q=80&w=300"
-  }
-];
 
 // Initiales pour les avatars
 const getInitials = (name = '') =>
@@ -86,7 +42,7 @@ const adaptIncidentData = (incident) => {
     ...incident,
     location: incident.zone || incident.location || 'Localisation non spécifiée',
     type: incident.zone || incident.type || 'Non spécifié',
-    image: incident.photo || incident.image || 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=150',
+    image: incident.photo || incident.image || '',
     startDate: incident.created_at ? new Date(incident.created_at).toLocaleDateString('fr-FR') : 'Non spécifié',
     endDate: incident.resolution_end_date ? new Date(incident.resolution_end_date).toLocaleDateString('fr-FR') : 'En cours',
     badge: getBadgeFromEtat(incident.etat),
@@ -230,7 +186,7 @@ const IncidentAgentsStack = ({ incident }) => {
             fontSize: '11px',
             border: '2px solid white',
             marginLeft: index > 0 ? '-8px' : '0',
-            zIndex: 10 - index,
+
             boxShadow: 'var(--shadow-sm)'
           }}
         >
@@ -274,6 +230,7 @@ const MesInterventionsContent = () => {
   const {
     openAssignModal,
     openAgentsModal,
+    openReportsModal,
     setMutateIncidents
   } = useMesInterventionsModalContext();
 
@@ -285,6 +242,33 @@ const MesInterventionsContent = () => {
     ['/MapApi/org-incidents', sourceFilter],
     () => getOrgInternalIncidentsService(sourceFilter)
   );
+
+  const { data: reportsData, error: reportsError, isLoading: isLoadingReports } = useSWR(
+    '/MapApi/field-reports',
+    () => getFieldReportsService(),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true
+    }
+  );
+
+  const { data: collaborationsData } = useSWR(
+    'collaborations',
+    getCollaborationsService,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      revalidateIfStale: false
+    }
+  );
+
+  const collabList = useMemo(() => {
+    return Array.isArray(collaborationsData)
+      ? collaborationsData
+      : Array.isArray(collaborationsData?.results)
+        ? collaborationsData.results
+        : [];
+  }, [collaborationsData]);
 
   React.useEffect(() => {
     if (setMutateIncidents) {
@@ -311,6 +295,21 @@ const MesInterventionsContent = () => {
     return rawList.map(adaptIncidentData);
   }, [data]);
 
+  const allReports = useMemo(() => {
+    return reportsData?.results || (Array.isArray(reportsData) ? reportsData : []);
+  }, [reportsData]);
+
+  // Fonction pour obtenir les rapports d'un incident
+  const getIncidentReports = (incidentId) => {
+    return allReports.filter(report => report.incident === incidentId);
+  };
+
+  // Fonction pour ouvrir les rapports d'un incident
+  const handleOpenReports = (incident) => {
+    const reports = getIncidentReports(incident.id);
+    openReportsModal(incident, reports);
+  };
+
   // Filtres locaux (recherche et statut)
   const filteredIncidents = useMemo(() => {
     return incidents.filter((i) => {
@@ -330,8 +329,23 @@ const MesInterventionsContent = () => {
     });
   }, [incidents, search, statusFilter]);
 
-  const handleSelectIncident = (incident) => {
-    navigate(`/incidents/${incident.id}`, { state: { incident, from: '/mes-interventions' } });
+  const handleRowClick = (incident) => {
+    const collab = collabList.find(c => c.incident === incident.id);
+    if (collab) {
+      navigate(`/collaboration-detail/${collab.id}`, {
+        state: { from: '/mes-interventions' }
+      });
+    } else {
+      navigate(`/incidents/${incident.id}`, {
+        state: { incident, from: '/mes-interventions' }
+      });
+    }
+  };
+
+  const handleGoToIncidentDetail = (incident) => {
+    navigate(`/incidents/${incident.id}`, {
+      state: { incident, from: '/mes-interventions' }
+    });
   };
 
   return (
@@ -417,6 +431,7 @@ const MesInterventionsContent = () => {
                     <th>Date de résolution</th>
                     <th>Progression</th>
                     <th>Équipe terrain</th>
+                    <th>Rapports</th>
                     <th>Statut</th>
                     <th></th>
                   </tr>
@@ -426,12 +441,12 @@ const MesInterventionsContent = () => {
                     return (
                       <tr
                         key={incident.id}
-                        onClick={() => handleSelectIncident(incident)}
+                        onClick={() => handleRowClick(incident)}
                         className="mes-interventions-row-clickable"
                       >
                         <td>
                           <div className="mes-interventions-main-cell">
-                            <img
+                            <BlurryImage
                               src={incident.image}
                               alt={incident.title}
                               className="mes-interventions-img"
@@ -468,8 +483,8 @@ const MesInterventionsContent = () => {
                               {(incident.take_in_charge_mode === 'internal' || incident.take_in_charge_mode === 'interne') ? 'Interne' : 'Collaboratif'}
                             </span>
                           ) || (
-                            <span style={{ color: 'var(--color-text-muted)', fontStyle: 'italic' }}>Non spécifié</span>
-                          )}
+                              <span style={{ color: 'var(--color-text-muted)', fontStyle: 'italic' }}>Non spécifié</span>
+                            )}
                         </td>
                         <td className="mes-interventions-cell-text">
                           {incident.startDate}
@@ -497,8 +512,27 @@ const MesInterventionsContent = () => {
                         <td className="mes-interventions-cell-text">
                           <IncidentAgentsStack incident={incident} />
                         </td>
+                        <td className="mes-interventions-cell-text" onClick={(e) => e.stopPropagation()}>
+                          {(() => {
+                            const reportsCount = getIncidentReports(incident.id).length;
+                            return (
+                              <button
+                                type="button"
+                                className="rapport-count-btn"
+                                onClick={(e) => { e.stopPropagation(); handleOpenReports(incident); }}
+                                disabled={reportsCount === 0}
+                                title={reportsCount > 0 ? `Voir les ${reportsCount} rapport(s)` : 'Aucun rapport'}
+                              >
+                                <DocumentText size={16} variant={reportsCount > 0 ? 'Bold' : 'Linear'} color={reportsCount > 0 ? '#3AA2DD' : '#9CA3AF'} />
+                                <span>{reportsCount}</span>
+                              </button>
+                            );
+                          })()}
+                        </td>
                         <td>
-                          <span className={`mes-interventions-badge-glow variant-${incident.badge.variant}`}>
+                          <span className={`mes-interventions-badge-glow variant-${incident.badge.variant}`}
+                            style={{ width: "max-content" }}
+                          >
                             {incident.badge.label}
                           </span>
                         </td>
@@ -507,7 +541,8 @@ const MesInterventionsContent = () => {
                             <button
                               type="button"
                               className="btn btn-primary"
-                              onClick={() => openAssignModal(incident)}
+                              style={{ width: "max-content" }}
+                              onClick={(e) => { e.stopPropagation(); openAssignModal(incident); }}
                               title="Gérer l'équipe"
                             >
                               Gérer l'équipe
@@ -515,8 +550,8 @@ const MesInterventionsContent = () => {
 
                             <button
                               type="button"
-                              className="mes-interventions-action-btn"
-                              onClick={() => handleSelectIncident(incident)}
+                              className="btn btn-light"
+                              onClick={(e) => { e.stopPropagation(); handleGoToIncidentDetail(incident); }}
                               title="Voir le détail"
                             >
                               <Eye size={16} variant="Bold" color="#6C7278" />
@@ -536,6 +571,7 @@ const MesInterventionsContent = () => {
       {/* Modales d'actions */}
       <MesInterventionsAssignModal />
       <IncidentAgentsListModal />
+      <IncidentReportsModal />
     </div>
   );
 };

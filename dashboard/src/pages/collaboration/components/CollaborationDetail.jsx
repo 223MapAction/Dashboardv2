@@ -20,6 +20,7 @@ import {
   Trash,
   Buildings2
 } from 'iconsax-react';
+import { BlurryImage } from '../../../components/atoms/BlurryImage';
 import './collaboration-detail.css';
 
 export const CollaborationDetail = ({
@@ -296,7 +297,7 @@ export const CollaborationDetail = ({
             {/* Image */}
             {collaboration.image && (
               <div className="collab-detail-image">
-                <img src={collaboration.image} alt={collaboration.title} />
+                <BlurryImage src={collaboration.image} alt={collaboration.title} />
               </div>
             )}
 
@@ -618,7 +619,7 @@ export const CollaborationDetail = ({
                       {task.proof ? (
                         <div className="collab-task-proof-display">
                           {task.proof.type === 'image' ? (
-                            <img src={task.proof.url} alt="Preuve" className="collab-task-proof-image" />
+                            <BlurryImage src={task.proof.url} alt="Preuve" className="collab-task-proof-image" />
                           ) : (
                             <iframe
                               src={task.proof.url}

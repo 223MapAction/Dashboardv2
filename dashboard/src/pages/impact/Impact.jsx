@@ -23,9 +23,11 @@ import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effec
 import {
   getIncidentsService,
   getIncidentPredictionService,
-  getIncidentAssignmentsService
+  getIncidentAssignmentsService,
+  getResolvedIncidentsService
 } from '../incident/service/incident_service';
 import { getTasksService } from '../incident/service/task_service';
+import { getGlobalImpactService } from './service/impact_service';
 import './impact.css';
 
 const STRUCTURE_LABELS = {
@@ -40,10 +42,10 @@ const STRUCTURE_LABELS = {
 };
 
 const SEVERITY_META = {
-  critical: { label: 'Critique', color: '#EF4444' },
-  high: { label: 'Élevée', color: '#F59E0B' },
-  medium: { label: 'Modérée', color: '#3AA2DD' },
-  low: { label: 'Faible', color: '#22C55E' }
+  critical: { label: 'Critique', color: 'var(--color-danger)' },
+  high: { label: 'Élevée', color: 'var(--color-warning)' },
+  medium: { label: 'Modérée', color: 'var(--color-primary)' },
+  low: { label: 'Faible', color: 'var(--color-success)' }
 };
 
 const getSeverity = (incident, prediction) => {
@@ -342,13 +344,104 @@ export const Impact = () => {
   const [structureFilter, setStructureFilter] = useState('all'); // all | schools | markets | water_points | etc.
   const [expanded, setExpanded] = useState(null);
 
-  // Mock mode enabled directly
-  const loadingIncidents = false;
+  // Appel API pour récupérer les données globales d'impact
+  const { data: globalImpactData, error: apiError, isLoading: isLoadingImpact } = useSWR(
+    '/MapApi/impact/global',
+    () => getGlobalImpactService(),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true
+    }
+  );
+
+  // Appel API pour récupérer les incidents résolus
+  const { data: resolvedIncidentsData, error: incidentsError, isLoading: isLoadingIncidents } = useSWR(
+    '/MapApi/resolved-incidents',
+    () => getResolvedIncidentsService(),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+    }
+  );
+
+  // Logger les données pour analyse
+  useEffect(() => {
+    if (globalImpactData) {
+      console.log('========================================');
+      console.log('📊 DONNÉES IMPACT GLOBAL REÇUES:');
+      console.log('========================================');
+      console.log('Structure complète:', JSON.stringify(globalImpactData, null, 2));
+      console.log('========================================');
+      console.log('Type de données:', typeof globalImpactData);
+      console.log('Est un tableau?', Array.isArray(globalImpactData));
+      console.log('Clés disponibles:', Object.keys(globalImpactData));
+      console.log('========================================');
+    }
+    if (apiError) {
+      console.error('❌ ERREUR API IMPACT:', apiError);
+    }
+  }, [globalImpactData, apiError]);
+
+  // Logger les incidents résolus
+  useEffect(() => {
+    if (resolvedIncidentsData) {
+      console.log('========================================');
+      console.log('📋 INCIDENTS RÉSOLUS REÇUS:');
+      console.log('========================================');
+      console.log('Nombre d\'incidents:', resolvedIncidentsData.results?.length || resolvedIncidentsData.length || 0);
+      console.log('Structure:', JSON.stringify(resolvedIncidentsData, null, 2));
+      console.log('========================================');
+    }
+    if (incidentsError) {
+      console.error('❌ ERREUR API INCIDENTS:', incidentsError);
+    }
+  }, [resolvedIncidentsData, incidentsError]);
+
+  // Utiliser les vraies données ou fallback sur MOCK
+  const loadingIncidents = isLoadingImpact || isLoadingIncidents;
   const loadingDetails = false;
-  const error = null;
-  const incidentsList = MOCK_INCIDENTS;
-  const predictions = MOCK_PREDICTIONS;
-  const tasks = MOCK_TASKS;
+  const error = apiError || incidentsError;
+  
+  // Normaliser les incidents (gérer pagination API)
+  const incidentsList = resolvedIncidentsData 
+    ? (Array.isArray(resolvedIncidentsData) 
+        ? resolvedIncidentsData 
+        : (resolvedIncidentsData.results || MOCK_INCIDENTS))
+    : MOCK_INCIDENTS;
+  
+  // Extraire les prédictions depuis les incidents
+  const predictions = useMemo(() => {
+    if (!incidentsList || incidentsList.length === 0) return MOCK_PREDICTIONS;
+    
+    const preds = {};
+    incidentsList.forEach(incident => {
+      if (incident.prediction) {
+        preds[incident.id] = incident.prediction;
+      }
+    });
+    
+    return Object.keys(preds).length > 0 ? preds : MOCK_PREDICTIONS;
+  }, [incidentsList]);
+  
+  // Extraire les tâches depuis les incidents (tasks_by_organisation)
+  const tasks = useMemo(() => {
+    if (!incidentsList || incidentsList.length === 0) return MOCK_TASKS;
+    
+    const tasksMap = {};
+    incidentsList.forEach(incident => {
+      if (incident.tasks_by_organisation && Array.isArray(incident.tasks_by_organisation)) {
+        // Aplatir toutes les tâches de toutes les organisations
+        const allTasks = incident.tasks_by_organisation.flatMap(org => org.tasks || []);
+        if (allTasks.length > 0) {
+          tasksMap[incident.id] = allTasks;
+        }
+      }
+    });
+    
+    return Object.keys(tasksMap).length > 0 ? tasksMap : MOCK_TASKS;
+  }, [incidentsList]);
+  
+  // Assignments - garder MOCK pour l'instant (pas dans la structure API)
   const assignments = MOCK_ASSIGNMENTS;
 
   // Period filtering logic
@@ -424,8 +517,55 @@ export const Impact = () => {
     });
   }, [incidentsList, search, periodFilter, statusFilter, structureFilter, tasks, predictions]);
 
-  // Compute all global KPIs dynamically
+  // Compute all global KPIs dynamically - Utilise les données de l'API si disponibles
   const globals = useMemo(() => {
+    // Si on a les données de l'API, on les utilise directement
+    if (globalImpactData) {
+      return {
+        direct: {
+          total: globalImpactData.beneficiaires_directs?.total || 0,
+          men: globalImpactData.beneficiaires_directs?.hommes || 0,
+          women: globalImpactData.beneficiaires_directs?.femmes || 0,
+          children: globalImpactData.beneficiaires_directs?.enfants || 0,
+        },
+        indirect: {
+          total: globalImpactData.beneficiaires_indirects?.total || 0,
+          men: Math.round((globalImpactData.beneficiaires_indirects?.total || 0) * 0.33),
+          women: Math.round((globalImpactData.beneficiaires_indirects?.total || 0) * 0.34),
+          children: Math.round((globalImpactData.beneficiaires_indirects?.total || 0) * 0.33),
+        },
+        structures: globalImpactData.infrastructures_detail || {
+          schools: 0,
+          markets: 0,
+          water_points: 0,
+          main_roads_bridges: 0,
+          residential_buildings: 0,
+          maternities: 0,
+          health_centers: 0,
+          nurseries: 0,
+        },
+        totalStructures: globalImpactData.infrastructures_total || 0,
+        cumulativeAreaHa: globalImpactData.superficie_ha || 0,
+        avgResolutionTimeDays: globalImpactData.temps_moyen_resolution || 0,
+        resolutionRate: globalImpactData.taux_resolution || 0,
+        incidentsWithoutAnalysis: globalImpactData.incidents_sans_analyse || 0,
+        mobilization: {
+          organisationsCount: globalImpactData.mobilisation?.organisations_distinctes || 0,
+          agentsCount: globalImpactData.mobilisation?.agents_terrain || 0,
+          collaborationsCount: globalImpactData.mobilisation?.collaborations || 0,
+          collaborativeCount: 0, // Non disponible dans l'API
+          individualCount: 0, // Non disponible dans l'API
+        },
+        citizen: {
+          received: globalImpactData.contribution_citoyenne?.signalements_recus || 0,
+          verified: globalImpactData.contribution_citoyenne?.signalements_verifies || 0,
+          withAction: globalImpactData.contribution_citoyenne?.transformes_actions || 0,
+          contributorsCount: 0, // Non disponible dans l'API
+        },
+      };
+    }
+
+    // Sinon, on calcule à partir des données MOCK (code existant)
     let directMen = 0;
     let directWomen = 0;
     let directChildren = 0;
@@ -495,8 +635,8 @@ export const Impact = () => {
         const children = parseInt(pred.children_exposed || pred.human_impact?.children_exposed || 0);
         const total = parseInt(
           pred.total_population_exposed ||
-            pred.human_impact?.total_population_exposed ||
-            men + women + children
+          pred.human_impact?.total_population_exposed ||
+          men + women + children
         );
 
         directMen += men;
@@ -640,7 +780,7 @@ export const Impact = () => {
       },
       cumulativeAreaHa,
     };
-  }, [incidentsList, periodFilter, statusFilter, structureFilter, predictions, tasks, assignments]);
+  }, [globalImpactData, incidentsList, periodFilter, statusFilter, structureFilter, predictions, tasks, assignments]);
 
   // Main isLoading flag combining SWR loading and details loading
   const isDataLoading = loadingIncidents || (incidentsList.length > 0 && loadingDetails);
@@ -665,11 +805,9 @@ export const Impact = () => {
             {/* Page Header */}
             <div className="impact-page-header">
               <div className="impact-header-left">
-                <div className="impact-header-icon">
-                  <Award size={28} variant="Bold" color="#FFFFFF" />
-                </div>
+
                 <div>
-                  <h1 className="impact-title">Dashboard d'Impact</h1>
+                  <h1 className="impact-title">Impact</h1>
                   <p className="impact-subtitle">
                     Mesure et consolidation de l'impact des interventions de Map Action sur le terrain.
                   </p>
@@ -766,213 +904,7 @@ export const Impact = () => {
               </div>
             ) : (
               <>
-                {/* Section 1: KPI Core Metrics */}
-                <div className="impact-kpis">
-                  {/* Area Card */}
-                  <div className="impact-kpi impact-kpi-primary-glow">
-                    <div className="impact-kpi-icon-glow">
-                      <Tree size={24} variant="Bold" color="#22C55E" />
-                    </div>
-                    <div className="impact-kpi-body">
-                      <div className="impact-kpi-value">
-                        {globals.cumulativeAreaHa.toLocaleString('fr-FR', {
-                          minimumFractionDigits: 1,
-                          maximumFractionDigits: 2,
-                        })} ha
-                      </div>
-                      <div className="impact-kpi-label">Superficies d'impact cumulées</div>
-                      <div className="impact-kpi-subtext">
-                        Surface totale des zones d'impact associées aux incidents résolus.
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Direct Beneficiaries Card */}
-                  <div className="impact-kpi impact-kpi-glass">
-                    <div className="impact-kpi-top-row">
-                      <div className="impact-kpi-icon-glow">
-                        <People size={24} variant="Bold" color="#3AA2DD" />
-                      </div>
-                      <div>
-                        <div className="impact-kpi-value">
-                          {globals.direct.total.toLocaleString('fr-FR')}
-                        </div>
-                        <div className="impact-kpi-label">Bénéficiaires Directs</div>
-                      </div>
-                    </div>
-                    <div className="impact-cohort-breakdown">
-                      <div className="cohort-item">
-                        <span className="cohort-gender">Hommes</span>
-                        <div className="cohort-bar">
-                          <div
-                            className="cohort-fill men-fill"
-                            style={{
-                              width: `${
-                                globals.direct.total > 0
-                                  ? (globals.direct.men / globals.direct.total) * 100
-                                  : 0
-                              }%`,
-                            }}
-                          />
-                        </div>
-                        <span className="cohort-val">
-                          {globals.direct.men.toLocaleString('fr-FR')}
-                        </span>
-                      </div>
-                      <div className="cohort-item">
-                        <span className="cohort-gender">Femmes</span>
-                        <div className="cohort-bar">
-                          <div
-                            className="cohort-fill women-fill"
-                            style={{
-                              width: `${
-                                globals.direct.total > 0
-                                  ? (globals.direct.women / globals.direct.total) * 100
-                                  : 0
-                              }%`,
-                            }}
-                          />
-                        </div>
-                        <span className="cohort-val">
-                          {globals.direct.women.toLocaleString('fr-FR')}
-                        </span>
-                      </div>
-                      <div className="cohort-item">
-                        <span className="cohort-gender">Enfants</span>
-                        <div className="cohort-bar">
-                          <div
-                            className="cohort-fill children-fill"
-                            style={{
-                              width: `${
-                                globals.direct.total > 0
-                                  ? (globals.direct.children / globals.direct.total) * 100
-                                  : 0
-                              }%`,
-                            }}
-                          />
-                        </div>
-                        <span className="cohort-val">
-                          {globals.direct.children.toLocaleString('fr-FR')}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Indirect Beneficiaries Card */}
-                  <div className="impact-kpi impact-kpi-glass">
-                    <div className="impact-kpi-top-row">
-                      <div className="impact-kpi-icon-glow">
-                        <Profile2User size={24} variant="Bold" color="#8B5CF6" />
-                      </div>
-                      <div>
-                        <div className="impact-kpi-value">
-                          {globals.indirect.total.toLocaleString('fr-FR')}
-                        </div>
-                        <div className="impact-kpi-label">Bénéficiaires Indirects</div>
-                      </div>
-                    </div>
-                    <div className="impact-cohort-breakdown">
-                      <div className="cohort-item">
-                        <span className="cohort-gender">Hommes</span>
-                        <div className="cohort-bar">
-                          <div
-                            className="cohort-fill men-fill"
-                            style={{
-                              width: `${
-                                globals.indirect.total > 0
-                                  ? (globals.indirect.men / globals.indirect.total) * 100
-                                  : 0
-                              }%`,
-                            }}
-                          />
-                        </div>
-                        <span className="cohort-val">
-                          {globals.indirect.men.toLocaleString('fr-FR')}
-                        </span>
-                      </div>
-                      <div className="cohort-item">
-                        <span className="cohort-gender">Femmes</span>
-                        <div className="cohort-bar">
-                          <div
-                            className="cohort-fill women-fill"
-                            style={{
-                              width: `${
-                                globals.indirect.total > 0
-                                  ? (globals.indirect.women / globals.indirect.total) * 100
-                                  : 0
-                              }%`,
-                            }}
-                          />
-                        </div>
-                        <span className="cohort-val">
-                          {globals.indirect.women.toLocaleString('fr-FR')}
-                        </span>
-                      </div>
-                      <div className="cohort-item">
-                        <span className="cohort-gender">Enfants</span>
-                        <div className="cohort-bar">
-                          <div
-                            className="cohort-fill children-fill"
-                            style={{
-                              width: `${
-                                globals.indirect.total > 0
-                                  ? (globals.indirect.children / globals.indirect.total) * 100
-                                  : 0
-                              }%`,
-                            }}
-                          />
-                        </div>
-                        <span className="cohort-val">
-                          {globals.indirect.children.toLocaleString('fr-FR')}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Sensitive structures protected Card */}
-                  <div className="impact-kpi impact-kpi-glass">
-                    <div className="impact-kpi-top-row">
-                      <div className="impact-kpi-icon-glow">
-                        <Building size={24} variant="Bold" color="#F59E0B" />
-                      </div>
-                      <div>
-                        <div className="impact-kpi-value">
-                          {globals.totalStructures.toLocaleString('fr-FR')}
-                        </div>
-                        <div className="impact-kpi-label">Structures Protégées</div>
-                      </div>
-                    </div>
-
-                    <div className="impact-structures-interactive">
-                      <span className="structures-filter-title">Filtrer par type de structure :</span>
-                      <div className="structures-grid-chips">
-                        <button
-                          type="button"
-                          className={`structure-chip ${structureFilter === 'all' ? 'active' : ''}`}
-                          onClick={() => setStructureFilter('all')}
-                        >
-                          Toutes ({globals.totalStructures})
-                        </button>
-                        {Object.entries(STRUCTURE_LABELS).map(([key, label]) => {
-                          const val = globals.structures[key] || 0;
-                          return (
-                            <button
-                              key={key}
-                              type="button"
-                              className={`structure-chip ${structureFilter === key ? 'active' : ''}`}
-                              onClick={() => setStructureFilter(key)}
-                              disabled={val === 0}
-                            >
-                              {label} ({val})
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Section 2: Performance & Mobilization */}
+                {/* Section 1: Performance & Mobilization */}
                 <div className="impact-grid-performance">
                   {/* Resolution speed & rate */}
                   <div className="performance-card">
@@ -1125,9 +1057,9 @@ export const Impact = () => {
                               <div
                                 className="impact-card-thumb"
                                 style={
-                                  inc.photo || inc.photo_url || inc.image
-                                    ? { backgroundImage: `url(${inc.photo || inc.photo_url || inc.image})` }
-                                    : { backgroundColor: '#E5E7EB' }
+                                  inc.photo || inc.photo_url || inc.image || inc.incident_details?.photo
+                                    ? { backgroundImage: `url(${inc.photo || inc.photo_url || inc.image || inc.incident_details?.photo})` }
+                                    : undefined
                                 }
                               >
                                 <span
@@ -1146,8 +1078,8 @@ export const Impact = () => {
                                     <Location size={12} variant="Bold" color="#6C7278" />
                                     {inc.lattitude && inc.longitude
                                       ? `${parseFloat(inc.lattitude).toFixed(4)}°N, ${parseFloat(
-                                          inc.longitude
-                                        ).toFixed(4)}°E`
+                                        inc.longitude
+                                      ).toFixed(4)}°E`
                                       : 'Coordonnées non spécifiées'}
                                   </span>
                                 </div>
@@ -1214,12 +1146,9 @@ export const Impact = () => {
                                 {/* Details Grid */}
                                 <div className="impact-detail-grid">
                                   {/* Direct human exposure details */}
-                                  <div className="impact-detail-card" style={{ borderColor: '#3AA2DD' }}>
-                                    <div
-                                      className="impact-detail-header"
-                                      style={{ backgroundColor: 'rgba(58, 162, 221, 0.12)', color: '#3AA2DD' }}
-                                    >
-                                      <People size={16} variant="Bold" color="#3AA2DD" />
+                                  <div className="impact-detail-card is-direct">
+                                    <div className="impact-detail-header">
+                                      <People size={16} variant="Bold" color="currentColor" />
                                       <span>Bénéficiaires Directs</span>
                                     </div>
                                     <ul className="impact-detail-list">
@@ -1251,12 +1180,9 @@ export const Impact = () => {
                                   </div>
 
                                   {/* Indirect human exposure details */}
-                                  <div className="impact-detail-card" style={{ borderColor: '#8B5CF6' }}>
-                                    <div
-                                      className="impact-detail-header"
-                                      style={{ backgroundColor: 'rgba(139, 92, 246, 0.12)', color: '#8B5CF6' }}
-                                    >
-                                      <Profile2User size={16} variant="Bold" color="#8B5CF6" />
+                                  <div className="impact-detail-card is-indirect">
+                                    <div className="impact-detail-header">
+                                      <Profile2User size={16} variant="Bold" color="currentColor" />
                                       <span>Bénéficiaires Indirects</span>
                                     </div>
                                     <ul className="impact-detail-list">
@@ -1288,12 +1214,9 @@ export const Impact = () => {
                                   </div>
 
                                   {/* Protected sensitive structures */}
-                                  <div className="impact-detail-card" style={{ borderColor: '#F59E0B' }}>
-                                    <div
-                                      className="impact-detail-header"
-                                      style={{ backgroundColor: 'rgba(245, 158, 11, 0.12)', color: '#F59E0B' }}
-                                    >
-                                      <Building size={16} variant="Bold" color="#F59E0B" />
+                                  <div className="impact-detail-card is-structures">
+                                    <div className="impact-detail-header">
+                                      <Building size={16} variant="Bold" color="currentColor" />
                                       <span>Structures Sensibles</span>
                                     </div>
                                     <ul className="impact-detail-list scrollable-list">
@@ -1347,7 +1270,7 @@ export const Impact = () => {
                                     </div>
 
                                     {incAssignments.length > 0 && (
-                                      <div className="impact-orgs-chips-row" style={{ marginTop: '10px' }}>
+                                      <div className="impact-orgs-chips-row">
                                         <span className="details-sublabel">Agents assignés :</span>
                                         <div className="impact-orgs-list">
                                           {incAssignments.map((a, idx) => {

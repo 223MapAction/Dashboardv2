@@ -4,6 +4,7 @@ import { User, Setting2, LogoutCurve, ArrowDown2, Notification, Danger, People, 
 import logoMapActionMin from '../../assets/logo-min.svg';
 import { authService } from '../../pages/auth/services/authService';
 import { getNotifications, markNotificationAsRead } from './service/notification_service';
+import { BlurryImage } from '../atoms/BlurryImage';
 import './header.css';
 
 export const Header = ({ onMenuToggle, user }) => {
@@ -163,7 +164,7 @@ export const Header = ({ onMenuToggle, user }) => {
               aria-label="Menu profil"
             >
               {currentUser?.logo || currentUser?.logo_url ? (
-                <img
+                <BlurryImage
                   src={currentUser.logo || currentUser.logo_url}
                   alt="Logo"
                 />

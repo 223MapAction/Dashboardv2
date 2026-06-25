@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { CloseCircle, Eye } from 'iconsax-react';
 import { ShimmerThumbnail } from 'react-shimmer-effects';
+import { BlurryImage } from '../../../components/atoms/BlurryImage';
 import '../../../styles/modals.css';
 
 export const CollabIncidentDetailModal = ({ incident, onClose }) => {
@@ -10,7 +11,6 @@ export const CollabIncidentDetailModal = ({ incident, onClose }) => {
   const prediction = incident.predictionDetails || {};
 
   const [isClosing, setIsClosing] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
 
   const handleClose = () => {
@@ -63,25 +63,19 @@ export const CollabIncidentDetailModal = ({ incident, onClose }) => {
           {/* Media preview if exists */}
           {(details.photo || details.video) && (
             <div style={{ marginBottom: '24px' }}>
-              
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {details.photo && (
                   <div>
                     <h4 className='body-large mb-1'>Image de l'incident</h4>
-                    {!imageLoaded && (
-                      <ShimmerThumbnail height={240} rounded />
-                    )}
-                    <img 
+                    <BlurryImage 
                       src={details.photo} 
                       alt="Aperçu de l'incident" 
-                      onLoad={() => setImageLoaded(true)}
                       style={{ 
                         width: '100%', 
                         maxHeight: '240px', 
                         objectFit: 'cover', 
                         borderRadius: '8px', 
                         border: '1px solid #eaecf0',
-                        display: imageLoaded ? 'block' : 'none'
                       }} 
                     />
                   </div>

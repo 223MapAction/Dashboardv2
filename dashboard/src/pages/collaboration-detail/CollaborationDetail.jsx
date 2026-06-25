@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import useSWR from 'swr';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText, ShimmerButton } from 'react-shimmer-effects';
 import { useSidebarState } from '../../hooks/useSidebarState';
@@ -8,8 +8,11 @@ import { CollaborationDetailProvider } from './context/CollaborationDetailContex
 import { TaskModal } from './modal/TaskModal';
 import { SuggestOrgModal } from './modal/SuggestOrgModal';
 import { DeleteTaskModal } from './modal/DeleteTaskModal';
+import { AgentReportsModal } from './modal/AgentReportsModal';
+import { NotFound } from '../not-found';
 import { getCollaborationService } from '../collaboration/service/collaboration_service';
 import { getOrganisationsService, formatOrganisation } from '../organisations/service/organisation_service';
+import { BlurryImage } from '../../components/atoms/BlurryImage';
 import {
   getDiscussionMessagesService,
   sendMessageService,
@@ -51,7 +54,8 @@ import {
   Buildings2,
   CloseCircle,
   Play,
-  Pause
+  Pause,
+  DocumentText
 } from 'iconsax-react';
 import './collaboration-detail.css';
 
@@ -229,6 +233,7 @@ const CustomAudioPlayer = ({ id, src, activeAudioId, setActiveAudioId }) => {
 export const CollaborationDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const formatEtat = (etat) => {
     if (!etat) return 'Inconnu';
@@ -333,12 +338,21 @@ export const CollaborationDetail = () => {
   // Récupérer l'incidentId depuis la collaboration
   const incidentId = collaborationData?.incident;
 
-  // Utiliser useSWR pour charger les tâches de l'incident
+  // Utiliser useSWR pour charger les tâches de l'incident avec polling intelligent
   const { data: tasksData, error: tasksError, isLoading: tasksLoading, mutate: mutateTasks } = useSWR(
     incidentId ? `tasks-${incidentId}` : null,
     () => getTasksService(incidentId),
     {
-      revalidateOnFocus: false
+      revalidateOnFocus: false,
+      // Polling intelligent : 10 secondes (non-agressif)
+      // Désactivé quand l'onglet est en arrière-plan
+      refreshInterval: 10000,
+      // Arrêter le polling si l'onglet n'est pas visible
+      refreshWhenHidden: false,
+      // Arrêter le polling si pas de connexion
+      refreshWhenOffline: false,
+      // Revalider quand la fenêtre reprend le focus
+      revalidateOnReconnect: true
     }
   );
 
@@ -412,6 +426,7 @@ export const CollaborationDetail = () => {
 
   // États pour le modal de suggestion d'organisations
   const [showSuggestModal, setShowSuggestModal] = useState(false);
+  const [showReportsModal, setShowReportsModal] = useState(false);
   const [suggestModalClosing, setSuggestModalClosing] = useState(false);
   const [suggestModalShowing, setSuggestModalShowing] = useState(false);
   const [suggestSearch, setSuggestSearch] = useState('');
@@ -495,7 +510,7 @@ export const CollaborationDetail = () => {
 
   // Bloquer le scroll du body quand un modal est ouvert
   useEffect(() => {
-    if (showTaskModal || showSuggestModal || showCloseModal || taskToDelete !== null) {
+    if (showTaskModal || showSuggestModal || showCloseModal || taskToDelete !== null || showReportsModal) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
@@ -503,7 +518,7 @@ export const CollaborationDetail = () => {
     return () => {
       document.body.style.overflow = '';
     };
-  }, [showTaskModal, showSuggestModal, showCloseModal, taskToDelete]);
+  }, [showTaskModal, showSuggestModal, showCloseModal, taskToDelete, showReportsModal]);
 
   // Mapper les données API vers le format attendu par le composant
   const collaboration = collaborationData ? {
@@ -559,10 +574,17 @@ export const CollaborationDetail = () => {
       if (!formatted.createdBy) {
         if (formatted.created_by === collaboration?.userId) {
           formatted.createdBy = 'me';
-        } else if (formatted.created_by) {
-          formatted.createdBy = `Utilisateur #${formatted.created_by}`;
         } else {
-          formatted.createdBy = 'Non assignée';
+          formatted.createdBy = formatted.created_by_organisation;
+        }
+      }
+
+      // Normaliser assignedTo pour l'affichage local
+      if (!formatted.assignedTo) {
+        if (formatted.assigned_to === collaboration?.userId) {
+          formatted.assignedTo = 'me';
+        } else {
+          formatted.assignedTo = formatted.assigned_to_name;
         }
       }
       return formatted;
@@ -593,7 +615,7 @@ export const CollaborationDetail = () => {
                 <button
                   type="button"
                   className="detail-back-btn"
-                  onClick={() => navigate('/collaboration')}
+                  onClick={() => navigate(location.state?.from || '/collaboration')}
                   aria-label="Retour à la liste"
                   style={{ display: 'flex', backgroundColor: 'var(--color-background)', color: 'var(--color-text-primary)', borderColor: 'var(--color-border)' }}
                 >
@@ -683,7 +705,17 @@ export const CollaborationDetail = () => {
                 {(!isMobile || activeTab === 'chat') && (
                   <main className="collab-detail-main">
                     <div className="collab-detail-section">
-                      <h3 className="collab-detail-section-title">Discussion</h3>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-4)' }}>
+                        <h3 className="collab-detail-section-title" style={{ margin: 0 }}>Discussion</h3>
+                        <button
+                          type="button"
+                          className="am-btn am-btn--outline w-full"
+
+                        >
+                          <DocumentText size={16} variant="Bold" color="var(--color-text-secondary)" />
+                          Rapports de terrain
+                        </button>
+                      </div>
 
                       <div className="collab-discussion">
                         <div className="collab-discussion-messages" style={{ overflow: 'hidden' }}>
@@ -788,9 +820,13 @@ export const CollaborationDetail = () => {
     );
   }
 
-  // if (collaborationError || !collaboration) {
-  //   return null;
-  // }
+  if (collaborationError || !collaboration) {
+    return (
+      <NotFound
+        message="Désolé, la collaboration demandée n'existe pas ou vous n'avez pas l'autorisation d'y accéder."
+      />
+    );
+  }
 
   const isCollabClosed = (collabId) => closedCollabs[collabId] === true;
 
@@ -1615,7 +1651,7 @@ export const CollaborationDetail = () => {
                 <button
                   type="button"
                   className="detail-back-btn"
-                  onClick={() => navigate('/collaboration')}
+                  onClick={() => navigate(location.state?.from || '/collaboration')}
                   aria-label="Retour à la liste"
                   style={{ display: 'flex', backgroundColor: 'var(--color-background)', color: 'var(--color-text-primary)', borderColor: 'var(--color-border)' }}
                 >
@@ -1655,7 +1691,7 @@ export const CollaborationDetail = () => {
 
                       {collaboration?.image && (
                         <div className="collab-detail-image">
-                          <img src={collaboration?.image} alt={collaboration?.title} />
+                          <BlurryImage src={collaboration?.image} alt={collaboration?.title} />
                         </div>
                       )}
 
@@ -1848,7 +1884,7 @@ export const CollaborationDetail = () => {
                             <div className="collab-detail-meta-row">
                               <span className="collab-detail-meta-label">Collaborateur</span>
                               <span className="collab-detail-meta-val">
-                                {collaboration.userFullName} <span style={{ color: 'var(--color-text-muted)', fontSize: '12px' }}>({collaboration.userEmail})</span>
+                                {collaboration.userFullName}
                               </span>
                             </div>
                           )}
@@ -1896,7 +1932,20 @@ export const CollaborationDetail = () => {
                 {(!isMobile || activeTab === 'chat') && (
                   <main className="collab-detail-main">
                     <div className="collab-detail-section">
-                      <h3 className="collab-detail-section-title">Discussion</h3>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-4)' }}>
+                        <h3 className="collab-detail-section-title" style={{ margin: 0 }}>Discussion</h3>
+                        <button
+                          type="button"
+
+                          className="am-btn am-btn--outline w-full"
+                          style={{ width: "fit-content" }}
+                          onClick={() => setShowReportsModal(true)}
+
+                        >
+                          <DocumentText size={16} variant="Bold" color="var(--color-text-secondary)" />
+                          Rapports de terrain
+                        </button>
+                      </div>
 
                       <div className="collab-discussion">
                         <div className="collab-discussion-messages">
@@ -1951,25 +2000,6 @@ export const CollaborationDetail = () => {
                                             {msg.file.name}
                                           </div>
                                           <div className="collab-message-file-actions" style={{ display: 'flex', gap: '8px', marginTop: '4px', alignItems: 'center' }}>
-                                            <button
-                                              type="button"
-                                              onClick={() => handleOpen(msg.file.url, msg.id)}
-                                              disabled={openingMsgId === msg.id}
-                                              style={{ background: 'none', border: 'none', padding: 0, fontSize: '11px', fontWeight: '500', color: 'var(--color-primary)', textDecoration: 'none', cursor: openingMsgId === msg.id ? 'not-allowed' : 'pointer', opacity: openingMsgId === msg.id ? 0.7 : 1, display: 'flex', alignItems: 'center', gap: '4px' }}
-                                            >
-                                              {openingMsgId === msg.id ? (
-                                                <>
-                                                  <svg style={{ animation: 'spin 1s linear infinite', width: '12px', height: '12px', color: 'var(--color-primary)' }} viewBox="0 0 24 24" fill="none">
-                                                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" style={{ opacity: 0.25 }}></circle>
-                                                    <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" style={{ opacity: 0.75 }}></path>
-                                                  </svg>
-                                                  <span>Ouverture...</span>
-                                                </>
-                                              ) : (
-                                                'Ouvrir'
-                                              )}
-                                            </button>
-                                            <span style={{ fontSize: '10px', color: 'var(--color-text-muted)' }}>•</span>
                                             <button
                                               type="button"
                                               onClick={() => handleDownload(msg.file.url, msg.file.name, msg.id)}
@@ -2257,7 +2287,13 @@ export const CollaborationDetail = () => {
                                       {task.description}
                                     </div>
                                   )}
-                                  <div className="collab-task-meta" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '6px', alignItems: 'center', fontSize: 'var(--font-size-caption)', color: 'var(--color-text-muted)' }}>
+                                  <div className="collab-task-meta"
+                                    style={{
+                                      display: 'flex', flexWrap: 'wrap',
+                                      gap: '8px', marginTop: '6px', alignItems: 'center',
+                                      fontSize: 'var(--font-size-caption)',
+                                      color: 'var(--color-text-secondary)'
+                                    }}>
                                     {task.failed && (
                                       <span className="collab-task-failed-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', backgroundColor: '#EF4444', color: '#FFFFFF', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold' }}>
                                         <Danger size={10} variant="Bold" color="#FFFFFF" />
@@ -2267,9 +2303,10 @@ export const CollaborationDetail = () => {
                                     <span className={task.createdBy === 'me' ? 'is-me' : ''}>
                                       {task.createdBy === 'me' ? 'Par moi' : task.createdBy}
                                     </span>
+
                                     {(task.start_date || task.end_date) && (
                                       <>
-                                        <span>•</span>
+
                                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                                           <Calendar size={12} variant="Linear" />
                                           {task.start_date && new Date(task.start_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
@@ -2318,7 +2355,7 @@ export const CollaborationDetail = () => {
                                     }}
                                     title="Marquer comme échouée"
                                   >
-                                    <CloseSquare size={16} variant="Bold" color="#EF4444" />
+                                    <Danger size={18} variant="Bold" color="#EF4444" />
                                   </button>
                                 )}
 
@@ -2329,7 +2366,7 @@ export const CollaborationDetail = () => {
                                     onClick={() => resetTaskStatus(task.id)}
                                     title="Réinitialiser"
                                   >
-                                    <Add size={16} variant="Bold" color="#6C7278" />
+                                    <Add size={18} variant="Bold" color="#6C7278" />
                                   </button>
                                 )}
 
@@ -2344,7 +2381,7 @@ export const CollaborationDetail = () => {
                                     {deletingTaskIds.includes(task.id) ? (
                                       <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" style={{ width: '12px', height: '12px', border: '2px solid transparent', borderTopColor: '#EF4444', borderRightColor: '#EF4444', borderRadius: '50%', animation: 'spin 0.75s linear infinite' }}></span>
                                     ) : (
-                                      <Trash size={16} variant="Bold" color="#EF4444" />
+                                      <Trash size={18} variant="Bold" color="#EF4444" />
                                     )}
                                   </button>
                                 )}
@@ -2452,7 +2489,7 @@ export const CollaborationDetail = () => {
                                     <div className="proof-file-preview-container" style={{ position: 'relative', marginTop: '8px', marginBottom: '12px', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--color-border)' }}>
                                       {proofPreviewType === 'image' ? (
                                         <>
-                                          <img src={proofPreviewUrl} alt="Preview" style={{ width: '100%', height: 'auto', display: 'block', maxWidth: '200px' }} />
+                                          <BlurryImage src={proofPreviewUrl} alt="Preview" style={{ width: '100%', height: 'auto', display: 'block', maxWidth: '200px' }} />
                                           <button
                                             type="button"
                                             disabled={uploadingProofTask === task.id}
@@ -2718,7 +2755,7 @@ export const CollaborationDetail = () => {
                                               }}
                                               className="proof-hover-container"
                                             >
-                                              <img
+                                              <BlurryImage
                                                 src={task.proof_image || task.proof.url}
                                                 alt="Preuve"
                                                 className="collab-task-proof-image"
@@ -2951,7 +2988,7 @@ export const CollaborationDetail = () => {
                     {/* Corps du modal */}
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', borderRadius: '12px', minHeight: '400px', backgroundColor: '#000000', width: '100%' }}>
                       {activeProofPreview.type === 'image' ? (
-                        <img
+                        <BlurryImage
                           src={activeProofPreview.url}
                           alt="Aperçu Preuve"
                           style={{
@@ -3139,6 +3176,12 @@ export const CollaborationDetail = () => {
           </div>
         </>
       )}
+      <AgentReportsModal
+        isOpen={showReportsModal}
+        onClose={() => setShowReportsModal(false)}
+        incidentId={collaboration?.incidentId}
+        incidentTitle={collaboration?.title}
+      />
     </CollaborationDetailProvider>
   );
 };

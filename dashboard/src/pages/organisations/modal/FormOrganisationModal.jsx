@@ -2,6 +2,7 @@ import React from 'react';
 import { CloseCircle, TickCircle } from 'iconsax-react';
 import { useOrganisationsContext } from '../context/OrganisationsContext';
 import { SECTORS, TYPES, COUNTRIES } from '../data/organisations';
+import { BlurryImage } from '../../../components/atoms/BlurryImage';
 
 const FormOrganisationModal = () => {
   const {
@@ -67,7 +68,7 @@ const FormOrganisationModal = () => {
                 {/* Zone de prévisualisation cliquable */}
                 <label htmlFor="org-photo-input" className="orgs-photo-picker">
                   {form.logo_url ? (
-                    <img src={form.logo_url} alt="Logo organisation" className="orgs-photo-preview" />
+                    <BlurryImage src={form.logo_url} alt="Logo organisation" className="orgs-photo-preview" />
                   ) : (
                     <div className="orgs-avatar orgs-avatar-lg" style={{ backgroundColor: form.color }}>
                       {(form.acronym || '?').slice(0, 2).toUpperCase()}

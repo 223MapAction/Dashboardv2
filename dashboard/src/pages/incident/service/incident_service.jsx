@@ -17,13 +17,11 @@ export const getIncidentsService = async (page = 1, pageSize = 10) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.get(
-      `${API_URL_BASE}/MapApi/${INCIDENT_URL}/`,
-      {
-        // params: { page, page_size: pageSize }
-      }
+      `${API_URL_BASE}/MapApi/org-incidents/`,
+      
     );
 
-    console.warn('[Incident]url Incidents récupérés:', `${API_URL_BASE}/MapApi/${INCIDENT_URL}`);
+    console.warn('[Incident]url Incidents récupérés:', `${API_URL_BASE}/MapApi/incident-filter/`);
     console.log('[Incident] Incidents récupérés:', response.data);
     return response.data;
   } catch (error) {

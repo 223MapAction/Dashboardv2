@@ -63,3 +63,25 @@ export const toggleIncidentPublicService = async (incidentId) => {
     throw error;
   }
 };
+
+/**
+ * Récupère les rapports de terrain remontés par les agents
+ * @returns {Promise<Array>}
+ */
+export const getFieldReportsService = async () => {
+  try {
+    const axios = authService.createAuthenticatedAxios();
+    const response = await axios.get(`${API_URL_BASE}/MapApi/field-reports/`);
+     return response.data;
+  } catch (error) {
+    console.error('[MesInterventions] Erreur récupération rapports de terrain:', error.response?.status, error.response?.data);
+    throw error;
+  }
+};
+/**
+ * Mes rapport dans mes incidents interne / agents
+ * @param {number|string} incidentId - ID de l'incident
+ * @returns {Promise<Object>}
+ */
+ 
+ 

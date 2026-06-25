@@ -51,6 +51,9 @@ import './dark-dashboard.css';
 import { getOrganisationsService, formatOrganisation } from '../../../organisations/service/organisation_service';
 import { IncidentDetailContext } from './IncidentDetailContext';
 import { InviteOrgModal } from './modal/InviteOrgModal';
+import { NotFound } from '../../../not-found';
+import { BlurryImage } from '../../../../components/atoms/BlurryImage';
+
 
 // Composant shimmer pour le détail d'incident
 const IncidentDetailSkeleton = () => (
@@ -230,7 +233,7 @@ const ORG_ROLE_OPTIONS = ROLE_OPTIONS.filter(role => role.id !== 'leader');
 
 export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
   // Utiliser useSWR pour rafraîchir les données automatiquement
-  const { data: swrIncident, mutate, isLoading: isSwrLoading } = useSWR(
+  const { data: swrIncident, mutate, isLoading: isSwrLoading, error: swrError } = useSWR(
     incident?.id ? `/incidents/${incident.id}` : null,
     () => getIncidentService(incident.id),
     {
@@ -251,12 +254,23 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
   const isCurrentlyLoading = isLoading || isSwrLoading || (incident?.id && !swrIncident?.title);
 
   // Récupérer la prédiction de l'incident
-  const { data: prediction, isLoading: isLoadingPrediction } = useSWR(
+  const { data: prediction, isLoading: isLoadingPrediction, error: predictionError } = useSWR(
     incident?.id ? `/Incidentprediction/${incident.id}` : null,
     () => getIncidentPredictionService(incident.id),
     {
       revalidateOnFocus: false,
-      revalidateOnReconnect: false
+      revalidateOnReconnect: false,
+      onError: (err) => {
+        console.error('[IncidentDetail] Erreur chargement prédiction:', err);
+        // Si erreur 404, c'est normal (pas de prédiction encore)
+        if (err?.response?.status === 404) {
+          console.log('[IncidentDetail] Aucune prédiction disponible pour cet incident');
+        }
+      },
+      // Ne pas retry indéfiniment en cas d'erreur
+      shouldRetryOnError: false,
+      // Considérer l'erreur 404 comme une réponse valide (pas de prédiction)
+      dedupingInterval: 100
     }
   );
 
@@ -298,7 +312,13 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
     participants: currentIncident.participants || [],
     extraParticipants: currentIncident.extraParticipants || 0,
     // Déterminer si l'utilisateur connecté est propriétaire de l'incident
-    isOwner: currentUserId ? currentIncident.taken_by === parseInt(currentUserId) : false,
+    isOwner: currentUserId ? (
+      currentIncident.taken_by
+        ? (typeof currentIncident.taken_by === 'object'
+            ? parseInt(currentIncident.taken_by.id) === parseInt(currentUserId)
+            : parseInt(currentIncident.taken_by) === parseInt(currentUserId))
+        : false
+    ) : false,
     ...currentIncident
   } : null;
 
@@ -317,15 +337,10 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
   const [alertType, setAlertType] = useState('success');
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMessage, setChatMessage] = useState('');
-  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
   const [chatError, setChatError] = useState(null);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const chatMessagesEndRef = useRef(null);
-
-  useEffect(() => {
-    setImageLoaded(false);
-  }, [safeIncident?.image]);
 
   const [messages, setMessages] = useState([
     { id: 1, sender: 'bot', text: 'Bonjour ! Je suis l\'assistant IA Vision. Comment puis-je vous aider avec cet incident ?' }
@@ -840,6 +855,14 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
     return <IncidentDetailSkeleton />;
   }
 
+  if (swrError?.response?.status === 404) {
+    return (
+      <NotFound 
+        message="Désolé, l'incident demandé n'existe pas, a été supprimé ou vous n'avez pas l'autorisation d'y accéder." 
+      />
+    );
+  }
+
   if (!incident) {
     return (
       <section className="project-detail empty">
@@ -1040,7 +1063,9 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
 
   const takingOrg = getTakingOrg(safeIncident);
 
-  const showInvolvementButton = !hasParticipantRole && (
+  const isInternalMode = safeIncident?.take_in_charge_mode === 'internal' || safeIncident?.take_in_charge_mode === 'interne';
+
+  const showInvolvementButton = !hasParticipantRole && !isInternalMode && (
     safeIncident?.isOwner
       ? (safeIncident?.take_in_charge_mode !== 'internal' && safeIncident?.take_in_charge_mode !== 'interne')
       : (!safeIncident?.take_in_charge_mode ||
@@ -1406,43 +1431,12 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                   backgroundColor: '#d2d6deff'
                 }}>
                 {safeIncident.image ? (
-                  <>
-                    {!imageLoaded && (
-                      <div className="shimmer-box" style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: '#d2d6deff',
-                        zIndex: 2
-                      }}>
-                        <div style={{
-                          width: '36px',
-                          height: '36px',
-                          border: '3px solid var(--color-primary)',
-                          borderTopColor: 'transparent',
-                          borderRadius: '50%',
-                          animation: 'spin 1s linear infinite'
-                        }} />
-                      </div>
-                    )}
-                    <img
-                      src={safeIncident.image}
-                      alt="Incident"
-                      className="incident-actual-image clickable"
-                      onClick={() => setIsImageModalOpen(true)}
-                      onLoad={() => setImageLoaded(true)}
-                      style={{
-                        filter: imageLoaded ? 'none' : 'blur(16px)',
-                        transition: 'filter 0.4s ease-out, opacity 0.4s ease-out',
-                        opacity: imageLoaded ? 1 : 0.5
-                      }}
-                    />
-                  </>
+                  <BlurryImage
+                    src={safeIncident.image}
+                    alt="Incident"
+                    className="incident-actual-image clickable"
+                    onClick={() => setIsImageModalOpen(true)}
+                  />
                 ) : (
                   <div className="image-placeholder">
                     <p>Aucune photo disponible</p>
@@ -1591,7 +1585,25 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
 
           {/* ── Colonne droite ── */}
           <div className="dashboard-col-right">
-            {!pred || pred?.length === 0 ?
+            {isLoadingPrediction ? (
+              <div style={{
+                padding: 'var(--spacing-8) var(--spacing-6)',
+                textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 'var(--spacing-4)',
+                minHeight: '400px',
+                border: '1px dashed var(--color-border)',
+              }}>
+                <div className="spinner" style={{ width: '48px', height: '48px', border: '4px solid rgba(58, 162, 221, 0.25)', borderTopColor: 'var(--color-primary)' }} />
+                <h3 style={{ margin: 0, fontSize: 'var(--font-size-h3)', color: 'var(--color-text-primary)' }}>Chargement de la prédiction...</h3>
+                <p style={{ fontSize: 'var(--font-size-body-small)', color: 'var(--color-text-secondary)', lineHeight: '1.6', maxWidth: '320px', margin: 0 }}>
+                  Récupération de l'analyse IA en cours...
+                </p>
+              </div>
+            ) : !pred || pred?.length === 0 ?
               (
                 <div style={{
                   padding: 'var(--spacing-8) var(--spacing-6)',
@@ -1604,14 +1616,25 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                   minHeight: '400px',
                   border: '1px dashed var(--color-border)',
                 }}>
-                  {/* <MagicStar size={48} variant="Bold" color="var(--color-text-muted)" style={{ opacity: 0.6 }} /> */}
+                  <MagicStar size={48} variant="Bold" color="var(--color-text-muted)" style={{ opacity: 0.6 }} />
                   <h3 style={{ margin: 0, fontSize: 'var(--font-size-h3)', color: 'var(--color-text-primary)' }}>Aucune Prédiction IA</h3>
                   <p style={{ fontSize: 'var(--font-size-body-small)', color: 'var(--color-text-secondary)', lineHeight: '1.6', maxWidth: '320px', margin: 0 }}>
                     L'analyse prédictive, satellite et de vulnérabilité sociale n'a pas encore été générée pour cet incident.
                   </p>
-                  <div className='body-large'>
-                    Attente du traitement par le modèle IA...
-                  </div>
+                  {predictionError && (
+                    <div style={{ 
+                      fontSize: 'var(--font-size-caption)', 
+                      color: 'var(--color-warning)',
+                      padding: 'var(--spacing-2) var(--spacing-3)',
+                      backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                      borderRadius: 'var(--radius-sm)',
+                      marginTop: 'var(--spacing-2)'
+                    }}>
+                      {predictionError?.response?.status === 404 
+                        ? 'Attente du traitement par le modèle IA...' 
+                        : 'Erreur lors du chargement de la prédiction'}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <>
@@ -1763,19 +1786,19 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 'var(--spacing-3)' }}>
                         {pred.ndvi_heatmap && (
                           <div style={{ textAlign: 'center' }}>
-                            <img src={pred.ndvi_heatmap} alt="NDVI Heatmap" style={{ width: '100%', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }} />
+                            <BlurryImage src={pred.ndvi_heatmap} alt="NDVI Heatmap" style={{ width: '100%', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }} />
                             <div style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-text-muted)', marginTop: 'var(--spacing-1)' }}>Heatmap NDVI</div>
                           </div>
                         )}
                         {pred.ndvi_ndwi_plot && (
                           <div style={{ textAlign: 'center' }}>
-                            <img src={pred.ndvi_ndwi_plot} alt="NDVI/NDWI Plot" style={{ width: '100%', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }} />
+                            <BlurryImage src={pred.ndvi_ndwi_plot} alt="NDVI/NDWI Plot" style={{ width: '100%', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }} />
                             <div style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-text-muted)', marginTop: 'var(--spacing-1)' }}>NDVI / NDWI Plot</div>
                           </div>
                         )}
                         {pred.landcover_plot && (
                           <div style={{ textAlign: 'center' }}>
-                            <img src={pred.landcover_plot} alt="Landcover Plot" style={{ width: '100%', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }} />
+                            <BlurryImage src={pred.landcover_plot} alt="Landcover Plot" style={{ width: '100%', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }} />
                             <div style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-text-muted)', marginTop: 'var(--spacing-1)' }}>Couverture du Sol</div>
                           </div>
                         )}
@@ -2139,7 +2162,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
             <button className="image-zoom-close" onClick={() => setIsImageModalOpen(false)}>
               <CloseCircle size={32} variant="Bold" color="#FFF" />
             </button>
-            <img src={safeIncident.image} alt="Incident Zoom" className="image-zoom-content" onClick={(e) => e.stopPropagation()} />
+            <BlurryImage src={safeIncident.image} alt="Incident Zoom" className="image-zoom-content" onClick={(e) => e.stopPropagation()} />
           </div>
         )}
 

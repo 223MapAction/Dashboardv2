@@ -13,6 +13,8 @@ import { Agents } from './pages/agents';
 import { MesInterventions } from './pages/mes-interventions';
 import { ProtectedRoute } from './components/auth';
 import { authService } from './pages/auth/services/authService';
+import { NotFound } from './pages/not-found';
+
 
 function App() {
   const [isAuthChecked, setIsAuthChecked] = useState(false);
@@ -136,9 +138,10 @@ function App() {
           }
         />
 
-        {/* Redirections */}
+        {/* Redirections & 404 */}
+        <Route path="/404" element={<NotFound />} />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );

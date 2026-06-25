@@ -20,6 +20,7 @@ import './organisations.css';
 import OrganisationsContext from './context/OrganisationsContext';
 import FormOrganisationModal from './modal/FormOrganisationModal';
 import DeleteOrganisationModal from './modal/DeleteOrganisationModal';
+import { BlurryImage } from '../../components/atoms/BlurryImage';
 
 const COLOR_PALETTE = [
   '#EF4444', '#F97316', '#F59E0B', '#22C55E',
@@ -91,7 +92,7 @@ export const Organisations = () => {
       website: o.website_url || '',
       description: o.description || '',
       status: o.partner_status || 'active',
-      logo_url: o.logo_url || null,
+      logo_url: o.logo || null,
       membersCount: o.members_count ?? 0,
       activeProjects: o.active_projects ?? 0,
     }));
@@ -221,7 +222,7 @@ export const Organisations = () => {
   const validate = () => {
     const errs = {};
     if (!form.name.trim()) errs.name = 'Le nom est requis.';
-    if (!form.acronym.trim()) errs.acronym = 'L\'acronyme est requis.';
+ 
     if (!form.sector) errs.sector = 'Le secteur est requis.';
     if (!form.type) errs.type = 'Le type est requis.';
     if (!form.country) errs.country = 'Le pays est requis.';
@@ -507,7 +508,7 @@ export const Organisations = () => {
                           <td>
                             <div className="orgs-table-org">
                               {org.logo_url ? (
-                                <img
+                                <BlurryImage
                                   src={org.logo_url}
                                   alt={org.name}
                                   className="orgs-avatar"

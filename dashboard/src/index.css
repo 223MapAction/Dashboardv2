@@ -44,6 +44,9 @@
   --color-danger: #EF4444;
   --color-info: #3AA2DD;
 
+  --bs-btn-disabled-bg: rgba(58, 162, 221, 0.65) !important;
+  --bs-btn-disabled-border-color: rgba(58, 162, 221, 0.65) !important;
+
   /* Spacing Scale - Base 4 */
   --spacing-1: 4px;
   --spacing-2: 8px;
@@ -83,6 +86,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+
 
 #root {
   min-height: 100vh;
@@ -150,6 +155,22 @@ h2,
 .btn-primary:hover {
   background-color: var(--color-primary-dark);
   box-shadow: var(--shadow-md);
+}
+
+.btn:disabled,
+.btn.disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.btn-primary:disabled,
+.btn-primary.disabled {
+  background-color: var(--color-primary) !important;
+  color: var(--color-surface) !important;
+  border-color: var(--color-primary) !important;
+  opacity: 0.65;
 }
 
 .btn-secondary {
@@ -773,5 +794,58 @@ h2,
 
   .lg-hidden {
     display: none;
+  }
+}
+
+/* ============================================
+   BLURRY IMAGE LOADING PLACEHOLDER SYSTEM
+   ============================================ */
+.blurry-image-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.blurry-image-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #f1f5f9;
+  background-image: linear-gradient(
+    90deg,
+    rgba(226, 232, 240, 0.4) 0px,
+    rgba(241, 245, 249, 0.6) 40px,
+    rgba(226, 232, 240, 0.4) 80px
+  );
+  background-size: 200% 100%;
+  animation: blurry-image-shimmer 1.5s infinite linear;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: opacity 0.4s ease-out;
+}
+
+.blurry-image-placeholder-only {
+  display: block;
+  background-color: var(--color-bg-placeholder, #e2e8f0);
+}
+
+.blurry-image-el {
+  opacity: 0;
+  filter: blur(16px);
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), filter 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.blurry-image-el.loaded {
+  opacity: 1;
+  filter: blur(0);
+}
+
+@keyframes blurry-image-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
   }
 }

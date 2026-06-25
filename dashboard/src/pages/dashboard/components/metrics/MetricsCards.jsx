@@ -1,29 +1,47 @@
-import React from 'react';
-import { NotificationBing, Activity, Cpu } from 'iconsax-react';
+import React, { useMemo } from 'react';
+import { NotificationBing, Activity, TickCircle, CloseCircle } from 'iconsax-react';
 import './metrics-cards.css';
 
-export const MetricsCards = () => {
+export const MetricsCards = ({ incidents = [] }) => {
+  // Calculer les statistiques à partir des incidents réels
+  const stats = useMemo(() => {
+    const normalizedIncidents = Array.isArray(incidents)
+      ? incidents
+      : (incidents && Array.isArray(incidents.results) ? incidents.results : []);
+
+    const resolved = normalizedIncidents.filter(inc => inc.etat === 'resolved' && !inc.is_deleted).length;
+    const inProgress = normalizedIncidents.filter(inc => 
+      (inc.etat === 'taken_into_account' || inc.etat === 'in_progress') && !inc.is_deleted
+    ).length;
+    const unresolved = normalizedIncidents.filter(inc => 
+      inc.etat === 'declared' && !inc.is_deleted
+    ).length;
+    const total = normalizedIncidents.filter(inc => !inc.is_deleted).length;
+
+    return { total, resolved, inProgress, unresolved };
+  }, [incidents]);
+
   const metrics = [
     {
       id: 'total-alerts',
-      label: 'Total des alertes',
-      value: '1 284',
+      label: 'Total des incidents',
+      value: stats.total.toString(),
       color: 'primary',
       icon: <NotificationBing size={24} variant="Bold" color="#3AA2DD" />
     },
     {
-      id: 'active-responses',
-      label: 'Réponses actives',
-      value: '42',
-      color: 'success',
-      icon: <Activity size={24} variant="Bold" color="#22C55E" />
+      id: 'in-progress',
+      label: 'En cours',
+      value: stats.inProgress.toString(),
+      color: 'warning',
+      icon: <Activity size={24} variant="Bold" color="#F59E0B" />
     },
     {
-      id: 'pending-audit',
+      id: 'resolved',
       label: 'Incidents résolus',
-      value: '15',
-      color: 'warning',
-      icon: <Cpu size={24} variant="Bold" color="#F59E0B" />
+      value: stats.resolved.toString(),
+      color: 'success',
+      icon: <TickCircle size={24} variant="Bold" color="#22C55E" />
     }
   ];
 

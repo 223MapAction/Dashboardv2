@@ -8,6 +8,7 @@ import {
 } from 'iconsax-react';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
 import { getTrashIncidentsService, restoreIncidentService, deleteIncidentService } from '../incident/service/incident_service';
+import { BlurryImage } from '../../components/atoms/BlurryImage';
 import './trash.css';
 
 // Composant Shimmer Skeleton pour le chargement des incidents de la corbeille
@@ -261,7 +262,7 @@ export const TrashPage = () => {
           />
 
           <div className="trash-row-thumb">
-            <img src={incident.image} alt={incident.title} />
+            <BlurryImage src={incident.image} alt={incident.title} />
           </div>
 
           <div className="trash-row-main">
@@ -322,7 +323,7 @@ export const TrashPage = () => {
         />
 
         <div className="trash-card-thumb">
-          <img src={incident.image} alt={incident.title} />
+          <BlurryImage src={incident.image} alt={incident.title} />
           <div className="trash-card-overlay" aria-hidden="true" />
         </div>
 

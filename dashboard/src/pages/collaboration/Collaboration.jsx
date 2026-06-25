@@ -32,6 +32,7 @@ import { Header, Sidebar } from '../../components/layout';
 import { CollaborationRequests } from '../collaboration-requests';
 import { getCollaborationsService } from './service/collaboration_service';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
+import { BlurryImage } from '../../components/atoms/BlurryImage';
 import './collaboration.css';
 
 registerLocale('fr', fr);
@@ -136,7 +137,12 @@ export const Collaboration = () => {
       return getCollaborationsService(params);
     },
     {
-      revalidateOnFocus: false
+      revalidateOnFocus: false,
+      // Polling intelligent : 10 secondes (non-agressif)
+      // Désactivé quand l'onglet est en arrière-plan
+      refreshInterval: 10000,
+      // Arrêter le polling si l'onglet n'est pas visible
+      refreshWhenHidden: false,
     }
   );
 
@@ -148,13 +154,14 @@ export const Collaboration = () => {
 
     return swrData.map(collab => {
       const createdDate = new Date(collab.created_at);
+      const startDate = collab.start_date ? new Date(collab.start_date) : null;
       const endDate = collab.end_date ? new Date(collab.end_date) : null;
-      const incidentTitle = collab.incident_details?.title || collab.incident_title || `Incident #${collab.incident}`;
+      const incidentTitle = collab.incident_details?.title || collab.incident_title || `Incident`;
       const incidentImage = collab.incident_details?.photo || collab.incident_details?.image || '';
       const orgName = collab.organisation_name || collab.user_full_name || `Utilisateur #${collab.user}`;
       const incidentLocation = collab.incident_details?.zone || 'À définir';
       const incidentDescription = collab.incident_details?.description || collab.motivation || 'Aucune description';
-      const incidentProgress = collab.incident_details?.progress || 0;
+      const incidentProgress = collab.incident_progress || 0;
 
       return {
         id: collab.id,
@@ -162,7 +169,7 @@ export const Collaboration = () => {
         title: incidentTitle,
         incidentId: collab.incident,
         userId: collab.user,
-        status: collab.status === 'accepted' ? 'in-progress' : collab.status,
+        status: parseInt(incidentProgress) === 100 ? 'completed' : (collab.status === 'accepted' ? 'in-progress' : collab.status),
         createdAt: collab.created_at,
         motivation: collab.motivation,
         otherOption: collab.other_option,
@@ -174,11 +181,11 @@ export const Collaboration = () => {
           month: 'long',
           year: 'numeric'
         }),
-        startDate: createdDate.toLocaleDateString('fr-FR', {
+        startDate: startDate ? startDate.toLocaleDateString('fr-FR', {
           day: 'numeric',
           month: 'short',
           year: 'numeric'
-        }),
+        }) : 'Non défini',
         endDate: endDate ? endDate.toLocaleDateString('fr-FR', {
           day: 'numeric',
           month: 'short',
@@ -712,11 +719,11 @@ export const Collaboration = () => {
 
                 {/* État d'erreur */}
                 {swrError && (
-                  <div className="collab-empty" style={{ color: '#EF4444' }}>
+                  <div className="collab-empty body-large text-center" >
                     <p>Erreur lors du chargement des collaborations.</p>
                     <button
                       onClick={() => mutate()}
-                      style={{ marginTop: '12px', padding: '8px 16px', cursor: 'pointer' }}
+                      className='btn btn-primary'
                     >
                       Réessayer
                     </button>
@@ -777,7 +784,7 @@ export const Collaboration = () => {
                             {c.userRole && (
                               <div className={`collab-role-badge collab-role-${c.userRole}`}>
                                 {c.userRole === 'leader' && <Crown1 size={12} variant="Bold" color="#F59E0B" />}
-                                {c.userRole === 'contributeur' && <People size={12} variant="Bold" color="#3AA2DD" />}
+                                {c.userRole === 'contributor' && <People size={12} variant="Bold" color="#3AA2DD" />}
                                 {c.userRole === 'observateur' && <Eye size={12} variant="Bold" color="#6C7278" />}
                                 <span>Votre rôle : {c.userRole.charAt(0).toUpperCase() + c.userRole.slice(1)}</span>
                               </div>
@@ -1067,7 +1074,7 @@ export const Collaboration = () => {
                             <div className="task-proof-label">Preuve fournie :</div>
                             {task.proof.type === 'image' ? (
                               <div className="task-proof-image">
-                                <img src={task.proof.url} alt="Preuve" />
+                                <BlurryImage src={task.proof.url} alt="Preuve" />
                               </div>
                             ) : (
                               <div className="task-proof-video">

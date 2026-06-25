@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { mutate } from 'swr';
 import { API_URL_BASE } from '../../../config/api_url_base';
 
 const API_URL = API_URL_BASE;
@@ -95,9 +96,19 @@ export const authService = {
    * Déconnexion de l'utilisateur
    */
   logout: () => {
+    // Effacer tous les caches SWR
+    mutate(
+      () => true, // Matcher toutes les clés
+      undefined,  // Pas de nouvelles données
+      { revalidate: false } // Ne pas revalider
+    );
+    
+    // Effacer le sessionStorage
     Object.values(STORAGE_KEYS).forEach((key) => {
       sessionStorage.removeItem(key);
     });
+    
+    console.log('[AUTH] ✅ Déconnexion effectuée - Caches SWR et sessionStorage effacés');
   },
 
   /**

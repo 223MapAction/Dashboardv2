@@ -423,6 +423,36 @@
   line-height: 1.5;
 }
 
+/* ── Bouton compteur de rapports ──────────────────────────── */
+.rapport-count-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--color-text-primary);
+}
+
+.rapport-count-btn:not(:disabled):hover {
+  background: rgba(58, 162, 221, 0.1);
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.rapport-count-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Les styles pour la modal des rapports sont maintenant dans le composant IncidentReportsModal 
+   qui utilise les classes am-offcanvas existantes */
+
 /* ── Responsive ──────────────────────────── */
 @media (max-width: 768px) {
   .mes-interventions-content {

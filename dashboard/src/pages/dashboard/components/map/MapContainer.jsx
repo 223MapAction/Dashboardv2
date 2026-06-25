@@ -5,6 +5,7 @@ import Map, { Marker } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
 import { getIncidentService, getIncidentsService, getResolvedIncidentsService } from '../../../incident/service/incident_service';
+import { BlurryImage } from '../../../../components/atoms/BlurryImage';
 import './map.css';
 
 // Token Mapbox depuis les variables d'environnement
@@ -60,7 +61,7 @@ const INCIDENT_STATUS_STEPS = [
 ];
 
 // Style "Humanitaire" inspiré d'OpenStreetMap HOT (Humanitarian OSM Team)
-// Utilise les tiles HOT-OSM directement
+// Utilise les tiles HOT-OSM directement avec masque pour afficher uniquement le Mali
 const HOT_OSM_STYLE = {
   version: 8,
   sources: {
@@ -74,15 +75,59 @@ const HOT_OSM_STYLE = {
       tileSize: 256,
       attribution:
         '© OpenStreetMap contributors, Tiles style by Humanitarian OpenStreetMap Team'
+    },
+    'mali-boundary': {
+      type: 'geojson',
+      data: {
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'Polygon',
+          coordinates: [
+            // Anneau externe : couvre le monde entier
+            [
+              [-180, -90],
+              [-180, 90],
+              [180, 90],
+              [180, -90],
+              [-180, -90]
+            ],
+            // Anneau interne (trou) : délimitation du Mali
+            [
+              [-12.24, 10.16], // Sud-Ouest
+              [-12.24, 25.00], // Nord-Ouest
+              [4.27, 25.00],   // Nord-Est
+              [4.27, 10.16],   // Sud-Est
+              [-12.24, 10.16]  // Fermeture
+            ]
+          ]
+        }
+      }
     }
   },
   layers: [
+    {
+      id: 'background',
+      type: 'background',
+      paint: {
+        'background-color': '#f0f0f0'
+      }
+    },
     {
       id: 'hot-osm-layer',
       type: 'raster',
       source: 'hot-osm',
       minzoom: 0,
       maxzoom: 19
+    },
+    {
+      id: 'mali-mask',
+      type: 'fill',
+      source: 'mali-boundary',
+      paint: {
+        'fill-color': '#f0f0f0',
+        'fill-opacity': 0.85
+      }
     }
   ]
 };
@@ -344,6 +389,8 @@ export const MapContainer = ({ incidents = [], isLoading = false }) => {
           cooperativeGestures={true}
           touchZoomRotate={true}
           touchPitch={true}
+          maxBounds={[[-13.0, 9.5], [5.0, 26.0]]}
+          minZoom={5.5}
         >
           {/* Markers d'incidents */}
           {!isLoading && validIncidents.map((incident) => {
@@ -552,7 +599,7 @@ export const MapContainer = ({ incidents = [], isLoading = false }) => {
                     <>
                       {/* Cover image */}
                       {selectedIncident.photo && (
-                        <img
+                        <BlurryImage
                           src={selectedIncident.photo}
                           alt={selectedIncident.title}
                           className="img-fluid rounded mb-3 w-100"

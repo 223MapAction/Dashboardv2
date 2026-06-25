@@ -29,8 +29,8 @@ export const TYPES = [
 ];
 
 export const COUNTRIES = [
-  { fr: 'Sénégal', en: 'senegal' },
   { fr: 'Mali', en: 'mali' },
+  { fr: 'Sénégal', en: 'senegal' },
   { fr: 'Guinée', en: 'guinea' },
   { fr: 'Burkina Faso', en: 'burkina_faso' },
   { fr: 'Niger', en: 'niger' },

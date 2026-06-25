@@ -117,6 +117,8 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed: controlledCollapsed, onC
     if (location.pathname === path) return true;
     if (path !== '/' && location.pathname.startsWith(path + '/')) return true;
     if (path === '/collaboration' && location.pathname.startsWith('/collaboration-detail')) return true;
+    // Garder mes-interventions actif si on vient de cette page vers collaboration-detail
+    if (path === '/mes-interventions' && location.pathname.startsWith('/collaboration-detail') && fromTab === '/mes-interventions') return true;
     return false;
   };
 

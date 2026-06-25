@@ -3,6 +3,7 @@ import useSWR from 'swr';
 import { SearchNormal1, ArrowDown2 } from 'iconsax-react';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText, ShimmerCircularImage } from 'react-shimmer-effects';
 import { Eye, Edit2, Trash } from 'iconsax-react';
+import { BlurryImage } from '../../../../components/atoms/BlurryImage';
 import { useIncidentModalContext } from '../../modale/IncidentModalContext';
 import { authService } from '../../../auth/services/authService';
 import { getCollaborationsService } from '../../service/collaboration_service';
@@ -151,7 +152,6 @@ export const IncidentList = ({ incidents = [], onSelectIncident, selectedId, isL
               </thead>
               <tbody>
                 {filtered.map((incident) => {
-                  const defaultImg = 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=150';
 
                   const getTakingOrg = (inc) => {
                     if (!inc.taken_by) return null;
@@ -162,15 +162,15 @@ export const IncidentList = ({ incidents = [], onSelectIncident, selectedId, isL
                     if (typeof inc.taken_by === 'object') {
                       const takenByUserId = inc.taken_by.id;
                       const takenByOrgId = inc.taken_by.organisation_member || inc.taken_by.organisation;
-                      const takenByOrgName = inc.taken_by.organisation_name || 
-                        (inc.taken_by.organisation_member && typeof inc.taken_by.organisation_member === 'object' ? inc.taken_by.organisation_member.name : null) || 
-                        (inc.taken_by.organisation && typeof inc.taken_by.organisation === 'object' ? inc.taken_by.organisation.name : null) || 
+                      const takenByOrgName = inc.taken_by.organisation_name ||
+                        (inc.taken_by.organisation_member && typeof inc.taken_by.organisation_member === 'object' ? inc.taken_by.organisation_member.name : null) ||
+                        (inc.taken_by.organisation && typeof inc.taken_by.organisation === 'object' ? inc.taken_by.organisation.name : null) ||
                         (typeof inc.taken_by.organisation === 'string' ? inc.taken_by.organisation : null);
 
                       if (currentUserId && takenByUserId && parseInt(takenByUserId) === parseInt(currentUserId)) {
                         isMe = true;
                       } else if (myOrgId && takenByOrgId && (
-                        parseInt(takenByOrgId) === parseInt(myOrgId) || 
+                        parseInt(takenByOrgId) === parseInt(myOrgId) ||
                         (typeof takenByOrgId === 'object' && takenByOrgId?.id && parseInt(takenByOrgId.id) === parseInt(myOrgId))
                       )) {
                         isMe = true;
@@ -220,11 +220,10 @@ export const IncidentList = ({ incidents = [], onSelectIncident, selectedId, isL
                     >
                       <td>
                         <div className="incident-table-main-col">
-                          <img
-                            src={incident.photo || defaultImg}
+                          <BlurryImage
+                            src={incident.photo || ''}
                             alt={incident.title}
                             className="incident-table-img"
-                            onError={(e) => { e.target.src = defaultImg; }}
                           />
                           <div>
                             <span className="incident-table-title">
