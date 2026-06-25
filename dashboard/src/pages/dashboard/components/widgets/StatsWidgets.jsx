@@ -48,10 +48,10 @@ export const StatsWidgets = ({ incidents = [] }) => {
     });
     const total = normalizedIncidents.length || 1;
     return Object.entries(categoryMap)
-      .map(([name, count]) => ({ 
-        name: name.toUpperCase(), 
+      .map(([name, count]) => ({
+        name: name.toUpperCase(),
         percentage: Math.round((count / total) * 100),
-        count 
+        count
       }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
@@ -66,20 +66,20 @@ export const StatsWidgets = ({ incidents = [] }) => {
     });
     const total = normalizedIncidents.length || 1;
     return [
-      { 
-        label: 'Critique', 
-        percentage: Math.round((severityMap.high / total) * 100), 
-        color: 'var(--color-severity-high)' 
+      {
+        label: 'Élevée',
+        percentage: Math.round((severityMap.high / total) * 100),
+        color: '#EF4444'
       },
-      { 
-        label: 'Grave', 
-        percentage: Math.round((severityMap.medium / total) * 100), 
-        color: 'var(--color-severity-medium)' 
+      {
+        label: 'Moyenne',
+        percentage: Math.round((severityMap.medium / total) * 100),
+        color: '#F97316'
       },
-      { 
-        label: 'Modéré', 
-        percentage: Math.round((severityMap.low / total) * 100), 
-        color: 'var(--color-severity-low)' 
+      {
+        label: 'Faible',
+        percentage: Math.round((severityMap.low / total) * 100),
+        color: '#FACC15'
       }
     ];
   }, [normalizedIncidents]);
@@ -89,7 +89,7 @@ export const StatsWidgets = ({ incidents = [] }) => {
       {/* Par Localité */}
       <div className="stats-widget">
         <div className="widget-header">
-          <Location size={18} variant="Bold"  />
+          <Location size={18} variant="Bold" />
           <h3>Par Localité</h3>
         </div>
         <div className="widget-content">
@@ -105,7 +105,7 @@ export const StatsWidgets = ({ incidents = [] }) => {
       {/* Top 5 Incidents */}
       <div className="stats-widget">
         <div className="widget-header">
-          <Chart2 size={18} variant="Bold"   />
+          <Chart2 size={18} variant="Bold" />
           <h3>Top 5 Incidents</h3>
         </div>
         <div className="widget-content">
@@ -116,9 +116,9 @@ export const StatsWidgets = ({ incidents = [] }) => {
                 <span className="incident-percentage">{incident.percentage}%</span>
               </div>
               <div className="progress-bar">
-                <div 
-                  className="progress-fill" 
-                  style={{ 
+                <div
+                  className="progress-fill"
+                  style={{
                     width: `${incident.percentage}%`,
                     backgroundColor: 'var(--color-primary)'
                   }}
@@ -126,17 +126,14 @@ export const StatsWidgets = ({ incidents = [] }) => {
               </div>
             </div>
           ))}
-          <button className="widget-link">
-            Voir tout le classement
-            <ArrowRight2 size={14} variant="Linear"  />
-          </button>
+
         </div>
       </div>
 
       {/* Gravité */}
       <div className="stats-widget">
         <div className="widget-header">
-          <Warning2 size={18} variant="Bold"  />
+          <Warning2 size={18} variant="Bold" />
           <h3>Gravité</h3>
         </div>
         <div className="widget-content">

@@ -69,265 +69,7 @@ const formatDate = (iso) => {
   });
 };
 
-// ===================================
-// DÉFINITION DE LA BASE DE DONNÉES DE SIMULATION
-// ===================================
-const MOCK_INCIDENTS = [
-  {
-    id: 1,
-    title: "Inondation majeure - Quartier Niamakoro",
-    zone: "Bamako, Commune VI",
-    description: "Montée subite des eaux du fleuve Niger inondant les habitations basses de Niamakoro. Évacuation en cours.",
-    etat: "resolved",
-    created_at: "2026-05-10T07:30:00Z",
-    resolution_end_date: "2026-05-15T18:00:00Z",
-    photo: "https://images.unsplash.com/photo-1547683905-f686c993aae5?w=600&h=400&fit=crop",
-    reported_by_agent: false,
-    take_in_charge_mode: "collaborative",
-    user_id: { id: 101, first_name: "Moussa", last_name: "Diarra", organisation_name: "Citoyen" },
-    user_full_name: "Moussa Diarra",
-    user_email: "moussa.diarra@gmail.com",
-    organisation_name: "Croix-Rouge Malienne",
-    lattitude: 12.5850,
-    longitude: -7.9600,
-    participants: [
-      { name: "Protection Civile", color: "#EF4444", initials: "PC" },
-      { name: "Mairie de Bamako", color: "#3AA2DD", initials: "MB" }
-    ]
-  },
-  {
-    id: 2,
-    title: "Foyer épidémique de choléra - Mopti Sévaré",
-    zone: "Mopti, Sévaré",
-    description: "Apparition de cas groupés de diarrhée aqueuse aiguë suspects de choléra près du port de Mopti. Intervention sanitaire d'urgence.",
-    etat: "taken_into_account",
-    created_at: "2026-06-02T09:00:00Z",
-    resolution_end_date: null,
-    photo: "https://images.unsplash.com/photo-1584515933487-779824d29309?w=600&h=400&fit=crop",
-    reported_by_agent: true,
-    take_in_charge_mode: "collaborative",
-    user_id: { id: 10, first_name: "Dr. Alou", last_name: "Sangare", organisation_name: "OMS" },
-    user_full_name: "Dr. Alou Sangare",
-    user_email: "alou.sangare@who.int",
-    organisation_name: "OMS",
-    lattitude: 14.5300,
-    longitude: -4.1000,
-    participants: [
-      { name: "Ministère de la Santé", color: "#22C55E", initials: "MS" },
-      { name: "Médecins Sans Frontières", color: "#EF4444", initials: "MSF" }
-    ]
-  },
-  {
-    id: 3,
-    title: "Feu de brousse hors contrôle - Kadiolo",
-    zone: "Sikasso, Kadiolo",
-    description: "Incendie de forêt menaçant les zones agricoles et habitations proches à la frontière de Kadiolo. Mobilisation locale.",
-    etat: "in_progress",
-    created_at: "2026-06-12T14:00:00Z",
-    resolution_end_date: null,
-    photo: "https://images.unsplash.com/photo-1602002418082-a4443e081dd1?w=600&h=400&fit=crop",
-    reported_by_agent: false,
-    take_in_charge_mode: "internal",
-    user_id: { id: 102, first_name: "Ousmane", last_name: "Coulibaly", organisation_name: "Citoyen" },
-    user_full_name: "Ousmane Coulibaly",
-    user_email: "ousmane.coul@outlook.com",
-    organisation_name: "Eaux et Forêts",
-    lattitude: 10.9500,
-    longitude: -5.7500,
-    participants: []
-  },
-  {
-    id: 4,
-    title: "Effondrement d'un immeuble résidentiel - Kayes",
-    zone: "Kayes, Centre-ville",
-    description: "Écroulement d'un bâtiment R+2 vétuste habité dans le quartier commercial de Kayes. Opérations de sauvetage activées.",
-    etat: "resolved",
-    created_at: "2026-04-15T22:30:00Z",
-    resolution_end_date: "2026-04-18T16:00:00Z",
-    photo: "https://images.unsplash.com/photo-1605640840605-14ac1855827b?w=600&h=400&fit=crop",
-    reported_by_agent: false,
-    take_in_charge_mode: "collaborative",
-    user_id: { id: 103, first_name: "Bintu", last_name: "Dembele", organisation_name: "Citoyen" },
-    user_full_name: "Bintu Dembele",
-    user_email: "bintu.demb@yahoo.fr",
-    organisation_name: "Protection Civile",
-    lattitude: 14.4500,
-    longitude: -11.4400,
-    participants: [
-      { name: "Croix-Rouge Malienne", color: "#3AA2DD", initials: "CR" }
-    ]
-  },
-  {
-    id: 5,
-    title: "Éboulement rocheux sur voie publique - Banamba",
-    zone: "Koulikoro, Banamba",
-    description: "Glissement de terrain obstruant totalement la route principale reliant Banamba, empêchant l'accès des véhicules.",
-    etat: "declared",
-    created_at: "2026-06-15T11:00:00Z",
-    resolution_end_date: null,
-    photo: "https://images.unsplash.com/photo-1587502537745-84b86da1204f?w=600&h=400&fit=crop",
-    reported_by_agent: false,
-    take_in_charge_mode: "internal",
-    user_id: { id: 104, first_name: "Adama", last_name: "Sangare", organisation_name: "Citoyen" },
-    user_full_name: "Adama Sangare",
-    user_email: "adama.sangare@gmail.com",
-    organisation_name: "Mairie de Banamba",
-    lattitude: 13.5500,
-    longitude: -7.4500,
-    participants: []
-  }
-];
 
-const MOCK_PREDICTIONS = {
-  1: {
-    base_severity: 8,
-    total_population_exposed: 450,
-    adult_men_exposed: 120,
-    adult_women_exposed: 180,
-    children_exposed: 150,
-    impact_radius_meters: 1200,
-    potential_risk: {
-      message: "Risque accru de propagation de maladies hydriques le long du fleuve Niger.",
-      stats: { total_pop: 1800, infrastructures: 12 },
-      vector: "Eau / Courant fluvial"
-    },
-    schools: 2,
-    markets: 1,
-    water_points: 4,
-    main_roads_bridges: 1,
-    residential_buildings: 85,
-    maternities_count: 1,
-    health_centers: 1,
-    nurseries_count: 2
-  },
-  2: {
-    base_severity: 9,
-    total_population_exposed: 920,
-    adult_men_exposed: 300,
-    adult_women_exposed: 320,
-    children_exposed: 300,
-    impact_radius_meters: 3000,
-    potential_risk: {
-      message: "Propagation rapide de l'épidémie par contamination des puits ouverts.",
-      stats: { total_pop: 4500, infrastructures: 48 },
-      vector: "Contact humain / Eau contaminée"
-    },
-    schools: 8,
-    markets: 3,
-    water_points: 12,
-    main_roads_bridges: 0,
-    residential_buildings: 320,
-    maternities_count: 3,
-    health_centers: 2,
-    nurseries_count: 5
-  },
-  3: {
-    base_severity: 6,
-    total_population_exposed: 150,
-    adult_men_exposed: 60,
-    adult_women_exposed: 50,
-    children_exposed: 40,
-    impact_radius_meters: 2500,
-    potential_risk: {
-      message: "Propagation rapide favorisée par des vents forts d'Harmattan.",
-      stats: { total_pop: 980, infrastructures: 4 },
-      vector: "Vent / Végétations sèches"
-    },
-    schools: 1,
-    markets: 0,
-    water_points: 2,
-    main_roads_bridges: 1,
-    residential_buildings: 12,
-    maternities_count: 0,
-    health_centers: 0,
-    nurseries_count: 0
-  },
-  4: {
-    base_severity: 8,
-    total_population_exposed: 80,
-    adult_men_exposed: 30,
-    adult_women_exposed: 30,
-    children_exposed: 20,
-    impact_radius_meters: 200,
-    potential_risk: {
-      message: "Fragilisation structurelle des bâtiments mitoyens.",
-      stats: { total_pop: 250, infrastructures: 3 },
-      vector: "Secousse de l'impact / Vibration"
-    },
-    schools: 0,
-    markets: 1,
-    water_points: 1,
-    main_roads_bridges: 1,
-    residential_buildings: 8,
-    maternities_count: 1,
-    health_centers: 0,
-    nurseries_count: 1
-  },
-  5: {
-    base_severity: 4,
-    total_population_exposed: 30,
-    adult_men_exposed: 10,
-    adult_women_exposed: 12,
-    children_exposed: 8,
-    impact_radius_meters: 150,
-    potential_risk: {
-      message: "Risque de sur-éboulement en cas de nouvelles pluies.",
-      stats: { total_pop: 120, infrastructures: 1 },
-      vector: "Gravité / Ruissellement de pluie"
-    },
-    schools: 0,
-    markets: 0,
-    water_points: 0,
-    main_roads_bridges: 1,
-    residential_buildings: 3,
-    maternities_count: 0,
-    health_centers: 0,
-    nurseries_count: 0
-  }
-};
-
-const MOCK_TASKS = {
-  1: [
-    { id: 1001, title: "Évacuation des zones basses", description: "Mettre en sécurité les populations piégées par les eaux.", state: "done", end_date: "2026-05-11" },
-    { id: 1002, title: "Distribution de kits de potabilisation", description: "Fournir de l'eau saine aux sinistrés.", state: "done", end_date: "2026-05-12" },
-    { id: 1003, title: "Sécurisation des digues temporaires", description: "Renforcer les berges avec des sacs de sable.", state: "done", end_date: "2026-05-13" }
-  ],
-  2: [
-    { id: 2001, title: "Mise en place de centres de traitement (CTC)", description: "Isoler et soigner d'urgence les patients atteints de choléra.", state: "done", end_date: "2026-06-04" },
-    { id: 2002, title: "Campagne de vaccination d'urgence", description: "Vacciner les populations dans un rayon de 3km.", state: "in_progress", end_date: "2026-06-25" },
-    { id: 2003, title: "Désinfection des points d'eau communautaires", description: "Chloration des puits et sources.", state: "pending", end_date: "2026-06-20" }
-  ],
-  3: [
-    { id: 3001, title: "Création de pare-feux", description: "Dégager la végétation pour stopper la propagation.", state: "done", end_date: "2026-06-13" },
-    { id: 3002, title: "Évacuation des hameaux isolés", description: "Éloigner les populations menacées par la fumée.", state: "in_progress", end_date: "2026-06-18" }
-  ],
-  4: [
-    { id: 4001, title: "Recherche de survivants sous les décombres", description: "Recherche active avec les équipes de secours.", state: "done", end_date: "2026-04-16" },
-    { id: 4002, title: "Étayage des structures attenantes", description: "Sécuriser les façades menaçant de s'effondrer.", state: "done", end_date: "2026-04-17" }
-  ],
-  5: [
-    { id: 5001, title: "Déblaiement de la chaussée", description: "Retrait des rochers et de la terre avec engins lourds.", state: "pending", end_date: "2026-06-22" }
-  ]
-};
-
-const MOCK_ASSIGNMENTS = {
-  1: [
-    { user_id: 1, agent_name: "Amadou Diallo", role: "Coordinateur terrain" },
-    { user_id: 2, agent_name: "Fatoumata Traoré", role: "Secouriste principal" }
-  ],
-  2: [
-    { user_id: 3, agent_name: "Ibrahim Keïta", role: "Médecin épidémiologiste" },
-    { user_id: 4, agent_name: "Awa Touré", role: "Infirmière de terrain" }
-  ],
-  3: [
-    { user_id: 5, agent_name: "Modibo Kone", role: "Chef de brigade incendie" }
-  ],
-  4: [
-    { user_id: 2, agent_name: "Fatoumata Traoré", role: "Secouriste principal" },
-    { user_id: 6, agent_name: "Bakary Sidibe", role: "Ingénieur Génie Civil" }
-  ],
-  5: []
-};
 
 export const Impact = () => {
   const {
@@ -401,32 +143,32 @@ export const Impact = () => {
   const loadingIncidents = isLoadingImpact || isLoadingIncidents;
   const loadingDetails = false;
   const error = apiError || incidentsError;
-  
+
   // Normaliser les incidents (gérer pagination API)
-  const incidentsList = resolvedIncidentsData 
-    ? (Array.isArray(resolvedIncidentsData) 
-        ? resolvedIncidentsData 
-        : (resolvedIncidentsData.results || MOCK_INCIDENTS))
-    : MOCK_INCIDENTS;
-  
+  const incidentsList = resolvedIncidentsData
+    ? (Array.isArray(resolvedIncidentsData)
+      ? resolvedIncidentsData
+      : (resolvedIncidentsData.results || []))
+    : [];
+
   // Extraire les prédictions depuis les incidents
   const predictions = useMemo(() => {
-    if (!incidentsList || incidentsList.length === 0) return MOCK_PREDICTIONS;
-    
+    if (!incidentsList || incidentsList.length === 0) return [];
+
     const preds = {};
     incidentsList.forEach(incident => {
       if (incident.prediction) {
         preds[incident.id] = incident.prediction;
       }
     });
-    
-    return Object.keys(preds).length > 0 ? preds : MOCK_PREDICTIONS;
+
+    return Object.keys(preds).length > 0 ? preds : [];
   }, [incidentsList]);
-  
+
   // Extraire les tâches depuis les incidents (tasks_by_organisation)
   const tasks = useMemo(() => {
-    if (!incidentsList || incidentsList.length === 0) return MOCK_TASKS;
-    
+    if (!incidentsList || incidentsList.length === 0) return [];
+
     const tasksMap = {};
     incidentsList.forEach(incident => {
       if (incident.tasks_by_organisation && Array.isArray(incident.tasks_by_organisation)) {
@@ -437,12 +179,12 @@ export const Impact = () => {
         }
       }
     });
-    
-    return Object.keys(tasksMap).length > 0 ? tasksMap : MOCK_TASKS;
+
+    return Object.keys(tasksMap).length > 0 ? tasksMap : [];
   }, [incidentsList]);
-  
+
   // Assignments - garder MOCK pour l'instant (pas dans la structure API)
-  const assignments = MOCK_ASSIGNMENTS;
+  const assignments = [];
 
   // Period filtering logic
   const isWithinPeriod = (incident, filter) => {
@@ -599,6 +341,7 @@ export const Impact = () => {
     const uniqueCitizenContributors = new Set();
 
     let cumulativeAreaHa = 0;
+    let incidentsWithoutAnalysis = 0;
 
     // We compute Resolution Rate over the selected period, regardless of the status filter
     let totalPeriodIncidents = 0;
@@ -627,6 +370,10 @@ export const Impact = () => {
       const isTakenWithAction =
         (inc.etat === 'taken_into_account' || inc.etat === 'in_progress') &&
         hasCompletedTask;
+
+      if (!pred) {
+        incidentsWithoutAnalysis++;
+      }
 
       // 1. Direct Beneficiaries
       if (pred) {
@@ -779,11 +526,22 @@ export const Impact = () => {
         contributorsCount: uniqueCitizenContributors.size,
       },
       cumulativeAreaHa,
+      incidentsWithoutAnalysis,
     };
   }, [globalImpactData, incidentsList, periodFilter, statusFilter, structureFilter, predictions, tasks, assignments]);
 
   // Main isLoading flag combining SWR loading and details loading
   const isDataLoading = loadingIncidents || (incidentsList.length > 0 && loadingDetails);
+
+  const directTotal = globals.direct?.total || 0;
+  const directMenPercent = directTotal > 0 ? Math.round((globals.direct?.men / directTotal) * 100) : 0;
+  const directWomenPercent = directTotal > 0 ? Math.round((globals.direct?.women / directTotal) * 100) : 0;
+  const directChildrenPercent = directTotal > 0 ? Math.max(0, 100 - directMenPercent - directWomenPercent) : 0;
+
+  const indirectTotal = globals.indirect?.total || 0;
+  const indirectMenPercent = indirectTotal > 0 ? Math.round((globals.indirect?.men / indirectTotal) * 100) : 0;
+  const indirectWomenPercent = indirectTotal > 0 ? Math.round((globals.indirect?.women / indirectTotal) * 100) : 0;
+  const indirectChildrenPercent = indirectTotal > 0 ? Math.max(0, 100 - indirectMenPercent - indirectWomenPercent) : 0;
 
   return (
     <div className="impact-layout">
@@ -889,6 +647,7 @@ export const Impact = () => {
                   <ShimmerThumbnail height={160} rounded />
                   <ShimmerThumbnail height={160} rounded />
                   <ShimmerThumbnail height={160} rounded />
+                  <ShimmerThumbnail height={160} rounded />
                 </div>
                 <div className="impact-skeleton-subgrid">
                   <ShimmerThumbnail height={200} rounded />
@@ -904,6 +663,166 @@ export const Impact = () => {
               </div>
             ) : (
               <>
+                {/* Core KPI Cards Grid */}
+                <div className="impact-kpis" style={{ marginBottom: '24px' }}>
+
+                  {/* Card 4: Cumulative Area (Primary Glow) */}
+                  <div className="impact-kpi impact-kpi-primary-glow">
+                    <div className="impact-kpi-top-row">
+                      <div className="impact-kpi-icon-glow">
+                        <Tree size={24} variant="Bold" color="#FFFFFF" />
+                      </div>
+                      <div>
+                        <span className="impact-kpi-label">Superficie Protégée</span>
+                        <div className="impact-kpi-value">
+                          {(globals.cumulativeAreaHa || 0).toFixed(1)} ha
+                        </div>
+                      </div>
+                    </div>
+                    <div className="impact-kpi-subtext">
+                      Superficie totale des zones d'impact résolues.
+                    </div>
+                  </div>
+                  {/* Card 1: Direct Beneficiaries */}
+                  <div className="impact-kpi">
+                    <div className="impact-kpi-top-row">
+                      <div className="impact-kpi-icon-glow">
+                        <People size={24} variant="Bold" color="#3AA2DD" />
+                      </div>
+                      <div>
+                        <span className="impact-kpi-label">Bénéficiaires Directs</span>
+                        <div className="impact-kpi-value">
+                          {(globals.direct?.total || 0).toLocaleString('fr-FR')}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="impact-cohort-breakdown">
+                      <div className="cohort-item">
+                        <span className="cohort-gender">Hommes</span>
+                        <div className="cohort-bar">
+                          <div className="cohort-fill men-fill" style={{ width: `${directMenPercent}%` }} />
+                        </div>
+                        <span className="cohort-val">{(globals.direct?.men || 0).toLocaleString('fr-FR')}</span>
+                      </div>
+                      <div className="cohort-item">
+                        <span className="cohort-gender">Femmes</span>
+                        <div className="cohort-bar">
+                          <div className="cohort-fill women-fill" style={{ width: `${directWomenPercent}%` }} />
+                        </div>
+                        <span className="cohort-val">{(globals.direct?.women || 0).toLocaleString('fr-FR')}</span>
+                      </div>
+                      <div className="cohort-item">
+                        <span className="cohort-gender">Enfants</span>
+                        <div className="cohort-bar">
+                          <div className="cohort-fill children-fill" style={{ width: `${directChildrenPercent}%` }} />
+                        </div>
+                        <span className="cohort-val">{(globals.direct?.children || 0).toLocaleString('fr-FR')}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card 2: Indirect Beneficiaries */}
+                  <div className="impact-kpi">
+                    <div className="impact-kpi-top-row">
+                      <div className="impact-kpi-icon-glow">
+                        <Profile2User size={24} variant="Bold" color="#8B5CF6" />
+                      </div>
+                      <div>
+                        <span className="impact-kpi-label">Bénéficiaires Indirects</span>
+                        <div className="impact-kpi-value">
+                          {(globals.indirect?.total || 0).toLocaleString('fr-FR')}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="impact-cohort-breakdown">
+                      <div className="cohort-item">
+                        <span className="cohort-gender">Hommes</span>
+                        <div className="cohort-bar">
+                          <div className="cohort-fill men-fill" style={{ width: `${indirectMenPercent}%` }} />
+                        </div>
+                        <span className="cohort-val">{(globals.indirect?.men || 0).toLocaleString('fr-FR')}</span>
+                      </div>
+                      <div className="cohort-item">
+                        <span className="cohort-gender">Femmes</span>
+                        <div className="cohort-bar">
+                          <div className="cohort-fill women-fill" style={{ width: `${indirectWomenPercent}%` }} />
+                        </div>
+                        <span className="cohort-val">{(globals.indirect?.women || 0).toLocaleString('fr-FR')}</span>
+                      </div>
+                      <div className="cohort-item">
+                        <span className="cohort-gender">Enfants</span>
+                        <div className="cohort-bar">
+                          <div className="cohort-fill children-fill" style={{ width: `${indirectChildrenPercent}%` }} />
+                        </div>
+                        <span className="cohort-val">{(globals.indirect?.children || 0).toLocaleString('fr-FR')}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card 3: Protected Sensitive Structures */}
+                  <div className="impact-kpi">
+                    <div className="impact-kpi-top-row">
+                      <div className="impact-kpi-icon-glow">
+                        <Building size={24} variant="Bold" color="#F59E0B" />
+                      </div>
+                      <div>
+                        <span className="impact-kpi-label">Structures Sensibles</span>
+                        <div className="impact-kpi-value">
+                          {globals.totalStructures || 0}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="impact-structures-interactive">
+                      <span className="structures-filter-title">Filtrer par type :</span>
+                      <div className="structures-grid-chips">
+                        <button
+                          type="button"
+                          className={`structure-chip ${structureFilter === 'all' ? 'active' : ''}`}
+                          onClick={() => setStructureFilter('all')}
+                        >
+                          Tous ({globals.totalStructures || 0})
+                        </button>
+                        {Object.entries(STRUCTURE_LABELS).map(([key, label]) => {
+                          const count = globals.structures?.[key] || 0;
+                          return (
+                            <button
+                              key={key}
+                              type="button"
+                              className={`structure-chip ${structureFilter === key ? 'active' : ''}`}
+                              disabled={count === 0}
+                              onClick={() => setStructureFilter(key)}
+                            >
+                              {label} ({count})
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
+
+                  {/* Card 5: Incidents Without Impact Analysis */}
+                  <div className="impact-kpi">
+                    <div className="impact-kpi-top-row">
+                      <div className="impact-kpi-icon-glow">
+                        <Activity size={24} variant="Bold" color="var(--color-danger)" />
+                      </div>
+                      <div>
+                        <span className="impact-kpi-label">Incidents sans analyse</span>
+                        <div className="impact-kpi-value">
+                          {globals.incidentsWithoutAnalysis || 0}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="impact-kpi-subtext">
+                      Incidents en attente d'estimation d'impact.
+                    </div>
+                  </div>
+                </div>
+
                 {/* Section 1: Performance & Mobilization */}
                 <div className="impact-grid-performance">
                   {/* Resolution speed & rate */}
@@ -1007,10 +926,9 @@ export const Impact = () => {
                 {/* Section 4: Filtered Incidents List */}
                 <div className="impact-section">
                   <div className="impact-section-header">
-                    <SearchNormal1 size={22} variant="Bold" color="#3AA2DD" />
-                    <h2 className="impact-section-title">
+                    <p className="impact-section-title">
                       Incidents filtrés ({filteredIncidents.length})
-                    </h2>
+                    </p>
                   </div>
 
                   {/* Search incident input */}

@@ -488,7 +488,7 @@ export const MapContainer = ({ incidents = [], isLoading = false }) => {
         <div className="map-legend-modern">
           {statusFilter === 'active' ? (
             <>
-              <p className="map-legend-title">SÉVÉRITÉ</p>
+              <p className="map-legend-title">Gravité</p>
               <div className="map-legend-list">
                 <div className="map-legend-item">
                   <span

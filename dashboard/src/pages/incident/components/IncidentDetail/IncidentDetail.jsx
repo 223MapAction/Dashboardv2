@@ -315,8 +315,8 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
     isOwner: currentUserId ? (
       currentIncident.taken_by
         ? (typeof currentIncident.taken_by === 'object'
-            ? parseInt(currentIncident.taken_by.id) === parseInt(currentUserId)
-            : parseInt(currentIncident.taken_by) === parseInt(currentUserId))
+          ? parseInt(currentIncident.taken_by.id) === parseInt(currentUserId)
+          : parseInt(currentIncident.taken_by) === parseInt(currentUserId))
         : false
     ) : false,
     ...currentIncident
@@ -857,8 +857,8 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
 
   if (swrError?.response?.status === 404) {
     return (
-      <NotFound 
-        message="Désolé, l'incident demandé n'existe pas, a été supprimé ou vous n'avez pas l'autorisation d'y accéder." 
+      <NotFound
+        message="Désolé, l'incident demandé n'existe pas, a été supprimé ou vous n'avez pas l'autorisation d'y accéder."
       />
     );
   }
@@ -1019,15 +1019,15 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
     if (typeof inc.taken_by === 'object') {
       const takenByUserId = inc.taken_by.id;
       const takenByOrgId = inc.taken_by.organisation_member || inc.taken_by.organisation;
-      const takenByOrgName = inc.taken_by.organisation_name || 
-        (inc.taken_by.organisation_member && typeof inc.taken_by.organisation_member === 'object' ? inc.taken_by.organisation_member.name : null) || 
-        (inc.taken_by.organisation && typeof inc.taken_by.organisation === 'object' ? inc.taken_by.organisation.name : null) || 
+      const takenByOrgName = inc.taken_by.organisation_name ||
+        (inc.taken_by.organisation_member && typeof inc.taken_by.organisation_member === 'object' ? inc.taken_by.organisation_member.name : null) ||
+        (inc.taken_by.organisation && typeof inc.taken_by.organisation === 'object' ? inc.taken_by.organisation.name : null) ||
         (typeof inc.taken_by.organisation === 'string' ? inc.taken_by.organisation : null);
 
       if (currentUserId && takenByUserId && parseInt(takenByUserId) === parseInt(currentUserId)) {
         isMe = true;
       } else if (myOrgId && takenByOrgId && (
-        parseInt(takenByOrgId) === parseInt(myOrgId) || 
+        parseInt(takenByOrgId) === parseInt(myOrgId) ||
         (typeof takenByOrgId === 'object' && takenByOrgId?.id && parseInt(takenByOrgId.id) === parseInt(myOrgId))
       )) {
         isMe = true;
@@ -1350,9 +1350,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
               <Calendar size={14} variant="Bold" color="var(--color-text-muted)" />
               <span>Déclaré le {safeIncident.startDate}</span>
             </div>
-            <div className="detail-meta-item">
-              <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>ID #{safeIncident.id}</span>
-            </div>
+
           </div>
         </div>
 
@@ -1622,16 +1620,16 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                     L'analyse prédictive, satellite et de vulnérabilité sociale n'a pas encore été générée pour cet incident.
                   </p>
                   {predictionError && (
-                    <div style={{ 
-                      fontSize: 'var(--font-size-caption)', 
+                    <div style={{
+                      fontSize: 'var(--font-size-caption)',
                       color: 'var(--color-warning)',
                       padding: 'var(--spacing-2) var(--spacing-3)',
                       backgroundColor: 'rgba(245, 158, 11, 0.1)',
                       borderRadius: 'var(--radius-sm)',
                       marginTop: 'var(--spacing-2)'
                     }}>
-                      {predictionError?.response?.status === 404 
-                        ? 'Attente du traitement par le modèle IA...' 
+                      {predictionError?.response?.status === 404
+                        ? 'Attente du traitement par le modèle IA...'
                         : 'Erreur lors du chargement de la prédiction'}
                     </div>
                   )}

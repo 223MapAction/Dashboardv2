@@ -410,7 +410,7 @@ export const IncidentList = ({ incidents = [], onSelectIncident, selectedId, isL
                               className="btn btn-primary"
                               onClick={() => openAssignModal(incident)}
                               title="Assigner à un agent"
-                              style={{ width: 'auto', padding: '0 12px', fontSize: '12px', fontWeight: 'bold' }}
+                              style={{ width: 'max-content' }}
                             >
                               Assigner à un agent
                             </button>

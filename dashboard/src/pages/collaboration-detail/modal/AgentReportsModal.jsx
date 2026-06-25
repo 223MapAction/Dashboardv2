@@ -65,7 +65,11 @@ export const AgentReportsModal = ({ isOpen, onClose, incidentId, incidentTitle }
     isClosing ? 'am-offcanvas-backdrop--closing' : '',
   ].filter(Boolean).join(' ');
 
-  const reportsList = reports || [];
+  const reportsList = (reports || []).filter(report => {
+    const reportIncidentId = report.incident ?? report.incident_id;
+    if (reportIncidentId === undefined || reportIncidentId === null) return false;
+    return parseInt(reportIncidentId, 10) === parseInt(incidentId, 10);
+  });
 
   return (
     <>

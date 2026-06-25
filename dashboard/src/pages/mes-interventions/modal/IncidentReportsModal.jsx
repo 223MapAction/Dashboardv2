@@ -1,6 +1,6 @@
 import React from 'react';
 import { useMesInterventionsModalContext } from '../MesInterventionsModalContext';
-import { DocumentText, Location, Calendar, User, CloseCircle } from 'iconsax-react';
+import { DocumentText, Location, } from 'iconsax-react';
 import { BlurryImage } from '../../../components/atoms/BlurryImage';
 
 const formatDate = (isoString) => {

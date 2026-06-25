@@ -102,12 +102,12 @@ export const authService = {
       undefined,  // Pas de nouvelles données
       { revalidate: false } // Ne pas revalider
     );
-    
+
     // Effacer le sessionStorage
     Object.values(STORAGE_KEYS).forEach((key) => {
       sessionStorage.removeItem(key);
     });
-    
+
     console.log('[AUTH] ✅ Déconnexion effectuée - Caches SWR et sessionStorage effacés');
   },
 
@@ -217,7 +217,7 @@ export const authService = {
       }
 
       console.log('[AUTH] Changement de mot de passe');
-      const response = await axios.post(
+      const response = await axios.put(
         `${API_URL}/MapApi/change_password/`,
         { old_password, new_password },
         {

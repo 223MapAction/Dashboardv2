@@ -2904,6 +2904,7 @@ export const CollaborationDetail = () => {
                 isOpen={taskToDelete !== null}
                 onClose={() => setTaskToDelete(null)}
                 taskId={taskToDelete?.id}
+                incidentId={collaborationData?.incident}
                 onConfirm={async () => {
                   await mutateTasks();
                   setTaskToDelete(null);

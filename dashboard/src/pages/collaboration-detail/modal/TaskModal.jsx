@@ -149,10 +149,10 @@ export const TaskModal = () => {
               disabled={taskSubmitSaving}
             />
 
-            <div  className='d-flex justify-content-between flex-wrap gap-2'>
+            <div className='d-flex justify-content-between flex-wrap gap-2'>
               <div className='w-100'>
                 <label className="tasks-add-label">
-                  Date de début (optionnel)
+                  Date de début <span className="required">*</span>
                 </label>
                 <input
                   type="date"
@@ -165,7 +165,7 @@ export const TaskModal = () => {
               </div>
               <div className='w-100'>
                 <label className="tasks-add-label">
-                  Date de fin (optionnel)
+                  Date de fin  <span className="required">*</span>
                 </label>
                 <input
                   type="date"
@@ -361,40 +361,40 @@ export const TaskModal = () => {
                             )}
                           </div>
                         </div>
-                          <div className="my-task-actions">
-                            {!task.completed && !task.failed && (
-                              <button
-                                type="button"
-                                className="my-task-action-btn edit"
-                                onClick={() => startEditTask(task)}
-                                title="Modifier"
-                                disabled={deletingTaskIds.includes(task.id)}
-                              >
-                                <Edit2 size={16} variant="Linear" color="#3AA2DD" />
-                              </button>
-                            )}
+                        <div className="my-task-actions">
+                          {!task.completed && !task.failed && (
                             <button
                               type="button"
-                              className="my-task-action-btn delete"
-                              onClick={() => setTaskToDelete(task)}
-                              title="Supprimer"
+                              className="my-task-action-btn edit"
+                              onClick={() => startEditTask(task)}
+                              title="Modifier"
                               disabled={deletingTaskIds.includes(task.id)}
-                              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                             >
-                              {deletingTaskIds.includes(task.id) ? (
-                                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" style={{ width: '12px', height: '12px', border: '2px solid transparent', borderTopColor: 'var(--color-danger)', borderRightColor: 'var(--color-danger)', borderRadius: '50%', animation: 'spin 0.75s linear infinite' }}></span>
-                              ) : (
-                                <Trash size={16} variant="Linear" color="#EF4444" />
-                              )}
+                              <Edit2 size={16} variant="Linear" color="#3AA2DD" />
                             </button>
-                          </div>
+                          )}
+                          <button
+                            type="button"
+                            className="my-task-action-btn delete"
+                            onClick={() => setTaskToDelete(task)}
+                            title="Supprimer"
+                            disabled={deletingTaskIds.includes(task.id)}
+                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                          >
+                            {deletingTaskIds.includes(task.id) ? (
+                              <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" style={{ width: '12px', height: '12px', border: '2px solid transparent', borderTopColor: 'var(--color-danger)', borderRightColor: 'var(--color-danger)', borderRadius: '50%', animation: 'spin 0.75s linear infinite' }}></span>
+                            ) : (
+                              <Trash size={16} variant="Linear" color="#EF4444" />
+                            )}
+                          </button>
+                        </div>
                       </>
                     )}
                   </div>
                 ))}
               </div>
             )}
-            </div>
+          </div>
         </div>
 
         <div className="am-offcanvas-footer">

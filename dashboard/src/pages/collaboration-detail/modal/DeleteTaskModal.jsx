@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
 import { Trash } from 'iconsax-react';
 import { deleteTaskService } from '../../incident/service/task_service';
 
@@ -9,9 +8,9 @@ export const DeleteTaskModal = ({
   onConfirm,
   taskTitle,
   taskId,
+  incidentId,
   isDeleting: propIsDeleting
 }) => {
-  const { id: incidentId } = useParams();
   const [shouldRender, setShouldRender] = useState(isOpen);
   const [localIsDeleting, setLocalIsDeleting] = useState(false);
   const isDeleting = propIsDeleting || localIsDeleting;

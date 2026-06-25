@@ -158,7 +158,7 @@ export const Collaboration = () => {
       const endDate = collab.end_date ? new Date(collab.end_date) : null;
       const incidentTitle = collab.incident_details?.title || collab.incident_title || `Incident`;
       const incidentImage = collab.incident_details?.photo || collab.incident_details?.image || '';
-      const orgName = collab.organisation_name || collab.user_full_name || `Utilisateur #${collab.user}`;
+      const orgName = collab.organisation_name || collab.user_full_name || ``;
       const incidentLocation = collab.incident_details?.zone || 'À définir';
       const incidentDescription = collab.incident_details?.description || collab.motivation || 'Aucune description';
       const incidentProgress = collab.incident_progress || 0;

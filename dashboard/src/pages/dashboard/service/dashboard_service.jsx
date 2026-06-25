@@ -10,8 +10,8 @@ export const getIncidentsService = async (filterType = '') => {
     const response = await axios.get(
       `${API_URL_BASE}/MapApi/incident-filter/`
     );
-    
-    return  response.data   || [];
+
+    return response.data || [];
   } catch (error) {
     console.error('[DASHBOARD] Erreur:', error.response?.status, error.response?.data);
     throw error;

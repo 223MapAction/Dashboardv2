@@ -10,15 +10,15 @@ export const MetricsCards = ({ incidents = [] }) => {
       : (incidents && Array.isArray(incidents.results) ? incidents.results : []);
 
     const resolved = normalizedIncidents.filter(inc => inc.etat === 'resolved' && !inc.is_deleted).length;
-    const inProgress = normalizedIncidents.filter(inc => 
-      (inc.etat === 'taken_into_account' || inc.etat === 'in_progress') && !inc.is_deleted
+    const takenIntoAccount = normalizedIncidents.filter(inc => 
+      inc.etat === 'taken_into_account' && !inc.is_deleted
     ).length;
     const unresolved = normalizedIncidents.filter(inc => 
       inc.etat === 'declared' && !inc.is_deleted
     ).length;
     const total = normalizedIncidents.filter(inc => !inc.is_deleted).length;
 
-    return { total, resolved, inProgress, unresolved };
+    return { total, resolved, takenIntoAccount, unresolved };
   }, [incidents]);
 
   const metrics = [
@@ -30,9 +30,9 @@ export const MetricsCards = ({ incidents = [] }) => {
       icon: <NotificationBing size={24} variant="Bold" color="#3AA2DD" />
     },
     {
-      id: 'in-progress',
-      label: 'En cours',
-      value: stats.inProgress.toString(),
+      id: 'taken-into-account',
+      label: 'Incidents pris en compte',
+      value: stats.takenIntoAccount.toString(),
       color: 'warning',
       icon: <Activity size={24} variant="Bold" color="#F59E0B" />
     },

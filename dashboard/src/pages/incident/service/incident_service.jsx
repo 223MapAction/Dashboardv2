@@ -13,12 +13,12 @@ const INCIDENTS_URL = 'incidents';
  * @param {number} pageSize - Taille de la page (default: 10)
  * @returns {Promise<Object>} - { count, next, previous, results }
  */
-export const getIncidentsService = async (page = 1, pageSize = 10) => {
+export const getIncidentsService = async () => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.get(
       `${API_URL_BASE}/MapApi/org-incidents/`,
-      
+
     );
 
     console.warn('[Incident]url Incidents récupérés:', `${API_URL_BASE}/MapApi/incident-filter/`);

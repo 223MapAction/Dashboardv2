@@ -156,7 +156,7 @@
 }
 
 .impact-kpi-primary-glow {
-  background: linear-gradient(135deg, #0F172A, #1E293B);
+  background: var(--color-primary);
   color: #FFFFFF;
   border-color: transparent;
   position: relative;
@@ -180,12 +180,19 @@
 }
 
 .impact-kpi-primary-glow .impact-kpi-label {
-  color: var(--color-severity-low);
+  color: rgba(255, 255, 255, 0.9);
   text-transform: uppercase;
   font-weight: var(--font-weight-bold);
   font-size: var(--font-size-caption);
   letter-spacing: 0.05em;
   margin-top: var(--spacing-2);
+}
+
+.impact-kpi-primary-glow .impact-kpi-subtext {
+  font-size: var(--font-size-caption);
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: var(--spacing-2);
+  line-height: 1.4;
 }
 
 .impact-kpi-subtext {
@@ -1051,7 +1058,7 @@
 
 .impact-skeleton-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: var(--spacing-4);
 }
 
