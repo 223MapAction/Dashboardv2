@@ -1805,7 +1805,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                   )}
 
                   {/* 3 PILIERS D'IMPACT */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '20px' }}>
+                  <div className="pillars-grid" style={{ marginBottom: '20px' }}>
                     {/* Pilier Social */}
                     <div className="dark-card" style={{ padding: '16px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', marginBottom: 'var(--spacing-4)' }}>
