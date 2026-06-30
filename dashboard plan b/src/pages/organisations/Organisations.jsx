@@ -1,0 +1,671 @@
+import React, { useState, useMemo, useEffect } from 'react';
+import useSWR from 'swr';
+import debounce from 'lodash.debounce';
+import { useSidebarState } from '../../hooks/useSidebarState';
+import { Header, Sidebar } from '../../components/layout';
+import {
+  SearchNormal1, ArrowDown2, Add, Edit2, Trash,
+  Buildings2, People, CloseCircle, TickCircle,
+  Global, Call, Sms, Briefcase, ArrowLeft2, ArrowRight2
+} from 'iconsax-react';
+import {
+  SECTORS, TYPES, COUNTRIES
+} from './data/organisations';
+import {
+  createOrganisationService,
+  deleteOrganisationService,
+  updateOrganisationService,
+  getOrganisationsService,
+  getOrganisationStatsService
+} from './service/organisation_service';
+import './organisations.css';
+import OrganisationsContext from './context/OrganisationsContext';
+import FormOrganisationModal from './modal/FormOrganisationModal';
+import DeleteOrganisationModal from './modal/DeleteOrganisationModal';
+import { BlurryImage } from '../../components/atoms/BlurryImage';
+import Pagination from '../../components/molecules/Pagination';
+
+const COLOR_PALETTE = [
+  '#EF4444', '#F97316', '#F59E0B', '#22C55E',
+  '#3AA2DD', '#1E40AF', '#A855F7', '#EC4899',
+  '#10B981', '#6366F1',
+];
+
+const EMPTY_FORM = {
+  name: '',
+  acronym: '',
+  color: '#3AA2DD',
+  sector: '',
+  type: '',
+  country: '',
+  city: '',
+  phone: '',
+  email: '',
+  website: '',
+  description: '',
+  status: 'active',
+  logo_url: null,
+  logo: null,
+};
+
+export const Organisations = () => {
+  const {
+    isOpen: sidebarOpen,
+    setOpen: setSidebarOpen,
+    isCollapsed: sidebarCollapsed,
+    setCollapsed: setSidebarCollapsed,
+  } = useSidebarState();
+
+  const getSectorLabel = (sectorEn) => {
+    if (!sectorEn) return '';
+    const sectorObj = SECTORS.find((s) => s.en === sectorEn || s.fr === sectorEn);
+    return sectorObj ? sectorObj.fr : sectorEn;
+  };
+
+  const getTypeLabel = (typeEn) => {
+    if (!typeEn) return '';
+    const typeObj = TYPES.find((t) => t.en === typeEn || t.fr === typeEn);
+    return typeObj ? typeObj.fr : typeEn;
+  };
+
+  const getCountryLabel = (countryEn) => {
+    if (!countryEn) return '';
+    const countryObj = COUNTRIES.find((c) => c.en === countryEn || c.fr === countryEn);
+    return countryObj ? countryObj.fr : countryEn;
+  };
+
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
+
+  const [searchInput, setSearchInput] = useState('');
+  const [search, setSearch] = useState('');
+  const [sectorFilter, setSectorFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+
+  // Debounce search input de 200ms
+  const debouncedSetSearch = useMemo(
+    () => debounce((val) => setSearch(val), 200),
+    []
+  );
+
+  useEffect(() => {
+    return () => {
+      debouncedSetSearch.cancel();
+    };
+  }, [debouncedSetSearch]);
+
+  // Reset page to 1 on filter/search change
+  useEffect(() => {
+    setPage(1);
+  }, [search, sectorFilter, statusFilter, typeFilter]);
+
+  const { data: rawOrgs, error: swrError, isLoading: swrLoading, mutate: mutateOrgs } = useSWR(
+    ['organisation_list', page, search, sectorFilter, statusFilter, typeFilter],
+    () => getOrganisationsService(page, pageSize, true, search, sectorFilter, statusFilter, typeFilter)
+  );
+
+  const { data: statsData, mutate: mutateStats } = useSWR(
+    'organisation_stats',
+    getOrganisationStatsService
+  );
+
+  const mutateAll = () => {
+    mutateOrgs();
+    mutateStats();
+  };
+
+  const orgs = useMemo(() => {
+    const results = rawOrgs?.results || (Array.isArray(rawOrgs) ? rawOrgs : []);
+    return results.map((o) => ({
+      id: o.id,
+      name: o.name,
+      acronym: o.acronym || '',
+      color: o.primary_color || '#3AA2DD',
+      sector: o.activity_sector || '',
+      type: o.organisation_type || '',
+      country: o.intervention_country || '',
+      city: o.subdomain || '',
+      phone: o.phone || '',
+      email: o.email || '',
+      website: o.website_url || '',
+      description: o.description || '',
+      status: o.partner_status || 'active',
+      logo_url: o.logo || null,
+      membersCount: o.members_count ?? 0,
+      activeProjects: o.active_projects ?? 0,
+    }));
+  }, [rawOrgs]);
+
+  // Modal create/edit
+  const [formModal, setFormModal] = useState({ open: false, mode: 'create', org: null });
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [formErrors, setFormErrors] = useState({});
+
+  // Modal delete
+  const [deleteModal, setDeleteModal] = useState({ open: false, org: null });
+
+  // Toast
+  const [toast, setToast] = useState(null);
+
+  // Alertes pour les modals
+  const [modalAlert, setModalAlert] = useState({ type: null, message: null });
+  const [deleteAlert, setDeleteAlert] = useState({ type: null, message: null });
+
+  // Animations
+  const [formAnimating, setFormAnimating] = useState(false);
+  const [deleteAnimating, setDeleteAnimating] = useState(false);
+
+  // Soumission en cours
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Suppression en cours
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // ── Stats ───────────────────────────────────────────────
+  const statsActive = statsData?.active ?? 0;
+  const statsTotal = statsData?.total ?? 0;
+  const statsProjects = statsData?.incidents_taken_total ?? 0;
+
+  // ── Filtrage ────────────────────────────────────────────
+  const filtered = useMemo(() => {
+    return orgs.filter((o) => {
+      const q = search.toLowerCase();
+      const matchSearch = !q || o.name.toLowerCase().includes(q)
+        || o.acronym.toLowerCase().includes(q)
+        || o.city.toLowerCase().includes(q)
+        || getCountryLabel(o.country).toLowerCase().includes(q)
+        || o.country.toLowerCase().includes(q);
+      const matchSector = !sectorFilter || o.sector === sectorFilter;
+      const matchStatus = !statusFilter || o.status === statusFilter;
+      const matchType = !typeFilter || o.type === typeFilter;
+      return matchSearch && matchSector && matchStatus && matchType;
+    });
+  }, [orgs, search, sectorFilter, statusFilter, typeFilter]);
+
+
+
+
+
+  // ── Ouvrir modal création ────────────────────────────────
+  const openCreate = () => {
+    setForm(EMPTY_FORM);
+    setFormErrors({});
+    setModalAlert({ type: null, message: null });
+    setFormAnimating('opening');
+    setFormModal({ open: true, mode: 'create', org: null });
+    setTimeout(() => setFormAnimating(false), 350);
+  };
+
+  // ── Ouvrir modal édition ─────────────────────────────────
+  const openEdit = (org, e) => {
+    e.stopPropagation();
+    setForm({
+      name: org.name,
+      acronym: org.acronym,
+      color: org.color,
+      sector: org.sector,
+      type: org.type,
+      country: org.country,
+      city: org.city,
+      phone: org.phone,
+      email: org.email,
+      website: org.website,
+      description: org.description,
+      status: org.status,
+      logo_url: org.logo_url || null,
+      logo: null,
+    });
+    setFormErrors({});
+    setModalAlert({ type: null, message: null });
+    setFormAnimating('opening');
+    setFormModal({ open: true, mode: 'edit', org });
+    setTimeout(() => setFormAnimating(false), 350);
+  };
+
+  // ── Gestion de la photo ──────────────────────────────────
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setField('logo', file);
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setField('logo_url', ev.target.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removePhoto = (e) => {
+    e.stopPropagation();
+    setField('logo_url', null);
+    setField('logo', null);
+  };
+
+  // ── Fermer le modal form ─────────────────────────────────
+  const closeFormModal = () => {
+    if (isSubmitting) return;
+    setFormAnimating('closing');
+    setTimeout(() => {
+      setFormModal({ open: false, mode: 'create', org: null });
+      setFormAnimating(false);
+      setModalAlert({ type: null, message: null });
+    }, 320);
+  };
+
+  // ── Validation ───────────────────────────────────────────
+  const validate = () => {
+    const errs = {};
+    if (!form.name.trim()) errs.name = 'Le nom est requis.';
+
+    if (!form.sector) errs.sector = 'Le secteur est requis.';
+    if (!form.type) errs.type = 'Le type est requis.';
+    if (!form.country) errs.country = 'Le pays est requis.';
+    if (form.email && !/\S+@\S+\.\S+/.test(form.email)) errs.email = 'Email invalide.';
+    setFormErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  // ── Soumettre le formulaire ──────────────────────────────
+  const buildPayload = (formData) => {
+    const subdomainVal = formData.name
+      ? formData.name.trim().toLowerCase().replace(/\s+/g, '_')
+      : '';
+
+    const payload = {
+      name: formData.name,
+      acronym: formData.acronym || null,
+      description: formData.description || null,
+      activity_sector: formData.sector || null,
+      organisation_type: formData.type || null,
+      intervention_country: formData.country || null,
+      partner_status: formData.status || 'active',
+      phone: formData.phone || null,
+      website_url: formData.website || null,
+      primary_color: formData.color || '#3AA2DD',
+      is_premium: true,
+      members_count: 0,
+      subdomain: subdomainVal,
+      email: formData.email || null,
+    };
+
+    if (formData.logo) {
+      payload.logo = formData.logo;
+    } else if (formData.logo_url === null) {
+      payload.logo = null;
+    }
+
+    return payload;
+  };
+
+  const handleSubmit = async () => {
+    if (!validate()) return;
+    setIsSubmitting(true);
+    setModalAlert({ type: null, message: null });
+    try {
+      const payload = buildPayload(form);
+      console.log('Sending payload to server:', payload);
+
+      if (formModal.mode === 'create') {
+        await createOrganisationService(payload);
+        setModalAlert({ type: 'success', message: 'Organisation créée avec succès !' });
+      } else {
+        await updateOrganisationService(formModal.org.id, payload);
+        setModalAlert({ type: 'success', message: 'Organisation mise à jour avec succès !' });
+      }
+      mutateAll();
+      setTimeout(() => {
+        closeFormModal();
+      }, 2000);
+    } catch (err) {
+      if (err?.response?.status === 400 && err?.response?.data && typeof err.response.data === 'object') {
+        const backendErrors = err.response.data;
+        const mappedErrors = {};
+
+        // Map backend field names to frontend field names
+        const keyMapping = {
+          activity_sector: 'sector',
+          organisation_type: 'type',
+          intervention_country: 'country',
+          website_url: 'website',
+          partner_status: 'status',
+        };
+
+        Object.keys(backendErrors).forEach((backendKey) => {
+          const frontendKey = keyMapping[backendKey] || backendKey;
+          const errorMsg = Array.isArray(backendErrors[backendKey])
+            ? backendErrors[backendKey].join(' ')
+            : backendErrors[backendKey];
+          mappedErrors[frontendKey] = errorMsg;
+        });
+
+        setFormErrors(mappedErrors);
+        setModalAlert({
+          type: 'danger',
+          message: 'Veuillez corriger les erreurs de validation dans le formulaire.'
+        });
+      } else {
+        const msg = err?.response?.data?.detail
+          || err?.response?.data?.message
+          || `Erreur lors de la ${formModal.mode === 'create' ? 'création' : 'modification'}. Veuillez réessayer.`;
+        setModalAlert({ type: 'danger', message: msg });
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // ── Supprimer ────────────────────────────────────────────
+  const openDelete = (org, e) => {
+    e.stopPropagation();
+    setDeleteAlert({ type: null, message: null });
+    setDeleteAnimating('opening');
+    setDeleteModal({ open: true, org });
+    setTimeout(() => setDeleteAnimating(false), 350);
+  };
+
+  const closeDeleteModal = () => {
+    if (isDeleting) return;
+    setDeleteAnimating('closing');
+    setTimeout(() => {
+      setDeleteModal({ open: false, org: null });
+      setDeleteAnimating(false);
+    }, 320);
+  };
+
+  const confirmDelete = async (e) => {
+    e.stopPropagation();
+    setIsDeleting(true);
+    setDeleteAlert({ type: null, message: null });
+    console.log(deleteModal.org);
+
+    try {
+      await deleteOrganisationService(deleteModal.org.id);
+      mutateAll();
+      setDeleteAlert({ type: 'success', message: 'Organisation supprimée avec succès !' });
+      setTimeout(() => {
+        closeDeleteModal();
+      }, 2000);
+    } catch (err) {
+      const msg = err?.response?.data?.detail
+        || err?.response?.data?.message
+        || 'Erreur lors de la suppression. Veuillez réessayer.';
+      setDeleteAlert({ type: 'danger', message: msg });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // ── Champ form helper ────────────────────────────────────
+  const setField = (key, val) => {
+    setForm((f) => ({ ...f, [key]: val }));
+    if (formErrors[key]) setFormErrors((e) => ({ ...e, [key]: undefined }));
+  };
+
+  const contextValue = {
+    formModal, formAnimating, closeFormModal, modalAlert, form, formErrors,
+    setField, handlePhotoChange, removePhoto, isSubmitting, handleSubmit,
+    deleteModal, setDeleteModal, deleteAnimating, isDeleting, deleteAlert,
+    closeDeleteModal, confirmDelete
+  };
+
+  return (
+    <OrganisationsContext.Provider value={contextValue}>
+      <div className="orgs-layout">
+        <Sidebar
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          isCollapsed={sidebarCollapsed}
+          onCollapsedChange={setSidebarCollapsed}
+        />
+
+        <div className={`orgs-main ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+          <Header
+            onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
+            sidebarCollapsed={sidebarCollapsed}
+          />
+
+          <main className="orgs-content">
+            <div className="orgs-page">
+
+              {/* ── En-tête ── */}
+              <div className="orgs-page-header">
+                <div className="orgs-header-left">
+                  <h1 className="orgs-title">Organisations</h1>
+                  <p className="orgs-subtitle">Gérez les organisations partenaires de Map Action.</p>
+                </div>
+                <button className="orgs-add-btn" onClick={openCreate}>
+                  <Add size={18} color='white' />
+                  Nouvelle organisation
+                </button>
+              </div>
+
+              {/* ── Statistiques ── */}
+              <div className="orgs-stats">
+                <div className="orgs-stat">
+                  <div className="orgs-stat-icon orgs-stat-icon-primary">
+                    <Buildings2 size={20} variant="Bold" color="var(--color-primary)" />
+                  </div>
+                  <div>
+                    <div className="orgs-stat-value">{statsTotal}</div>
+                    <div className="orgs-stat-label">Total</div>
+                  </div>
+                </div>
+                <div className="orgs-stat">
+                  <div className="orgs-stat-icon orgs-stat-icon-success">
+                    <TickCircle size={20} variant="Bold" color="var(--color-success)" />
+                  </div>
+                  <div>
+                    <div className="orgs-stat-value">{statsActive}</div>
+                    <div className="orgs-stat-label">Actives</div>
+                  </div>
+                </div>
+                <div className="orgs-stat">
+                  <div className="orgs-stat-icon orgs-stat-icon-warning">
+                    <Briefcase size={20} variant="Bold" color="var(--color-warning)" />
+                  </div>
+                  <div>
+                    <div className="orgs-stat-value">{statsProjects}</div>
+                    <div className="orgs-stat-label">Nombre d'incidents</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Toolbar ── */}
+              <div className="orgs-toolbar">
+                <div className="orgs-search">
+                  <SearchNormal1 size={16} variant="Linear" color="var(--color-text-muted)" />
+                  <input
+                    type="search"
+                    id="orgs-search-input"
+                    name="orgs-search-query"
+                    autoComplete="off"
+                    placeholder="Nom, acronyme, ville, pays..."
+                    value={searchInput}
+                    onChange={(e) => {
+                      setSearchInput(e.target.value);
+                      debouncedSetSearch(e.target.value);
+                    }}
+                  />
+                </div>
+
+                <div className="orgs-select-wrap">
+                  <select value={sectorFilter} onChange={(e) => setSectorFilter(e.target.value)}>
+                    <option value="">Tous les secteurs</option>
+                    {SECTORS.map((s) => <option key={s.en} value={s.en}>{s.fr}</option>)}
+                  </select>
+                  <ArrowDown2 size={14} variant="Linear" color="var(--color-text-muted)" />
+                </div>
+
+                <div className="orgs-select-wrap">
+                  <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
+                    <option value="">Tous les types</option>
+                    {TYPES.map((t) => <option key={t.en} value={t.en}>{t.fr}</option>)}
+                  </select>
+                  <ArrowDown2 size={14} variant="Linear" color="var(--color-text-muted)" />
+                </div>
+
+                <div className="orgs-select-wrap">
+                  <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                    <option value="">Tous les statuts</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                  <ArrowDown2 size={14} variant="Linear" color="var(--color-text-muted)" />
+                </div>
+
+                <span className="orgs-count-label">
+                  {filtered.length} organisation{filtered.length > 1 ? 's' : ''}
+                </span>
+              </div>
+
+              {/* ── Tableau ── */}
+              {swrLoading ? (
+                <div className="orgs-table-wrap">
+                  <table className="orgs-table">
+                    <thead>
+                      <tr>
+                        <th>Organisation</th>
+                        <th>Secteur</th>
+                        <th>Localisation</th>
+                        <th>Incidents prise en compte</th>
+                        <th>Membres</th>
+                        <th>Statut</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <tr key={i}>
+                          <td>
+                            <div className="orgs-table-org" style={{ opacity: 0.5 }}>
+                              <div className="orgs-avatar" style={{ backgroundColor: 'var(--color-border)', width: '36px', height: '36px', borderRadius: '50%', color: 'transparent' }}>
+                                --
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                <div style={{ width: '120px', height: '12px', borderRadius: '4px', backgroundColor: 'var(--color-border)', animation: 'pulse 1.8s infinite' }} />
+                                <div style={{ width: '70px', height: '8px', borderRadius: '3px', backgroundColor: 'var(--color-border)', animation: 'pulse 1.8s infinite' }} />
+                              </div>
+                            </div>
+                          </td>
+                          <td><div style={{ width: '90px', height: '10px', borderRadius: '4px', backgroundColor: 'var(--color-border)', opacity: 0.5, animation: 'pulse 1.8s infinite' }} /></td>
+                          <td><div style={{ width: '80px', height: '10px', borderRadius: '4px', backgroundColor: 'var(--color-border)', opacity: 0.5, animation: 'pulse 1.8s infinite' }} /></td>
+                          <td><div style={{ width: '30px', height: '10px', borderRadius: '4px', backgroundColor: 'var(--color-border)', margin: '0 auto', opacity: 0.5, animation: 'pulse 1.8s infinite' }} /></td>
+                          <td><div style={{ width: '40px', height: '10px', borderRadius: '4px', backgroundColor: 'var(--color-border)', margin: '0 auto', opacity: 0.5, animation: 'pulse 1.8s infinite' }} /></td>
+                          <td><div style={{ width: '60px', height: '16px', borderRadius: '12px', backgroundColor: 'var(--color-border)', opacity: 0.5, animation: 'pulse 1.8s infinite' }} /></td>
+                          <td><div style={{ width: '40px', height: '24px', borderRadius: '4px', backgroundColor: 'var(--color-border)', opacity: 0.5, animation: 'pulse 1.8s infinite' }} /></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : filtered.length === 0 ? (
+                <div className="orgs-empty">
+                  <div className="orgs-empty-icon">
+                    <Buildings2 size={48} variant="Linear" color="var(--color-border)" />
+                  </div>
+                  <p>Aucune organisation ne correspond à vos critères.</p>
+                </div>
+              ) : (
+                <div className="orgs-table-wrap">
+                  <table className="orgs-table">
+                    <thead>
+                      <tr>
+                        <th>Organisation</th>
+                        <th>Secteur</th>
+                        <th>Localisation</th>
+                        <th>Incidents prise en compte</th>
+                        <th>Membres</th>
+                        <th>Statut</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filtered.map((org) => (
+                        <tr key={org.id}>
+                          <td>
+                            <div className="orgs-table-org">
+                              {org.logo_url ? (
+                                <BlurryImage
+                                  src={org.logo_url}
+                                  alt={org.name}
+                                  className="orgs-avatar"
+                                  style={{ objectFit: 'cover' }}
+                                />
+                              ) : (
+                                <div
+                                  className="orgs-avatar"
+                                  style={{ backgroundColor: org.color }}
+                                >
+                                  {(org.acronym || org.name || '?').slice(0, 2).toUpperCase()}
+                                </div>
+                              )}
+                              <div>
+                                <span className="orgs-table-org-name">{org.name}</span>
+                                <span className="orgs-table-org-type">{getTypeLabel(org.type)}</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td style={{ fontSize: 'var(--font-size-body-small)', color: 'var(--color-text-secondary)' }}>
+                            {getSectorLabel(org.sector)}
+                          </td>
+                          <td style={{ fontSize: 'var(--font-size-body-small)', color: 'var(--color-text-secondary)' }}>
+                            {org.city}, {getCountryLabel(org.country)}
+                          </td>
+                          <td style={{ textAlign: 'center', fontWeight: 'var(--font-weight-semibold)' }}>
+                            {org.activeProjects}
+                          </td>
+                          <td style={{ textAlign: 'center', fontWeight: 'var(--font-weight-semibold)' }}>
+                            {org.membersCount.toLocaleString('fr')}
+                          </td>
+                          <td>
+                            <span className={`orgs-status orgs-status-${org.status}`}>
+                              <span className="orgs-status-dot" />
+                              {org.status === 'active' ? 'Active' : 'Inactive'}
+                            </span>
+                          </td>
+                          <td>
+                            <div className="orgs-row-actions">
+                              <button
+                                className="orgs-icon-btn orgs-icon-btn-edit"
+                                onClick={(e) => openEdit(org, e)}
+                                title="Modifier"
+                              >
+                                <Edit2 size={16} variant="Linear" />
+                              </button>
+                              <button
+                                className="orgs-icon-btn orgs-icon-btn-delete"
+                                onClick={(e) => openDelete(org, e)}
+                                title="Supprimer"
+                              >
+                                <Trash size={16} variant="Linear" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              <Pagination
+                page={page}
+                pageSize={pageSize}
+                count={rawOrgs?.count || 0}
+                onChange={setPage}
+              />
+
+            </div>
+          </main>
+        </div>
+
+        {/* ── Modals ── */}
+        <FormOrganisationModal key={"FormOgrnasationKey"} />
+        <DeleteOrganisationModal key={"DeleteOrganisationModalKey"} />
+
+      </div>
+    </OrganisationsContext.Provider>
+  );
+};
+
+export default Organisations;

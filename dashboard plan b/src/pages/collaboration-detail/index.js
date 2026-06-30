@@ -1,0 +1,1 @@
+export { CollaborationDetail } from './CollaborationDetail';

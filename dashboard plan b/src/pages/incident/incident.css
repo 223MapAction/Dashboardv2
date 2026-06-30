@@ -1,0 +1,47 @@
+/* ============================================
+   INCIDENT PAGE
+   ============================================ */
+.incident-page {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--color-background);
+}
+
+.incident-page-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Workspace 2 colonnes - chaque colonne scrolle indépendamment */
+.incident-workspace {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ============================================
+   MOBILE (< 1024px) - Bascule liste/détail
+   ============================================ */
+@media (max-width: 1023px) {
+  .incident-workspace .project-list-section,
+  .incident-workspace .project-detail {
+    width: 100%;
+    flex: 1;
+  }
+
+  /* Tab "list" : on voit la liste seulement */
+  .incident-workspace.mobile-tab-list .project-detail {
+    display: none;
+  }
+
+  /* Tab "detail" : on voit le détail seulement */
+  .incident-workspace.mobile-tab-detail .project-list-section {
+    display: none;
+  }
+}

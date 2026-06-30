@@ -1,0 +1,142 @@
+import { authService } from '../../auth/services/authService';
+import { API_URL_BASE } from '../../../config/api_url_base';
+
+/**
+ * Récupère tous les membres d'une organisation avec filtrage
+ * @param {number|string} organisationId - ID de l'organisation
+ * @param {string} search - Recherche textuelle
+ * @param {string} role - Rôle filtré (admin|bureau|terrain)
+ * @param {string} status - Statut filtré (active|inactive)
+ * @returns {Promise<Object|Array>} Réponse paginée ou liste des membres
+ */
+export const getOrganisationMembersService = async (organisationId, search = '', role = '', status = '') => {
+    try {
+        const axios = authService.createAuthenticatedAxios();
+
+        const params = {};
+        if (search) params.search = search;
+        if (role) {
+            let backendRole = role;
+            if (role === 'admin') backendRole = 'org_admin';
+            if (role === 'bureau') backendRole = 'bureau_agent';
+            if (role === 'terrain') backendRole = 'field_agent';
+            params.role = backendRole;
+        }
+        if (status) {
+            params.status = status;
+        }
+
+        const response = await axios.get(
+            `${API_URL_BASE}/MapApi/agents/`,
+            { params }
+        );
+        console.log('[Members] Membres récupérés:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('[Members] Erreur récupération membres:', error?.response?.status, error?.response?.data);
+        throw error;
+    }
+};
+
+/**
+ * Récupère les statistiques des agents de la plateforme
+ * @returns {Promise<Object>} Statistiques {total, active, admins, bureau_agents, field_agents}
+ */
+export const getAgentsStatsService = async () => {
+    try {
+        const axios = authService.createAuthenticatedAxios();
+        const response = await axios.get(`${API_URL_BASE}/MapApi/agents/stats/`);
+        console.log('[Members] Stats agents récupérées:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('[Members] Erreur récupération stats agents:', error?.response?.status, error?.response?.data);
+        throw error;
+    }
+};
+
+/**
+ * Crée un nouvel agent de terrain dans une organisation
+ * @param {number|string} organisationId - ID de l'organisation
+ * @param {Object} agentData - Données de l'agent à créer
+ * @returns {Promise<Object>} Agent créé
+ */
+export const createOrganisationAgentService = async (organisationId, agentData) => {
+    try {
+        const axios = authService.createAuthenticatedAxios();
+        const response = await axios.post(
+            `${API_URL_BASE}/MapApi/organisations/${organisationId}/agents/create/`,
+            agentData,
+            { headers: { 'Content-Type': 'application/json' } }
+        );
+        console.log('[Members] Agent créé:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('[Members] Erreur création agent:', error?.response?.status, error?.response?.data);
+        throw error;
+    }
+};
+
+/**
+ * Ajoute un membre existant à une organisation
+ * @param {number|string} organisationId - ID de l'organisation
+ * @param {Object} data - Données { user_id, org_role }
+ * @returns {Promise<Object>}
+ */
+export const addOrganisationStaffMemberService = async (organisationId, data) => {
+    try {
+        const axios = authService.createAuthenticatedAxios();
+        const response = await axios.post(
+            `${API_URL_BASE}/MapApi/organisations/${organisationId}/staff/create/`,
+            data,
+            { headers: { 'Content-Type': 'application/json' } }
+        );
+        console.log('[Members] Staff ajouté:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('[Members] Erreur ajout staff:', error?.response?.status, error?.response?.data);
+        throw error;
+    }
+};
+
+/**
+ * Modifie le rôle d'un membre
+ * @param {number|string} organisationId - ID de l'organisation
+ * @param {number|string} userId - ID de l'utilisateur
+ * @param {Object} data - Données { org_role }
+ * @returns {Promise<Object>}
+ */
+export const updateOrganisationMemberService = async (organisationId, userId, data) => {
+    try {
+        const axios = authService.createAuthenticatedAxios();
+        const response = await axios.patch(
+            `${API_URL_BASE}/MapApi/organisations/${organisationId}/members/${userId}/`,
+            data,
+            { headers: { 'Content-Type': 'application/json' } }
+        );
+        console.log('[Members] Membre mis à jour:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('[Members] Erreur mise à jour membre:', error?.response?.status, error?.response?.data);
+        throw error;
+    }
+};
+
+/**
+ * Retire un membre d'une organisation
+ * @param {number|string} organisationId - ID de l'organisation
+ * @param {number|string} userId - ID de l'utilisateur
+ * @returns {Promise<Object>}
+ */
+export const removeOrganisationMemberService = async (organisationId, userId) => {
+    try {
+        const axios = authService.createAuthenticatedAxios();
+        const response = await axios.delete(
+            `${API_URL_BASE}/MapApi/organisations/${organisationId}/members/${userId}/`
+        );
+        console.log('[Members] Membre retiré:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('[Members] Erreur retrait membre:', error?.response?.status, error?.response?.data);
+        throw error;
+    }
+};

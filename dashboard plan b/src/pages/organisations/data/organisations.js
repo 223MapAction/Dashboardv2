@@ -1,0 +1,39 @@
+
+export const SECTORS = [
+  { fr: 'Environnement', en: 'environment' },
+  { fr: 'Assainissement', en: 'sanitation' },
+  { fr: 'Eau / WASH', en: 'water_wash' },
+  { fr: 'Santé', en: 'health' },
+  { fr: 'Sécurité alimentaire', en: 'food_security' },
+  { fr: 'Protection', en: 'protection' },
+  { fr: 'Humanitaire', en: 'humanitarian' },
+  { fr: 'Développement', en: 'development' },
+  { fr: 'Gouvernance', en: 'governance' },
+  { fr: 'Éducation', en: 'education' },
+  { fr: 'Technologie / Données', en: 'technology_data' },
+  { fr: 'Multisectoriel', en: 'multisectoral' },
+  { fr: 'Autre', en: 'other' },
+];
+
+export const TYPES = [
+  { fr: 'ONG', en: 'ngo' },
+  { fr: 'Organisation internationale', en: 'international_organization' },
+  { fr: 'Agence UN', en: 'un_agency' },
+  { fr: 'Institution publique', en: 'public_institution' },
+  { fr: 'Collectivité territoriale', en: 'local_authority' },
+  { fr: 'Association / OSC', en: 'association_cso' },
+  { fr: 'Secteur privé', en: 'private_sector' },
+  { fr: 'Projet / Programme', en: 'project_programme' },
+  { fr: 'Structure communautaire', en: 'community_structure' },
+  { fr: 'Autre', en: 'other' },
+];
+
+export const COUNTRIES = [
+  { fr: 'Mali', en: 'mali' },
+  { fr: 'Sénégal', en: 'senegal' },
+  { fr: 'Guinée', en: 'guinea' },
+  { fr: 'Burkina Faso', en: 'burkina_faso' },
+  { fr: 'Niger', en: 'niger' },
+  { fr: 'Côte d\'Ivoire', en: 'côte_d\'ivoire' },
+  { fr: 'Mauritanie', en: 'mauritania' },
+];

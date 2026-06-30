@@ -1,0 +1,494 @@
+/* ============================================
+   INCIDENT SUIVI PAGE - Incidents Assignés
+   ============================================ */
+
+.mes-interventions-page {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--color-background);
+}
+
+.mes-interventions-page-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100vh;
+  overflow: hidden;
+  transition: margin-left 0.3s ease;
+}
+
+.mes-interventions-content {
+  flex: 1;
+  padding: 80px var(--spacing-6) var(--spacing-6) var(--spacing-6);
+  overflow-y: auto;
+  margin-top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
+  min-height: 0;
+}
+
+/* ── Header ────────────────────────────── */
+.mes-interventions-header {
+  margin-bottom: var(--spacing-2);
+}
+
+.mes-interventions-title {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-1) 0;
+  letter-spacing: var(--tracking-tight);
+}
+
+.mes-interventions-subtitle {
+  font-size: var(--font-size-body-small);
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ── Filtres et Recherche ───────────────── */
+.mes-interventions-filters {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  flex-wrap: wrap;
+  position: sticky;
+  top: -4px;
+  z-index: 50;
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: saturate(180%) blur(12px);
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
+  padding: var(--spacing-3) var(--spacing-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  
+  margin: 0 calc(var(--spacing-2) * -1);
+  padding-left: calc(var(--spacing-4) + var(--spacing-2));
+  padding-right: calc(var(--spacing-4) + var(--spacing-2));
+}
+
+.mes-interventions-search {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  flex: 1;
+  min-width: 200px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-3) var(--spacing-4);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mes-interventions-search:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(58, 162, 221, 0.1);
+}
+
+.mes-interventions-search input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: var(--font-size-body);
+  color: var(--color-text-primary);
+  font-family: var(--font-family);
+}
+
+.mes-interventions-search input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.mes-interventions-select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-3) var(--spacing-4);
+  transition: border-color 0.2s ease;
+}
+
+.mes-interventions-select-wrapper:focus-within {
+  border-color: var(--color-primary);
+}
+
+.mes-interventions-select-wrapper select {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: var(--font-size-body);
+  color: var(--color-text-primary);
+  font-family: var(--font-family);
+  appearance: none;
+  cursor: pointer;
+  padding-right: var(--spacing-5);
+}
+
+.mes-interventions-select-wrapper > svg {
+  pointer-events: none;
+  margin-left: calc(var(--spacing-2) * -1);
+}
+
+/* ── Table de données ───────────────────── */
+.mes-interventions-table-wrap,
+.incident-table-wrap {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+
+/* Scrollbar personnalisée premium */
+.mes-interventions-table-wrap::-webkit-scrollbar {
+  height: 6px;
+}
+.mes-interventions-table-wrap::-webkit-scrollbar-track {
+  background: transparent;
+}
+.mes-interventions-table-wrap::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+}
+.mes-interventions-table-wrap::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+.mes-interventions-table {
+  width: 100%;
+  min-width: 1000px;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: var(--font-size-body);
+}
+
+.mes-interventions-table th {
+  padding: var(--spacing-4) var(--spacing-5);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-body-small);
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-background);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.mes-interventions-table td {
+  padding: var(--spacing-4) var(--spacing-5);
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+/* Fixer la première colonne (Incident) pour éviter de la perdre de vue lors du défilement */
+.mes-interventions-table th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  background-color: var(--color-background);
+  border-right: 1px solid var(--color-border);
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.03);
+}
+
+.mes-interventions-table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background-color: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.03);
+}
+
+.mes-interventions-row-clickable {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.mes-interventions-row-clickable:hover {
+  background-color: rgba(58, 162, 221, 0.02);
+}
+
+.mes-interventions-row-clickable:hover td:first-child {
+  background-color: #F8FAFC;
+}
+
+.mes-interventions-row-clickable:active {
+  background-color: rgba(58, 162, 221, 0.05);
+}
+
+.mes-interventions-row-clickable:active td:first-child {
+  background-color: #F1F5F9;
+}
+
+/* Cellule principale de l'incident */
+.mes-interventions-main-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  min-width: 250px;
+}
+
+.mes-interventions-img {
+  width: 50px;
+  height: 50px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--color-border);
+}
+
+.mes-interventions-row-title {
+  display: block;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 280px;
+}
+
+.mes-interventions-row-desc {
+  display: block;
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 280px;
+}
+
+/* Textes de cellule */
+.mes-interventions-cell-text {
+  font-size: var(--font-size-body-small);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+/* Badges de date */
+.mes-interventions-date-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: var(--font-weight-semibold);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.mes-interventions-date-badge.is-pending {
+  background-color: rgba(245, 158, 11, 0.08);
+  color: var(--color-warning);
+}
+
+.mes-interventions-date-badge.is-resolved {
+  background-color: rgba(34, 197, 94, 0.08);
+  color: var(--color-success);
+}
+
+/* Progression */
+.mes-interventions-progress-container {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  min-width: 120px;
+}
+
+.mes-interventions-progress-bar-bg {
+  flex: 1;
+  height: 6px;
+  background-color: var(--color-border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.mes-interventions-progress-bar-fill {
+  height: 100%;
+  background-color: var(--color-primary);
+  border-radius: var(--radius-full);
+  transition: width 0.3s ease;
+}
+
+.mes-interventions-progress-label {
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  min-width: 28px;
+  text-align: right;
+}
+
+/* Badges d'état */
+.mes-interventions-badge-glow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: var(--font-weight-bold);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.mes-interventions-badge-glow .badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+/* Declared (Déclaré) */
+.mes-interventions-badge-glow.variant-declared {
+  background-color: #F1F5F9;
+  color: #64748B;
+}
+.mes-interventions-badge-glow.variant-declared .badge-dot {
+  background-color: #64748B;
+}
+
+/* Taken (Pris en compte) */
+.mes-interventions-badge-glow.variant-taken {
+  background-color: #EFF6FF;
+  color: var(--color-primary);
+}
+.mes-interventions-badge-glow.variant-taken .badge-dot {
+  background-color: var(--color-primary);
+}
+
+/* In Progress (En cours) */
+.mes-interventions-badge-glow.variant-in-progress {
+  background-color: #FFFBEB;
+  color: var(--color-warning);
+}
+.mes-interventions-badge-glow.variant-in-progress .badge-dot {
+  background-color: var(--color-warning);
+}
+
+/* Resolved (Résolu) */
+.mes-interventions-badge-glow.variant-resolved {
+  background-color: #ECFDF5;
+  color: var(--color-success);
+}
+.mes-interventions-badge-glow.variant-resolved .badge-dot {
+  background-color: var(--color-success);
+}
+
+/* Boutons d'action */
+.mes-interventions-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mes-interventions-action-btn:hover {
+  background-color: rgba(58, 162, 221, 0.08);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+/* ── États vides et erreurs ─────────────── */
+.mes-interventions-empty,
+.mes-interventions-error-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--spacing-8);
+  background-color: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.mes-interventions-empty p,
+.mes-interventions-error-card p {
+  font-size: var(--font-size-body);
+  color: var(--color-text-secondary);
+  max-width: 400px;
+  line-height: 1.5;
+}
+
+/* ── Bouton compteur de rapports ──────────────────────────── */
+.rapport-count-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--color-text-primary);
+}
+
+.rapport-count-btn:not(:disabled):hover {
+  background: rgba(58, 162, 221, 0.1);
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.rapport-count-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Les styles pour la modal des rapports sont maintenant dans le composant IncidentReportsModal 
+   qui utilise les classes am-offcanvas existantes */
+
+/* ── Responsive ──────────────────────────── */
+@media (max-width: 768px) {
+  .mes-interventions-content {
+    padding: var(--spacing-4);
+  }
+
+  .mes-interventions-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .mes-interventions-select-wrapper {
+    width: 100%;
+  }
+}
+
+/* ── Stack d'avatars pour l'équipe terrain ── */
+.avatar-stack {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  transition: transform 0.2s ease;
+}
+
+.avatar-stack:hover {
+  transform: translateY(-1px);
+}
+
+.avatar-stack > div {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.avatar-stack:hover > div {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.avatar-stack:hover > div:not(:first-child) {
+  transform: translateX(2px);
+}
