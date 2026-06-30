@@ -1,1 +1,1 @@
-export const API_URL_BASE = "https://backend-production-0726b.up.railway.app"
+export const API_URL_BASE = "https://api.map-action.com"
