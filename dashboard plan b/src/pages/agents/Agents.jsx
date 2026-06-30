@@ -14,6 +14,7 @@ import { getOrganisationMembersService, getAgentsStatsService } from './service/
 import AgentsContext from './modale/AgentsModalContext';
 import { AgentFormModal, AgentDeleteModal } from './modale';
 import Pagination from '../../components/molecules/Pagination';
+import { authService } from '../auth/services/authService';
 import './agents.css';
 
 // ── Helpers ───────────────────────────────────────────────────────
@@ -133,6 +134,7 @@ const fetcher = async ([, organisationsList, search, role, status]) => {
 };
 
 export const Agents = () => {
+  const currentUser = authService.getCurrentUser();
   const {
     isOpen: sidebarOpen,
     setOpen: setSidebarOpen,
@@ -208,6 +210,11 @@ export const Agents = () => {
   // ── Ouvrir modal édition ──────────────────────────────────────
   const openEdit = (agent, e) => {
     e?.stopPropagation();
+    const isOffice = currentUser?.web_role === 'bureau_agent' || currentUser?.web_role === 'bureau' || currentUser?.web_role === 'agent_de_bureau';
+    const isTargetAdmin = agent?.role === 'admin' || agent?.role === 'super_admin' || agent?.role === 'admin_organisation';
+    if (isOffice && isTargetAdmin) {
+      return;
+    }
     setModalAlert({ type: null, message: null });
     setShowPassword(false);
     setFormAnimating('opening');
@@ -229,6 +236,10 @@ export const Agents = () => {
   // ── Ouvrir modal suppression ──────────────────────────────────
   const openDelete = (agent, e) => {
     e?.stopPropagation();
+    const isOffice = currentUser?.web_role === 'bureau_agent' || currentUser?.web_role === 'bureau' || currentUser?.web_role === 'agent_de_bureau';
+    if (isOffice && agent.role !== 'terrain') {
+      return;
+    }
     setDeleteAlert({ type: null, message: null });
     setDeleteAnimating('opening');
     setDeleteModal({ open: true, agent });
@@ -489,20 +500,27 @@ export const Agents = () => {
                               </td>
                               <td>
                                 <div className="agents-row-actions">
-                                  <button
-                                    className="agents-icon-btn agents-icon-btn-edit"
-                                    onClick={(e) => openEdit(agent, e)}
-                                    title="Modifier"
-                                  >
-                                    <Edit2 size={16} variant="Bold" color="var(--color-primary)" />
-                                  </button>
-                                  <button
-                                    className="agents-icon-btn agents-icon-btn-delete"
-                                    onClick={(e) => openDelete(agent, e)}
-                                    title="Supprimer"
-                                  >
-                                    <Trash size={16} variant="Bold" color="var(--color-danger)" />
-                                  </button>
+                                  {!(
+                                    (currentUser?.web_role === 'bureau_agent' || currentUser?.web_role === 'bureau' || currentUser?.web_role === 'agent_de_bureau') &&
+                                    (agent.role === 'admin' || agent.role === 'super_admin' || agent.role === 'admin_organisation')
+                                  ) && (
+                                    <button
+                                      className="agents-icon-btn agents-icon-btn-edit"
+                                      onClick={(e) => openEdit(agent, e)}
+                                      title="Modifier"
+                                    >
+                                      <Edit2 size={16} variant="Bold" color="var(--color-primary)" />
+                                    </button>
+                                  )}
+                                  {(!(currentUser?.web_role === 'bureau_agent' || currentUser?.web_role === 'bureau' || currentUser?.web_role === 'agent_de_bureau') || agent.role === 'terrain') && (
+                                    <button
+                                      className="agents-icon-btn agents-icon-btn-delete"
+                                      onClick={(e) => openDelete(agent, e)}
+                                      title="Supprimer"
+                                    >
+                                      <Trash size={16} variant="Bold" color="var(--color-danger)" />
+                                    </button>
+                                  )}
                                 </div>
                               </td>
                             </tr>

@@ -2,24 +2,16 @@ import React, { useMemo } from 'react';
 import { NotificationBing, Activity, TickCircle, CloseCircle } from 'iconsax-react';
 import './metrics-cards.css';
 
-export const MetricsCards = ({ incidents = [] }) => {
-  // Calculer les statistiques à partir des incidents réels
+export const MetricsCards = ({ stats: statsData }) => {
+  // Extraire les statistiques fournies par le backend
   const stats = useMemo(() => {
-    const normalizedIncidents = Array.isArray(incidents)
-      ? incidents
-      : (incidents && Array.isArray(incidents.results) ? incidents.results : []);
-
-    const resolved = normalizedIncidents.filter(inc => inc.etat === 'resolved' && !inc.is_deleted).length;
-    const takenIntoAccount = normalizedIncidents.filter(inc => 
-      inc.etat === 'taken_into_account' && !inc.is_deleted
-    ).length;
-    const unresolved = normalizedIncidents.filter(inc => 
-      inc.etat === 'declared' && !inc.is_deleted
-    ).length;
-    const total = normalizedIncidents.filter(inc => !inc.is_deleted).length;
+    const total = statsData?.total_alerts ?? 0;
+    const resolved = statsData?.resolved_incidents ?? 0;
+    const takenIntoAccount = statsData?.active_responses ?? 0;
+    const unresolved = total - resolved - takenIntoAccount;
 
     return { total, resolved, takenIntoAccount, unresolved };
-  }, [incidents]);
+  }, [statsData]);
 
   const metrics = [
     {

@@ -10,7 +10,7 @@ import { SuggestOrgModal } from './modal/SuggestOrgModal';
 import { DeleteTaskModal } from './modal/DeleteTaskModal';
 import { AgentReportsModal } from './modal/AgentReportsModal';
 import { NotFound } from '../not-found';
-import { getCollaborationService } from '../collaboration/service/collaboration_service';
+import { getCollaborationService, getCollaborationsService } from '../collaboration/service/collaboration_service';
 import { getOrganisationsService, formatOrganisation } from '../organisations/service/organisation_service';
 import { BlurryImage } from '../../components/atoms/BlurryImage';
 import { API_URL_BASE } from '../../config/api_url_base';
@@ -233,6 +233,7 @@ const CustomAudioPlayer = ({ id, src, activeAudioId, setActiveAudioId }) => {
 };
 
 export const CollaborationDetail = () => {
+
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -336,7 +337,12 @@ export const CollaborationDetail = () => {
     }
   );
 
-  console.log(collaborationData);
+  console.log("[COLLAB_DETAIL] SWR Debug:", {
+    idFromUrl: id,
+    collaborationData,
+    collaborationError,
+    isLoading
+  });
 
 
   // Récupérer l'incidentId depuis la collaboration
@@ -402,7 +408,7 @@ export const CollaborationDetail = () => {
       setHasMoreMessages(rawMessagesData.has_more || false);
       setNextBeforeId(rawMessagesData.next_before || null);
       console.log('[Chat] Chargement initial:', apiResults.length, 'messages, has_more:', rawMessagesData.has_more);
-      
+
       // Scroller vers le bas après le chargement initial
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -412,14 +418,14 @@ export const CollaborationDetail = () => {
       const newMessages = apiResults.filter(
         newMsg => !currentMessages.some(existingMsg => existingMsg.id === newMsg.id)
       );
-      
+
       if (newMessages.length > 0) {
         console.log('[Chat] Nouveaux messages reçus:', newMessages.length);
         setAllMessages(prev => {
           const prevArray = Array.isArray(prev) ? prev : [];
           return [...prevArray, ...newMessages];
         });
-        
+
         setTimeout(() => {
           messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
         }, 100);
@@ -474,7 +480,7 @@ export const CollaborationDetail = () => {
         try {
           const data = JSON.parse(event.data);
           console.log('[WS] Message reçu:', data);
-          
+
           if (data.type === 'task_event' && data.action === 'delete' && data.task_id) {
             console.log('[WS] Suppression de tâche reçue en temps réel:', data.task_id);
             mutateTasks(prev => {
@@ -1277,14 +1283,14 @@ export const CollaborationDetail = () => {
 
   const notifyTaskChange = (action, taskId) => {
     console.log('[WS] notifyTaskChange appelé:', { action, taskId });
-    
+
     if (!tasksSocketRef.current) {
       console.warn('[WS] tasksSocketRef.current est null');
       return;
     }
-    
+
     console.log('[WS] État du socket:', tasksSocketRef.current.readyState, 'OPEN=', WebSocket.OPEN);
-    
+
     if (tasksSocketRef.current.readyState === WebSocket.OPEN) {
       try {
         const message = { type: 'task_event', action, task_id: taskId };
@@ -2229,32 +2235,32 @@ export const CollaborationDetail = () => {
                         <div className="collab-discussion-messages" ref={messagesContainerRef}>
                           {/* Indicateur de chargement de messages plus anciens */}
                           {isLoadingMoreMessages && (
-                            <div style={{ 
-                              display: 'flex', 
-                              justifyContent: 'center', 
+                            <div style={{
+                              display: 'flex',
+                              justifyContent: 'center',
                               padding: '12px',
                               color: 'var(--color-text-secondary)',
                               fontSize: '13px',
                               gap: '8px',
                               alignItems: 'center'
                             }}>
-                              <div style={{ 
-                                width: '16px', 
-                                height: '16px', 
-                                border: '2px solid var(--color-border)', 
-                                borderTopColor: 'var(--color-primary)', 
-                                borderRadius: '50%', 
-                                animation: 'spin 0.8s linear infinite' 
+                              <div style={{
+                                width: '16px',
+                                height: '16px',
+                                border: '2px solid var(--color-border)',
+                                borderTopColor: 'var(--color-primary)',
+                                borderRadius: '50%',
+                                animation: 'spin 0.8s linear infinite'
                               }} />
                               Chargement des messages...
                             </div>
                           )}
-                          
+
                           {/* Bouton "Charger plus de messages" (fonctionne même sans scroll) */}
                           {!isLoadingMoreMessages && hasMoreMessages && messages.length > 0 && (
-                            <div style={{ 
-                              display: 'flex', 
-                              justifyContent: 'center', 
+                            <div style={{
+                              display: 'flex',
+                              justifyContent: 'center',
                               padding: '8px 12px'
                             }}>
                               <button
@@ -2275,7 +2281,7 @@ export const CollaborationDetail = () => {
                               </button>
                             </div>
                           )}
-                          
+
                           {messages.length === 0 ? (
                             <div className="collab-discussion-empty">
                               <Send2 size={48} color="var(--color-text-secondary)" />
@@ -3243,7 +3249,7 @@ export const CollaborationDetail = () => {
                         : { ...prev, results: list.filter(t => t.id !== taskId) };
                     }, { revalidate: false });
                   }
-                  
+
                   try {
                     await deleteTaskService(collaborationData?.incident, taskId);
                     notifyTaskChange('delete', taskId);

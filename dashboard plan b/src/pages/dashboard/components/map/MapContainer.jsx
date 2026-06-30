@@ -4,7 +4,8 @@ import useSWR from 'swr';
 import Map, { Marker } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
-import { getIncidentService, getIncidentsService, getResolvedIncidentsService } from '../../../incident/service/incident_service';
+import { getIncidentService } from '../../../incident/service/incident_service';
+import { getOrgInternalIncidentsService } from '../../../mes-interventions/service/mes_interventions_service';
 import { BlurryImage } from '../../../../components/atoms/BlurryImage';
 import './map.css';
 
@@ -204,34 +205,15 @@ export const MapContainer = ({ incidents = [], isLoading = false }) => {
   // Utiliser useSWR pour récupérer les incidents quand "Mes incidents" est sélectionné
   const { data: orgIncidentsData, isLoading: isLoadingOrgIncidents } = useSWR(
     ownershipFilter === 'mine' ? '/org-incidents' : null,
-    () => getIncidentsService(),
+    () => getOrgInternalIncidentsService(),
     {
-      revalidateOnFocus: false,
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
       onError: (err) => {
         console.error('[MAP] Erreur chargement incidents organisation:', err);
-      },
-      onSuccess: (data) => {
-        console.log('[MAP] Incidents organisation chargés:', data);
       }
     }
   );
-
-  /*
-  // Utiliser useSWR pour récupérer les incidents résolus quand "Résolus" est sélectionné
-  const { data: resolvedIncidentsData, isLoading: isLoadingResolvedIncidents } = useSWR(
-    statusFilter === 'resolved' ? '/resolved-incidents' : null,
-    () => getResolvedIncidentsService(),
-    {
-      revalidateOnFocus: false,
-      onError: (err) => {
-        console.error('[MAP] Erreur chargement incidents résolus:', err);
-      },
-      onSuccess: (data) => {
-        console.log('[MAP] Incidents résolus chargés:', data);
-      }
-    }
-  );
-  */
 
   // S'assurer que incidents est un tableau (gestion de la pagination de l'API)
   const baseIncidents = ownershipFilter === 'mine' ? (orgIncidentsData || []) : incidents;
@@ -244,7 +226,6 @@ export const MapContainer = ({ incidents = [], isLoading = false }) => {
   console.log('[MAP] statusFilter:', statusFilter);
   console.log('[MAP] currentUserId:', currentUserId);
   console.log('[MAP] Prop incidents:', incidents);
-  console.log('[MAP] SWR orgIncidentsData:', orgIncidentsData);
   console.log('[MAP] baseIncidents résolu:', baseIncidents);
   console.log('[MAP] normalizedIncidents:', normalizedIncidents);
 
@@ -279,12 +260,9 @@ export const MapContainer = ({ incidents = [], isLoading = false }) => {
   }).filter((inc) => {
     // 2. Filtre d'attribution (Tous vs Mes incidents)
     if (ownershipFilter === 'mine') {
-      let takenById = inc?.taken_by;
-
-      const takenBy = takenById !== undefined ? parseInt(takenById) : null;
-      const me = parseInt(currentUserId);
-      if (isNaN(takenBy) || isNaN(me) || takenBy !== me) {
-        console.log(`[MAP] Incident ID ${inc.id} ("${inc.title}") rejeté: Filtre 'mine' actif mais taken_by (${takenById} -> ${takenBy}) ne correspond pas à l'utilisateur actuel (${currentUserId} -> ${me})`);
+      const takenBy = inc?.taken_by;
+      if (!takenBy || !currentUserId || String(takenBy).toLowerCase() !== String(currentUserId).toLowerCase()) {
+        console.log(`[MAP] Incident ID ${inc.id} ("${inc.title}") rejeté: Filtre 'mine' actif mais taken_by (${takenBy}) ne correspond pas à l'utilisateur actuel (${currentUserId})`);
         return false;
       }
     }
@@ -776,7 +754,13 @@ export const MapContainer = ({ incidents = [], isLoading = false }) => {
                     <button
                       type="button"
                       className="btn btn-primary"
-                      onClick={() => navigate(`/incidents/${selectedIncident.id}`)}
+                      onClick={() => {
+                        console.log(`/incidents/${selectedIncident.id}`);
+                        console.log(selectedIncident);
+
+                        // return
+                        navigate(`/incidents/${selectedIncident.id}`, { state: "dashboard" })
+                      }}
                     >
                       Savoir plus
                     </button>

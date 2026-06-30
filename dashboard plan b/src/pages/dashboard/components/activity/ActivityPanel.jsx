@@ -2,12 +2,12 @@ import React from 'react';
 import { TickCircle, Danger, People, DocumentText, Camera, Warning2, InfoCircle, MessageText, Task, Archive } from 'iconsax-react';
 import './activity-panel.css';
 
-export const ActivityPanel = () => {
+export const ActivityPanel = ({ activities: propActivities, isLoading, nextUrl, onLoadMore, isLoadingMore }) => {
   // Fonction pour obtenir l'icône selon le type d'activité
   const getActivityIcon = (type, severity) => {
     const iconProps = { size: 20, variant: "Bold" };
-    
-    switch(type) {
+
+    switch (type) {
       case 'incident-taken':
         return <DocumentText {...iconProps} color="#3AA2DD" />;
       case 'incident-resolved':
@@ -33,98 +33,55 @@ export const ActivityPanel = () => {
     }
   };
 
-  const activities = [
-    {
-      id: 1,
-      type: 'incident-taken',
-      title: 'La mairie de la commune IV',
-      description: 'a pris en compte un incident.',
-      time: 'À l\'instant',
-      severity: 'info',
-      unread: true
-    },
-    {
-      id: 2,
-      type: 'incident-resolved',
-      title: 'L\'Unicef',
-      description: 'a résolu un incident.',
-      time: 'Il y a 5 min',
-      severity: 'success',
-      unread: true
-    },
-    {
-      id: 3,
-      type: 'collaboration',
-      title: 'Le GEDEFOR',
-      description: 'demande une collaboration avec la DNACPN sur un incident.',
-      time: 'Il y a 12 min',
-      severity: 'warning',
-      unread: true
-    },
-    {
-      id: 4,
-      type: 'report',
-      title: 'Un Agent terrain',
-      description: 'a soumis un nouveau rapport photo à Kayes.',
-      time: 'Il y a 26 min',
-      severity: 'info',
-      unread: true
-    },
-    {
-      id: 5,
-      type: 'alert',
-      title: 'Alerte IA:',
-      description: 'Détection de fumée anormale dans le secteur de Baoulé.',
-      time: 'Il y a 32 min',
-      severity: 'danger',
-      unread: false
-    },
-    {
-      id: 6,
-      type: 'message',
-      title: 'La DNACPN',
-      description: 'a envoyé un message concernant le rapport de Kayes.',
-      time: 'Il y a 45 min',
-      severity: 'info',
-      unread: false
-    },
-    {
-      id: 7,
-      type: 'task',
-      title: 'Un superviseur',
-      description: 'a validé une tâche de surveillance.',
-      time: 'Il y a 1h',
-      severity: 'success',
-      unread: false
-    },
-    {
-      id: 8,
-      type: 'warning',
-      title: 'Système',
-      description: 'Niveau d\'alerte élevé détecté dans la zone de Sikasso.',
-      time: 'Il y a 1h 30min',
-      severity: 'warning',
-      unread: false
-    },
-    {
-      id: 9,
-      type: 'incident-taken',
-      title: 'Le Ministère',
-      description: 'a pris en charge un incident prioritaire.',
-      time: 'Il y a 2h',
-      severity: 'info',
-      unread: false
-    },
-    {
-      id: 10,
-      type: 'archive',
-      title: 'Système',
-      description: 'a archivé 3 incidents résolus.',
-      time: 'Il y a 3h',
-      severity: 'info',
-      unread: false
+  const formatTimeAgo = (isoString) => {
+    if (!isoString) return '';
+    try {
+      const date = new Date(isoString);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      if (diffMins < 1) return "À l'instant";
+      if (diffMins < 60) return `Il y a ${diffMins} min`;
+      const diffHours = Math.floor(diffMins / 60);
+      if (diffHours < 24) return `Il y a ${diffHours}h`;
+      return date.toLocaleDateString('fr-FR');
+    } catch (e) {
+      return '';
     }
-  ];
+  };
+
+  const getSeverityFromAction = (action = '') => {
+    const act = action.toLowerCase();
+    if (act.includes('résolu') || act.includes('valide') || act.includes('accept')) return 'success';
+    if (act.includes('refus') || act.includes('supprim') || act.includes('alert') || act.includes('danger')) return 'danger';
+    if (act.includes('demand') || act.includes('invit') || act.includes('propos') || act.includes('warning')) return 'warning';
+    return 'info';
+  };
+
+  const getTypeFromAction = (action = '') => {
+    const act = action.toLowerCase();
+    if (act.includes('pris en compte') || act.includes('charge')) return 'incident-taken';
+    if (act.includes('résolu') || act.includes('clôt')) return 'incident-resolved';
+    if (act.includes('collab') || act.includes('organis')) return 'collaboration';
+    if (act.includes('rapport') || act.includes('terrain') || act.includes('photo')) return 'report';
+    if (act.includes('tâche') || act.includes('valid')) return 'task';
+    if (act.includes('alert') || act.includes('danger')) return 'alert';
+    return 'info';
+  };
+
+
+
+  const activities = (propActivities || []).map((act) => {
+    return {
+      id: act.id,
+      type: getTypeFromAction(act.action || ''),
+      title: act.actor || act.user_name || act.organisation_name || '',
+      description: act.action || '',
+      time: formatTimeAgo(act.created_at || act.timeStamp),
+      severity: getSeverityFromAction(act.action || ''),
+      unread: false
+    };
+  });
 
   const unreadCount = activities.filter(a => a.unread).length;
 
@@ -146,29 +103,57 @@ export const ActivityPanel = () => {
       </div>
 
       <div className="activity-list">
-        {activities.map((activity) => (
-          <div 
-            key={activity.id} 
-            className={`activity-item activity-${activity.severity} ${activity.unread ? 'unread' : ''}`}
-          >
-            <div className="activity-icon-wrapper">
-              {getActivityIcon(activity.type, activity.severity)}
-            </div>
-            <div className="activity-content">
-              <p className="activity-text">
-                <strong>{activity.title}</strong> {activity.description}
-              </p>
-              <span className="activity-time">{activity.time}</span>
-            </div>
-            {activity.unread && <div className="activity-unread-dot"></div>}
+        {isLoading ? (
+          <div className="d-flex flex-column align-items-center justify-content-center p-4 text-center">
+            <div className="spinner-border text-primary spinner-border-sm" role="status" />
+            <span className="text-muted mt-2" style={{ fontSize: '11px' }}>Chargement du flux...</span>
           </div>
-        ))}
-      </div>
+        ) : activities.length === 0 ? (
+          <div className="text-center p-4 text-muted" style={{ fontSize: '12px' }}>
+            Aucune activité récente.
+          </div>
+        ) : (
+          <>
+            {activities.map((activity) => (
+              <div
+                key={activity.id}
+                className={`activity-item activity-${activity.severity} ${activity.unread ? 'unread' : ''}`}
+              >
+                <div className="activity-icon-wrapper">
+                  {getActivityIcon(activity.type, activity.severity)}
+                </div>
+                <div className="activity-content">
+                  <p className="activity-text">
+                    <strong>{activity.title}</strong> {activity.description}
+                  </p>
+                  <span className="activity-time">{activity.time}</span>
+                </div>
+                {activity.unread && <div className="activity-unread-dot"></div>}
+              </div>
+            ))}
 
-      <div className="activity-footer">
-        <button className="activity-footer-btn">
-          Voir tout l'historique
-        </button>
+            {nextUrl && (
+              <div className="d-flex justify-content-center mt-3 mb-2">
+                <button
+                  type="button"
+                  className="btn btn-link"
+                  onClick={onLoadMore}
+                  disabled={isLoadingMore}
+
+                >
+                  {isLoadingMore ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm" role="status" style={{ width: '10px', height: '10px' }} />
+                      Chargement...
+                    </>
+                  ) : (
+                    'Afficher plus'
+                  )}
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

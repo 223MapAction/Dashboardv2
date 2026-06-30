@@ -3,7 +3,7 @@ import useSWR from 'swr';
 import { useSidebarState } from '../../hooks/useSidebarState';
 import { Header, Sidebar } from '../../components/layout';
 import { IncidentStats } from '../dashboard/components/stats/IncidentStats';
-import { getIncidentsService } from '../dashboard/service/dashboard_service';
+import { getDashboardStatsService } from '../dashboard/service/dashboard_service';
 import { ShimmerThumbnail, ShimmerTitle } from 'react-shimmer-effects';
 import './incident-stats-page.css';
 
@@ -15,21 +15,21 @@ export const IncidentStatsPage = () => {
     setCollapsed: setSidebarCollapsed,
   } = useSidebarState();
 
-  // Récupérer tous les incidents
-  const { data: incidents = [], isLoading, error } = useSWR(
-    '/incidents/all',
-    () => getIncidentsService('all'),
+  // Récupérer les statistiques du tableau de bord
+  const { data: stats, isLoading, error } = useSWR(
+    '/MapApi/incidents/dashboard-stats/',
+    () => getDashboardStatsService(),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: true,
-      dedupingInterval: 60000,
+      dedupingInterval: 30000,
       errorRetryCount: 3,
       errorRetryInterval: 2000,
       onError: (err) => {
-        console.error('[STATS] Erreur chargement incidents:', err);
+        console.error('[STATS] Erreur chargement statistiques:', err);
       },
       onSuccess: (data) => {
-        console.log('[STATS] Incidents chargés:', data);
+        console.log('[STATS] Statistiques chargées:', data);
       }
     }
   );
@@ -71,7 +71,7 @@ export const IncidentStatsPage = () => {
               <button onClick={() => window.location.reload()}>Réessayer</button>
             </div>
           ) : (
-            <IncidentStats incidents={incidents} />
+            <IncidentStats stats={stats} />
           )}
         </main>
       </div>

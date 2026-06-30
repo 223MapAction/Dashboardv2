@@ -13,6 +13,7 @@ import { getOrgInternalIncidentsService, toggleIncidentPublicService } from './s
 import { getIncidentAssignmentsService } from '../incident/service/incident_service';
 import { BlurryImage } from '../../components/atoms/BlurryImage';
 import Pagination from '../../components/molecules/Pagination';
+import debounce from 'lodash.debounce';
 import './mes-interventions.css';
 
 
@@ -229,22 +230,53 @@ const MesInterventionsContent = () => {
     setMutateIncidents
   } = useMesInterventionsModalContext();
 
+  const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [sourceFilter, setSourceFilter] = useState('agents_or_internal');
 
-  const { data, error, isLoading, mutate } = useSWR(
-    ['/MapApi/org-incidents', sourceFilter],
-    () => getOrgInternalIncidentsService(sourceFilter)
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
+
+  // Debounce search input de 300ms
+  const debouncedSetSearch = useMemo(
+    () => debounce((val) => setSearch(val), 300),
+    []
   );
+
+  React.useEffect(() => {
+    return () => {
+      debouncedSetSearch.cancel();
+    };
+  }, [debouncedSetSearch]);
+
+  // Reset page to 1 on filter/search change
+  React.useEffect(() => {
+    setPage(1);
+  }, [search, statusFilter, sourceFilter]);
+
+  const mappedStatus = useMemo(() => {
+    if (statusFilter === 'En cours') return 'taken_into_account';
+    if (statusFilter === 'terminer') return 'resolved';
+    return '';
+  }, [statusFilter]);
+
+  const { data, error, isLoading, mutate } = useSWR(
+    ['/MapApi/org-incidents', sourceFilter, mappedStatus, search, page],
+    () => getOrgInternalIncidentsService({
+      sourceFilter,
+      status: mappedStatus,
+      search,
+      page,
+      page_size: pageSize
+    })
+  );
+
   React.useEffect(() => {
     if (setMutateIncidents) {
       setMutateIncidents(() => mutate);
     }
   }, [mutate, setMutateIncidents]);
-
-
-
 
   const incidents = useMemo(() => {
     const rawList = data?.results || (Array.isArray(data) ? data : []);
@@ -256,41 +288,10 @@ const MesInterventionsContent = () => {
     openReportsModal(incident);
   };
 
-  // Filtres locaux (recherche et statut)
-  const filteredIncidents = useMemo(() => {
-    return incidents.filter((i) => {
-      const matchesSearch =
-        !search ||
-        i.title?.toLowerCase().includes(search.toLowerCase()) ||
-        i.location?.toLowerCase().includes(search.toLowerCase()) ||
-        i.description?.toLowerCase().includes(search.toLowerCase());
-
-      const matchesStatus = !statusFilter || (
-        statusFilter === 'En cours'
-          ? (i.etat === 'declared' || i.etat === 'taken_into_account' || i.etat === 'in_progress')
-          : i.etat === 'resolved'
-      );
-
-      return matchesSearch && matchesStatus;
-    });
-  }, [incidents, search, statusFilter]);
-
-  const [page, setPage] = useState(1);
-  const pageSize = 20;
-
-  // Reset page to 1 on filter/search change
-  React.useEffect(() => {
-    setPage(1);
-  }, [search, statusFilter, sourceFilter]);
-
-  const pagedIncidents = useMemo(() => {
-    const startIndex = (page - 1) * pageSize;
-    return filteredIncidents.slice(startIndex, startIndex + pageSize);
-  }, [filteredIncidents, page, pageSize]);
-
   const handleRowClick = (incident) => {
-    const collabId = incident.my_collaboration?.id;
-
+    const collabId = incident?.my_collaboration?.id;
+    console.log("l'id de la collaboration : ", collabId);
+    // return
     navigate(`/collaboration-detail/${collabId}`, {
       state: { from: '/mes-interventions' }
     });
@@ -334,8 +335,11 @@ const MesInterventionsContent = () => {
               <input
                 type="text"
                 placeholder="Rechercher par titre, description, localisation..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                value={searchInput}
+                onChange={(e) => {
+                  setSearchInput(e.target.value);
+                  debouncedSetSearch(e.target.value);
+                }}
               />
             </div>
 
@@ -369,7 +373,7 @@ const MesInterventionsContent = () => {
           {/* Affichage des données / Chargement */}
           {isLoading ? (
             <TableSkeleton />
-          ) : filteredIncidents.length === 0 ? (
+          ) : incidents.length === 0 ? (
             <div className="mes-interventions-empty">
               <p className="h1 mb-p pb-0">Aucun incident</p>
               <p className="mt-2">Aucun incident assigné ne correspond à vos critères.</p>
@@ -393,7 +397,7 @@ const MesInterventionsContent = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {pagedIncidents?.map((incident) => {
+                    {incidents?.map((incident) => {
                       return (
                         <tr
                           key={incident.id}
@@ -524,7 +528,7 @@ const MesInterventionsContent = () => {
               <Pagination
                 page={page}
                 pageSize={pageSize}
-                count={filteredIncidents.length}
+                count={data?.count ?? (Array.isArray(data) ? data.length : 0)}
                 onChange={setPage}
               />
             </>

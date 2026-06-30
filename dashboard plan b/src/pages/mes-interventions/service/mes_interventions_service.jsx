@@ -7,10 +7,13 @@ import { API_URL_BASE } from '../../../config/api_url_base';
  * @param {string} filter - 'agents_or_internal' | 'internal' | 'agents'
   * @returns {Promise<Object>}
  */
-export const getOrgInternalIncidentsService = async (filter = 'agents_or_internal') => {
+export const getOrgInternalIncidentsService = async (filters = {}) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const params = {};
+
+    // Determine filter mode/source (default to 'agents_or_internal' or support string/object parameter)
+    const filter = typeof filters === 'string' ? filters : (filters.sourceFilter || 'agents_or_internal');
     if (filter === 'internal') {
       params.mode = 'internal';
     } else if (filter === 'agents') {
@@ -18,10 +21,26 @@ export const getOrgInternalIncidentsService = async (filter = 'agents_or_interna
     } else {
       params.source = filter;
     }
+
+    if (filters && typeof filters === 'object') {
+      if (filters.status) {
+        params.status = filters.status;
+      }
+      if (filters.search) {
+        params.search = filters.search;
+      }
+      if (filters.page) {
+        params.page = filters.page;
+      }
+      if (filters.page_size) {
+        params.page_size = filters.page_size;
+      }
+    }
+
     const response = await axios.get(`${API_URL_BASE}/MapApi/org-incidents/`, {
       params
     });
-    console.log('[MesInterventions] Incidents internes de l\'organisation récupérés:', response.data);
+    console.log('[MesInterventions] Incidents internes de l\'organisation récupérés:', params, response.data);
     return response.data;
   } catch (error) {
     console.error('[MesInterventions] Erreur récupération incidents internes org:', error.response?.status, error.response?.data);

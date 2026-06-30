@@ -4,14 +4,19 @@ import { API_URL_BASE } from '../../../config/api_url_base';
 /**
  * Récupère toutes les notifications de l'utilisateur
  */
-export const getNotifications = async () => {
+export const getNotifications = async (urlOrPageSize) => {
   try {
     const axios = authService.createAuthenticatedAxios();
-    const response = await axios.get(`${API_URL_BASE}/MapApi/notifications/`);
-    
-    return Array.isArray(response.data) 
-      ? response.data 
-      : response.data.data || response.data.results || [];
+    let url = `${API_URL_BASE}/MapApi/notifications/`;
+    if (typeof urlOrPageSize === 'string' && urlOrPageSize.startsWith('http')) {
+      url = urlOrPageSize;
+    } else if (urlOrPageSize) {
+      url = `${url}?page_size=${urlOrPageSize}`;
+    } else {
+      url = `${url}?page_size=15`;
+    }
+    const response = await axios.get(url);
+    return response.data;
   } catch (error) {
     console.error('[NOTIFICATIONS] Erreur:', error.response?.status, error.response?.data);
     throw error;

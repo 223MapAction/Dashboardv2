@@ -1,88 +1,77 @@
 import React, { useMemo } from 'react';
-import { Location, Chart2, Warning2, ArrowRight2 } from 'iconsax-react';
+import { Location, Chart2, Warning2, ArrowRight2, Clock } from 'iconsax-react';
 import './stats-widgets.css';
 
-// Détermine la sévérité d'un incident
-const getSeverity = (incident) => {
-  const baseSeverity = incident.base_severity ?? incident.incident_details?.prediction_details?.base_severity;
-  if (baseSeverity !== undefined && baseSeverity !== null) {
-    const val = parseFloat(baseSeverity);
-    if (val >= 7) return 'high';
-    if (val >= 4) return 'medium';
-    return 'low';
+const getStatusLabel = (etat) => {
+  switch (etat) {
+    case 'resolved': return 'Résolu';
+    case 'taken_into_account':
+    case 'in_progress': return 'En cours';
+    case 'declared': return 'Déclaré';
+    default: return etat || 'Déclaré';
   }
-  const badges = (incident.badges || []).map((b) => b.variant);
-  if (badges.includes('critical') || badges.includes('high') || badges.includes('expert-needed')) return 'high';
-  if (badges.includes('in-progress') || badges.includes('medium')) return 'medium';
-  return 'low';
 };
 
-export const StatsWidgets = ({ incidents = [] }) => {
-  // Normaliser les incidents
-  const normalizedIncidents = useMemo(() => {
-    const data = Array.isArray(incidents)
-      ? incidents
-      : (incidents && Array.isArray(incidents.results) ? incidents.results : []);
-    return data.filter(inc => !inc.is_deleted);
-  }, [incidents]);
+const getStatusStyle = (etat) => {
+  switch (etat) {
+    case 'resolved':
+      return { backgroundColor: 'rgba(34, 197, 94, 0.1)', color: '#22C55E' };
+    case 'taken_into_account':
+    case 'in_progress':
+      return { backgroundColor: 'rgba(245, 158, 11, 0.1)', color: '#F59E0B' };
+    case 'declared':
+    default:
+      return { backgroundColor: 'rgba(107, 114, 128, 0.1)', color: '#6B7280' };
+  }
+};
 
+export const StatsWidgets = ({ stats }) => {
   // Calculer les statistiques par localité
   const locationStats = useMemo(() => {
-    const locationMap = {};
-    normalizedIncidents.forEach(inc => {
-      const zone = inc.zone || 'Non spécifié';
-      locationMap[zone] = (locationMap[zone] || 0) + 1;
-    });
-    return Object.entries(locationMap)
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5);
-  }, [normalizedIncidents]);
+    if (stats?.by_zone && Array.isArray(stats.by_zone)) {
+      return stats.by_zone.map(z => ({ name: z.name, count: z.count })).slice(0, 5);
+    }
+    return [];
+  }, [stats]);
 
-  // Calculer le top 5 des incidents par catégorie/titre
-  const topIncidents = useMemo(() => {
-    const categoryMap = {};
-    normalizedIncidents.forEach(inc => {
-      const category = inc.title || 'Incident anonyme';
-      categoryMap[category] = (categoryMap[category] || 0) + 1;
-    });
-    const total = normalizedIncidents.length || 1;
-    return Object.entries(categoryMap)
-      .map(([name, count]) => ({
-        name: name.toUpperCase(),
-        percentage: Math.round((count / total) * 100),
-        count
-      }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5);
-  }, [normalizedIncidents]);
+  // Récupérer les activités récentes
+  const recentActivities = useMemo(() => {
+    if (stats?.recent_activity && Array.isArray(stats.recent_activity)) {
+      return stats.recent_activity.slice(0, 5);
+    }
+    return [];
+  }, [stats]);
 
   // Calculer les statistiques par gravité
   const severityData = useMemo(() => {
-    const severityMap = { high: 0, medium: 0, low: 0 };
-    normalizedIncidents.forEach(inc => {
-      const severity = getSeverity(inc);
-      severityMap[severity]++;
-    });
-    const total = normalizedIncidents.length || 1;
+    if (stats?.by_severity) {
+      const high = stats.by_severity.high?.percentage ?? 0;
+      const medium = stats.by_severity.medium?.percentage ?? 0;
+      const low = stats.by_severity.low?.percentage ?? 0;
+      return [
+        {
+          label: 'Élevée',
+          percentage: high,
+          color: '#EF4444'
+        },
+        {
+          label: 'Moyenne',
+          percentage: medium,
+          color: '#F97316'
+        },
+        {
+          label: 'Faible',
+          percentage: low,
+          color: '#FACC15'
+        }
+      ];
+    }
     return [
-      {
-        label: 'Élevée',
-        percentage: Math.round((severityMap.high / total) * 100),
-        color: '#EF4444'
-      },
-      {
-        label: 'Moyenne',
-        percentage: Math.round((severityMap.medium / total) * 100),
-        color: '#F97316'
-      },
-      {
-        label: 'Faible',
-        percentage: Math.round((severityMap.low / total) * 100),
-        color: '#FACC15'
-      }
+      { label: 'Élevée', percentage: 0, color: '#EF4444' },
+      { label: 'Moyenne', percentage: 0, color: '#F97316' },
+      { label: 'Faible', percentage: 0, color: '#FACC15' }
     ];
-  }, [normalizedIncidents]);
+  }, [stats]);
 
   return (
     <div className="stats-widgets">
@@ -102,31 +91,56 @@ export const StatsWidgets = ({ incidents = [] }) => {
         </div>
       </div>
 
-      {/* Top 5 Incidents */}
+      {/* Activité récente */}
       <div className="stats-widget">
         <div className="widget-header">
-          <Chart2 size={18} variant="Bold" />
-          <h3>Top 5 Incidents</h3>
+          <Clock size={18} variant="Bold" />
+          <h3>Activité récente</h3>
         </div>
-        <div className="widget-content">
-          {topIncidents.map((incident, index) => (
-            <div key={index} className="incident-row">
-              <div className="incident-info">
-                <span className="incident-label">{incident.name}</span>
-                <span className="incident-percentage">{incident.percentage}%</span>
+        <div className="widget-content" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {recentActivities.length > 0 ? (
+            recentActivities.map((activity) => (
+              <div key={activity.id} className="recent-activity-row" style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '10px 0',
+                borderBottom: '1px solid var(--color-border)'
+              }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <span
+                    className='body' style={{ fontWeight: "500" }} >
+                    {activity.title}
+                  </span>
+                  <span
+                    className='body-small '
+                    style={{ color: 'var(--color-text-secondary)' }}>
+                    {activity.zone} • {new Date(activity.created_at).toLocaleDateString('fr-FR', {
+                      day: 'numeric',
+                      month: 'short',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </span>
+                </div>
+                <span style={{
+                  fontSize: '9px',
+                  padding: '3px 8px',
+                  borderRadius: '12px',
+                  fontWeight: '600',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.03em',
+                  ...getStatusStyle(activity.etat)
+                }}>
+                  {getStatusLabel(activity.etat)}
+                </span>
               </div>
-              <div className="progress-bar">
-                <div
-                  className="progress-fill"
-                  style={{
-                    width: `${incident.percentage}%`,
-                    backgroundColor: 'var(--color-primary)'
-                  }}
-                />
-              </div>
+            ))
+          ) : (
+            <div className="text-center p-3 text-muted" style={{ fontSize: '11px' }}>
+              Aucune activité récente.
             </div>
-          ))}
-
+          )}
         </div>
       </div>
 
