@@ -6,14 +6,19 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
 import { getIncidentService } from '../../../incident/service/incident_service';
 import { getOrgInternalIncidentsService } from '../../../mes-interventions/service/mes_interventions_service';
+import { getIncidentsNotResolvedService, getIncidentsResolvedService } from '../../service/dashboard_service';
 import { BlurryImage } from '../../../../components/atoms/BlurryImage';
 import './map.css';
 
 // Token Mapbox depuis les variables d'environnement
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
-// Détermine la sévérité d'un incident à partir de base_severity (0 à 10) ou de ses badges
+// Détermine la sévérité d'un incident à partir de sa sévérité directe, base_severity (0 à 10) ou de ses badges
 const getSeverity = (project) => {
+  if (project.severity === 'high' || project.severity === 'medium' || project.severity === 'low') {
+    return project.severity;
+  }
+
   const baseSeverity = project.base_severity ?? project.incident_details?.prediction_details?.base_severity;
   if (baseSeverity !== undefined && baseSeverity !== null) {
     const val = parseFloat(baseSeverity);
@@ -202,6 +207,26 @@ export const MapContainer = ({ incidents = [], isLoading = false }) => {
     }
   );
 
+  // Utiliser useSWR pour récupérer les incidents non résolus (actifs)
+  const { data: activeIncidentsData, isLoading: isLoadingActiveIncidents } = useSWR(
+    ownershipFilter === 'all' && statusFilter === 'active' ? '/map-active-incidents' : null,
+    () => getIncidentsNotResolvedService(),
+    {
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true
+    }
+  );
+
+  // Utiliser useSWR pour récupérer les incidents résolus
+  const { data: resolvedIncidentsData, isLoading: isLoadingResolvedIncidents } = useSWR(
+    ownershipFilter === 'all' && statusFilter === 'resolved' ? '/map-resolved-incidents' : null,
+    () => getIncidentsResolvedService(),
+    {
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true
+    }
+  );
+
   // Utiliser useSWR pour récupérer les incidents quand "Mes incidents" est sélectionné
   const { data: orgIncidentsData, isLoading: isLoadingOrgIncidents } = useSWR(
     ownershipFilter === 'mine' ? '/org-incidents' : null,
@@ -216,18 +241,15 @@ export const MapContainer = ({ incidents = [], isLoading = false }) => {
   );
 
   // S'assurer que incidents est un tableau (gestion de la pagination de l'API)
-  const baseIncidents = ownershipFilter === 'mine' ? (orgIncidentsData || []) : incidents;
+  const baseIncidents = ownershipFilter === 'mine'
+    ? (orgIncidentsData || [])
+    : (statusFilter === 'resolved' ? (resolvedIncidentsData || []) : (activeIncidentsData || incidents));
+
   const normalizedIncidents = Array.isArray(baseIncidents)
     ? baseIncidents
     : (baseIncidents && Array.isArray(baseIncidents.results) ? baseIncidents.results : []);
 
-  console.log('[MAP] --- Début filtrage ---');
-  console.log('[MAP] ownershipFilter:', ownershipFilter);
-  console.log('[MAP] statusFilter:', statusFilter);
-  console.log('[MAP] currentUserId:', currentUserId);
-  console.log('[MAP] Prop incidents:', incidents);
-  console.log('[MAP] baseIncidents résolu:', baseIncidents);
-  console.log('[MAP] normalizedIncidents:', normalizedIncidents);
+
 
   const DEFAULT_MALI_LAT = 12.65; // Bamako
   const DEFAULT_MALI_LNG = -8.0;
@@ -262,25 +284,22 @@ export const MapContainer = ({ incidents = [], isLoading = false }) => {
     if (ownershipFilter === 'mine') {
       const takenBy = inc?.taken_by;
       if (!takenBy || !currentUserId || String(takenBy).toLowerCase() !== String(currentUserId).toLowerCase()) {
-        console.log(`[MAP] Incident ID ${inc.id} ("${inc.title}") rejeté: Filtre 'mine' actif mais taken_by (${takenBy}) ne correspond pas à l'utilisateur actuel (${currentUserId})`);
+        // console.log(`[MAP] Incident ID ${inc.id} ("${inc.title}") rejeté: Filtre 'mine' actif mais taken_by (${takenBy}) ne correspond pas à l'utilisateur actuel (${currentUserId})`);
         return false;
       }
     }
 
     // 3. Filtre de statut (Actifs vs Résolus)
     const isResolved = inc?.etat == 'resolved';
-    if (statusFilter === 'active' && isResolved) {
-      console.log(`[MAP] Incident ID ${inc.id} ("${inc.title}") rejeté: Filtre 'active' mais l'état est 'resolved'`);
-      return false;
-    }
+    // Si le filtre est 'resolved', on n'affiche que les incidents résolus.
+    // Si le filtre est 'active', on affiche tout (actifs et résolus confondus).
     if (statusFilter === 'resolved' && !isResolved) {
-      console.log(`[MAP] Incident ID ${inc.id} ("${inc.title}") rejeté: Filtre 'resolved' mais l'état est '${inc.etat}'`);
       return false;
     }
 
     // 4. Filtrer les incidents supprimés
     if (inc?.is_deleted || inc?.isDeleted) {
-      console.log(`[MAP] Incident ID ${inc.id} ("${inc.title}") rejeté: Incident marqué comme supprimé (is_deleted: ${inc.is_deleted}, isDeleted: ${inc.isDeleted})`);
+      // console.log(`[MAP] Incident ID ${inc.id} ("${inc.title}") rejeté: Incident marqué comme supprimé (is_deleted: ${inc.is_deleted}, isDeleted: ${inc.isDeleted})`);
       return false;
     }
 
@@ -341,19 +360,23 @@ export const MapContainer = ({ incidents = [], isLoading = false }) => {
     )
     : 0;
 
+  const isMapLoading = isLoading ||
+    (ownershipFilter === 'mine' && isLoadingOrgIncidents) ||
+    (ownershipFilter === 'all' && statusFilter === 'active' && isLoadingActiveIncidents) ||
+    (ownershipFilter === 'all' && statusFilter === 'resolved' && isLoadingResolvedIncidents);
+
   return (
     <div className="card">
       <div className="map-container">
         {/* Loader overlay */}
-        {(isLoading ||
-          (ownershipFilter === 'mine' && isLoadingOrgIncidents)) && (
-            <div className="map-loading-overlay">
-              <div className="map-loading-spinner">
-                <div className="spinner"></div>
-                <p>Chargement des incidents...</p>
-              </div>
+        {isMapLoading && (
+          <div className="map-loading-overlay">
+            <div className="map-loading-spinner">
+              <div className="spinner"></div>
+              <p>Chargement des incidents...</p>
             </div>
-          )}
+          </div>
+        )}
 
         <Map
           initialViewState={{
@@ -371,7 +394,7 @@ export const MapContainer = ({ incidents = [], isLoading = false }) => {
           minZoom={5.5}
         >
           {/* Markers d'incidents */}
-          {!isLoading && validIncidents.map((incident) => {
+          {!isMapLoading && validIncidents.map((incident) => {
             const colorClass = getMarkerColorClass(incident, currentUserId);
             return (
               <Marker
@@ -398,23 +421,7 @@ export const MapContainer = ({ incidents = [], isLoading = false }) => {
           })}
         </Map>
 
-        {/* Bandeau titre */}
-        <div className="map-title-overlay">
-          <span className="map-title-overlay-label">
-            {statusFilter === 'resolved' ? (
-              <>
-                <span className="desktop-only-inline">INCIDENTS RÉSOLUS</span>
-                <span className="mobile-only-inline">Résolus</span>
-              </>
-            ) : (
-              <>
-                <span className="desktop-only-inline">INCIDENTS ACTIFS</span>
-                <span className="mobile-only-inline">Actifs</span>
-              </>
-            )}
-          </span>
-          <span className="map-title-overlay-count">{validIncidents.length}</span>
-        </div>
+
 
         {/* Switcher de style de carte */}
         <div className="map-style-switcher">
@@ -755,11 +762,7 @@ export const MapContainer = ({ incidents = [], isLoading = false }) => {
                       type="button"
                       className="btn btn-primary"
                       onClick={() => {
-                        console.log(`/incidents/${selectedIncident.id}`);
-                        console.log(selectedIncident);
-
-                        // return
-                        navigate(`/incidents/${selectedIncident.id}`, { state: "dashboard" })
+                        navigate(`/incidents/${selectedIncident.id}`, { state: { from: '/dashboard' } });
                       }}
                     >
                       Savoir plus

@@ -27,7 +27,9 @@ import {
   getResolvedIncidentsService
 } from '../incident/service/incident_service';
 import { getTasksService } from '../incident/service/task_service';
-import { getGlobalImpactService } from './service/impact_service';
+import { getGlobalImpactService, getImpactIncidentsService } from './service/impact_service';
+import { authService } from '../auth/services/authService';
+import Pagination from '../../components/molecules/Pagination';
 import './impact.css';
 
 const STRUCTURE_LABELS = {
@@ -85,21 +87,28 @@ export const Impact = () => {
   const [statusFilter, setStatusFilter] = useState('both'); // both | resolved | taken_with_action
   const [structureFilter, setStructureFilter] = useState('all'); // all | schools | markets | water_points | etc.
   const [expanded, setExpanded] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, periodFilter, statusFilter, structureFilter]);
+
+  const statusApiValue = statusFilter === 'both' ? 'all' : (statusFilter === 'taken_with_action' ? 'taken_action' : 'resolved');
 
   // Appel API pour récupérer les données globales d'impact
   const { data: globalImpactData, error: apiError, isLoading: isLoadingImpact } = useSWR(
-    '/MapApi/impact/global',
-    () => getGlobalImpactService(),
+    ['/MapApi/impact/', statusApiValue, periodFilter],
+    () => getGlobalImpactService(statusApiValue, periodFilter),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: true
     }
   );
 
-  // Appel API pour récupérer les incidents résolus
-  const { data: resolvedIncidentsData, error: incidentsError, isLoading: isLoadingIncidents } = useSWR(
-    '/MapApi/resolved-incidents',
-    () => getResolvedIncidentsService(),
+  // Appel API pour récupérer les incidents d'impact filtrés et paginés
+  const { data: impactIncidentsData, error: incidentsError, isLoading: isLoadingIncidents } = useSWR(
+    ['/MapApi/impact/incidents/', statusApiValue, periodFilter, search, currentPage],
+    () => getImpactIncidentsService(statusApiValue, periodFilter, search, currentPage, 10),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: true,
@@ -124,159 +133,99 @@ export const Impact = () => {
     }
   }, [globalImpactData, apiError]);
 
-  // Logger les incidents résolus
+  // Logger les incidents d'impact
   useEffect(() => {
-    if (resolvedIncidentsData) {
+    if (impactIncidentsData) {
       console.log('========================================');
-      console.log('📋 INCIDENTS RÉSOLUS REÇUS:');
+      console.log('📋 INCIDENTS D\'IMPACT REÇUS:');
       console.log('========================================');
-      console.log('Nombre d\'incidents:', resolvedIncidentsData.results?.length || resolvedIncidentsData.length || 0);
-      console.log('Structure:', JSON.stringify(resolvedIncidentsData, null, 2));
+      console.log('Nombre d\'incidents:', impactIncidentsData.results?.length || impactIncidentsData.length || 0);
+      console.log('Structure:', JSON.stringify(impactIncidentsData, null, 2));
       console.log('========================================');
     }
     if (incidentsError) {
       console.error('❌ ERREUR API INCIDENTS:', incidentsError);
     }
-  }, [resolvedIncidentsData, incidentsError]);
+  }, [impactIncidentsData, incidentsError]);
 
   // Utiliser les vraies données ou fallback sur MOCK
   const loadingIncidents = isLoadingImpact || isLoadingIncidents;
   const loadingDetails = false;
   const error = apiError || incidentsError;
 
+  const currentUser = authService.getCurrentUser();
+  const isSuperAdmin = currentUser?.web_role === 'super_admin';
+
+  const isPlatformScope = isSuperAdmin && (
+    globalImpactData?.filters?.scope === 'platform' || (
+      globalImpactData && (
+        !!globalImpactData.resolution ||
+        !!globalImpactData.mobilization ||
+        !!globalImpactData.mobilisation ||
+        !!globalImpactData.citizen_contribution ||
+        !!globalImpactData.contribution_citoyenne
+      )
+    )
+  );
+
   // Normaliser les incidents (gérer pagination API)
-  const incidentsList = resolvedIncidentsData
-    ? (Array.isArray(resolvedIncidentsData)
-      ? resolvedIncidentsData
-      : (resolvedIncidentsData.results || []))
+  const incidentsList = impactIncidentsData
+    ? (Array.isArray(impactIncidentsData)
+      ? impactIncidentsData
+      : (impactIncidentsData.results || []))
     : [];
 
-  // Extraire les prédictions depuis les incidents
-  const predictions = useMemo(() => {
-    if (!incidentsList || incidentsList.length === 0) return [];
-
-    const preds = {};
-    incidentsList.forEach(incident => {
-      if (incident.prediction) {
-        preds[incident.id] = incident.prediction;
-      }
-    });
-
-    return Object.keys(preds).length > 0 ? preds : [];
-  }, [incidentsList]);
-
-  // Extraire les tâches depuis les incidents (tasks_by_organisation)
-  const tasks = useMemo(() => {
-    if (!incidentsList || incidentsList.length === 0) return [];
-
-    const tasksMap = {};
-    incidentsList.forEach(incident => {
-      if (incident.tasks_by_organisation && Array.isArray(incident.tasks_by_organisation)) {
-        // Aplatir toutes les tâches de toutes les organisations
-        const allTasks = incident.tasks_by_organisation.flatMap(org => org.tasks || []);
-        if (allTasks.length > 0) {
-          tasksMap[incident.id] = allTasks;
-        }
-      }
-    });
-
-    return Object.keys(tasksMap).length > 0 ? tasksMap : [];
-  }, [incidentsList]);
-
-  // Assignments - garder MOCK pour l'instant (pas dans la structure API)
-  const assignments = [];
-
-  // Period filtering logic
-  const isWithinPeriod = (incident, filter) => {
-    if (filter === 'all') return true;
-    if (!incident.created_at) return false;
-
-    const incDate = new Date(incident.created_at);
-    const now = new Date();
-    const diffTime = Math.abs(now - incDate);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (filter === '30d') return diffDays <= 30;
-    if (filter === '90d') return diffDays <= 90;
-    if (filter === 'year') return incDate.getFullYear() === now.getFullYear();
-    return true;
-  };
-
-  // Status filtering logic
-  const matchStatus = (incident, filter) => {
-    const isResolved = incident.etat === 'resolved';
-    const incTasks = tasks[incident.id] || [];
-    const hasCompletedTask = incTasks.some((t) => t.state === 'done');
-    const isTakenWithAction =
-      (incident.etat === 'taken_into_account' || incident.etat === 'in_progress') &&
-      hasCompletedTask;
-
-    if (filter === 'resolved') return isResolved;
-    if (filter === 'taken_with_action') return isTakenWithAction;
-    if (filter === 'both') return isResolved || isTakenWithAction;
-    return false;
-  };
+  const totalIncidentsCount = impactIncidentsData?.count || 0;
 
   // Structure type filtering logic
-  const matchesStructureType = (incId, typeFilter) => {
+  const matchesStructureType = (inc, typeFilter) => {
     if (typeFilter === 'all') return true;
-    const pred = predictions[incId];
+    const pred = inc.prediction;
     if (!pred) return false;
 
     let count = 0;
-    if (typeFilter === 'schools') count = pred.schools ?? pred.social_data?.schools ?? 0;
-    else if (typeFilter === 'markets') count = pred.markets ?? pred.social_data?.markets ?? 0;
-    else if (typeFilter === 'water_points') count = pred.water_points ?? pred.social_data?.water_points ?? 0;
-    else if (typeFilter === 'main_roads_bridges') count = pred.main_roads_bridges ?? pred.social_data?.main_roads_bridges ?? 0;
-    else if (typeFilter === 'residential_buildings') count = pred.residential_buildings ?? pred.social_data?.residential_buildings ?? 0;
-    else if (typeFilter === 'maternities') count = pred.maternities_count ?? pred.maternities ?? 0;
-    else if (typeFilter === 'health_centers') count = pred.health_centers ?? 0;
-    else if (typeFilter === 'nurseries') count = pred.nurseries_count ?? pred.nurseries ?? 0;
+    if (typeFilter === 'schools') count = pred.infrastructure?.schools ?? pred.schools ?? pred.social_data?.schools ?? 0;
+    else if (typeFilter === 'markets') count = pred.infrastructure?.markets ?? pred.markets ?? pred.social_data?.markets ?? 0;
+    else if (typeFilter === 'water_points') count = pred.infrastructure?.water_points ?? pred.water_points ?? pred.social_data?.water_points ?? 0;
+    else if (typeFilter === 'main_roads_bridges') count = pred.infrastructure?.main_roads_bridges ?? pred.main_roads_bridges ?? pred.social_data?.main_roads_bridges ?? 0;
+    else if (typeFilter === 'residential_buildings') count = pred.infrastructure?.residential_buildings ?? pred.residential_buildings ?? pred.social_data?.residential_buildings ?? 0;
+    else if (typeFilter === 'maternities') count = pred.infrastructure?.maternities ?? pred.maternities_count ?? pred.maternities ?? 0;
+    else if (typeFilter === 'health_centers') count = pred.infrastructure?.health_centers ?? pred.health_centers ?? 0;
+    else if (typeFilter === 'nurseries') count = pred.infrastructure?.nurseries ?? pred.nurseries_count ?? pred.nurseries ?? 0;
 
     return parseInt(count) > 0;
   };
 
   // Filtered dataset for statistics & final list display
   const filteredIncidents = useMemo(() => {
-    const q = search.trim().toLowerCase();
-
-    return incidentsList.filter((inc) => {
-      // 1. Period filter
-      if (!isWithinPeriod(inc, periodFilter)) return false;
-
-      // 2. Status filter
-      if (!matchStatus(inc, statusFilter)) return false;
-
-      // 3. Structure type filter
-      if (!matchesStructureType(inc.id, structureFilter)) return false;
-
-      // 4. Search query
-      if (!q) return true;
-      const titleMatch = (inc.title || '').toLowerCase().includes(q);
-      const zoneMatch = (inc.zone || inc.location || '').toLowerCase().includes(q);
-      const descMatch = (inc.description || '').toLowerCase().includes(q);
-      return titleMatch || zoneMatch || descMatch;
-    });
-  }, [incidentsList, search, periodFilter, statusFilter, structureFilter, tasks, predictions]);
+    return incidentsList.filter((inc) => matchesStructureType(inc, structureFilter));
+  }, [incidentsList, structureFilter]);
 
   // Compute all global KPIs dynamically - Utilise les données de l'API si disponibles
   const globals = useMemo(() => {
     // Si on a les données de l'API, on les utilise directement
     if (globalImpactData) {
+      const directBenefs = globalImpactData.beneficiaries?.direct || globalImpactData.beneficiaires_directs;
+      const indirectBenefs = globalImpactData.beneficiaries?.indirect || globalImpactData.beneficiaires_indirects;
+      const infraProtected = globalImpactData.infrastructure_protected || {};
+      const resolutionStats = globalImpactData.resolution || {};
+      const mobilizationStats = globalImpactData.mobilization || globalImpactData.mobilisation || {};
+      const citizenStats = globalImpactData.citizen_contribution || globalImpactData.contribution_citoyenne || {};
+
       return {
         direct: {
-          total: globalImpactData.beneficiaires_directs?.total || 0,
-          men: globalImpactData.beneficiaires_directs?.hommes || 0,
-          women: globalImpactData.beneficiaires_directs?.femmes || 0,
-          children: globalImpactData.beneficiaires_directs?.enfants || 0,
+          total: directBenefs?.total || 0,
+          men: directBenefs?.men ?? directBenefs?.hommes ?? 0,
+          women: directBenefs?.women ?? directBenefs?.femmes ?? 0,
+          children: directBenefs?.children ?? directBenefs?.enfants ?? 0,
         },
         indirect: {
-          total: globalImpactData.beneficiaires_indirects?.total || 0,
-          men: Math.round((globalImpactData.beneficiaires_indirects?.total || 0) * 0.33),
-          women: Math.round((globalImpactData.beneficiaires_indirects?.total || 0) * 0.34),
-          children: Math.round((globalImpactData.beneficiaires_indirects?.total || 0) * 0.33),
+          total: indirectBenefs?.total || 0,
+          men: indirectBenefs?.men ?? indirectBenefs?.hommes ?? Math.round((indirectBenefs?.total || 0) * 0.33),
+          women: indirectBenefs?.women ?? indirectBenefs?.femmes ?? Math.round((indirectBenefs?.total || 0) * 0.34),
+          children: indirectBenefs?.children ?? indirectBenefs?.enfants ?? Math.round((indirectBenefs?.total || 0) * 0.33),
         },
-        structures: globalImpactData.infrastructures_detail || {
+        structures: infraProtected.by_type || globalImpactData.infrastructures_detail || {
           schools: 0,
           markets: 0,
           water_points: 0,
@@ -286,249 +235,61 @@ export const Impact = () => {
           health_centers: 0,
           nurseries: 0,
         },
-        totalStructures: globalImpactData.infrastructures_total || 0,
-        cumulativeAreaHa: globalImpactData.superficie_ha || 0,
-        avgResolutionTimeDays: globalImpactData.temps_moyen_resolution || 0,
-        resolutionRate: globalImpactData.taux_resolution || 0,
-        incidentsWithoutAnalysis: globalImpactData.incidents_sans_analyse || 0,
+        totalStructures: infraProtected.total || globalImpactData.infrastructures_total || 0,
+        cumulativeAreaHa: globalImpactData.cumulative_impact_area_ha || globalImpactData.superficie_ha || 0,
+        avgResolutionTimeDays: resolutionStats.avg_resolution_days || globalImpactData.temps_moyen_resolution || 0,
+        resolutionRate: resolutionStats.resolution_rate?.percentage || globalImpactData.taux_resolution || 0,
+        incidentsWithoutAnalysis: (globalImpactData.filters?.incidents_in_scope - globalImpactData.filters?.incidents_with_prediction) || globalImpactData.incidents_sans_analyse || 0,
         mobilization: {
-          organisationsCount: globalImpactData.mobilisation?.organisations_distinctes || 0,
-          agentsCount: globalImpactData.mobilisation?.agents_terrain || 0,
-          collaborationsCount: globalImpactData.mobilisation?.collaborations || 0,
-          collaborativeCount: 0, // Non disponible dans l'API
-          individualCount: 0, // Non disponible dans l'API
+          organisationsCount: mobilizationStats.organisations_involved || mobilizationStats.organisations_distinctes || 0,
+          agentsCount: mobilizationStats.field_agents_mobilized || mobilizationStats.agents_terrain || 0,
+          collaborationsCount: mobilizationStats.collaborations_created || mobilizationStats.collaborations || 0,
+          collaborativeCount: mobilizationStats.incidents_collaborative || 0,
+          individualCount: mobilizationStats.incidents_individual || 0,
         },
         citizen: {
-          received: globalImpactData.contribution_citoyenne?.signalements_recus || 0,
-          verified: globalImpactData.contribution_citoyenne?.signalements_verifies || 0,
-          withAction: globalImpactData.contribution_citoyenne?.transformes_actions || 0,
-          contributorsCount: 0, // Non disponible dans l'API
+          received: citizenStats.reports_received || citizenStats.signalements_recus || 0,
+          verified: citizenStats.reports_verified || citizenStats.signalements_verifies || 0,
+          withAction: citizenStats.reports_led_to_action || citizenStats.transformes_actions || 0,
+          contributorsCount: citizenStats.active_citizen_contributors || 0,
         },
       };
     }
 
-    // Sinon, on calcule à partir des données MOCK (code existant)
-    let directMen = 0;
-    let directWomen = 0;
-    let directChildren = 0;
-    let directTotal = 0;
-
-    let indirectTotal = 0;
-
-    const structures = {
-      schools: 0,
-      markets: 0,
-      water_points: 0,
-      main_roads_bridges: 0,
-      residential_buildings: 0,
-      maternities: 0,
-      health_centers: 0,
-      nurseries: 0,
-    };
-
-    let totalResolutionTimeMs = 0;
-    let resolvedIncidentsCount = 0;
-
-    const uniqueOrganisations = new Set();
-    const uniqueAgents = new Set();
-    let totalCollaborations = 0;
-    let collaborativeIncidentsCount = 0;
-    let individualIncidentsCount = 0;
-
-    let citizenReportsReceived = 0;
-    let citizenReportsVerified = 0;
-    let citizenReportsWithAction = 0;
-    const uniqueCitizenContributors = new Set();
-
-    let cumulativeAreaHa = 0;
-    let incidentsWithoutAnalysis = 0;
-
-    // We compute Resolution Rate over the selected period, regardless of the status filter
-    let totalPeriodIncidents = 0;
-    let resolvedPeriodIncidents = 0;
-
-    incidentsList.forEach((inc) => {
-      // Period filter check
-      if (!isWithinPeriod(inc, periodFilter)) return;
-
-      totalPeriodIncidents++;
-      if (inc.etat === 'resolved') {
-        resolvedPeriodIncidents++;
-      }
-
-      // Check if it matches the current status filter + structure filter
-      if (!matchStatus(inc, statusFilter)) return;
-      if (!matchesStructureType(inc.id, structureFilter)) return;
-
-      const isResolved = inc.etat === 'resolved';
-      const pred = predictions[inc.id] || null;
-      const incTasks = tasks[inc.id] || [];
-      const incAssignments = assignments[inc.id] || [];
-
-      // Check if taken into account with action
-      const hasCompletedTask = incTasks.some((t) => t.state === 'done');
-      const isTakenWithAction =
-        (inc.etat === 'taken_into_account' || inc.etat === 'in_progress') &&
-        hasCompletedTask;
-
-      if (!pred) {
-        incidentsWithoutAnalysis++;
-      }
-
-      // 1. Direct Beneficiaries
-      if (pred) {
-        const men = parseInt(pred.adult_men_exposed || pred.human_impact?.adult_men_exposed || 0);
-        const women = parseInt(pred.adult_women_exposed || pred.human_impact?.adult_women_exposed || 0);
-        const children = parseInt(pred.children_exposed || pred.human_impact?.children_exposed || 0);
-        const total = parseInt(
-          pred.total_population_exposed ||
-          pred.human_impact?.total_population_exposed ||
-          men + women + children
-        );
-
-        directMen += men;
-        directWomen += women;
-        directChildren += children;
-        directTotal += total;
-
-        // 2. Indirect Beneficiaries
-        const indirectPop = parseInt(pred.potential_risk?.stats?.total_pop || 0);
-        indirectTotal += indirectPop;
-
-        // 3. Sensitive structures protected
-        structures.schools += parseInt(pred.schools ?? pred.social_data?.schools ?? 0);
-        structures.markets += parseInt(pred.markets ?? pred.social_data?.markets ?? 0);
-        structures.water_points += parseInt(pred.water_points ?? pred.social_data?.water_points ?? 0);
-        structures.main_roads_bridges += parseInt(pred.main_roads_bridges ?? pred.social_data?.main_roads_bridges ?? 0);
-        structures.residential_buildings += parseInt(pred.residential_buildings ?? pred.social_data?.residential_buildings ?? 0);
-        structures.maternities += parseInt(pred.maternities_count ?? pred.maternities ?? 0);
-        structures.health_centers += parseInt(pred.health_centers ?? 0);
-        structures.nurseries += parseInt(pred.nurseries_count ?? pred.nurseries ?? 0);
-
-        // 4. Cumulative Area (only for resolved incidents)
-        if (isResolved) {
-          const radius = parseFloat(pred.impact_radius_meters || 0);
-          const areaHa = (Math.PI * Math.pow(radius, 2)) / 10000;
-          cumulativeAreaHa += areaHa;
-        }
-      }
-
-      // 5. Average Resolution Time (resolution_end_date to created_at)
-      if (isResolved && inc.resolution_end_date && inc.created_at) {
-        const durationMs = new Date(inc.resolution_end_date) - new Date(inc.created_at);
-        if (durationMs > 0) {
-          totalResolutionTimeMs += durationMs;
-          resolvedIncidentsCount++;
-        }
-      }
-
-      // 6. Mobilization of actors
-      const leaderOrg = inc.organisation_name || inc.organisation || inc.user_id?.organisation_name;
-      if (leaderOrg && leaderOrg !== 'Non spécifié') {
-        uniqueOrganisations.add(leaderOrg);
-      }
-      if (inc.participants && Array.isArray(inc.participants)) {
-        inc.participants.forEach((p) => {
-          if (p.name) uniqueOrganisations.add(p.name);
-        });
-        totalCollaborations += inc.participants.length;
-      }
-
-      // Field agents assigned
-      incAssignments.forEach((a) => {
-        const agentId = a.user_id || a.assigned_to?.id;
-        if (agentId) uniqueAgents.add(agentId);
-      });
-
-      // Treated in collaboration vs individually
-      const isCollabMode =
-        inc.take_in_charge_mode === 'collaborative' ||
-        (inc.participants && inc.participants.length > 0);
-      if (isCollabMode) {
-        collaborativeIncidentsCount++;
-      } else if (inc.take_in_charge_mode === 'internal' || (inc.taken_by && !isCollabMode)) {
-        individualIncidentsCount++;
-      }
-
-      // 7. Citizen contribution
-      const isCitizenReport = !inc.reported_by_agent;
-      if (isCitizenReport) {
-        citizenReportsReceived++;
-        if (inc.etat !== 'declared') {
-          citizenReportsVerified++;
-        }
-        if (isResolved || isTakenWithAction) {
-          citizenReportsWithAction++;
-        }
-        const citizenId =
-          inc.user_id?.id || inc.user_id || inc.user_full_name || inc.user_email;
-        if (citizenId) {
-          uniqueCitizenContributors.add(citizenId);
-        }
-      }
-    });
-
-    // Distribute indirect cohort population proportionally based on direct cohort ratios
-    let indirectMen = 0;
-    let indirectWomen = 0;
-    let indirectChildren = 0;
-
-    if (indirectTotal > 0) {
-      if (directTotal > 0) {
-        const menRatio = directMen / directTotal;
-        const womenRatio = directWomen / directTotal;
-        indirectMen = Math.round(indirectTotal * menRatio);
-        indirectWomen = Math.round(indirectTotal * womenRatio);
-        indirectChildren = Math.max(0, indirectTotal - indirectMen - indirectWomen);
-      } else {
-        indirectMen = Math.round(indirectTotal * 0.33);
-        indirectWomen = Math.round(indirectTotal * 0.34);
-        indirectChildren = Math.max(0, indirectTotal - indirectMen - indirectWomen);
-      }
-    }
-
-    const avgResolutionTimeDays =
-      resolvedIncidentsCount > 0
-        ? Math.round((totalResolutionTimeMs / (1000 * 60 * 60 * 24) / resolvedIncidentsCount) * 10) / 10
-        : 0;
-
-    const resolutionRate =
-      totalPeriodIncidents > 0 ? (resolvedPeriodIncidents / totalPeriodIncidents) * 100 : 0;
-
+    // Sinon, on renvoie une structure vide par défaut
     return {
-      direct: {
-        total: directTotal,
-        men: directMen,
-        women: directWomen,
-        children: directChildren,
+      direct: { total: 0, men: 0, women: 0, children: 0 },
+      indirect: { total: 0, men: 0, women: 0, children: 0 },
+      structures: {
+        schools: 0,
+        markets: 0,
+        water_points: 0,
+        main_roads_bridges: 0,
+        residential_buildings: 0,
+        maternities: 0,
+        health_centers: 0,
+        nurseries: 0,
       },
-      indirect: {
-        total: indirectTotal,
-        men: indirectMen,
-        women: indirectWomen,
-        children: indirectChildren,
-      },
-      structures,
-      totalStructures: Object.values(structures).reduce((a, b) => a + b, 0),
-      avgResolutionTimeDays,
-      resolutionRate,
+      totalStructures: 0,
+      cumulativeAreaHa: 0,
+      avgResolutionTimeDays: 0,
+      resolutionRate: 0,
+      incidentsWithoutAnalysis: 0,
       mobilization: {
-        organisationsCount: uniqueOrganisations.size,
-        agentsCount: uniqueAgents.size,
-        collaborationsCount: totalCollaborations,
-        collaborativeCount: collaborativeIncidentsCount,
-        individualCount: individualIncidentsCount,
+        organisationsCount: 0,
+        agentsCount: 0,
+        collaborationsCount: 0,
+        collaborativeCount: 0,
+        individualCount: 0,
       },
       citizen: {
-        received: citizenReportsReceived,
-        verified: citizenReportsVerified,
-        withAction: citizenReportsWithAction,
-        contributorsCount: uniqueCitizenContributors.size,
+        received: 0,
+        verified: 0,
+        withAction: 0,
+        contributorsCount: 0,
       },
-      cumulativeAreaHa,
-      incidentsWithoutAnalysis,
     };
-  }, [globalImpactData, incidentsList, periodFilter, statusFilter, structureFilter, predictions, tasks, assignments]);
+  }, [globalImpactData]);
 
   // Main isLoading flag combining SWR loading and details loading
   const isDataLoading = loadingIncidents || (incidentsList.length > 0 && loadingDetails);
@@ -565,9 +326,14 @@ export const Impact = () => {
               <div className="impact-header-left">
 
                 <div>
-                  <h1 className="impact-title">Impact</h1>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <h1 className="impact-title">Impact</h1>
+
+                  </div>
                   <p className="impact-subtitle">
+
                     Mesure et consolidation de l'impact des interventions de Map Action sur le terrain.
+
                   </p>
                 </div>
               </div>
@@ -804,124 +570,129 @@ export const Impact = () => {
                   </div>
 
 
-                  {/* Card 5: Incidents Without Impact Analysis */}
-                  <div className="impact-kpi">
-                    <div className="impact-kpi-top-row">
-                      <div className="impact-kpi-icon-glow">
-                        <Activity size={24} variant="Bold" color="var(--color-danger)" />
-                      </div>
-                      <div>
-                        <span className="impact-kpi-label">Incidents sans analyse</span>
-                        <div className="impact-kpi-value">
-                          {globals.incidentsWithoutAnalysis || 0}
+                  {isPlatformScope && (
+                    <div className="impact-kpi">
+                      <div className="impact-kpi-top-row">
+                        <div className="impact-kpi-icon-glow">
+                          <Activity size={24} variant="Bold" color="var(--color-danger)" />
+                        </div>
+                        <div>
+                          <span className="impact-kpi-label">Incidents sans analyse</span>
+                          <div className="impact-kpi-value">
+                            {globals.incidentsWithoutAnalysis || 0}
+                          </div>
                         </div>
                       </div>
+                      <div className="impact-kpi-subtext">
+                        Incidents en attente d'estimation d'impact.
+                      </div>
                     </div>
-                    <div className="impact-kpi-subtext">
-                      Incidents en attente d'estimation d'impact.
-                    </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Section 1: Performance & Mobilization */}
-                <div className="impact-grid-performance">
-                  {/* Resolution speed & rate */}
-                  <div className="performance-card">
-                    <h3 className="section-subtitle-impact">Performance des interventions</h3>
-                    <div className="performance-row-inner">
-                      <div className="perf-item-value">
-                        <div className="perf-circle">
-                          <Clock size={28} variant="Bold" color="#3AA2DD" />
+                {isPlatformScope && (
+                  <div className="impact-grid-performance">
+                    {/* Resolution speed & rate */}
+                    <div className="performance-card">
+                      <h3 className="section-subtitle-impact">Performance des interventions</h3>
+                      <div className="performance-row-inner">
+                        <div className="perf-item-value">
+                          <div className="perf-circle">
+                            <Clock size={28} variant="Bold" color="#3AA2DD" />
+                          </div>
+                          <div className="perf-stats">
+                            <span className="perf-val">
+                              {globals.avgResolutionTimeDays > 0
+                                ? `${globals.avgResolutionTimeDays} jours`
+                                : '—'}
+                            </span>
+                            <span className="perf-lbl">Temps moyen de résolution</span>
+                          </div>
                         </div>
-                        <div className="perf-stats">
-                          <span className="perf-val">
-                            {globals.avgResolutionTimeDays > 0
-                              ? `${globals.avgResolutionTimeDays} jours`
-                              : '—'}
-                          </span>
-                          <span className="perf-lbl">Temps moyen de résolution</span>
+
+                        <div className="perf-item-value">
+                          <div className="perf-circle">
+                            <Chart2 size={28} variant="Bold" color="#22C55E" />
+                          </div>
+                          <div className="perf-stats">
+                            <span className="perf-val">
+                              {globals.resolutionRate.toFixed(1)}%
+                            </span>
+                            <span className="perf-lbl">Taux de résolution</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Mobilisation Card */}
+                    <div className="performance-card">
+                      <h3 className="section-subtitle-impact">Mobilisation des acteurs</h3>
+                      <div className="actor-stats-grid">
+                        <div className="actor-badge">
+                          <Briefcase size={20} variant="Bold" color="#8B5CF6" />
+                          <span className="actor-num">{globals.mobilization.organisationsCount}</span>
+                          <span className="actor-lbl">Organisations impliquées</span>
+                        </div>
+
+                        <div className="actor-badge">
+                          <Profile2User size={20} variant="Bold" color="#F59E0B" />
+                          <span className="actor-num">{globals.mobilization.agentsCount}</span>
+                          <span className="actor-lbl">Agents de terrain</span>
+                        </div>
+
+                        <div className="actor-badge">
+                          <People size={20} variant="Bold" color="#3AA2DD" />
+                          <span className="actor-num">{globals.mobilization.collaborationsCount}</span>
+                          <span className="actor-lbl">Collaborations créées</span>
                         </div>
                       </div>
 
-                      <div className="perf-item-value">
-                        <div className="perf-circle">
-                          <Chart2 size={28} variant="Bold" color="#22C55E" />
+                      <div className="collab-split-bar">
+                        <div className="collab-split-item">
+                          <span>Traités en collaboration :</span>
+                          <strong>{globals.mobilization.collaborativeCount}</strong>
                         </div>
-                        <div className="perf-stats">
-                          <span className="perf-val">
-                            {globals.resolutionRate.toFixed(1)}%
-                          </span>
-                          <span className="perf-lbl">Taux de résolution</span>
+                        <div className="collab-split-item">
+                          <span>Traités individuellement :</span>
+                          <strong>{globals.mobilization.individualCount}</strong>
                         </div>
                       </div>
                     </div>
                   </div>
-
-                  {/* Mobilisation Card */}
-                  <div className="performance-card">
-                    <h3 className="section-subtitle-impact">Mobilisation des acteurs</h3>
-                    <div className="actor-stats-grid">
-                      <div className="actor-badge">
-                        <Briefcase size={20} variant="Bold" color="#8B5CF6" />
-                        <span className="actor-num">{globals.mobilization.organisationsCount}</span>
-                        <span className="actor-lbl">Organisations impliquées</span>
-                      </div>
-
-                      <div className="actor-badge">
-                        <Profile2User size={20} variant="Bold" color="#F59E0B" />
-                        <span className="actor-num">{globals.mobilization.agentsCount}</span>
-                        <span className="actor-lbl">Agents de terrain</span>
-                      </div>
-
-                      <div className="actor-badge">
-                        <People size={20} variant="Bold" color="#3AA2DD" />
-                        <span className="actor-num">{globals.mobilization.collaborationsCount}</span>
-                        <span className="actor-lbl">Collaborations créées</span>
-                      </div>
-                    </div>
-
-                    <div className="collab-split-bar">
-                      <div className="collab-split-item">
-                        <span>Traités en collaboration :</span>
-                        <strong>{globals.mobilization.collaborativeCount}</strong>
-                      </div>
-                      <div className="collab-split-item">
-                        <span>Traités individuellement :</span>
-                        <strong>{globals.mobilization.individualCount}</strong>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                )}
 
                 {/* Section 3: Citizen Contribution */}
-                <div className="citizen-contribution-section">
-                  <h3 className="section-subtitle-impact">Contribution citoyenne</h3>
-                  <div className="citizen-grid">
-                    <div className="citizen-card">
-                      <Activity size={24} variant="Bold" color="#3AA2DD" />
-                      <span className="citizen-number">{globals.citizen.received}</span>
-                      <span className="citizen-lbl">Signalements reçus</span>
-                    </div>
+                {isPlatformScope && (
+                  <div className="citizen-contribution-section">
+                    <h3 className="section-subtitle-impact">Contribution citoyenne</h3>
+                    <div className="citizen-grid">
+                      <div className="citizen-card">
+                        <Activity size={24} variant="Bold" color="#3AA2DD" />
+                        <span className="citizen-number">{globals.citizen.received}</span>
+                        <span className="citizen-lbl">Signalements reçus</span>
+                      </div>
 
-                    <div className="citizen-card">
-                      <TickCircle size={24} variant="Bold" color="#22C55E" />
-                      <span className="citizen-number">{globals.citizen.verified}</span>
-                      <span className="citizen-lbl">Signalements vérifiés</span>
-                    </div>
+                      <div className="citizen-card">
+                        <TickCircle size={24} variant="Bold" color="#22C55E" />
+                        <span className="citizen-number">{globals.citizen.verified}</span>
+                        <span className="citizen-lbl">Signalements vérifiés</span>
+                      </div>
 
-                    <div className="citizen-card">
-                      <Award size={24} variant="Bold" color="#F59E0B" />
-                      <span className="citizen-number">{globals.citizen.withAction}</span>
-                      <span className="citizen-lbl">Ayant conduit à une action</span>
-                    </div>
+                      <div className="citizen-card">
+                        <Award size={24} variant="Bold" color="#F59E0B" />
+                        <span className="citizen-number">{globals.citizen.withAction}</span>
+                        <span className="citizen-lbl">Ayant conduit à une action</span>
+                      </div>
 
-                    <div className="citizen-card">
-                      <Profile2User size={24} variant="Bold" color="#8B5CF6" />
-                      <span className="citizen-number">{globals.citizen.contributorsCount}</span>
-                      <span className="citizen-lbl">Citoyens contributeurs actifs</span>
+                      <div className="citizen-card">
+                        <Profile2User size={24} variant="Bold" color="#8B5CF6" />
+                        <span className="citizen-number">{globals.citizen.contributorsCount}</span>
+                        <span className="citizen-lbl">Citoyens contributeurs actifs</span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
                 {/* Section 4: Filtered Incidents List */}
                 <div className="impact-section">
@@ -952,12 +723,28 @@ export const Impact = () => {
                   ) : (
                     <div className="impact-list">
                       {filteredIncidents.map((inc) => {
-                        const pred = predictions[inc.id];
-                        const incTasks = tasks[inc.id] || [];
-                        const incAssignments = assignments[inc.id] || [];
+                        const pred = inc.prediction;
+                        const incTasks = inc.tasks || [];
                         const severity = getSeverity(inc, pred);
                         const sev = SEVERITY_META[severity];
                         const isOpen = expanded === inc.id;
+
+                        // Extraire les agents de terrain uniques depuis les tâches de l'incident
+                        const uniqueAssignees = new Map();
+                        incTasks.forEach(t => {
+                          if (t.assigned_to) {
+                            const name = typeof t.assigned_to === 'object'
+                              ? `${t.assigned_to.first_name || ''} ${t.assigned_to.last_name || ''}`.trim()
+                              : String(t.assigned_to);
+                            if (name) {
+                              uniqueAssignees.set(name, t.assigned_to_role || '');
+                            }
+                          }
+                        });
+                        const incAssignments = Array.from(uniqueAssignees.entries()).map(([name, role]) => ({
+                          agent_name: name,
+                          role
+                        }));
 
                         // Calculate impact area for this card
                         const radius = parseFloat(pred?.impact_radius_meters || 0);
@@ -1014,7 +801,7 @@ export const Impact = () => {
                                       <div className="impact-card-metric text-primary">
                                         <People size={13} variant="Bold" color="#3AA2DD" />
                                         <strong>
-                                          {(pred.total_population_exposed || 0).toLocaleString('fr-FR')}
+                                          {(pred.direct?.total_population_exposed || pred.total_population_exposed || 0).toLocaleString('fr-FR')}
                                         </strong>
                                         <span>directs</span>
                                       </div>
@@ -1022,7 +809,7 @@ export const Impact = () => {
                                       <div className="impact-card-metric text-purple">
                                         <Profile2User size={13} variant="Bold" color="#8B5CF6" />
                                         <strong>
-                                          {(pred.potential_risk?.stats?.total_pop || 0).toLocaleString('fr-FR')}
+                                          {(pred.indirect?.total_population_exposed || pred.potential_risk?.stats?.total_pop || 0).toLocaleString('fr-FR')}
                                         </strong>
                                         <span>indirects</span>
                                       </div>
@@ -1073,25 +860,25 @@ export const Impact = () => {
                                       <li>
                                         <span className="impact-detail-key">Total exposés</span>
                                         <span className="impact-detail-val">
-                                          {(pred?.total_population_exposed || 0).toLocaleString('fr-FR')}
+                                          {(pred?.direct?.total_population_exposed || pred?.total_population_exposed || 0).toLocaleString('fr-FR')}
                                         </span>
                                       </li>
                                       <li>
                                         <span className="impact-detail-key">Hommes adultes</span>
                                         <span className="impact-detail-val">
-                                          {(pred?.adult_men_exposed || 0).toLocaleString('fr-FR')}
+                                          {(pred?.direct?.adult_men_exposed || pred?.adult_men_exposed || 0).toLocaleString('fr-FR')}
                                         </span>
                                       </li>
                                       <li>
                                         <span className="impact-detail-key">Femmes adultes</span>
                                         <span className="impact-detail-val">
-                                          {(pred?.adult_women_exposed || 0).toLocaleString('fr-FR')}
+                                          {(pred?.direct?.adult_women_exposed || pred?.adult_women_exposed || 0).toLocaleString('fr-FR')}
                                         </span>
                                       </li>
                                       <li>
                                         <span className="impact-detail-key">Enfants</span>
                                         <span className="impact-detail-val">
-                                          {(pred?.children_exposed || 0).toLocaleString('fr-FR')}
+                                          {(pred?.direct?.children_exposed || pred?.children_exposed || 0).toLocaleString('fr-FR')}
                                         </span>
                                       </li>
                                     </ul>
@@ -1107,7 +894,7 @@ export const Impact = () => {
                                       <li>
                                         <span className="impact-detail-key">Zone à risque</span>
                                         <span className="impact-detail-val">
-                                          {(pred?.potential_risk?.stats?.total_pop || 0).toLocaleString('fr-FR')}
+                                          {(pred?.indirect?.total_population_exposed || pred?.potential_risk?.stats?.total_pop || 0).toLocaleString('fr-FR')}
                                         </span>
                                       </li>
                                       <li>
@@ -1119,13 +906,15 @@ export const Impact = () => {
                                       <li>
                                         <span className="impact-detail-key">Vecteur</span>
                                         <span className="impact-detail-val">
-                                          {pred?.potential_risk?.vector || 'N/A'}
+                                          {pred?.spread_vectors && Array.isArray(pred.spread_vectors) && pred.spread_vectors.length > 0
+                                            ? pred.spread_vectors.join(', ')
+                                            : (pred?.potential_risk?.vector || 'N/A')}
                                         </span>
                                       </li>
                                       <li>
                                         <span className="impact-detail-key">Bâtiments à risque</span>
                                         <span className="impact-detail-val">
-                                          {pred?.potential_risk?.stats?.infrastructures || 0} sites
+                                          {pred?.indirect?.residential_buildings || pred?.potential_risk?.stats?.infrastructures || 0} sites
                                         </span>
                                       </li>
                                     </ul>
@@ -1141,14 +930,15 @@ export const Impact = () => {
                                       {Object.entries(STRUCTURE_LABELS).map(([key, label]) => {
                                         let val = 0;
                                         if (pred) {
-                                          if (key === 'schools') val = pred.schools ?? pred.social_data?.schools ?? 0;
-                                          else if (key === 'markets') val = pred.markets ?? pred.social_data?.markets ?? 0;
-                                          else if (key === 'water_points') val = pred.water_points ?? pred.social_data?.water_points ?? 0;
-                                          else if (key === 'main_roads_bridges') val = pred.main_roads_bridges ?? pred.social_data?.main_roads_bridges ?? 0;
-                                          else if (key === 'residential_buildings') val = pred.residential_buildings ?? pred.social_data?.residential_buildings ?? 0;
-                                          else if (key === 'maternities') val = pred.maternities_count ?? pred.maternities ?? 0;
-                                          else if (key === 'health_centers') val = pred.health_centers ?? 0;
-                                          else if (key === 'nurseries') val = pred.nurseries_count ?? pred.nurseries ?? 0;
+                                          val = pred.infrastructure?.[key] ?? pred.schools ?? pred.social_data?.[key] ?? 0;
+                                          if (key === 'schools') val = pred.infrastructure?.schools ?? pred.schools ?? pred.social_data?.schools ?? 0;
+                                          else if (key === 'markets') val = pred.infrastructure?.markets ?? pred.markets ?? pred.social_data?.markets ?? 0;
+                                          else if (key === 'water_points') val = pred.infrastructure?.water_points ?? pred.water_points ?? pred.social_data?.water_points ?? 0;
+                                          else if (key === 'main_roads_bridges') val = pred.infrastructure?.main_roads_bridges ?? pred.main_roads_bridges ?? pred.social_data?.main_roads_bridges ?? 0;
+                                          else if (key === 'residential_buildings') val = pred.infrastructure?.residential_buildings ?? pred.residential_buildings ?? pred.social_data?.residential_buildings ?? 0;
+                                          else if (key === 'maternities') val = pred.infrastructure?.maternities ?? pred.maternities_count ?? pred.maternities ?? 0;
+                                          else if (key === 'health_centers') val = pred.infrastructure?.health_centers ?? pred.health_centers ?? 0;
+                                          else if (key === 'nurseries') val = pred.infrastructure?.nurseries ?? pred.nurseries_count ?? pred.nurseries ?? 0;
                                         }
                                         return (
                                           <li key={key}>
@@ -1169,20 +959,16 @@ export const Impact = () => {
                                       <span className="details-sublabel">Organisations :</span>
                                       <div className="impact-orgs-list">
                                         {(() => {
-                                          const orgs = [];
-                                          const leader = inc.organisation_name || inc.organisation || inc.user_id?.organisation_name;
-                                          if (leader && leader !== 'Non spécifié') orgs.push(leader);
-                                          if (inc.participants && Array.isArray(inc.participants)) {
-                                            inc.participants.forEach((p) => {
-                                              if (p.name && !orgs.includes(p.name)) orgs.push(p.name);
-                                            });
-                                          }
-                                          if (orgs.length === 0) return <span className="text-muted">Aucune organisation spécifiée</span>;
-                                          return orgs.map((org, idx) => (
-                                            <span key={idx} className="impact-org-chip">
-                                              {org}
-                                            </span>
-                                          ));
+                                          const collabOrgs = inc.collaborating_organisations || [];
+                                          if (collabOrgs.length === 0) return <span className="text-muted">Aucune organisation spécifiée</span>;
+                                          return collabOrgs.map((org, idx) => {
+                                            const relationLabel = org.relation === 'leader' ? 'Leader' : (org.relation === 'assigned' ? 'Assignée' : 'Collaborateur');
+                                            return (
+                                              <span key={idx} className="impact-org-chip">
+                                                {org.name} <strong style={{ marginLeft: '4px', fontSize: '10px', opacity: 0.8 }}>({relationLabel})</strong>
+                                              </span>
+                                            );
+                                          });
                                         })()}
                                       </div>
                                     </div>
@@ -1239,6 +1025,14 @@ export const Impact = () => {
                           </article>
                         );
                       })}
+                      <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'center' }}>
+                        <Pagination
+                          page={currentPage}
+                          pageSize={10}
+                          count={totalIncidentsCount}
+                          onChange={setCurrentPage}
+                        />
+                      </div>
                     </div>
                   )}
                 </div>

@@ -88,27 +88,32 @@
 /* Couleurs par sévérité active et statut de résolution */
 .incident-marker.severity-active-high .incident-marker-dot,
 .incident-marker.severity-active-high .incident-marker-pulse {
-  background-color: #EF4444; /* Rouge */
+  background-color: #EF4444;
+  /* Rouge */
 }
 
 .incident-marker.severity-active-medium .incident-marker-dot,
 .incident-marker.severity-active-medium .incident-marker-pulse {
-  background-color: #F97316; /* Orange */
+  background-color: #F97316;
+  /* Orange */
 }
 
 .incident-marker.severity-active-low .incident-marker-dot,
 .incident-marker.severity-active-low .incident-marker-pulse {
-  background-color: #FACC15; /* Jaune */
+  background-color: #FACC15;
+  /* Jaune */
 }
 
 .incident-marker.severity-resolved-others .incident-marker-dot,
 .incident-marker.severity-resolved-others .incident-marker-pulse {
-  background-color: #3AA2DD; /* Bleu */
+  background-color: #3AA2DD;
+  /* Bleu */
 }
 
 .incident-marker.severity-resolved-mine .incident-marker-dot,
 .incident-marker.severity-resolved-mine .incident-marker-pulse {
-  background-color: #22C55E; /* Vert */
+  background-color: #22C55E;
+  /* Vert */
 }
 
 /* ============================================
@@ -480,9 +485,11 @@
 .status-stepper-declared .incident-modal-status-segment.is-current {
   background-color: var(--color-text-secondary);
 }
+
 .status-stepper-declared .incident-modal-status-step.is-current {
   color: var(--color-text-secondary);
 }
+
 .status-stepper-declared .incident-modal-status-step.is-current .incident-modal-status-dot {
   box-shadow: 0 0 0 4px rgba(108, 114, 120, 0.18);
 }
@@ -491,9 +498,11 @@
 .status-stepper-pending .incident-modal-status-segment.is-current {
   background-color: var(--color-warning);
 }
+
 .status-stepper-pending .incident-modal-status-step.is-current {
   color: var(--color-warning);
 }
+
 .status-stepper-pending .incident-modal-status-step.is-current .incident-modal-status-dot {
   box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.18);
 }
@@ -502,9 +511,11 @@
 .status-stepper-taken_into_account .incident-modal-status-segment.is-current {
   background-color: var(--color-primary);
 }
+
 .status-stepper-taken_into_account .incident-modal-status-step.is-current {
   color: var(--color-primary);
 }
+
 .status-stepper-taken_into_account .incident-modal-status-step.is-current .incident-modal-status-dot {
   box-shadow: 0 0 0 4px rgba(58, 162, 221, 0.18);
 }
@@ -514,10 +525,12 @@
 .status-stepper-resolved .incident-modal-status-segment.is-done {
   background-color: var(--color-success);
 }
+
 .status-stepper-resolved .incident-modal-status-step.is-current,
 .status-stepper-resolved .incident-modal-status-step.is-done {
   color: var(--color-success);
 }
+
 .status-stepper-resolved .incident-modal-status-step.is-current .incident-modal-status-dot {
   box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.18);
 }
@@ -632,7 +645,7 @@
 .map-style-switcher {
   position: absolute;
   top: var(--spacing-4);
-  right: var(--spacing-4);
+  left: var(--spacing-4);
   z-index: 5;
   display: inline-flex;
   background: rgba(15, 23, 42, 0.9);
@@ -1065,7 +1078,7 @@
    ============================================ */
 .map-filters-overlay {
   position: absolute;
-  top: 70px;
+  top: var(--spacing-4);
   right: var(--spacing-4);
   z-index: 5;
   display: flex;
@@ -1140,6 +1153,7 @@
 .desktop-only-inline {
   display: inline;
 }
+
 .mobile-only-inline {
   display: none;
 }
@@ -1155,6 +1169,7 @@
   .desktop-only-inline {
     display: none;
   }
+
   .mobile-only-inline {
     display: inline;
   }
@@ -1169,12 +1184,12 @@
   }
 
   /* Target other grid elements and pad them so they are not glued to screen edges */
-  .dashboard-grid > *:not(.card) {
+  .dashboard-grid>*:not(.card) {
     padding-left: 16px !important;
     padding-right: 16px !important;
   }
 
-  .dashboard-grid > .card {
+  .dashboard-grid>.card {
     border: none !important;
     border-radius: 0 !important;
     margin: 0 !important;

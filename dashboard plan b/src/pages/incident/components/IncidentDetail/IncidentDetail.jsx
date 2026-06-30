@@ -1118,6 +1118,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
   const hasAcceptedRole = collabRequest && (collabRequest.status?.toLowerCase() === 'accepted' || collabRequest.status?.toLowerCase() === 'in-progress');
 
   const showInvolvementButton = (
+    !safeIncident?.take_in_charge_mode ||
     safeIncident?.etat === 'declared' ||
     (takingOrg && !takingOrg.isMe && !hasParticipantRole) ||
     (isCollaborativeMode && takingOrg?.isMe) ||
@@ -1408,7 +1409,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                 ) : (
                   <>
                     <UserAdd size={18} variant="Bold" color="var(--color-surface)" />
-                    {safeIncident.isOwner || hasAcceptedRole
+                    {safeIncident.isOwner || hasAcceptedRole || (isCollaborativeMode && takingOrg?.isMe)
                       ? 'Inviter des organisations'
                       : safeIncident?.etat === 'declared'
                         ? "Agir sur cet incident"

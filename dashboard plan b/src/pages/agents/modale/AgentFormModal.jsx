@@ -254,39 +254,68 @@ export const AgentFormModal = () => {
       mutateAgents();
       setTimeout(() => closeFormModal(), 2000);
     } catch (err) {
-      if (err?.response?.status === 400 && err?.response?.data && typeof err.response.data === 'object') {
-        const backendErrors = err.response.data;
-        const keyMapping = {
-          first_name: 'firstName',
-          last_name: 'lastName',
-          email: 'email',
-          phone: 'phone',
-          address: 'address',
-          org_role: 'role',
-          password: 'password',
-          organisation: 'organisationId',
-        };
+      console.log("[AGENTS] Error caught:", err?.response?.status, err?.response?.data);
+      const backendData = err?.response?.data;
+      
+      if (err?.response?.status === 400 && backendData && typeof backendData === 'object') {
+        // Si le backend renvoie { error: "..." }
+        if (backendData.error) {
+          const errorMsg = backendData.error;
+          const lowerMsg = errorMsg.toLowerCase();
+          
+          if (lowerMsg.includes('téléphone') || lowerMsg.includes('telephone') || lowerMsg.includes('numéro') || lowerMsg.includes('numero')) {
+            setError('phone', { type: 'server', message: errorMsg });
+            setModalAlert({
+              type: 'danger',
+              message: 'Erreur sur le numéro de téléphone.'
+            });
+          } else if (lowerMsg.includes('email') || lowerMsg.includes('mail') || lowerMsg.includes('adresse')) {
+            setError('email', { type: 'server', message: errorMsg });
+            setModalAlert({
+              type: 'danger',
+              message: "Erreur sur l'adresse email."
+            });
+          } else {
+            setModalAlert({
+              type: 'danger',
+              message: errorMsg
+            });
+          }
+        } else {
+          // Dictionnaire de champs standard
+          const keyMapping = {
+            first_name: 'firstName',
+            last_name: 'lastName',
+            email: 'email',
+            phone: 'phone',
+            address: 'address',
+            org_role: 'role',
+            password: 'password',
+            organisation: 'organisationId',
+          };
 
-        Object.keys(backendErrors).forEach((backendKey) => {
-          const frontendKey = keyMapping[backendKey] || backendKey;
-          const errorMsg = Array.isArray(backendErrors[backendKey])
-            ? backendErrors[backendKey].join(' ')
-            : backendErrors[backendKey];
+          Object.keys(backendData).forEach((backendKey) => {
+            const frontendKey = keyMapping[backendKey] || backendKey;
+            const errorMsg = Array.isArray(backendData[backendKey])
+              ? backendData[backendKey].join(' ')
+              : backendData[backendKey];
 
-          setError(frontendKey, {
-            type: 'server',
-            message: errorMsg
+            setError(frontendKey, {
+              type: 'server',
+              message: errorMsg
+            });
           });
-        });
 
-        setModalAlert({
-          type: 'danger',
-          message: 'Veuillez corriger les erreurs de validation dans le formulaire.'
-        });
+          setModalAlert({
+            type: 'danger',
+            message: 'Veuillez corriger les erreurs de validation dans le formulaire.'
+          });
+        }
       } else {
         const msg =
           err?.response?.data?.detail ||
           err?.response?.data?.message ||
+          err?.response?.data?.error ||
           `Erreur lors de la ${isCreate ? 'création' : 'modification'}. Veuillez réessayer.`;
         setModalAlert({ type: 'danger', message: msg });
       }

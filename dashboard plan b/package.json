@@ -27,6 +27,7 @@
     "react-map-gl": "^8.1.1",
     "react-router-dom": "^7.14.2",
     "react-shimmer-effects": "^1.0.4",
+    "recharts": "^3.9.1",
     "swr": "^2.4.1",
     "yup": "^1.7.1"
   },

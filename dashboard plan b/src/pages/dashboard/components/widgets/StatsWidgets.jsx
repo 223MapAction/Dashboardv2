@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { Location, Chart2, Warning2, ArrowRight2, Clock } from 'iconsax-react';
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import './stats-widgets.css';
 
 const getStatusLabel = (etat) => {
@@ -72,6 +73,18 @@ export const StatsWidgets = ({ stats }) => {
       { label: 'Faible', percentage: 0, color: '#FACC15' }
     ];
   }, [stats]);
+
+  const chartData = useMemo(() => {
+    const hasData = severityData.some(item => item.percentage > 0);
+    if (!hasData) {
+      return [{ name: 'Pas de données', value: 100, color: 'var(--color-border)' }];
+    }
+    return severityData.map(item => ({
+      name: item.label,
+      value: item.percentage,
+      color: item.color
+    })).filter(item => item.value > 0);
+  }, [severityData]);
 
   return (
     <div className="stats-widgets">
@@ -151,45 +164,34 @@ export const StatsWidgets = ({ stats }) => {
           <h3>Gravité</h3>
         </div>
         <div className="widget-content">
-          <div className="donut-chart">
-            <svg viewBox="0 0 120 120" className="donut-svg">
-              <circle
-                cx="60"
-                cy="60"
-                r="45"
-                fill="none"
-                stroke="var(--color-severity-low)"
-                strokeWidth="20"
-                strokeDasharray="282.7"
-                strokeDashoffset="70.675"
-                transform="rotate(-90 60 60)"
-              />
-              <circle
-                cx="60"
-                cy="60"
-                r="45"
-                fill="none"
-                stroke="var(--color-severity-medium)"
-                strokeWidth="20"
-                strokeDasharray="282.7"
-                strokeDashoffset="217.7"
-                transform="rotate(145 60 60)"
-              />
-              <circle
-                cx="60"
-                cy="60"
-                r="45"
-                fill="none"
-                stroke="var(--color-severity-high)"
-                strokeWidth="20"
-                strokeDasharray="282.7"
-                strokeDashoffset="248.8"
-                transform="rotate(228 60 60)"
-              />
-              <text x="60" y="60" textAnchor="middle" dy="7" className="donut-label">
-                Global
-              </text>
-            </svg>
+          <div className="donut-chart" style={{ height: 160 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={35}
+                  outerRadius={55}
+                  paddingAngle={3}
+                  dataKey="value"
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(value, name) => [`${value}%`, name]}
+                  contentStyle={{
+                    backgroundColor: 'var(--color-bg-primary, #ffffff)',
+                    border: '1px solid var(--color-border, #e5e7eb)',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                    color: 'var(--color-text-primary)'
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
           <div className="severity-legend">
             {severityData.map((item, index) => (

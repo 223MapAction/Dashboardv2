@@ -31,6 +31,10 @@ export const Header = ({ onMenuToggle, user }) => {
     return notificationsData?.results || (Array.isArray(notificationsData) ? notificationsData : []);
   }, [notificationsData]);
 
+  useEffect(() => {
+    console.log('[NOTIFICATIONS] Liste actuelle des notifications:', notifications);
+  }, [notifications]);
+
   // Synchroniser nextUrl quand les données SWR changent
   useEffect(() => {
     if (notificationsData && notificationsData.next !== undefined) {
@@ -96,12 +100,21 @@ export const Header = ({ onMenuToggle, user }) => {
       };
     };
 
+    const handleBeforeUnload = () => {
+      isCleanedUp = true;
+      if (socket) {
+        socket.close(1000, "Page unloading");
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
     connect();
 
     return () => {
       isCleanedUp = true;
+      window.removeEventListener('beforeunload', handleBeforeUnload);
       if (socket) {
-        socket.close();
+        socket.close(1000, "Component unmounting");
       }
     };
   }, [mutateNotifications]);

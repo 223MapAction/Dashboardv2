@@ -38,6 +38,7 @@ import {
 import { CollabIncidentDetailModal } from './modal/CollabIncidentDetailModal';
 import { DecisionModal } from './modal/DecisionModal';
 import { authService } from '../auth/services/authService';
+import { API_URL_BASE } from '../../config/api_url_base';
 import './collaboration-requests.css';
 
 const STATUS_META = {
@@ -178,6 +179,10 @@ export const CollaborationRequests = ({
   // Clé SWR pour la suggestion sélectionnée
   const [selectedSuggestionKey, setSelectedSuggestionKey] = useState(null);
 
+  // Demandes de collaborations reçues en temps réel par WebSocket
+  const [wsRequests, setWsRequests] = useState([]);
+  const [statusOverrides, setStatusOverrides] = useState({});
+
   // SWR Calls
   const { data: pendingSuggestions, mutate: mutatePendingSuggestions, isLoading: loadingSuggestions } = useSWR(
     typeFilter === 'sug-received' || typeFilter === 'all' ? 'my-pending-received-suggestions' : null,
@@ -247,6 +252,130 @@ export const CollaborationRequests = ({
       refreshWhenHidden: false,
     }
   );
+
+  useEffect(() => {
+    const wsBaseUrl = window.location.protocol === 'https:' || API_URL_BASE.startsWith('https')
+      ? API_URL_BASE.replace(/^https/, 'wss')
+      : API_URL_BASE.replace(/^http/, 'ws');
+    const token = authService.getAccessToken();
+    const query = token ? `?token=${token}` : '';
+
+    let socket = null;
+    let isCleanedUp = false;
+    let delay = 3000;
+
+    const shouldRetry = (code) => ![1000, 4001, 4003, 4004].includes(code);
+
+    const connect = () => {
+      if (isCleanedUp) return;
+      socket = new WebSocket(`${wsBaseUrl}/ws/collaborations/${query}`);
+
+      socket.onopen = () => {
+        delay = 3000;
+        console.log('[WS-Collaborations] Connecté aux collaborations');
+      };
+
+      socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          console.log('[WS-Collaborations] Message reçu:', data);
+
+          if (data) {
+            const reqId = data.id;
+            const newStatus = data.status || 'pending';
+
+            // Mettre à jour l'override de statut pour synchronisation instantanée avec SWR
+            if (reqId) {
+              setStatusOverrides((prev) => ({ ...prev, [reqId]: newStatus }));
+            }
+
+            setWsRequests((prev) => {
+              const exists = prev.some((r) => r.apiId === reqId);
+              if (exists) {
+                return prev.map((r) => r.apiId === reqId ? { ...r, status: newStatus } : r);
+              }
+
+              const orgName = data.sender_organisation || 'Organisation';
+              const isLeader = data.role === 'leader';
+              const displayRole = isLeader ? 'Leader' : (data.role === 'observer' ? 'Observateur' : 'Contributeur');
+
+              const currUser = authService.getCurrentUser();
+              const myOrgId = currUser?.organisation_member || currUser?.organisation_id || '';
+              const senderOrgId = data.sender_organisation_id;
+
+              let calculatedDirection = 'received';
+              if (senderOrgId && myOrgId && String(senderOrgId).toLowerCase() === String(myOrgId).toLowerCase()) {
+                calculatedDirection = 'sent';
+              } else if (data.sender_name && currUser?.first_name && data.sender_name.toLowerCase().includes(currUser.first_name.toLowerCase())) {
+                calculatedDirection = 'sent';
+              }
+
+              const newReq = {
+                id: `collab_ws_${reqId}`,
+                type: 'invitation',
+                direction: calculatedDirection,
+                projectTitle: data.incident_title || `Incident #${data.incident}`,
+                projectImage: '',
+                organisation: orgName,
+                organisationInitials: getInitials(orgName),
+                organisationColor: 'var(--color-warning)',
+                role: displayRole,
+                motif: data.justification || data.motivation || `${orgName} a demandé à collaborer sur «${data.incident_title || 'cet incident'}»`,
+                status: newStatus,
+                submittedAt: data.created_at || new Date().toISOString(),
+                respondedAt: null,
+                response: null,
+                incidentId: data.incident,
+                apiId: reqId,
+                incidentDetails: {
+                  id: data.incident,
+                  title: data.incident_title
+                },
+                userFullName: data.sender_name,
+                organisationName: orgName
+              };
+
+              return [newReq, ...prev];
+            });
+
+            // Revalidation globale en arrière-plan
+            mutatePendingSuggestions();
+            mutateActiveCollabs();
+            mutatePendingInvitations();
+          }
+        } catch (e) {
+          console.error('[WS-Collaborations] Erreur parsing message:', e);
+        }
+      };
+
+      socket.onerror = () => socket.close();
+
+      socket.onclose = (e) => {
+        if (!isCleanedUp && shouldRetry(e.code)) {
+          setTimeout(connect, delay);
+          delay = Math.min(delay * 2, 30000);
+        }
+      };
+    };
+
+    const handleBeforeUnload = () => {
+      isCleanedUp = true;
+      if (socket) {
+        socket.close(1000, "Page unloading");
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    connect();
+
+    return () => {
+      isCleanedUp = true;
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      if (socket) {
+        socket.close(1000, "Component unmounting");
+      }
+    };
+  }, [mutatePendingSuggestions, mutateActiveCollabs, mutatePendingInvitations]);
 
   const openDecision = (request, action = null) => {
     setDecisionRequest(request);
@@ -328,7 +457,7 @@ export const CollaborationRequests = ({
   };
 
   // Compile flat requests list
-  const requests = [
+  const compiledSwrRequests = [
     ...localRequests,
     ...(pendingSuggestions || []).map((item) => {
       const orgName = item.suggested_partner_name || item.partner_name || 'Partenaire';
@@ -497,7 +626,20 @@ export const CollaborationRequests = ({
         userId: item.user || null
       };
     })
-  ].filter(r => r.status !== 'accepted');
+  ].map(r => {
+    if (r.apiId && statusOverrides[r.apiId]) {
+      return { ...r, status: statusOverrides[r.apiId] };
+    }
+    return r;
+  }).filter(r => r.status !== 'accepted');
+
+  const swrApiIds = new Set(compiledSwrRequests.map(r => r.apiId).filter(Boolean));
+  const filteredWsRequests = wsRequests.filter(r => !swrApiIds.has(r.apiId));
+
+  const requests = [
+    ...filteredWsRequests,
+    ...compiledSwrRequests
+  ];
 
   const q = search.trim().toLowerCase();
   const filtered = requests.filter((r) => {
@@ -702,8 +844,7 @@ export const CollaborationRequests = ({
         <RequestCardSkeleton />
       ) : groupedIncidents.length === 0 ? (
         <div className="requests-empty">
-          <p className='h2'>Aucune collaboration ne correspond à vos critères.</p>
-          <p className='body-large'>Aucune collaboration ne correspond à vos critères.</p>
+          <p className='body-large' style={{ color: "var(--color-text-primary)" }}>Aucune collaboration ne correspond à vos critères.</p>
         </div>
       ) : (
         <div className="incident-centric-list">
@@ -775,7 +916,7 @@ export const CollaborationRequests = ({
                           </>
                         ) : (
                           <>
-                            <strong style={{ fontWeight: 800 }}>{pendingReqToAction?.organisation || 'Une organisation'}</strong> souhaite collaborer sur cet incident
+                            <strong style={{ fontWeight: 800 }}>{pendingReqToAction?.organisation || 'Une organisation'}</strong> a demandé à collaborer sur <strong style={{ fontWeight: 800 }}>«{incident.projectTitle}»</strong>
                           </>
                         )}
                       </span>
