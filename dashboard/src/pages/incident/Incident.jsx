@@ -50,7 +50,17 @@ const adaptIncidentData = (incident, currentUserId = null) => {
     description: incident.description || 'Aucune description disponible',
     // Ajouter les coordonnées formatées
     coordinates: (() => {
-      const lat = parseFloat(incident.lattitude);
+      // 1. Vérifier si l'objet coordinates existe et contient des nombres valides
+      if (incident.coordinates && typeof incident.coordinates === 'object') {
+        const lat = parseFloat(incident.coordinates.lat);
+        const lng = parseFloat(incident.coordinates.lng);
+        if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+          return { lat, lng };
+        }
+      }
+      // 2. Sinon, vérifier les champs directs (gère lattitude et latitude)
+      const latVal = incident.lattitude !== undefined ? incident.lattitude : incident.latitude;
+      const lat = parseFloat(latVal);
       const lng = parseFloat(incident.longitude);
       if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
         return { lat, lng };

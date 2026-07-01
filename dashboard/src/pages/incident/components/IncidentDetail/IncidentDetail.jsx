@@ -291,15 +291,6 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
     fullDescription: currentIncident.fullDescription || currentIncident.description || 'Aucune description disponible',
     type: currentIncident.type || currentIncident.zone || 'Non spécifié',
     location: currentIncident.location || currentIncident.zone || 'Localisation non spécifiée',
-    coordinates: currentIncident.coordinates || (() => {
-      const lat = parseFloat(currentIncident.lattitude);
-      const lng = parseFloat(currentIncident.longitude);
-      // Vérifier que les coordonnées sont des nombres valides
-      if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
-        return { lat, lng };
-      }
-      return null;
-    })(),
     video: currentIncident.video || null,
     startDate: currentIncident.startDate || currentIncident.created_at ? new Date(currentIncident.created_at).toLocaleDateString('fr-FR') : 'Non spécifié',
     endDate: currentIncident.endDate || 'En cours',
@@ -319,7 +310,27 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
           : parseInt(currentIncident.taken_by) === parseInt(currentUserId))
         : false
     ) : false,
-    ...currentIncident
+    ...currentIncident,
+    // S'assurer que les coordonnées sont toujours récupérées en toute sécurité, en vérifiant l'objet `coordinates` ou les champs `lattitude`/`latitude`/`longitude`
+    coordinates: (() => {
+      // 1. Vérifier si l'objet coordinates existe et contient des nombres valides
+      if (currentIncident.coordinates && typeof currentIncident.coordinates === 'object') {
+        const lat = parseFloat(currentIncident.coordinates.lat);
+        const lng = parseFloat(currentIncident.coordinates.lng);
+        if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+          return { lat, lng };
+        }
+      }
+      // 2. Sinon, vérifier les champs directs (gère lattitude et latitude)
+      const latVal = currentIncident.lattitude !== undefined ? currentIncident.lattitude : currentIncident.latitude;
+      const lat = parseFloat(latVal);
+      const lng = parseFloat(currentIncident.longitude);
+      // Vérifier que les coordonnées sont des nombres valides
+      if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+        return { lat, lng };
+      }
+      return null;
+    })()
   } : null;
 
   const [joinOpen, setJoinOpen] = useState(false);

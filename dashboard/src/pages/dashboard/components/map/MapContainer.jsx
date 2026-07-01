@@ -265,7 +265,16 @@ export const MapContainer = ({ incidents = [], isLoading = false }) => {
     if (!hasValidCoords) {
       hasFallbackCoords = true;
       // Ajout d'une petite variation déterministe basée sur l'ID de l'incident pour éviter la superposition parfaite
-      const offsetId = inc.id || 0;
+      let offsetId = Number(inc.id);
+      if (isNaN(offsetId)) {
+        // Hachage simple pour les identifiants sous forme de chaîne de caractères (comme les UUID)
+        const str = String(inc.id || '');
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+          hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        offsetId = hash;
+      }
       finalLat = DEFAULT_MALI_LAT + (Math.sin(offsetId) * 0.005);
       finalLng = DEFAULT_MALI_LNG + (Math.cos(offsetId) * 0.005);
     }
@@ -341,8 +350,8 @@ export const MapContainer = ({ incidents = [], isLoading = false }) => {
     const avg = validIncidents.reduce(
       (acc, inc) => {
         return {
-          lng: acc.lng + inc._lng,
-          lat: acc.lat + inc._lat
+          lng: acc.lng + (isNaN(inc._lng) ? 0 : inc._lng),
+          lat: acc.lat + (isNaN(inc._lat) ? 0 : inc._lat)
         };
       },
       { lng: 0, lat: 0 }
