@@ -1895,11 +1895,28 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                         VECTEURS DE PROPAGATION
                       </div>
                       <div style={{ display: 'flex', gap: 'var(--spacing-2)', flexWrap: 'wrap' }}>
-                        {(pred.spread_vectors || []).map((vector, idx) => (
-                          <span key={idx} style={{ padding: 'var(--spacing-1) var(--spacing-2)', backgroundColor: 'var(--color-background)', border: '1px solid var(--color-primary)', color: 'var(--color-primary)', borderRadius: 'var(--radius-full)', fontSize: 'var(--font-size-caption)', fontWeight: 'var(--font-weight-medium)' }}>
-                            {vector}
-                          </span>
-                        ))}
+                        {(() => {
+                          const rawVectors = pred.spread_vectors;
+                          let vectorsArray = [];
+                          if (Array.isArray(rawVectors)) {
+                            vectorsArray = rawVectors;
+                          } else if (typeof rawVectors === 'string') {
+                            try {
+                              if (rawVectors.trim().startsWith('[')) {
+                                vectorsArray = JSON.parse(rawVectors);
+                              } else {
+                                vectorsArray = rawVectors.split(',').map(v => v.trim()).filter(Boolean);
+                              }
+                            } catch (e) {
+                              vectorsArray = rawVectors.split(',').map(v => v.trim()).filter(Boolean);
+                            }
+                          }
+                          return vectorsArray.map((vector, idx) => (
+                            <span key={idx} style={{ padding: 'var(--spacing-1) var(--spacing-2)', backgroundColor: 'var(--color-background)', border: '1px solid var(--color-primary)', color: 'var(--color-primary)', borderRadius: 'var(--radius-full)', fontSize: 'var(--font-size-caption)', fontWeight: 'var(--font-weight-medium)' }}>
+                              {vector}
+                            </span>
+                          ));
+                        })()}
                       </div>
                     </div>
 
@@ -1909,11 +1926,28 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                         TAGS D'IMPACT SECONDAIRES
                       </div>
                       <div style={{ display: 'flex', gap: 'var(--spacing-2)', flexWrap: 'wrap' }}>
-                        {(pred.impact_tags || []).map((tag, idx) => (
-                          <span key={idx} style={{ padding: 'var(--spacing-1) var(--spacing-2)', backgroundColor: 'var(--color-background)', border: '1px solid var(--color-success)', color: 'var(--color-success)', borderRadius: 'var(--radius-full)', fontSize: 'var(--font-size-caption)', fontWeight: 'var(--font-weight-medium)' }}>
-                            {tag}
-                          </span>
-                        ))}
+                        {(() => {
+                          const rawTags = pred.impact_tags;
+                          let tagsArray = [];
+                          if (Array.isArray(rawTags)) {
+                            tagsArray = rawTags;
+                          } else if (typeof rawTags === 'string') {
+                            try {
+                              if (rawTags.trim().startsWith('[')) {
+                                tagsArray = JSON.parse(rawTags);
+                              } else {
+                                tagsArray = rawTags.split(',').map(t => t.trim()).filter(Boolean);
+                              }
+                            } catch (e) {
+                              tagsArray = rawTags.split(',').map(t => t.trim()).filter(Boolean);
+                            }
+                          }
+                          return tagsArray.map((tag, idx) => (
+                            <span key={idx} style={{ padding: 'var(--spacing-1) var(--spacing-2)', backgroundColor: 'var(--color-background)', border: '1px solid var(--color-success)', color: 'var(--color-success)', borderRadius: 'var(--radius-full)', fontSize: 'var(--font-size-caption)', fontWeight: 'var(--font-weight-medium)' }}>
+                              {tag}
+                            </span>
+                          ));
+                        })()}
                       </div>
                     </div>
                   </div>

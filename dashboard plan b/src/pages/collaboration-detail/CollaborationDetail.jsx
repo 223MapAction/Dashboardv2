@@ -2107,16 +2107,34 @@ export const CollaborationDetail = () => {
                               </div>
                             )}
 
-                            {collaboration.predictionDetails.impact_tags && collaboration.predictionDetails.impact_tags.length > 0 && (
-                              <div className="collab-detail-meta-row">
-                                <span className="collab-detail-meta-label">Domaines d'impact</span>
-                                <div className="collab-detail-tag-list">
-                                  {collaboration.predictionDetails.impact_tags.map((tag, i) => (
-                                    <span key={i} className="collab-detail-tag">{tag}</span>
-                                  ))}
+                            {(() => {
+                              const rawTags = collaboration.predictionDetails.impact_tags;
+                              let tagsArray = [];
+                              if (Array.isArray(rawTags)) {
+                                tagsArray = rawTags;
+                              } else if (typeof rawTags === 'string') {
+                                try {
+                                  if (rawTags.trim().startsWith('[')) {
+                                    tagsArray = JSON.parse(rawTags);
+                                  } else {
+                                    tagsArray = rawTags.split(',').map(t => t.trim()).filter(Boolean);
+                                  }
+                                } catch (e) {
+                                  tagsArray = rawTags.split(',').map(t => t.trim()).filter(Boolean);
+                                }
+                              }
+                              if (!Array.isArray(tagsArray) || tagsArray.length === 0) return null;
+                              return (
+                                <div className="collab-detail-meta-row">
+                                  <span className="collab-detail-meta-label">Domaines d'impact</span>
+                                  <div className="collab-detail-tag-list">
+                                    {tagsArray.map((tag, i) => (
+                                      <span key={i} className="collab-detail-tag">{tag}</span>
+                                    ))}
+                                  </div>
                                 </div>
-                              </div>
-                            )}
+                              );
+                            })()}
                           </div>
                         ) : (
                           <div className="collab-detail-meta-val" style={{ color: 'var(--color-text-muted)', fontSize: '13px', fontStyle: 'italic' }}>
