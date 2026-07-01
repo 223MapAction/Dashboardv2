@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useSWR from 'swr';
 import Map, { Marker } from 'react-map-gl/mapbox';
@@ -6,8 +6,9 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
 import { getIncidentService } from '../../../incident/service/incident_service';
 import { getOrgInternalIncidentsService } from '../../../mes-interventions/service/mes_interventions_service';
-import { getIncidentsNotResolvedService, getIncidentsResolvedService } from '../../service/dashboard_service';
+import { getIncidentsFilteredService } from '../../service/dashboard_service';
 import { BlurryImage } from '../../../../components/atoms/BlurryImage';
+import { COUNTRIES } from '../../../organisations/data/organisations';
 import './map.css';
 
 // Token Mapbox depuis les variables d'environnement
@@ -67,7 +68,7 @@ const INCIDENT_STATUS_STEPS = [
 ];
 
 // Style "Humanitaire" inspiré d'OpenStreetMap HOT (Humanitarian OSM Team)
-// Utilise les tiles HOT-OSM directement avec masque pour afficher uniquement le Mali
+// Affichage mondial sans restriction géographique
 const HOT_OSM_STYLE = {
   version: 8,
   sources: {
@@ -81,34 +82,6 @@ const HOT_OSM_STYLE = {
       tileSize: 256,
       attribution:
         '© OpenStreetMap contributors, Tiles style by Humanitarian OpenStreetMap Team'
-    },
-    'mali-boundary': {
-      type: 'geojson',
-      data: {
-        type: 'Feature',
-        properties: {},
-        geometry: {
-          type: 'Polygon',
-          coordinates: [
-            // Anneau externe : couvre le monde entier
-            [
-              [-180, -90],
-              [-180, 90],
-              [180, 90],
-              [180, -90],
-              [-180, -90]
-            ],
-            // Anneau interne (trou) : délimitation du Mali
-            [
-              [-12.24, 10.16], // Sud-Ouest
-              [-12.24, 25.00], // Nord-Ouest
-              [4.27, 25.00],   // Nord-Est
-              [4.27, 10.16],   // Sud-Est
-              [-12.24, 10.16]  // Fermeture
-            ]
-          ]
-        }
-      }
     }
   },
   layers: [
@@ -125,15 +98,6 @@ const HOT_OSM_STYLE = {
       source: 'hot-osm',
       minzoom: 0,
       maxzoom: 19
-    },
-    {
-      id: 'mali-mask',
-      type: 'fill',
-      source: 'mali-boundary',
-      paint: {
-        'fill-color': '#f0f0f0',
-        'fill-opacity': 0.85
-      }
     }
   ]
 };
@@ -190,6 +154,10 @@ export const MapContainer = ({ incidents = [], isLoading = false }) => {
   const currentUserId = sessionStorage.getItem('user_id');
   const [ownershipFilter, setOwnershipFilter] = useState('all'); // 'all' | 'mine'
   const [statusFilter, setStatusFilter] = useState('active'); // 'active' | 'resolved'
+  const [countryFilter, setCountryFilter] = useState(''); // Filtre pays (vide = tous les pays)
+
+  // Récupérer le pays de l'organisation de l'utilisateur
+  const userOrgCountry = sessionStorage.getItem('organisation_country') || '';
 
   // Utiliser useSWR pour récupérer les détails de l'incident sélectionné
   const { data: selectedIncident, isLoading: isLoadingIncident } = useSWR(
@@ -207,47 +175,101 @@ export const MapContainer = ({ incidents = [], isLoading = false }) => {
     }
   );
 
-  // Utiliser useSWR pour récupérer les incidents non résolus (actifs)
-  const { data: activeIncidentsData, isLoading: isLoadingActiveIncidents } = useSWR(
-    ownershipFilter === 'all' && statusFilter === 'active' ? '/map-active-incidents' : null,
-    () => getIncidentsNotResolvedService(),
-    {
-      revalidateOnFocus: true,
-      revalidateOnReconnect: true
-    }
-  );
+  // ── Chargement progressif des incidents ──────────────────────────────────────
+  const [allIncidents, setAllIncidents] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMorePages, setHasMorePages] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const loadedPagesRef = useRef(new Set());
 
-  // Utiliser useSWR pour récupérer les incidents résolus
-  const { data: resolvedIncidentsData, isLoading: isLoadingResolvedIncidents } = useSWR(
-    ownershipFilter === 'all' && statusFilter === 'resolved' ? '/map-resolved-incidents' : null,
-    () => getIncidentsResolvedService(),
-    {
-      revalidateOnFocus: true,
-      revalidateOnReconnect: true
-    }
-  );
+  // Déterminer le scope en fonction des filtres
+  const getScope = () => {
+    if (ownershipFilter === 'mine') return 'mine';
+    if (statusFilter === 'resolved') return 'resolved';
+    if (statusFilter === 'active') return 'unresolved';
+    return 'all';
+  };
 
-  // Utiliser useSWR pour récupérer les incidents quand "Mes incidents" est sélectionné
-  const { data: orgIncidentsData, isLoading: isLoadingOrgIncidents } = useSWR(
-    ownershipFilter === 'mine' ? '/org-incidents' : null,
-    () => getOrgInternalIncidentsService(),
+  const scope = getScope();
+
+  // Réinitialiser quand les filtres changent
+  useEffect(() => {
+    setAllIncidents([]);
+    setCurrentPage(1);
+    setHasMorePages(true);
+    loadedPagesRef.current = new Set();
+  }, [ownershipFilter, statusFilter, countryFilter]);
+
+  // Charger une page d'incidents
+  const { data: currentPageData, isLoading: isLoadingPage } = useSWR(
+    ownershipFilter === 'mine'
+      ? (currentPage === 1 ? '/org-incidents' : null) // Pour "mine", utiliser l'ancien endpoint
+      : `/map-incidents-${scope}-${countryFilter || 'all'}-page-${currentPage}`,
+    async () => {
+      if (ownershipFilter === 'mine') {
+        // Pour "Mes incidents", utiliser l'ancien service
+        return getOrgInternalIncidentsService();
+      }
+      // Pour les autres, utiliser le nouvel endpoint paginé
+      const params = {
+        scope,
+        page: currentPage,
+        page_size: 30
+      };
+      // Ajouter le filtre pays si défini
+      if (countryFilter) {
+        params.country = countryFilter;
+      }
+      console.log('[MAP] Chargement incidents avec params:', params);
+      return getIncidentsFilteredService(params);
+    },
     {
-      revalidateOnFocus: true,
-      revalidateOnReconnect: true,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      onSuccess: (data) => {
+        if (!data) return;
+
+        // Créer une clé unique incluant scope, pays et page pour éviter les conflits
+        const pageKey = `${scope}-${countryFilter || 'all'}-${currentPage}`;
+
+        // Éviter de charger la même page deux fois
+        if (loadedPagesRef.current.has(pageKey)) return;
+        loadedPagesRef.current.add(pageKey);
+
+        const results = data.results || (Array.isArray(data) ? data : []);
+
+        setAllIncidents(prev => {
+          // Éviter les doublons basés sur l'ID
+          const existingIds = new Set(prev.map(inc => inc.id));
+          const newIncidents = results.filter(inc => !existingIds.has(inc.id));
+          return [...prev, ...newIncidents];
+        });
+
+        // Vérifier s'il y a plus de pages
+        if (ownershipFilter === 'mine') {
+          // Pour "mine", pas de pagination
+          setHasMorePages(false);
+        } else {
+          setHasMorePages(!!data.next);
+        }
+
+        setIsLoadingMore(false);
+      },
       onError: (err) => {
-        console.error('[MAP] Erreur chargement incidents organisation:', err);
+        console.error('[MAP] Erreur chargement incidents:', err);
+        setIsLoadingMore(false);
       }
     }
   );
 
-  // S'assurer que incidents est un tableau (gestion de la pagination de l'API)
-  const baseIncidents = ownershipFilter === 'mine'
-    ? (orgIncidentsData || [])
-    : (statusFilter === 'resolved' ? (resolvedIncidentsData || []) : (activeIncidentsData || incidents));
+  // Fonction pour charger la page suivante
+  const loadMoreIncidents = useCallback(() => {
+    if (!hasMorePages || isLoadingMore || isLoadingPage) return;
+    setIsLoadingMore(true);
+    setCurrentPage(prev => prev + 1);
+  }, [hasMorePages, isLoadingMore, isLoadingPage]);
 
-  const normalizedIncidents = Array.isArray(baseIncidents)
-    ? baseIncidents
-    : (baseIncidents && Array.isArray(baseIncidents.results) ? baseIncidents.results : []);
+  const normalizedIncidents = allIncidents;
 
 
 
@@ -269,8 +291,22 @@ export const MapContainer = ({ incidents = [], isLoading = false }) => {
       hasFallbackCoords = true;
       // Ajout d'une petite variation déterministe basée sur l'ID de l'incident pour éviter la superposition parfaite
       const offsetId = inc.id || 0;
-      finalLat = DEFAULT_MALI_LAT + (Math.sin(offsetId) * 0.005);
-      finalLng = DEFAULT_MALI_LNG + (Math.cos(offsetId) * 0.005);
+      let offsetNum = 0;
+      if (typeof offsetId === 'number') {
+        offsetNum = offsetId;
+      } else if (typeof offsetId === 'string') {
+        for (let i = 0; i < offsetId.length; i++) {
+          offsetNum = (offsetNum << 5) - offsetNum + offsetId.charCodeAt(i);
+          offsetNum |= 0; // Convert to 32bit integer
+        }
+      }
+      finalLat = DEFAULT_MALI_LAT + (Math.sin(offsetNum) * 0.005);
+      finalLng = DEFAULT_MALI_LNG + (Math.cos(offsetNum) * 0.005);
+    }
+
+    if (isNaN(finalLat) || isNaN(finalLng)) {
+      finalLat = DEFAULT_MALI_LAT;
+      finalLng = DEFAULT_MALI_LNG;
     }
 
     return {
@@ -304,15 +340,13 @@ export const MapContainer = ({ incidents = [], isLoading = false }) => {
     }
 
     if (inc._hasFallbackCoords) {
-      console.log(`[MAP] Incident ID ${inc.id} ("${inc.title}") ACCEPTE et affiché avec coordonnées par défaut du Mali : [${inc._lat}, ${inc._lng}]`);
+      // console.log(`[MAP] Incident ID ${inc.id} ("${inc.title}") ACCEPTE et affiché avec coordonnées par défaut du Mali : [${inc._lat}, ${inc._lng}]`);
     } else {
-      console.log(`[MAP] Incident ID ${inc.id} ("${inc.title}") ACCEPTE et affiché avec coordonnées réelles : [${inc._lat}, ${inc._lng}]`);
+      // console.log(`[MAP] Incident ID ${inc.id} ("${inc.title}") ACCEPTE et affiché avec coordonnées réelles : [${inc._lat}, ${inc._lng}]`);
     }
     return true;
   });
 
-  console.log('[MAP] Nombre total d\'incidents affichés (validIncidents):', validIncidents.length);
-  console.log('[MAP] --- Fin filtrage ---');
 
   const openModal = (incident) => {
     setModalClosing(false);
@@ -360,10 +394,7 @@ export const MapContainer = ({ incidents = [], isLoading = false }) => {
     )
     : 0;
 
-  const isMapLoading = isLoading ||
-    (ownershipFilter === 'mine' && isLoadingOrgIncidents) ||
-    (ownershipFilter === 'all' && statusFilter === 'active' && isLoadingActiveIncidents) ||
-    (ownershipFilter === 'all' && statusFilter === 'resolved' && isLoadingResolvedIncidents);
+  const isMapLoading = isLoading || (isLoadingPage && allIncidents.length === 0);
 
   return (
     <div className="card">
@@ -390,8 +421,14 @@ export const MapContainer = ({ incidents = [], isLoading = false }) => {
           cooperativeGestures={true}
           touchZoomRotate={true}
           touchPitch={true}
-          maxBounds={[[-13.0, 9.5], [5.0, 26.0]]}
-          minZoom={5.5}
+          minZoom={2}
+          maxZoom={18}
+          onMoveEnd={() => {
+            // Charger automatiquement plus d'incidents quand l'utilisateur déplace/zoom la carte
+            if (hasMorePages && !isLoadingMore && !isLoadingPage && validIncidents.length > 0) {
+              loadMoreIncidents();
+            }
+          }}
         >
           {/* Markers d'incidents */}
           {!isMapLoading && validIncidents.map((incident) => {
@@ -448,6 +485,27 @@ export const MapContainer = ({ incidents = [], isLoading = false }) => {
             >
               <option value="all">Tous les incidents</option>
               <option value="mine">Mes incidents</option>
+            </select>
+          </div>
+
+          <div className="map-filter-group">
+            <select
+              className="map-filter-select"
+              value={countryFilter}
+              onChange={(e) => setCountryFilter(e.target.value)}
+              aria-label="Filtre par pays"
+            >
+              <option value="">Tous les pays</option>
+              {userOrgCountry && (
+                <option value={userOrgCountry}>
+                  Mon pays ({COUNTRIES.find(c => c.en === userOrgCountry)?.fr || userOrgCountry})
+                </option>
+              )}
+              {COUNTRIES.map((country) => (
+                <option key={country.en} value={country.en}>
+                  {country.fr}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -520,6 +578,72 @@ export const MapContainer = ({ incidents = [], isLoading = false }) => {
             </>
           )}
         </div>
+
+        {/* Indicateur de chargement progressif et bouton "Charger plus" */}
+        {!isMapLoading && (
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '20px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 10,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            {/* Compteur d'incidents affichés */}
+            <div
+              style={{
+                background: 'rgba(255, 255, 255, 0.95)',
+                backdropFilter: 'blur(8px)',
+                padding: '8px 16px',
+                borderRadius: '20px',
+                fontSize: '13px',
+                fontWeight: '600',
+                color: '#374151',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+              }}
+            >
+              {validIncidents.length} incident{validIncidents.length > 1 ? 's' : ''} affiché{validIncidents.length > 1 ? 's' : ''}
+            </div>
+
+            {/* Bouton "Charger plus" si des pages restent */}
+            {hasMorePages && (
+              <button
+                type="button"
+                onClick={loadMoreIncidents}
+                disabled={isLoadingMore || isLoadingPage}
+                className="btn btn-primary btn-sm"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px 16px',
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  borderRadius: '20px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                  cursor: isLoadingMore || isLoadingPage ? 'not-allowed' : 'pointer',
+                  opacity: isLoadingMore || isLoadingPage ? 0.7 : 1
+                }}
+              >
+                {isLoadingMore || isLoadingPage ? (
+                  <>
+                    <div className="spinner-border spinner-border-sm" role="status">
+                      <span className="visually-hidden">Chargement...</span>
+                    </div>
+                    Chargement...
+                  </>
+                ) : (
+                  'Charger plus d\'incidents'
+                )}
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Modal d'incident (Bootstrap modal) */}

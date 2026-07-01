@@ -157,22 +157,12 @@ export const MesInterventionsAssignModal = () => {
       setAssignAlert({ type: null, message: null });
 
       const assignedId = assignModal.incident.taken_by || assignModal.incident.takenBy;
-      if (assignedId && agents.length > 0) {
-        const preselected = agents.find((a) => a.id === assignedId);
-        if (preselected) {
-          reset({
-            agent: String(preselected.id),
-            deadline: assignModal.incident.deadline ? formatDatetimeLocal(assignModal.incident.deadline) : ''
-          });
-          return;
-        }
-      }
       reset({
-        agent: '',
-        deadline: ''
+        agent: assignedId ? String(assignedId) : '',
+        deadline: assignModal.incident.deadline ? formatDatetimeLocal(assignModal.incident.deadline) : ''
       });
     }
-  }, [assignModal.open, assignModal.incident, agents, reset, setAssignAlert]);
+  }, [assignModal.open, assignModal.incident, reset, setAssignAlert]);
 
   const handleSelectAgent = (agent) => {
     if (selectedAgentId === String(agent.id)) {
@@ -240,6 +230,19 @@ export const MesInterventionsAssignModal = () => {
 
       if (err?.response?.status === 400 && err?.response?.data) {
         const serverErrors = err.response.data;
+
+        // Gérer les erreurs globales (ex: non_field_errors)
+        if (serverErrors.non_field_errors) {
+          const errorsList = Array.isArray(serverErrors.non_field_errors)
+            ? serverErrors.non_field_errors[0]
+            : serverErrors.non_field_errors;
+          setAssignAlert({
+            type: 'danger',
+            message: errorsList
+          });
+          return;
+        }
+
         let hasFieldErrors = false;
         Object.keys(serverErrors).forEach((key) => {
           if (['deadline', 'agent', 'status', 'incident'].includes(key)) {
@@ -259,10 +262,25 @@ export const MesInterventionsAssignModal = () => {
         }
       }
 
-      const msg =
+      let msg =
         err?.response?.data?.detail ||
-        err?.response?.data?.message ||
-        "Une erreur est survenue lors de l'assignation de l'incident.";
+        err?.response?.data?.message;
+
+      if (!msg && err?.response?.data) {
+        const data = err.response.data;
+        if (typeof data === 'object') {
+          const firstKey = Object.keys(data)[0];
+          if (firstKey) {
+            const val = data[firstKey];
+            msg = Array.isArray(val) ? val[0] : String(val);
+          }
+        }
+      }
+
+      if (!msg) {
+        msg = "Une erreur est survenue lors de l'assignation de l'incident.";
+      }
+
       setAssignAlert({
         type: 'danger',
         message: msg

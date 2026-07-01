@@ -279,9 +279,9 @@ export const Dashboard = () => {
         aria-label="Voir l'historique des activités"
       >
         <Clock size={24} variant="Bold" color="#FFFFFF" />
-        {activitiesList.length > 0 && (
+       {/*  {activitiesList.length > 0 && (
           <span className="activity-fab-badge">{activitiesList.length}</span>
-        )}
+        )} */}
       </button>
 
       {/* Modal Activité pour mobile */}

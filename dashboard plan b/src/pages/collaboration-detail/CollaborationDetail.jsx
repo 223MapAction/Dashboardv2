@@ -1048,7 +1048,27 @@ export const CollaborationDetail = () => {
     );
   }
 
-  if (collaborationError || !collaboration) {
+  if (collaborationError) {
+    return (
+      <div className="app-container">
+        <Sidebar
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          isCollapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        />
+        <div className={`collab-detail-main-wrapper ${sidebarCollapsed ?
+           'sidebar-collapsed' : ''}`} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', width: '100%' }}>
+          <div className="collab-empty body-large text-center">
+            <p>Erreur lors du chargement de la collaboration.</p>
+            <button className="btn btn-primary" onClick={() => mutateCollaboration()}>Réessayer</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!collaboration) {
     return (
       <NotFound
         message="Désolé, la collaboration demandée n'existe pas ou vous n'avez pas l'autorisation d'y accéder."

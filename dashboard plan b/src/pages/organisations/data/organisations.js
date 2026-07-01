@@ -34,6 +34,6 @@ export const COUNTRIES = [
   { fr: 'Guinée', en: 'guinea' },
   { fr: 'Burkina Faso', en: 'burkina_faso' },
   { fr: 'Niger', en: 'niger' },
-  { fr: 'Côte d\'Ivoire', en: 'côte_d\'ivoire' },
+  { fr: 'Côte d\'Ivoire', en: "cote_divoire" },
   { fr: 'Mauritanie', en: 'mauritania' },
 ];

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import useSWR from 'swr';
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
@@ -52,6 +52,13 @@ export const IncidentAssignModal = () => {
   } = useIncidentModalContext();
 
   const [searchQuery, setSearchQuery] = useState('');
+  const bodyRef = useRef(null);
+
+  useEffect(() => {
+    if (assignAlert && assignAlert.message && bodyRef.current) {
+      bodyRef.current.scrollTop = 0;
+    }
+  }, [assignAlert]);
 
   const {
     register,
@@ -155,22 +162,12 @@ export const IncidentAssignModal = () => {
       }
 
       const assignedId = assignModal.incident.taken_by || assignModal.incident.takenBy;
-      if (assignedId && agents.length > 0) {
-        const preselected = agents.find((a) => a.id === parseInt(assignedId));
-        if (preselected) {
-          reset({
-            agent: String(preselected.id),
-            deadline: assignModal.incident.deadline ? formatDatetimeLocal(assignModal.incident.deadline) : ''
-          });
-          return;
-        }
-      }
       reset({
-        agent: '',
-        deadline: ''
+        agent: assignedId ? String(assignedId) : '',
+        deadline: assignModal.incident.deadline ? formatDatetimeLocal(assignModal.incident.deadline) : ''
       });
     }
-  }, [assignModal.open, assignModal.incident, agents, reset, mutateAgents]);
+  }, [assignModal.open, assignModal.incident, reset, mutateAgents]);
 
   const handleSelectAgent = (agent) => {
     if (selectedAgentId === String(agent.id)) {
@@ -238,6 +235,19 @@ export const IncidentAssignModal = () => {
 
       if (err?.response?.status === 400 && err?.response?.data) {
         const serverErrors = err.response.data;
+
+        // Gérer les erreurs globales (ex: non_field_errors)
+        if (serverErrors.non_field_errors) {
+          const errorsList = Array.isArray(serverErrors.non_field_errors)
+            ? serverErrors.non_field_errors[0]
+            : serverErrors.non_field_errors;
+          setAssignAlert({
+            type: 'danger',
+            message: errorsList
+          });
+          return;
+        }
+
         let hasFieldErrors = false;
         Object.keys(serverErrors).forEach((key) => {
           if (['deadline', 'agent', 'status', 'incident'].includes(key)) {
@@ -257,10 +267,25 @@ export const IncidentAssignModal = () => {
         }
       }
 
-      const msg =
+      let msg =
         err?.response?.data?.detail ||
-        err?.response?.data?.message ||
-        "Une erreur est survenue lors de l'assignation de l'incident.";
+        err?.response?.data?.message;
+
+      if (!msg && err?.response?.data) {
+        const data = err.response.data;
+        if (typeof data === 'object') {
+          const firstKey = Object.keys(data)[0];
+          if (firstKey) {
+            const val = data[firstKey];
+            msg = Array.isArray(val) ? val[0] : String(val);
+          }
+        }
+      }
+
+      if (!msg) {
+        msg = "Une erreur est survenue lors de l'assignation de l'incident.";
+      }
+
       setAssignAlert({
         type: 'danger',
         message: msg
@@ -317,7 +342,17 @@ export const IncidentAssignModal = () => {
           />
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} id="assign-incident-form" className="am-offcanvas-body" noValidate>
+        <form onSubmit={handleSubmit(onSubmit)} id="assign-incident-form" className="am-offcanvas-body" ref={bodyRef} noValidate>
+          {assignAlert && assignAlert.message && (
+            <div className={`am-alert am-alert--${assignAlert.type === 'success' ? 'success' : 'danger'}`} role="alert" style={{ marginBottom: 'var(--spacing-4)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {assignAlert.type === 'success' ? (
+                <TickCircle size={18} variant="Bold" color="var(--color-success)" style={{ flexShrink: 0 }} />
+              ) : (
+                <CloseCircle size={18} variant="Bold" color="var(--color-danger)" style={{ flexShrink: 0 }} />
+              )}
+              <span className="am-alert__message" style={{ margin: 0 }}>{assignAlert.message}</span>
+            </div>
+          )}
 
 
           {/* Barre de recherche d'agent */}
@@ -466,16 +501,7 @@ export const IncidentAssignModal = () => {
                 </span>
               )}
 
-              {assignAlert.message && (
-                <div className={`am-alert am-alert--${assignAlert.type === 'success' ? 'success' : 'danger'}`} role="alert" style={{ width: '100%' }}>
-                  {assignAlert.type === 'success' ? (
-                    <TickCircle size={18} variant="Bold" color="#22C55E" />
-                  ) : (
-                    <CloseCircle size={18} variant="Bold" color="#EF4444" />
-                  )}
-                  <span className="am-alert__message" style={{ textAlign: 'left' }}>{assignAlert.message}</span>
-                </div>
-              )}
+
             </div>
 
 

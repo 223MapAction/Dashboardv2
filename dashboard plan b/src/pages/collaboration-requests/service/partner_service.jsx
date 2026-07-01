@@ -235,7 +235,7 @@ export const getCollaborationDashboardService = async (params = {}) => {
         const axios = authService.createAuthenticatedAxios();
         const response = await axios.get(`${API_URL_BASE}/MapApi/collaborations/dashboard/`, { params });
         console.log('[Collaboration] Dashboard récupéré:', response.data);
-        return response?.data?.results || response?.data || [];
+        return response?.data;
     } catch (error) {
         console.error('[Collaboration] Erreur dashboard:', error?.response?.status, error?.response?.data);
         throw error;

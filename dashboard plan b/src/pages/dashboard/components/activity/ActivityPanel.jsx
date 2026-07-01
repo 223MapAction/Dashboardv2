@@ -128,7 +128,7 @@ export const ActivityPanel = ({ activities: propActivities, isLoading, nextUrl, 
                   </p>
                   <span className="activity-time">{activity.time}</span>
                 </div>
-                {activity.unread && <div className="activity-unread-dot"></div>}
+                {/* {activity.unread && <div className="activity-unread-dot"></div>} */}
               </div>
             ))}
 

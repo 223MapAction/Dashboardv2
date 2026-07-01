@@ -33,7 +33,8 @@ export const Header = ({ onMenuToggle, user }) => {
 
   useEffect(() => {
     console.log('[NOTIFICATIONS] Liste actuelle des notifications:', notifications);
-  }, [notifications]);
+    console.log('[NOTIFICATIONS] unread_count depuis API:', notificationsData?.unread_count);
+  }, [notifications, notificationsData]);
 
   // Synchroniser nextUrl quand les données SWR changent
   useEffect(() => {
@@ -84,7 +85,9 @@ export const Header = ({ onMenuToggle, user }) => {
               const list = prev?.results || (Array.isArray(prev) ? prev : []);
               if (list.some(n => n.id === newNotification.id)) return prev;
               const sorted = [newNotification, ...list];
-              return Array.isArray(prev) ? sorted : { ...prev, results: sorted };
+              const currentUnreadCount = prev?.unread_count ?? list.filter(n => !n.read).length;
+              const newUnreadCount = !newNotification.read ? currentUnreadCount + 1 : currentUnreadCount;
+              return Array.isArray(prev) ? sorted : { ...prev, results: sorted, unread_count: newUnreadCount };
             }, { revalidate: false });
           }
         } catch (e) {
@@ -146,7 +149,8 @@ export const Header = ({ onMenuToggle, user }) => {
     }
   };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  // Utiliser unread_count de l'API si disponible, sinon calculer localement
+  const unreadCount = notificationsData?.unread_count ?? notifications.filter(n => !n.read).length;
 
   // Formater le temps relatif
   const getRelativeTime = (dateString) => {
@@ -197,7 +201,9 @@ export const Header = ({ onMenuToggle, user }) => {
         mutateNotifications(prev => {
           const list = prev?.results || (Array.isArray(prev) ? prev : []);
           const updated = list.map(n => n.id === notification.id ? { ...n, read: true } : n);
-          return Array.isArray(prev) ? updated : { ...prev, results: updated };
+          const currentUnreadCount = prev?.unread_count ?? list.filter(n => !n.read).length;
+          const newUnreadCount = Math.max(0, currentUnreadCount - 1);
+          return Array.isArray(prev) ? updated : { ...prev, results: updated, unread_count: newUnreadCount };
         }, { revalidate: false });
       } catch (error) {
         console.error('[HEADER] Erreur marquage notification:', error);

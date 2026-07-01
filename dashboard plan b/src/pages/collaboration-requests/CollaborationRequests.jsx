@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import useSWR from 'swr';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import useSWR, { mutate } from 'swr';
+import Pagination from '../../components/molecules/Pagination';
 import { useSidebarState } from '../../hooks/useSidebarState';
 import {
   SearchNormal1,
@@ -25,7 +26,6 @@ import {
 import { Header, Sidebar } from '../../components/layout';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
 import {
-  listPartnerSuggestionsService,
   getPartnerSuggestionService,
   getMyPendingReceivedSuggestionsService,
   acceptPartnerSuggestionService,
@@ -48,18 +48,8 @@ const STATUS_META = {
     color: 'var(--color-warning)',
     className: 'status-pending'
   },
-  accepted: {
-    label: 'Active',
-    icon: TickCircle,
-    color: 'var(--color-success)',
-    className: 'status-accepted'
-  },
-  rejected: {
-    label: 'Refusée',
-    icon: CloseCircle,
-    color: 'var(--color-danger)',
-    className: 'status-rejected'
-  },
+ 
+ 
   declined: {
     label: 'Refusée',
     icon: CloseCircle,
@@ -133,6 +123,44 @@ export const CollaborationRequests = ({
 
   const [localRequests, setLocalRequests] = useState([]);
 
+  // Cache to stabilize signed image URLs and prevent reloading on SWR revalidations
+  const imageCacheRef = useRef({});
+
+  const getStableImageUrl = (key, rawUrl) => {
+    if (!rawUrl) return '';
+    const getBasePath = (url) => {
+      try {
+        const parsed = new URL(url);
+        return parsed.origin + parsed.pathname;
+      } catch (e) {
+        return url;
+      }
+    };
+    const basePath = getBasePath(rawUrl);
+    const cached = imageCacheRef.current[key];
+    if (cached && getBasePath(cached.url) === basePath) {
+      const hasExpired = (Date.now() - cached.timestamp >= 600000);
+      if (hasExpired && rawUrl !== cached.url) {
+        // Le cache a expiré ET SWR a récupéré une nouvelle URL signée
+        imageCacheRef.current[key] = {
+          url: rawUrl,
+          timestamp: Date.now()
+        };
+        return rawUrl;
+      } else {
+        // Soit le cache n'a pas encore expiré, soit il a expiré mais SWR n'a pas encore mis à jour l'URL (on continue d'utiliser le cache sans réinitialiser le timestamp)
+        return cached.url;
+      }
+    } else {
+      // Premier chargement ou nouvelle image
+      imageCacheRef.current[key] = {
+        url: rawUrl,
+        timestamp: Date.now()
+      };
+      return rawUrl;
+    }
+  };
+
   // Détermine si le bouton Accepter/Refuser doit s'afficher pour une requête
   // Logique : l'utilisateur connecté est-il le propriétaire de l'incident (taken_by) ?
   // Et la demande ne vient-elle pas de lui-même ?
@@ -164,6 +192,14 @@ export const CollaborationRequests = ({
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
+  
+  // Réinitialiser la page à 1 lors du changement de filtre
+  useEffect(() => {
+    setPage(1);
+  }, [statusFilter, typeFilter, search]);
+  
   const [expandedIncident, setExpandedIncident] = useState(null);
   const [selectedIncidentForModal, setSelectedIncidentForModal] = useState(null);
 
@@ -184,7 +220,7 @@ export const CollaborationRequests = ({
   const [statusOverrides, setStatusOverrides] = useState({});
 
   // SWR Calls
-  const { data: pendingSuggestions, mutate: mutatePendingSuggestions, isLoading: loadingSuggestions } = useSWR(
+  const { data: pendingSuggestions, error: errorSuggestions, mutate: mutatePendingSuggestions, isLoading: loadingSuggestions } = useSWR(
     typeFilter === 'sug-received' || typeFilter === 'all' ? 'my-pending-received-suggestions' : null,
     getMyPendingReceivedSuggestionsService,
     {
@@ -197,13 +233,29 @@ export const CollaborationRequests = ({
     }
   );
 
-  const { data: activeCollabs, mutate: mutateActiveCollabs, isLoading: loadingCollabs } = useSWR(
-    typeFilter === 'app-sent' || typeFilter === 'all' ? ['my-active-collaborations', {}] : null,
-    ([, params]) => getCollaborationDashboardService(params),
+  const { data: activeCollabs, error: errorCollabs, mutate: mutateActiveCollabs, isLoading: loadingCollabs } = useSWR(
+    typeFilter === 'app-sent' || typeFilter === 'all' ? ['my-active-collaborations', page, statusFilter, search] : null,
+    () => {
+      const params = { page, page_size: pageSize };
+      // Filtre de statut pour les demandes
+      if (statusFilter === 'pending') {
+        params.status = 'pending';
+      } else if (statusFilter === 'declined') {
+        params.status = 'declined';
+      } else if (statusFilter === 'all') {
+        params.status = 'all';
+      }
+      // Filtre de recherche
+      if (search.trim()) {
+        params.search = search.trim();
+      }
+      console.log('[CollaborationRequests] Paramètres API getCollaborationDashboardService:', params);
+      return getCollaborationDashboardService(params);
+    },
     { revalidateOnFocus: false }
   );
 
-  const { data: pendingInvitations, mutate: mutatePendingInvitations, isLoading: loadingInvitations } = useSWR(
+  const { data: pendingInvitations, error: errorInvitations, mutate: mutatePendingInvitations, isLoading: loadingInvitations } = useSWR(
     typeFilter === 'app-received' || typeFilter === 'all' ? ['my-pending-contributor-invitations', { status: 'pending', role: 'contributor' }] : null,
     ([, params]) => listDemandeDeCollaborationsService(params),
     {
@@ -215,6 +267,8 @@ export const CollaborationRequests = ({
       refreshWhenHidden: false,
     }
   );
+
+  const hasDataError = errorSuggestions || errorCollabs || errorInvitations;
 
   const isDataLoading =
     ((typeFilter === 'sug-received' || typeFilter === 'all') && loadingSuggestions && !pendingSuggestions) ||
@@ -235,24 +289,7 @@ export const CollaborationRequests = ({
     }
   }, [typeFilter, mutatePendingSuggestions, mutateActiveCollabs, mutatePendingInvitations]);
 
-  const { data: selectedSuggestionDetail } = useSWR(
-    selectedSuggestionKey
-      ? `partner-suggestion-${selectedSuggestionKey[0]}-${selectedSuggestionKey[1]}`
-      : null,
-    selectedSuggestionKey
-      ? () => getPartnerSuggestionService(selectedSuggestionKey[0], selectedSuggestionKey[1])
-      : null,
-    {
-      revalidateOnFocus: false,
-
-      // Polling intelligent : 5 secondes (non-agressif)
-      // Désactivé quand l'onglet est en arrière-plan
-      refreshInterval: 5000,
-      // Arrêter le polling si l'onglet n'est pas visible
-      refreshWhenHidden: false,
-    }
-  );
-
+ 
   useEffect(() => {
     const wsBaseUrl = window.location.protocol === 'https:' || API_URL_BASE.startsWith('https')
       ? API_URL_BASE.replace(/^https/, 'wss')
@@ -457,181 +494,183 @@ export const CollaborationRequests = ({
   };
 
   // Compile flat requests list
-  const compiledSwrRequests = [
-    ...localRequests,
-    ...(pendingSuggestions || []).map((item) => {
-      const orgName = item.suggested_partner_name || item.partner_name || 'Partenaire';
-      const details = item.incident_details || item.incident_detail;
-      const projImg = details?.photo || details?.image || details?.photo_url || '';
-      return {
-        id: `sug_received_${item.id}`,
-        type: 'suggestion',
-        direction: 'received',
-        projectTitle: details?.title || item.incident_title || (item.incident_id ? `Incident #${item.incident_id}` : 'Incident sans titre'),
-        projectImage: projImg,
-        organisation: orgName,
-        organisationInitials: getInitials(orgName),
-        organisationColor: 'var(--color-primary)',
-        suggestedBy: item.suggested_by_name || 'Leader',
-        suggestedByRole: item.suggested_by_role || 'Leader',
-        suggestionMessage: item.justification || item.message || 'Pas de message.',
-        role: (item.suggested_role || item.role || 'contributor') === 'leader' ? 'Leader' : ((item.suggested_role || item.role || 'contributor') === 'observer' || (item.suggested_role || item.role || 'contributor') === 'observateur') ? 'Observateur' : 'Contributeur',
-        proposedCollaborators: (item.proposed_collaborators || []).map((pc) => ({
-          name: pc.partner_name || 'Partenaire',
-          initials: getInitials(pc.partner_name || 'PT'),
-          color: 'var(--color-success)',
-          role: pc.role || 'contributeur',
-          comment: pc.justification || ''
-        })),
-        status: item.status || 'pending',
-        submittedAt: item.created_at || new Date().toISOString(),
-        respondedAt: item.updated_at || null,
-        response: item.response_message || null,
-        incidentId: item.incident_id || item.incident,
-        apiId: item.id,
-        incidentDetails: details,
-        predictionDetails: item.prediction_details,
-        userFullName: item.user_full_name,
-        userEmail: item.user_email,
-        organisationId: item.organisation_id,
-        organisationName: item.organisation_name || orgName,
-        userId: item.user || null
-      };
-    }),
-    ...(activeCollabs || []).map((item) => {
-      const orgName = item.organisation_name || item.leader_name || 'Organisation sans nom';
-      const details = item.incident_details || item.incident_detail;
-      const projTitle = details?.title || item.incident_title || (item.incident_id ? `Incident #${item.incident_id}` : 'Incident sans titre');
-      const projImg = details?.photo || details?.image || details?.photo_url || '';
+  const compiledSwrRequests = useMemo(() => {
+    return [
+      ...localRequests,
+      ...(pendingSuggestions || []).map((item) => {
+        const orgName = item.suggested_partner_name || item.partner_name || 'Partenaire';
+        const details = item.incident_details || item.incident_detail;
+        const projImg =  item?.incident_thumbnail || '';
+        return {
+          id: `sug_received_${item.id}`,
+          type: 'suggestion',
+          direction: 'received',
+          projectTitle: details?.title || item.incident_title || (item.incident_id ? `Incident #${item.incident_id}` : 'Incident sans titre'),
+          projectImage: projImg,
+          organisation: orgName,
+          organisationInitials: getInitials(orgName),
+          organisationColor: 'var(--color-primary)',
+          suggestedBy: item.suggested_by_name || 'Leader',
+          suggestedByRole: item.suggested_by_role || 'Leader',
+          suggestionMessage: item.justification || item.message || 'Pas de message.',
+          role: (item.suggested_role || item.role || 'contributor') === 'leader' ? 'Leader' : ((item.suggested_role || item.role || 'contributor') === 'observer' || (item.suggested_role || item.role || 'contributor') === 'observateur') ? 'Observateur' : 'Contributeur',
+          proposedCollaborators: (item.proposed_collaborators || []).map((pc) => ({
+            name: pc.partner_name || 'Partenaire',
+            initials: getInitials(pc.partner_name || 'PT'),
+            color: 'var(--color-success)',
+            role: pc.role || 'contributeur',
+            comment: pc.justification || ''
+          })),
+          status: item.status || 'pending',
+          submittedAt: item.created_at || new Date().toISOString(),
+          respondedAt: item.updated_at || null,
+          response: item.response_message || null,
+          incidentId: item.incident_id || item.incident,
+          apiId: item.id,
+          incidentDetails: details,
+          predictionDetails: item.prediction_details,
+          userFullName: item.user_full_name,
+          userEmail: item.user_email,
+          organisationId: item.organisation_id,
+          organisationName: item.organisation_name || orgName,
+          userId: item.user || null
+        };
+      }),
+      ...(activeCollabs?.results || []).map((item) => {
+        const orgName = item.organisation_name || item.leader_name || 'Organisation sans nom';
+        const details = item.incident_details || item.incident_detail;
+        const projTitle = details?.title || item.incident_title || (item.incident_id ? `Incident #${item.incident_id}` : 'Incident sans titre');
+        const projImg = item?.incident_thumbnail || '';
 
-      const currUser = authService.getCurrentUser();
-      const currentUserId = currUser?.id ? String(currUser.id).toLowerCase() : '';
-      const senderId = item.sender?.id ? String(item.sender.id).toLowerCase() : (item.sender ? String(item.sender).toLowerCase() : '');
-      const receiverId = item.receiver?.id ? String(item.receiver.id).toLowerCase() : (item.receiver ? String(item.receiver).toLowerCase() : '');
+        const currUser = authService.getCurrentUser();
+        const currentUserId = currUser?.id ? String(currUser.id).toLowerCase() : '';
+        const senderId = item.sender?.id ? String(item.sender.id).toLowerCase() : (item.sender ? String(item.sender).toLowerCase() : '');
+        const receiverId = item.receiver?.id ? String(item.receiver.id).toLowerCase() : (item.receiver ? String(item.receiver).toLowerCase() : '');
 
-      let calculatedDirection = 'sent';
-      if (currentUserId && senderId === currentUserId) {
-        calculatedDirection = 'sent';
-      } else if (currentUserId && receiverId === currentUserId) {
-        calculatedDirection = 'received';
+        let calculatedDirection = 'sent';
+        if (currentUserId && senderId === currentUserId) {
+          calculatedDirection = 'sent';
+        } else if (currentUserId && receiverId === currentUserId) {
+          calculatedDirection = 'received';
+        }
+
+        const myOrgId = currUser?.organisation_member || currUser?.organisation_id || '';
+        const senderOrgId = item.sender?.organisation_id || '';
+        const receiverOrgId = item.receiver?.organisation_id || '';
+
+        let senderOrgName = '';
+        if (senderOrgId && myOrgId && String(senderOrgId).toLowerCase() === String(myOrgId).toLowerCase()) {
+          senderOrgName = currUser?.organisation_name || item.sender?.organisation_name || 'Mon Organisation';
+        } else {
+          senderOrgName = item.sender?.organisation_name || item.organisation_name || 'Partenaire';
+        }
+
+        let receiverOrgName = '';
+        if (receiverOrgId && myOrgId && String(receiverOrgId).toLowerCase() === String(myOrgId).toLowerCase()) {
+          receiverOrgName = currUser?.organisation_name || item.receiver?.organisation_name || 'Mon Organisation';
+        } else {
+          receiverOrgName = item.receiver?.organisation_name || item.organisation_name || 'Partenaire';
+        }
+
+        const displayOrgName = (calculatedDirection === 'sent') ? receiverOrgName : senderOrgName;
+
+        return {
+          id: `collab_active_${item.id}`,
+          direction: calculatedDirection,
+          projectTitle: projTitle,
+          projectImage: projImg,
+          organisation: displayOrgName,
+          organisationInitials: getInitials(displayOrgName),
+          organisationColor: 'var(--color-success)',
+          role: item.role === 'leader' ? 'Leader' : (item.role === 'contributor' || item.role === 'contributeur') ? 'Contributeur' : 'Observateur',
+          motif: item.justification || item.motivation || 'Collaboration acceptée en cours.',
+          status: item.status || 'accepted',
+          submittedAt: item.created_at || new Date().toISOString(),
+          respondedAt: item.updated_at || null,
+          response: null,
+          incidentId: details?.id || item.incident_id || item.incident,
+          apiId: item.id,
+          incidentDetails: details,
+          predictionDetails: item.prediction_details,
+          userFullName: item.user_full_name || item.sender?.name,
+          userEmail: item.user_email || item.sender?.email,
+          organisationId: item.organisation_id,
+          organisationName: displayOrgName,
+          userId: item.user || null
+        };
+      }),
+      ...(pendingInvitations || []).map((item) => {
+        const orgName = item.organisation_name || item.leader_name || 'Organisation sans nom';
+        const details = item.incident_details || item.incident_detail;
+        const projTitle = details?.title || item.incident_title || (item.incident_id ? `Incident #${item.incident_id}` : 'Incident sans titre');
+        const projImg = item?.incident_thumbnail || '';
+
+        const currUser = authService.getCurrentUser();
+        const currentUserId = currUser?.id ? String(currUser.id).toLowerCase() : '';
+        const senderId = item.sender?.id ? String(item.sender.id).toLowerCase() : (item.sender ? String(item.sender).toLowerCase() : '');
+        const receiverId = item.receiver?.id ? String(item.receiver.id).toLowerCase() : (item.receiver ? String(item.receiver).toLowerCase() : '');
+
+        let calculatedDirection = 'received';
+        if (currentUserId && senderId === currentUserId) {
+          calculatedDirection = 'sent';
+        } else if (currentUserId && receiverId === currentUserId) {
+          calculatedDirection = 'received';
+        }
+
+        const myOrgId = currUser?.organisation_member || currUser?.organisation_id || '';
+        const senderOrgId = item.sender?.organisation_id || '';
+        const receiverOrgId = item.receiver?.organisation_id || '';
+
+        let senderOrgName = '';
+        if (senderOrgId && myOrgId && String(senderOrgId).toLowerCase() === String(myOrgId).toLowerCase()) {
+          senderOrgName = currUser?.organisation_name || item.sender?.organisation_name || 'Mon Organisation';
+        } else {
+          senderOrgName = item.sender?.organisation_name || item.organisation_name || 'Partenaire';
+        }
+
+        let receiverOrgName = '';
+        if (receiverOrgId && myOrgId && String(receiverOrgId).toLowerCase() === String(myOrgId).toLowerCase()) {
+          receiverOrgName = currUser?.organisation_name || item.receiver?.organisation_name || 'Mon Organisation';
+        } else {
+          receiverOrgName = item.receiver?.organisation_name || item.organisation_name || 'Partenaire';
+        }
+
+        const displayOrgName = (calculatedDirection === 'sent') ? receiverOrgName : senderOrgName;
+
+        return {
+          id: `invitation_pending_${item.id}`,
+          direction: calculatedDirection,
+          applicantName: item.user_full_name || item.invited_member_name || item.sender?.name || 'Membre',
+          applicantOrg: senderOrgName,
+          projectTitle: projTitle,
+          projectImage: projImg,
+          organisation: displayOrgName,
+          organisationInitials: getInitials(displayOrgName),
+          organisationColor: 'var(--color-warning)',
+          role: item.role === 'leader' ? 'Leader' : (item.role === 'contributor' || item.role === 'contributeur') ? 'Contributeur' : 'Observateur',
+          motif: item.justification || item.motivation || 'Invitation en attente de réponse.',
+          status: item.status || 'pending',
+          submittedAt: item.created_at || new Date().toISOString(),
+          respondedAt: null,
+          response: null,
+          incidentId: details?.id || item.incident_id || item.incident,
+          apiId: item.id,
+          incidentDetails: details,
+          predictionDetails: item.prediction_details,
+          userFullName: item.user_full_name || item.sender?.name,
+          userEmail: item.user_email || item.sender?.email,
+          organisationId: item.organisation_id,
+          organisationName: displayOrgName,
+          userId: item.user || null
+        };
+      })
+    ].map(r => {
+      if (r.apiId && statusOverrides[r.apiId]) {
+        return { ...r, status: statusOverrides[r.apiId] };
       }
-
-      const myOrgId = currUser?.organisation_member || currUser?.organisation_id || '';
-      const senderOrgId = item.sender?.organisation_id || '';
-      const receiverOrgId = item.receiver?.organisation_id || '';
-
-      let senderOrgName = '';
-      if (senderOrgId && myOrgId && String(senderOrgId).toLowerCase() === String(myOrgId).toLowerCase()) {
-        senderOrgName = currUser?.organisation_name || item.sender?.organisation_name || 'Mon Organisation';
-      } else {
-        senderOrgName = item.sender?.organisation_name || item.organisation_name || 'Partenaire';
-      }
-
-      let receiverOrgName = '';
-      if (receiverOrgId && myOrgId && String(receiverOrgId).toLowerCase() === String(myOrgId).toLowerCase()) {
-        receiverOrgName = currUser?.organisation_name || item.receiver?.organisation_name || 'Mon Organisation';
-      } else {
-        receiverOrgName = item.receiver?.organisation_name || item.organisation_name || 'Partenaire';
-      }
-
-      const displayOrgName = (calculatedDirection === 'sent') ? receiverOrgName : senderOrgName;
-
-      return {
-        id: `collab_active_${item.id}`,
-        direction: calculatedDirection,
-        projectTitle: projTitle,
-        projectImage: projImg,
-        organisation: displayOrgName,
-        organisationInitials: getInitials(displayOrgName),
-        organisationColor: 'var(--color-success)',
-        role: item.role === 'leader' ? 'Leader' : (item.role === 'contributor' || item.role === 'contributeur') ? 'Contributeur' : 'Observateur',
-        motif: item.justification || item.motivation || 'Collaboration acceptée en cours.',
-        status: item.status || 'accepted',
-        submittedAt: item.created_at || new Date().toISOString(),
-        respondedAt: item.updated_at || null,
-        response: null,
-        incidentId: details?.id || item.incident_id || item.incident,
-        apiId: item.id,
-        incidentDetails: details,
-        predictionDetails: item.prediction_details,
-        userFullName: item.user_full_name || item.sender?.name,
-        userEmail: item.user_email || item.sender?.email,
-        organisationId: item.organisation_id,
-        organisationName: displayOrgName,
-        userId: item.user || null
-      };
-    }),
-    ...(pendingInvitations || []).map((item) => {
-      const orgName = item.organisation_name || item.leader_name || 'Organisation sans nom';
-      const details = item.incident_details || item.incident_detail;
-      const projTitle = details?.title || item.incident_title || (item.incident_id ? `Incident #${item.incident_id}` : 'Incident sans titre');
-      const projImg = details?.photo || details?.image || details?.photo_url || '';
-
-      const currUser = authService.getCurrentUser();
-      const currentUserId = currUser?.id ? String(currUser.id).toLowerCase() : '';
-      const senderId = item.sender?.id ? String(item.sender.id).toLowerCase() : (item.sender ? String(item.sender).toLowerCase() : '');
-      const receiverId = item.receiver?.id ? String(item.receiver.id).toLowerCase() : (item.receiver ? String(item.receiver).toLowerCase() : '');
-
-      let calculatedDirection = 'received';
-      if (currentUserId && senderId === currentUserId) {
-        calculatedDirection = 'sent';
-      } else if (currentUserId && receiverId === currentUserId) {
-        calculatedDirection = 'received';
-      }
-
-      const myOrgId = currUser?.organisation_member || currUser?.organisation_id || '';
-      const senderOrgId = item.sender?.organisation_id || '';
-      const receiverOrgId = item.receiver?.organisation_id || '';
-
-      let senderOrgName = '';
-      if (senderOrgId && myOrgId && String(senderOrgId).toLowerCase() === String(myOrgId).toLowerCase()) {
-        senderOrgName = currUser?.organisation_name || item.sender?.organisation_name || 'Mon Organisation';
-      } else {
-        senderOrgName = item.sender?.organisation_name || item.organisation_name || 'Partenaire';
-      }
-
-      let receiverOrgName = '';
-      if (receiverOrgId && myOrgId && String(receiverOrgId).toLowerCase() === String(myOrgId).toLowerCase()) {
-        receiverOrgName = currUser?.organisation_name || item.receiver?.organisation_name || 'Mon Organisation';
-      } else {
-        receiverOrgName = item.receiver?.organisation_name || item.organisation_name || 'Partenaire';
-      }
-
-      const displayOrgName = (calculatedDirection === 'sent') ? receiverOrgName : senderOrgName;
-
-      return {
-        id: `invitation_pending_${item.id}`,
-        direction: calculatedDirection,
-        applicantName: item.user_full_name || item.invited_member_name || item.sender?.name || 'Membre',
-        applicantOrg: senderOrgName,
-        projectTitle: projTitle,
-        projectImage: projImg,
-        organisation: displayOrgName,
-        organisationInitials: getInitials(displayOrgName),
-        organisationColor: 'var(--color-warning)',
-        role: item.role === 'leader' ? 'Leader' : (item.role === 'contributor' || item.role === 'contributeur') ? 'Contributeur' : 'Observateur',
-        motif: item.justification || item.motivation || 'Invitation en attente de réponse.',
-        status: item.status || 'pending',
-        submittedAt: item.created_at || new Date().toISOString(),
-        respondedAt: null,
-        response: null,
-        incidentId: details?.id || item.incident_id || item.incident,
-        apiId: item.id,
-        incidentDetails: details,
-        predictionDetails: item.prediction_details,
-        userFullName: item.user_full_name || item.sender?.name,
-        userEmail: item.user_email || item.sender?.email,
-        organisationId: item.organisation_id,
-        organisationName: displayOrgName,
-        userId: item.user || null
-      };
-    })
-  ].map(r => {
-    if (r.apiId && statusOverrides[r.apiId]) {
-      return { ...r, status: statusOverrides[r.apiId] };
-    }
-    return r;
-  }).filter(r => r.status !== 'accepted');
+      return r;
+    }).filter(r => r.status !== 'accepted');
+  }, [localRequests, pendingSuggestions, activeCollabs, pendingInvitations, statusOverrides]);
 
   const swrApiIds = new Set(compiledSwrRequests.map(r => r.apiId).filter(Boolean));
   const filteredWsRequests = wsRequests.filter(r => !swrApiIds.has(r.apiId));
@@ -745,19 +784,24 @@ export const CollaborationRequests = ({
       }
     }
   });
+ 
 
-  const counts = {
-    all: requests.length,
-    pending: requests.filter((r) => r.status === 'pending').length,
-    accepted: requests.filter((r) => r.status === 'accepted').length,
-    rejected: requests.filter((r) => r.status === 'rejected').length,
-    appSent: requests.filter((r) => r.type !== 'suggestion' && r.direction === 'sent').length,
-    appReceived: requests.filter((r) => r.type !== 'suggestion' && r.direction === 'received').length,
-    sugSent: requests.filter((r) => r.type === 'suggestion' && r.direction === 'sent').length,
-    sugReceived: requests.filter((r) => r.type === 'suggestion' && r.direction === 'received').length
-  };
-
-  const content = (
+  const content = hasDataError ? (
+    <div className="collab-empty body-large text-center" style={{ padding: '40px 20px' }}>
+ 
+              
+                  <div className="collab-empty body-large text-center" >
+                    <p>Erreur lors du chargement des demandes de collaboration.</p>
+                    <button
+                      onClick={() => mutate()}
+                      className='btn btn-primary'
+                    >
+                      Réessayer
+                    </button>
+                  </div>
+               
+    </div>
+  ) : (
     <>
       {!embedded && (
         <div className="requests-page-header">
@@ -790,7 +834,7 @@ export const CollaborationRequests = ({
             onClick={() => setStatusFilter('all')}
           >
             Toutes
-            <span className="requests-filter-count">{counts.all}</span>
+            
           </button>
           <button
             type="button"
@@ -799,17 +843,18 @@ export const CollaborationRequests = ({
           >
             <Clock size={14} variant="Bold" color="currentColor" style={{ color: 'currentColor' }} />
             En attente
-            <span className="requests-filter-count">{counts.pending}</span>
+            
           </button>
           <button
             type="button"
-            className={`requests-filter-pill ${statusFilter === 'accepted' ? 'is-active' : ''}`}
-            onClick={() => setStatusFilter('accepted')}
+            className={`requests-filter-pill ${statusFilter === 'declined' ? 'is-active' : ''}`}
+            onClick={() => setStatusFilter('declined')}
           >
-            <TickCircle size={14} variant="Bold" color="currentColor" style={{ color: 'currentColor' }} />
-            Actives
-            <span className="requests-filter-count">{counts.accepted}</span>
+            <CloseCircle size={14} variant="Bold" color="currentColor" style={{ color: 'currentColor' }} />
+            Refusées
+            
           </button>
+
         </div>
       </div>
 
@@ -1228,6 +1273,16 @@ export const CollaborationRequests = ({
         <CollabIncidentDetailModal
           incident={selectedIncidentForModal}
           onClose={() => setSelectedIncidentForModal(null)}
+        />
+      )}
+      
+      {/* Pagination */}
+      {activeCollabs?.count > pageSize && (
+        <Pagination
+          page={page}
+          pageSize={pageSize}
+          count={activeCollabs?.count || 0}
+          onChange={setPage}
         />
       )}
     </>

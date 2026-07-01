@@ -38,7 +38,7 @@ export const IncidentReportsModal = () => {
 
   const { data: initialData, error, isLoading } = useSWR(
     reportsModal.open && currentIncident?.id ? `field-reports-${currentIncident.id}` : null,
-    () => getFieldReportsService({ incident_id: currentIncident.id, page_size: 2 }),
+    () => getFieldReportsService({ incident_id: currentIncident.id, page_size: 10 }),
     { revalidateOnFocus: false }
   );
 
@@ -289,19 +289,10 @@ export const IncidentReportsModal = () => {
                   <div style={{ display: 'flex', justifyContent: 'center', marginTop: '16px' }}>
                     <button
                       type="button"
-                      className="am-btn am-btn--outline"
+                      className="btn btn-link"
                       onClick={loadMore}
                       disabled={isLoadingMore}
-                      style={{
-                        borderRadius: '16px',
-                        padding: '6px 20px',
-                        fontSize: '12px',
-                        fontWeight: '500',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        cursor: 'pointer'
-                      }}
+                     
                     >
                       {isLoadingMore ? (
                         <>
@@ -309,7 +300,7 @@ export const IncidentReportsModal = () => {
                           Chargement...
                         </>
                       ) : (
-                        'Charger plus'
+                        'Afficher plus'
                       )}
                     </button>
                   </div>

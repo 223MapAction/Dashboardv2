@@ -103,7 +103,7 @@ export const Collaboration = () => {
   // Réinitialiser la page à 1 lors du changement de filtre
   useEffect(() => {
     setPage(1);
-  }, [search, roleFilter, statusFilter, incidentFilter, dateFrom, dateTo]);
+  }, [search, roleFilter, statusFilter, incidentFilter, dateFrom, dateTo, localStatusFilter]);
 
   // Charger les incidents pour le filtre dropdown
   const { data: rawIncidents } = useSWR('incidents_dropdown_list', () => getIncidentsService(1, 100));
@@ -155,7 +155,7 @@ export const Collaboration = () => {
 
   // Utiliser useSWR pour charger les collaborations
   const { data: swrData, error: swrError, isLoading, mutate } = useSWR(
-    ['collaborations', page, search, roleFilter, statusFilter, incidentFilter, dateFrom, dateTo],
+    ['collaborations', page, search, roleFilter, statusFilter, incidentFilter, dateFrom, dateTo, localStatusFilter],
     () => {
       const params = { page, page_size: pageSize };
       if (search.trim()) {
@@ -167,6 +167,12 @@ export const Collaboration = () => {
       if (statusFilter && statusFilter !== 'all') {
         params.status = statusFilter;
       }
+      // Filtre d'avancement (Terminées / En cours)
+      if (localStatusFilter === 'completed') {
+        params.status = 'completed';
+      } else if (localStatusFilter === 'in-progress') {
+        params.status = 'in-progress';
+      }
       if (incidentFilter) {
         params.incident_id = incidentFilter;
       }
@@ -176,12 +182,11 @@ export const Collaboration = () => {
       if (dateTo) {
         params.date_to = dateTo.toISOString().slice(0, 10);
       }
+      console.log('[Collaboration] Paramètres API:', params);
       return getCollaborationsService(params);
     },
     {
-      revalidateOnFocus: false,
-      refreshInterval: 10000,
-      refreshWhenHidden: false,
+      revalidateOnFocus: true,
     }
   );
 
@@ -243,15 +248,12 @@ export const Collaboration = () => {
     });
   }, [swrData]);
 
-  // Filtres locaux pour recherche, statut et dates
+  // Filtres locaux pour recherche et dates (le filtre de statut est maintenant géré par l'API)
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
 
     return collaborations.filter((c) => {
-      // Filtre statut local (pills)
-      if (localStatusFilter !== 'all' && c.status !== localStatusFilter) return false;
-
-      // Filtre période
+      // Filtre période (optionnel, peut être géré par l'API aussi)
       if (dateFrom || dateTo) {
         const cStart = c.startAt ? new Date(c.startAt) : null;
         const cEnd = c.endAt ? new Date(c.endAt) : null;
@@ -268,7 +270,7 @@ export const Collaboration = () => {
         c.location.toLowerCase().includes(q)
       );
     });
-  }, [collaborations, search, statusFilter, dateFrom, dateTo]);
+  }, [collaborations, search, dateFrom, dateTo]);
 
   const resetDateRange = () => setDateRange([null, null]);
 
@@ -651,11 +653,11 @@ export const Collaboration = () => {
                       />
                       {(dateFrom || dateTo) && (
                         <button
-                           type="button"
-                           className="collab-date-clear"
-                           onClick={resetDateRange}
-                           aria-label="Réinitialiser la période"
-                           title="Réinitialiser"
+                          type="button"
+                          className="collab-date-clear"
+                          onClick={resetDateRange}
+                          aria-label="Réinitialiser la période"
+                          title="Réinitialiser"
                         >
                           <CalendarRemove
                             size={16}

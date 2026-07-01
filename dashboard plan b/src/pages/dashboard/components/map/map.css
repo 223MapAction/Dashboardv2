@@ -775,11 +775,7 @@
     padding: 6px 10px;
   }
 
-  .map-style-switcher {
-    top: auto;
-    bottom: var(--spacing-3);
-    right: var(--spacing-3);
-  }
+
 
   .map-style-btn {
     padding: 5px 8px;

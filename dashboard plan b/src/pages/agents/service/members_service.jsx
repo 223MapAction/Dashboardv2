@@ -26,8 +26,12 @@ export const getOrganisationMembersService = async (organisationId, search = '',
             params.status = status;
         }
 
+        const url = organisationId
+            ? `${API_URL_BASE}/MapApi/organisations/${organisationId}/members/`
+            : `${API_URL_BASE}/MapApi/agents/`;
+
         const response = await axios.get(
-            `${API_URL_BASE}/MapApi/agents/`,
+            url,
             { params }
         );
         console.log('[Members] Membres récupérés:', response.data);

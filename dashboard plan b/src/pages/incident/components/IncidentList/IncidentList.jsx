@@ -136,8 +136,8 @@ export const IncidentList = ({
         {isLoading ? (
           <IncidentTableSkeleton />
         ) : filtered.length === 0 ? (
-          <div className="project-empty">
-            <div style={{ opacity: 0.3, marginBottom: '16px' }}>
+          <div className='d-flex flex-column align-items-center'>
+            <div className='mb-2'>
               <SearchNormal1 size={48} variant="Linear" color="var(--color-text-muted)" />
             </div>
             <p>Aucun incident ne correspond à vos critères.</p>

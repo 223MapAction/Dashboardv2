@@ -55,7 +55,7 @@ export const CollabIncidentDetailModal = ({ incident, onClose }) => {
             aria-label="Fermer"
             style={{ border: 'none', background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 0 }}
           >
-            <CloseCircle size={24} variant="Linear" />
+            <CloseCircle size={24} variant="Linear" color='var(--color-text-primary)' />
           </button>
         </header>
 
@@ -67,38 +67,38 @@ export const CollabIncidentDetailModal = ({ incident, onClose }) => {
                 {details.photo && (
                   <div>
                     <h4 className='body-large mb-1'>Image de l'incident</h4>
-                    <BlurryImage 
-                      src={details.photo} 
-                      alt="Aperçu de l'incident" 
-                      style={{ 
-                        width: '100%', 
-                        maxHeight: '240px', 
-                        objectFit: 'cover', 
-                        borderRadius: '8px', 
+                    <BlurryImage
+                      src={details.photo}
+                      alt="Aperçu de l'incident"
+                      style={{
+                        width: '100%',
+                        maxHeight: '240px',
+                        objectFit: 'cover',
+                        borderRadius: '8px',
                         border: '1px solid #eaecf0',
-                      }} 
+                      }}
                     />
                   </div>
                 )}
-                
+
                 {details.video && (
                   <div>
                     <h4 className='body-large mb-1'>Vidéo de l'incident</h4>
                     {!videoLoaded && (
                       <ShimmerThumbnail height={240} rounded />
                     )}
-                    <video 
-                      src={details.video} 
-                      controls 
+                    <video
+                      src={details.video}
+                      controls
                       onLoadedData={() => setVideoLoaded(true)}
-                      style={{ 
-                        width: '100%', 
-                        maxHeight: '240px', 
-                        objectFit: 'cover', 
-                        borderRadius: '8px', 
+                      style={{
+                        width: '100%',
+                        maxHeight: '240px',
+                        objectFit: 'cover',
+                        borderRadius: '8px',
                         border: '1px solid #eaecf0',
                         display: videoLoaded ? 'block' : 'none'
-                      }} 
+                      }}
                     />
                   </div>
                 )}

@@ -34,12 +34,39 @@ export const getDashboardStatsService = async () => {
 };
 
 /**
- * Récupère la liste des incidents non résolus
+ * Récupère les incidents filtrés pour la carte (léger, paginé)
+ * @param {Object} params - Paramètres de requête
+ * @param {string} params.scope - Scope: 'resolved' | 'unresolved' | 'all' | 'mine'
+ * @param {number} params.page - Numéro de page (défaut: 1)
+ * @param {number} params.page_size - Taille de page (max: 100, défaut: 100)
+ * @returns {Promise<Object>} { count, next, previous, results }
  */
-export const getIncidentsNotResolvedService = async () => {
+export const getIncidentsFilteredService = async (params = {}) => {
   try {
     const axios = authService.createAuthenticatedAxios();
-    const response = await axios.get(`${API_URL_BASE}/MapApi/incidentNotResolved/`);
+    const queryParams = {
+      scope: params.scope || 'all',
+      page: params.page || 1,
+      page_size: params.page_size || 100,
+      ...params
+    };
+    const response = await axios.get(`${API_URL_BASE}/MapApi/incident-filter/`, { params: queryParams });
+    console.log(`[DASHBOARD] Incidents filtrés (${queryParams.scope}) récupérés:`, response.data);
+    return response.data;
+  } catch (error) {
+    console.error('[DASHBOARD] Erreur récupération incidents filtrés:', error.response?.status, error.response?.data);
+    throw error;
+  }
+};
+
+/**
+ * Récupère la liste des incidents non résolus
+ * @deprecated Utiliser getIncidentsFilteredService avec scope='unresolved' pour la carte
+ */
+export const getIncidentsNotResolvedService = async (params = {}) => {
+  try {
+    const axios = authService.createAuthenticatedAxios();
+    const response = await axios.get(`${API_URL_BASE}/MapApi/incidentNotResolved/`, { params });
     console.log('[DASHBOARD] Incidents non résolus récupérés:', response.data);
     return response.data;
   } catch (error) {
@@ -50,11 +77,12 @@ export const getIncidentsNotResolvedService = async () => {
 
 /**
  * Récupère la liste des incidents résolus
+ * @deprecated Utiliser getIncidentsFilteredService avec scope='resolved' pour la carte
  */
-export const getIncidentsResolvedService = async () => {
+export const getIncidentsResolvedService = async (params = {}) => {
   try {
     const axios = authService.createAuthenticatedAxios();
-    const response = await axios.get(`${API_URL_BASE}/MapApi/incidentResolved/`);
+    const response = await axios.get(`${API_URL_BASE}/MapApi/incidentResolved/`, { params });
     console.log('[DASHBOARD] Incidents résolus récupérés:', response.data);
     return response.data;
   } catch (error) {

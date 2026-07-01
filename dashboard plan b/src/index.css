@@ -152,6 +152,13 @@ h2,
   color: var(--color-surface);
 }
 
+.btn-link {
+   --bs-btn-color: var(--color-primary);
+ 
+  --bs-btn-hover-color: var(--color-primary) ;
+  
+ 
+}
 .btn-primary:hover {
   background-color: var(--color-primary-dark);
   box-shadow: var(--shadow-md);

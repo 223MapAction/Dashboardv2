@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import Map, { Marker } from 'react-map-gl/mapbox';
+import Map, { Marker, NavigationControl, FullscreenControl } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import useSWR from 'swr';
 import {
@@ -348,6 +348,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMessage, setChatMessage] = useState('');
   const [chatError, setChatError] = useState(null);
+  const [detailMapStyle, setDetailMapStyle] = useState('satellite'); // 'satellite' | 'streets'
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const chatMessagesEndRef = useRef(null);
@@ -1217,7 +1218,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
       <section className="project-detail" style={{ backgroundColor: 'var(--color-background)', minHeight: '100vh', padding: '0' }}>
         {/* Header */}
         <div className="detail-header" style={{ backgroundColor: 'var(--color-surface)', borderBottom: '1px solid var(--color-border)' }}>
-          <div className="detail-title-block">
+          <div className="d-flex gap-2 mb-2" style={{ marginTop: "60px" }}>
             <button
               type="button"
               className="detail-back-btn"
@@ -1228,139 +1229,129 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
               <ArrowLeft2 size={20} variant="Linear" color="var(--color-text-primary)" />
             </button>
             <h2 className="detail-title" style={{ color: 'var(--color-text-primary)' }}>{safeIncident.title}</h2>
-            {/* Badge statut */}
-            <span className="detail-status-badge-custom" style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              padding: '4px 12px',
-              borderRadius: '20px',
-              fontSize: '12px',
-              fontWeight: '600',
-              backgroundColor: currentStatus.bg,
-              color: currentStatus.color,
-              border: `1px solid ${currentStatus.border}`,
-              whiteSpace: 'nowrap'
-            }}>
-              {currentStatus.icon}
-              {currentStatus.label}
-            </span>
-            {/* Badge public/privé */}
-            {/* <span className="detail-visibility-badge-custom" style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              padding: '4px 12px',
-              borderRadius: '20px',
-              fontSize: '12px',
-              fontWeight: '600',
-              backgroundColor: visibilityBadge.bg,
-              color: visibilityBadge.color,
-              border: `1px solid ${visibilityBadge.border}`,
-              whiteSpace: 'nowrap'
-            }}>
-              {visibilityBadge.icon}
-              {visibilityBadge.label}
-            </span> */}
 
-            {/* Badge mode d'implication (Interne/Collaboratif) */}
-            {modeBadge && (
-              <span className="detail-mode-badge-custom" style={{
+          </div>
+          <div className="detail-title-block   gap-2 mt-0 d-flex flex-wrap justify-content-between w-100" >
+            <div className="d-flex gap-2 flex-wrap">
+
+              {/* Badge statut */}
+              <span className="detail-status-badge-custom" style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 padding: '4px 12px',
                 borderRadius: '20px',
                 fontSize: '12px',
                 fontWeight: '600',
-                backgroundColor: modeBadge.bg,
-                color: modeBadge.color,
-                border: `1px solid ${modeBadge.border}`,
-                whiteSpace: 'nowrap',
-                marginLeft: '8px'
+                backgroundColor: currentStatus.bg,
+                color: currentStatus.color,
+                border: `1px solid ${currentStatus.border}`,
+                whiteSpace: 'nowrap'
               }}>
-                {modeBadge.icon}
-                {modeBadge.label}
+                {currentStatus.icon}
+                {currentStatus.label}
               </span>
-            )}
 
-            {/* Badge de rôle utilisateur (Observateur / Contributeur / Leader) */}
-            {userRoleBadge && (
-              <span className="detail-user-role-badge-custom" style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                padding: '4px 12px',
-                borderRadius: '20px',
-                fontSize: '12px',
-                fontWeight: '600',
-                backgroundColor: userRoleBadge.bg,
-                color: userRoleBadge.color,
-                border: `1px solid ${userRoleBadge.border}`,
-                whiteSpace: 'nowrap',
-                marginLeft: '8px'
-              }}>
-                {userRoleBadge.icon}
-                {userRoleBadge.label}
-              </span>
-            )}
+              {/* Badge mode d'implication (Interne/Collaboratif) */}
+              {modeBadge && (
+                <span className="detail-mode-badge-custom" style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  padding: '4px 12px',
+                  borderRadius: '20px',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  backgroundColor: modeBadge.bg,
+                  color: modeBadge.color,
+                  border: `1px solid ${modeBadge.border}`,
+                  whiteSpace: 'nowrap',
+                  marginLeft: '8px'
+                }}>
+                  {modeBadge.icon}
+                  {modeBadge.label}
+                </span>
+              )}
 
-            {/* Badge de gravité */}
-            {safeIncident.severity && (
-              <span className="detail-severity-badge-custom" style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                padding: '4px 12px',
-                borderRadius: '20px',
-                fontSize: '12px',
-                fontWeight: '600',
-                backgroundColor: (() => {
-                  if (safeIncident.severity === 'high') return 'rgba(239, 68, 68, 0.12)';
-                  if (safeIncident.severity === 'medium') return 'rgba(245, 158, 11, 0.12)';
-                  return 'rgba(34, 197, 94, 0.12)';
-                })(),
-                color: (() => {
-                  if (safeIncident.severity === 'high') return 'var(--color-danger)';
-                  if (safeIncident.severity === 'medium') return 'var(--color-warning)';
-                  return 'var(--color-success)';
-                })(),
-                border: `1px solid ${(() => {
-                  if (safeIncident.severity === 'high') return 'rgba(239, 68, 68, 0.3)';
-                  if (safeIncident.severity === 'medium') return 'rgba(245, 158, 11, 0.3)';
-                  return 'rgba(34, 197, 94, 0.3)';
-                })()}`,
-                whiteSpace: 'nowrap',
-                marginLeft: '8px'
-              }}>
-                {(() => {
-                  if (safeIncident.severity === 'high') return 'GRAVITÉ ÉLEVÉE';
-                  if (safeIncident.severity === 'medium') return 'GRAVITÉ MOYENNE';
-                  return 'GRAVITÉ FAIBLE';
-                })()}
-              </span>
-            )}
+              {/* Badge de rôle utilisateur (Observateur / Contributeur / Leader) */}
+              {userRoleBadge && (
+                <span className="detail-user-role-badge-custom" style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  padding: '4px 12px',
+                  borderRadius: '20px',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  backgroundColor: userRoleBadge.bg,
+                  color: userRoleBadge.color,
+                  border: `1px solid ${userRoleBadge.border}`,
+                  whiteSpace: 'nowrap',
+                  marginLeft: '8px'
+                }}>
+                  {userRoleBadge.icon}
+                  {userRoleBadge.label}
+                </span>
+              )}
 
-            {/* Badge de demande de collaboration envoyée */}
-            {collabRequest && (
-              <span className="detail-collab-request-badge-custom" style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                padding: '4px 12px',
-                borderRadius: '20px',
-                fontSize: '12px',
-                fontWeight: '600',
-                backgroundColor: getCollabBadgeStyle(collabRequest.status).bg,
-                color: getCollabBadgeStyle(collabRequest.status).color,
-                border: `1px solid ${getCollabBadgeStyle(collabRequest.status).border}`,
-                whiteSpace: 'nowrap',
-                marginLeft: '8px'
-              }}>
-                <span style={{
-                  width: '6px',
-                  height: '6px',
-                  borderRadius: '50%',
-                  backgroundColor: 'currentColor',
-                  marginRight: '6px'
-                }}></span>
-                Demande {getRoleLabel(collabRequest.role)} : {getStatusLabel(collabRequest.status)}
-              </span>
-            )}
+              {/* Badge de gravité */}
+              {safeIncident.severity && (
+                <span className="detail-severity-badge-custom" style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  padding: '4px 12px',
+                  borderRadius: '20px',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  backgroundColor: (() => {
+                    if (safeIncident.severity === 'high') return 'rgba(239, 68, 68, 0.12)';
+                    if (safeIncident.severity === 'medium') return 'rgba(245, 158, 11, 0.12)';
+                    return 'rgba(34, 197, 94, 0.12)';
+                  })(),
+                  color: (() => {
+                    if (safeIncident.severity === 'high') return 'var(--color-danger)';
+                    if (safeIncident.severity === 'medium') return 'var(--color-warning)';
+                    return 'var(--color-success)';
+                  })(),
+                  border: `1px solid ${(() => {
+                    if (safeIncident.severity === 'high') return 'rgba(239, 68, 68, 0.3)';
+                    if (safeIncident.severity === 'medium') return 'rgba(245, 158, 11, 0.3)';
+                    return 'rgba(34, 197, 94, 0.3)';
+                  })()}`,
+                  whiteSpace: 'nowrap',
+                  marginLeft: '8px'
+                }}>
+                  {(() => {
+                    if (safeIncident.severity === 'high') return 'GRAVITÉ ÉLEVÉE';
+                    if (safeIncident.severity === 'medium') return 'GRAVITÉ MOYENNE';
+                    return 'GRAVITÉ FAIBLE';
+                  })()}
+                </span>
+              )}
+
+              {/* Badge de demande de collaboration envoyée */}
+              {collabRequest && (
+                <span className="detail-collab-request-badge-custom" style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  padding: '4px 12px',
+                  borderRadius: '20px',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  backgroundColor: getCollabBadgeStyle(collabRequest.status).bg,
+                  color: getCollabBadgeStyle(collabRequest.status).color,
+                  border: `1px solid ${getCollabBadgeStyle(collabRequest.status).border}`,
+                  whiteSpace: 'nowrap',
+                  marginLeft: '8px'
+                }}>
+                  <span style={{
+                    width: '6px',
+                    height: '6px',
+                    borderRadius: '50%',
+                    backgroundColor: 'currentColor',
+                    marginRight: '6px'
+                  }}></span>
+                  Demande {getRoleLabel(collabRequest.role)} : {getStatusLabel(collabRequest.status)}
+                </span>
+              )}
+            </div>
 
             {/* Bouton Prendre en compte / Inviter - Masqué si l'incident est géré en interne par nous ou si l'utilisateur a déjà un rôle */}
             {showInvolvementButton && (
@@ -1585,8 +1576,8 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                       <input type="text" className="dark-input" value={safeIncident.coordinates.lng} readOnly />
                     </div>
                   </div>
-                  {/* Mini-carte */}
-                  <div className="detail-geo-map" style={{ marginTop: '12px', height: '180px', borderRadius: '8px', overflow: 'hidden' }}>
+                  {/* Mini-carte détaillée */}
+                  <div className="detail-geo-map" style={{ marginTop: '12px', height: '320px', borderRadius: '8px', overflow: 'hidden', position: 'relative' }}>
                     <Map
                       cooperativeGestures={true}
                       initialViewState={{
@@ -1596,14 +1587,66 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                       }}
                       mapboxAccessToken={MAPBOX_TOKEN}
                       style={{ width: '100%', height: '100%' }}
-                      mapStyle="mapbox://styles/mapbox/streets-v12"
+                      mapStyle={detailMapStyle === 'satellite' ? 'mapbox://styles/mapbox/satellite-streets-v12' : 'mapbox://styles/mapbox/streets-v12'}
                     >
                       <Marker longitude={safeIncident.coordinates.lng} latitude={safeIncident.coordinates.lat} anchor="bottom">
                         <div className="project-map-marker">
                           <Location size={24} variant="Bold" color="var(--color-danger)" />
                         </div>
                       </Marker>
+                      <NavigationControl position="top-right" />
+                      <FullscreenControl position="top-left" />
                     </Map>
+
+                    {/* Sélecteur de style de carte */}
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '12px',
+                      right: '12px',
+                      display: 'flex',
+                      gap: '4px',
+                      zIndex: 10,
+                      backgroundColor: 'rgba(26, 32, 44, 0.85)',
+                      backdropFilter: 'blur(8px)',
+                      padding: '4px',
+                      borderRadius: '6px',
+                      border: '1px solid rgba(255, 255, 255, 0.1)'
+                    }}>
+                      <button
+                        type="button"
+                        onClick={() => setDetailMapStyle('satellite')}
+                        style={{
+                          padding: '4px 10px',
+                          fontSize: '11px',
+                          fontWeight: '600',
+                          borderRadius: '4px',
+                          border: 'none',
+                          cursor: 'pointer',
+                          backgroundColor: detailMapStyle === 'satellite' ? 'var(--color-primary)' : 'transparent',
+                          color: detailMapStyle === 'satellite' ? '#ffffff' : 'var(--color-text-muted)',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        Satellite
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDetailMapStyle('streets')}
+                        style={{
+                          padding: '4px 10px',
+                          fontSize: '11px',
+                          fontWeight: '600',
+                          borderRadius: '4px',
+                          border: 'none',
+                          cursor: 'pointer',
+                          backgroundColor: detailMapStyle === 'streets' ? 'var(--color-primary)' : 'transparent',
+                          color: detailMapStyle === 'streets' ? '#ffffff' : 'var(--color-text-muted)',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        Plan
+                      </button>
+                    </div>
                   </div>
                 </>
               ) : (
