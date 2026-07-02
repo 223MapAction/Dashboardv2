@@ -30,7 +30,7 @@ export const listPartnerSuggestionsService = async (params = {}) => {
  * POST /MapApi/incidents/<incident_id>/suggestions/
  * @param {number|string} incidentId
  * @param {{
- *   suggested_partner: number,
+ *   suggested_organisation: string,
  *   suggested_role?: 'leader' | 'contributor' | 'observer',
  *   justification?: string
  * }} data

@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import useSWRInfinite from 'swr/infinite';
+import debounce from 'lodash.debounce';
 import { useIncidentDetail } from '../IncidentDetailContext';
 import {
   CloseCircle,
-
   SearchNormal1,
   Add,
   People,
-
+  Buildings2,
   EyeSlash
 } from 'iconsax-react';
+import { getOtherOrganisationsService } from '../../../../collaboration-detail/service/collab_detail_service';
 
 export const InviteOrgModal = () => {
   const {
@@ -47,6 +49,120 @@ export const InviteOrgModal = () => {
     takingOrg,
     hasAcceptedRole
   } = useIncidentDetail();
+
+  const searchWrapperRef = useRef(null);
+  const pageSize = 10;
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  // Debounce de la recherche
+  const debouncedSetSearch = useMemo(
+    () => debounce((value) => {
+      setDebouncedSearch(value);
+    }, 300),
+    []
+  );
+
+  useEffect(() => {
+    debouncedSetSearch(orgSearch);
+    return () => {
+      debouncedSetSearch.cancel();
+    };
+  }, [orgSearch, debouncedSetSearch]);
+
+  // Récupération paginée avec useSWRInfinite
+  const getKey = useCallback(
+    (pageIndex, previousPageData) => {
+      if (previousPageData && !previousPageData.next) return null;
+      return ['other-organisations-invite', debouncedSearch, pageIndex + 1];
+    },
+    [debouncedSearch]
+  );
+
+  const fetcher = useCallback(([, search, pageNumber]) => {
+    const params = { page: pageNumber, page_size: pageSize };
+    if (search.trim()) {
+      params.search = search.trim();
+    }
+    return getOtherOrganisationsService(params);
+  }, []);
+
+  const {
+    data: pages,
+    error: orgsError,
+    size,
+    setSize,
+    isLoading: orgsLoading,
+    isValidating
+  } = useSWRInfinite(getKey, fetcher, {
+    revalidateOnFocus: false,
+    revalidateFirstPage: false,
+    keepPreviousData: true
+  });
+
+  // Réinitialise la pagination lors d'une nouvelle recherche
+  useEffect(() => {
+    setSize(1);
+  }, [debouncedSearch, setSize]);
+
+  // Aplatit toutes les pages en une seule liste
+  const organisations = useMemo(() => {
+    if (!pages) return [];
+    const seen = new Set();
+    const flat = [];
+    for (const pg of pages) {
+      for (const org of pg?.results ?? []) {
+        if (!seen.has(org.id)) {
+          seen.add(org.id);
+          flat.push(org);
+        }
+      }
+    }
+    return flat;
+  }, [pages]);
+
+  const lastPage = pages?.[pages.length - 1];
+  const hasMore = Boolean(lastPage?.next);
+  const isInitialLoading = orgsLoading && !pages;
+  const isLoadingMore =
+    orgsLoading || (size > 0 && pages && typeof pages[size - 1] === 'undefined');
+
+  const loadMore = useCallback(() => {
+    if (hasMore && !isValidating) {
+      setSize((prev) => prev + 1);
+    }
+  }, [hasMore, isValidating, setSize]);
+
+  // Sélection d'une organisation : on l'ajoute, on vide la recherche et on referme
+  const handleSelectOrg = (org) => {
+    addInvitedOrg(org);
+    setOrgSearch('');
+    setShowOrgDropdown(false);
+  };
+
+  // Ferme la liste lors d'un clic en dehors
+  useEffect(() => {
+    if (!showOrgDropdown) return;
+    const handlePointerDown = (event) => {
+      if (searchWrapperRef.current && !searchWrapperRef.current.contains(event.target)) {
+        setShowOrgDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handlePointerDown);
+    return () => document.removeEventListener('mousedown', handlePointerDown);
+  }, [showOrgDropdown, setShowOrgDropdown]);
+
+  const getOrgInitials = (org) => {
+    if (org.acronym) return org.acronym.substring(0, 2).toUpperCase();
+    return org.name ? org.name.substring(0, 2).toUpperCase() : 'OR';
+  };
+
+  const getOrgColor = (org) => {
+    return org.primary_color || '#3AA2DD';
+  };
+
+  const selectableOrgs = organisations.filter(
+    (o) => !invitedOrgs.find((inv) => inv.id === o.id)
+  );
 
   if (!joinOpen) return null;
 
@@ -313,7 +429,7 @@ export const InviteOrgModal = () => {
               </div>
 
               {/* Champ recherche */}
-              <div className="invite-orgs-search-wrapper">
+              <div className="invite-orgs-search-wrapper" ref={searchWrapperRef}>
                 <div className="invite-orgs-search">
                   <SearchNormal1 size={16} variant="Linear" color="var(--color-text-secondary)" />
                   <input
@@ -331,7 +447,7 @@ export const InviteOrgModal = () => {
                     <button
                       type="button"
                       className="invite-orgs-clear"
-                      onClick={() => setOrgSearch('')}
+                      onClick={() => { setOrgSearch(''); setShowOrgDropdown(false); }}
                     >
                       <CloseCircle size={16} variant="Linear" color="var(--color-text-secondary)" />
                     </button>
@@ -339,34 +455,86 @@ export const InviteOrgModal = () => {
                 </div>
 
                 {showOrgDropdown && (
-                  <div className="invite-orgs-dropdown">
-                    {isLoadingOrgs ? (
-                      <div className="invite-orgs-empty">
-                        Chargement des organisations...
-                      </div>
-                    ) : filteredOrgs.length > 0 ? (
-                      filteredOrgs.map((org) => (
+                  <div
+                    className="invite-orgs-dropdown"
+                    style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+                  >
+                    {/* Zone scrollable */}
+                    <div
+                      className="invite-orgs-dropdown-scroll"
+                      style={{ overflowY: 'auto', maxHeight: '300px' }}
+                    >
+                      {isInitialLoading ? (
+                        <div className="invite-orgs-empty">
+                          Chargement...
+                        </div>
+                      ) : orgsError ? (
+                        <div className="invite-orgs-empty">
+                          <Buildings2 size={20} variant="Linear" color="#EF4444" />
+                          <span>Erreur de chargement</span>
+                        </div>
+                      ) : selectableOrgs.length === 0 ? (
+                        <div className="invite-orgs-empty">
+                          <Buildings2 size={20} variant="Linear" color="#9CA3AF" />
+                          <span>Aucune organisation disponible</span>
+                        </div>
+                      ) : (
+                        selectableOrgs.map((org) => (
+                          <button
+                            type="button"
+                            key={org.id}
+                            className="invite-orgs-option"
+                            onClick={() => handleSelectOrg(org)}
+                          >
+                            <div
+                              className="invite-orgs-avatar"
+                              style={{ backgroundColor: getOrgColor(org) }}
+                            >
+                              {getOrgInitials(org)}
+                            </div>
+                            <span className="invite-orgs-option-name">{org.name}</span>
+                            <Add size={18} variant="Linear" color="var(--color-primary)" />
+                          </button>
+                        ))
+                      )}
+                    </div>
+
+                    {/* Bouton Afficher plus fixe en bas */}
+                    {hasMore && !isInitialLoading && !orgsError && (
+                      <div
+                        className="invite-orgs-dropdown-footer"
+                        style={{
+                          flexShrink: 0,
+                          borderTop: '1px solid rgba(0, 0, 0, 0.06)',
+                          background: 'var(--color-surface, #ffffff)'
+                        }}
+                      >
                         <button
                           type="button"
-                          key={org.id}
-                          className="invite-orgs-option"
-                          onClick={() => addInvitedOrg(org)}
+                          className="btn btn-link"
+                          onClick={loadMore}
+                          disabled={isLoadingMore}
+                          style={{
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '6px',
+                            padding: '10px',
+                            margin: 0
+                          }}
+                          onMouseEnter={(e) => !isLoadingMore && (e.currentTarget.style.backgroundColor = 'rgba(58, 162, 221, 0.08)')}
+                          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                         >
-                          <div
-                            className="invite-orgs-avatar"
-                            style={{ backgroundColor: org.color }}
-                          >
-                            {org.initials}
-                          </div>
-                          <span className="invite-orgs-option-name">{org.name}</span>
-                          <Add size={18} variant="Linear" color="var(--color-primary)" />
+                          {isLoadingMore ? (
+                            <>
+                              <span className="am-spinner" style={{ width: '14px', height: '14px', borderWidth: '2px' }} />
+                              Chargement...
+                            </>
+                          ) : (
+                            'Afficher plus'
+                          )}
                         </button>
-                      ))
-                    ) : (
-                      <div className="invite-orgs-empty">
-                        {availableOrgs.length === 0
-                          ? 'Aucune organisation disponible'
-                          : 'Aucune organisation trouvée'}
                       </div>
                     )}
                   </div>

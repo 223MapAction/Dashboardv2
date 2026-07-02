@@ -726,12 +726,17 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
           try {
             const roleStr = org.role === 'observateur' ? 'observer' : 'contributor';
             const commentStr = org.comment || `Invitation à rejoindre l'incident en tant que ${org.role}`;
+            console.log("inviter des organisation ",{incident: safeIncident.id,
+              suggested_organisation: org.id,
+              suggested_role: roleStr,
+              justification: commentStr});
+            
             const result = await suggestCollaborationPartnerService(safeIncident.id, {
               incident: safeIncident.id,
-              suggested_partner: org.id,
+              suggested_organisation: org.id,
               suggested_role: roleStr,
-              justification: commentStr,
-              user: currentUserId ? parseInt(currentUserId) : null
+              justification: commentStr
+            
             });
             console.log('Invitation envoyée:', result);
             successCount++;
@@ -1119,11 +1124,13 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
   const hasAcceptedRole = collabRequest && (collabRequest.status?.toLowerCase() === 'accepted' || collabRequest.status?.toLowerCase() === 'in-progress');
 
   const showInvolvementButton = (
-    !safeIncident?.take_in_charge_mode ||
-    safeIncident?.etat === 'declared' ||
-    (takingOrg && !takingOrg.isMe && !hasParticipantRole) ||
-    (isCollaborativeMode && takingOrg?.isMe) ||
-    (hasAcceptedRole && isCollaborativeMode)
+    safeIncident?.etat !== 'resolved' && (
+      !safeIncident?.take_in_charge_mode ||
+      safeIncident?.etat === 'declared' ||
+      (takingOrg && !takingOrg.isMe && !hasParticipantRole) ||
+      (isCollaborativeMode && takingOrg?.isMe) ||
+      (hasAcceptedRole && isCollaborativeMode)
+    )
   );
 
   const getCollabBadgeStyle = (status) => {

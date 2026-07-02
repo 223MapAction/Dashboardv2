@@ -329,7 +329,7 @@ export const groupMessagesByDate = (messages) => {
  * Suggère une organisation partenaire pour une collaboration
  * @param {number} incidentId - ID de la collaboration
  * @param {Object} data - Données de la suggestion
- * @param {number} data.suggested_partner - ID de l'utilisateur/organisation
+ * @param {string} data.suggested_organisation - UUID de l'organisation
  * @param {string} data.suggested_role - 'contributor' | 'observer'
  * @param {string} data.justification - Motif de la suggestion
  * @returns {Promise<Object>} Résultat de la suggestion
@@ -339,18 +339,37 @@ export const suggestCollaborationPartnerService = async (incidentId, data) => {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.post(
       `${API_URL_BASE}/MapApi/incidents/${incidentId}/suggestions/`,
-      {
-        incident: data.incident,
-        suggested_partner: data.suggested_partner,
-        suggested_role: data.suggested_role,
-        justification: data.justification || ''
-      },
+      data,
       { headers: { 'Content-Type': 'application/json' } }
     );
     console.log('[Collaboration] Suggestion envoyée:', response.data);
     return response.data;
   } catch (error) {
     console.error('[Collaboration] Erreur suggestion:', error?.response?.status, error?.response?.data);
+    throw error;
+  }
+};
+
+/**
+ * Récupère les organisations autres que celle de l'utilisateur
+ * GET /MapApi/organisations/others/
+ * @param {Object} [params]
+ * @param {number} [params.page] - Numéro de page
+ * @param {number} [params.page_size] - Nombre d'éléments par page
+ * @param {string} [params.search] - Terme de recherche
+ * @returns {Promise<Object>} Liste paginée des organisations
+ */
+export const getOtherOrganisationsService = async (params = {}) => {
+  try {
+    const axios = authService.createAuthenticatedAxios();
+    const response = await axios.get(
+      `${API_URL_BASE}/MapApi/organisations/others/`,
+      { params }
+    );
+    console.log('[Organisations] Autres organisations récupérées:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('[Organisations] Erreur récupération autres organisations:', error?.response?.status, error?.response?.data);
     throw error;
   }
 };
@@ -363,5 +382,7 @@ export default {
   sendMessageService,
   formatMessage,
   filterMessagesByRecipient,
-  groupMessagesByDate
+  groupMessagesByDate,
+  suggestCollaborationPartnerService,
+  getOtherOrganisationsService
 };

@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import useSWRInfinite from 'swr/infinite';
+import debounce from 'lodash.debounce';
 import { useCollaborationDetail } from '../context/CollaborationDetailContext';
 import {
   CloseCircle,
@@ -10,7 +12,7 @@ import {
   Edit2,
   TickCircle
 } from 'iconsax-react';
-import { suggestCollaborationPartnerService } from '../service/collab_detail_service';
+import { suggestCollaborationPartnerService, getOtherOrganisationsService } from '../service/collab_detail_service';
 
 export const SuggestOrgModal = () => {
   const {
@@ -34,6 +36,92 @@ export const SuggestOrgModal = () => {
   } = useCollaborationDetail();
 
   const bodyRef = useRef(null);
+  const searchWrapperRef = useRef(null);
+  const pageSize = 10;
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  // Debounce de la recherche : ne fait QUE mettre à jour la valeur débouncée.
+  // Le reset de pagination est géré par useSWRInfinite (voir setSize plus bas).
+  const debouncedSetSearch = useMemo(
+    () => debounce((value) => {
+      setDebouncedSearch(value);
+    }, 300),
+    []
+  );
+
+  useEffect(() => {
+    debouncedSetSearch(suggestSearch);
+    return () => {
+      debouncedSetSearch.cancel();
+    };
+  }, [suggestSearch, debouncedSetSearch]);
+
+  // --- Récupération paginée + recherche via useSWRInfinite ---
+  // getKey retourne la clé de chaque page. Elle inclut `debouncedSearch`,
+  // donc un changement de recherche invalide automatiquement toutes les pages.
+  const getKey = useCallback(
+    (pageIndex, previousPageData) => {
+      // On a atteint la fin : plus de page suivante.
+      if (previousPageData && !previousPageData.next) return null;
+      // Sinon on demande la page suivante (pageIndex commence à 0).
+      return ['other-organisations', debouncedSearch, pageIndex + 1];
+    },
+    [debouncedSearch]
+  );
+
+  const fetcher = useCallback(([, search, pageNumber]) => {
+    const params = { page: pageNumber, page_size: pageSize };
+    if (search.trim()) {
+      params.search = search.trim();
+    }
+    return getOtherOrganisationsService(params);
+  }, []);
+
+  const {
+    data: pages,
+    error: orgsError,
+    size,
+    setSize,
+    isLoading: orgsLoading,
+    isValidating
+  } = useSWRInfinite(getKey, fetcher, {
+    revalidateOnFocus: false,
+    revalidateFirstPage: false, // évite de re-fetch la page 1 à chaque "charger plus"
+    keepPreviousData: true
+  });
+
+  // Réinitialise la pagination à la page 1 dès qu'une nouvelle recherche démarre.
+  useEffect(() => {
+    setSize(1);
+  }, [debouncedSearch, setSize]);
+
+  // Aplatit toutes les pages en une seule liste, en dédupliquant par id (sécurité).
+  const organisations = useMemo(() => {
+    if (!pages) return [];
+    const seen = new Set();
+    const flat = [];
+    for (const pg of pages) {
+      for (const org of pg?.results ?? []) {
+        if (!seen.has(org.id)) {
+          seen.add(org.id);
+          flat.push(org);
+        }
+      }
+    }
+    return flat;
+  }, [pages]);
+
+  const lastPage = pages?.[pages.length - 1];
+  const hasMore = Boolean(lastPage?.next);
+  const isInitialLoading = orgsLoading && !pages;
+  const isLoadingMore =
+    orgsLoading || (size > 0 && pages && typeof pages[size - 1] === 'undefined');
+
+  const loadMore = useCallback(() => {
+    if (hasMore && !isValidating) {
+      setSize((prev) => prev + 1);
+    }
+  }, [hasMore, isValidating, setSize]);
 
   useEffect(() => {
     if (suggestAlert?.message && bodyRef.current) {
@@ -50,7 +138,29 @@ export const SuggestOrgModal = () => {
     return org.primary_color || '#3AA2DD';
   };
 
+  // Sélection d'une organisation : on l'ajoute, on vide la recherche
+  // et on referme la liste déroulante.
+  const handleSelectOrg = (org) => {
+    toggleSuggestedOrg(org);
+    setSuggestSearch('');
+    setShowDropdown(false);
+  };
+
   const [showDropdown, setShowDropdown] = useState(false);
+
+  // Ferme la liste UNIQUEMENT lors d'un clic réellement en dehors du bloc
+  // recherche. On n'utilise plus onBlur sur l'input : sinon un clic sur
+  // "Afficher plus" (qui fait perdre le focus à l'input) refermait la liste.
+  useEffect(() => {
+    if (!showDropdown) return;
+    const handlePointerDown = (event) => {
+      if (searchWrapperRef.current && !searchWrapperRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handlePointerDown);
+    return () => document.removeEventListener('mousedown', handlePointerDown);
+  }, [showDropdown]);
 
   if (!showSuggestModal) return null;
 
@@ -64,6 +174,10 @@ export const SuggestOrgModal = () => {
     'am-offcanvas-backdrop',
     suggestModalClosing ? 'am-offcanvas-backdrop--closing' : '',
   ].filter(Boolean).join(' ');
+
+  const selectableOrgs = organisations.filter(
+    (o) => !suggestedOrgs.find((s) => s.id === o.id)
+  );
 
   return (
     <>
@@ -117,7 +231,7 @@ export const SuggestOrgModal = () => {
             <label className="suggest-section-label">
               Rechercher une organisation
             </label>
-            <div className="suggest-search-wrapper">
+            <div className="suggest-search-wrapper" ref={searchWrapperRef}>
               <div className="suggest-search">
                 <SearchNormal1 size={16} variant="Linear" color="#6C7278" />
                 <input
@@ -127,7 +241,6 @@ export const SuggestOrgModal = () => {
                   value={suggestSearch}
                   onChange={(e) => { setSuggestSearch(e.target.value); setShowDropdown(true); }}
                   onFocus={() => setShowDropdown(true)}
-                  onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
                 />
                 {suggestSearch && (
                   <button
@@ -141,40 +254,90 @@ export const SuggestOrgModal = () => {
               </div>
 
               {/* Résultats déroulants */}
-              {showDropdown && <div className="suggest-search-results">
-                {AVAILABLE_ORGS.filter(o =>
-                  o.name.toLowerCase().includes(suggestSearch.toLowerCase()) &&
-                  !suggestedOrgs.find(s => s.id === o.id)
-                ).length === 0 ? (
-                  <div className="suggest-search-empty">
-                    <Buildings2 size={20} variant="Linear" color="#9CA3AF" />
-                    <span>Aucune organisation disponible</span>
+              {showDropdown && (
+                <div
+                  className="suggest-search-results"
+                  style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+                >
+                  {/* Zone SCROLLABLE : seule la liste défile ici */}
+                  <div
+                    className="suggest-search-results-scroll"
+                    style={{ overflowY: 'auto', maxHeight: '300px' }}
+                  >
+                    {isInitialLoading ? (
+                      <div className="suggest-search-empty">
+                        <span>Chargement...</span>
+                      </div>
+                    ) : orgsError ? (
+                      <div className="suggest-search-empty">
+                        <Buildings2 size={20} variant="Linear" color="#EF4444" />
+                        <span>Erreur de chargement</span>
+                      </div>
+                    ) : selectableOrgs.length === 0 ? (
+                      <div className="suggest-search-empty">
+                        <Buildings2 size={20} variant="Linear" color="#9CA3AF" />
+                        <span>Aucune organisation disponible</span>
+                      </div>
+                    ) : (
+                      selectableOrgs.map(org => (
+                        <button
+                          type="button"
+                          key={org.id}
+                          className="suggest-search-result"
+                          onClick={() => handleSelectOrg(org)}
+                        >
+                          <div
+                            className="suggest-org-avatar"
+                            style={{ backgroundColor: getOrgColor(org) }}
+                          >
+                            {getOrgInitials(org)}
+                          </div>
+                          <span className="suggest-org-name">{org.name}</span>
+                         </button>
+                      ))
+                    )}
                   </div>
-                ) : (
-                  AVAILABLE_ORGS
-                    .filter(o =>
-                      o.name.toLowerCase().includes(suggestSearch.toLowerCase()) &&
-                      !suggestedOrgs.find(s => s.id === o.id)
-                    )
-                    .map(org => (
+
+                  {/* Bouton "Afficher plus" FIXE en bas (hors de la zone scrollable) */}
+                  {hasMore && !isInitialLoading && !orgsError && (
+                    <div
+                      className="suggest-search-results-footer"
+                      style={{
+                        flexShrink: 0,
+                        borderTop: '1px solid rgba(0, 0, 0, 0.06)',
+                        background: 'var(--color-surface, #ffffff)'
+                      }}
+                    >
                       <button
                         type="button"
-                        key={org.id}
-                        className="suggest-search-result"
-                        onClick={() => toggleSuggestedOrg(org)}
+                        className="btn btn-link"
+                        onClick={loadMore}
+                        disabled={isLoadingMore}
+                        style={{
+                          width: '100%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '6px',
+                          padding: '10px',
+                          margin: 0
+                        }}
+                        onMouseEnter={(e) => !isLoadingMore && (e.currentTarget.style.backgroundColor = 'rgba(58, 162, 221, 0.08)')}
+                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                       >
-                        <div
-                          className="suggest-org-avatar"
-                          style={{ backgroundColor: getOrgColor(org) }}
-                        >
-                          {getOrgInitials(org)}
-                        </div>
-                        <span className="suggest-org-name">{org.name}</span>
-                        <Add size={18} variant="Linear" color="#3AA2DD" />
+                        {isLoadingMore ? (
+                          <>
+                            <span className="am-spinner" style={{ width: '14px', height: '14px', borderWidth: '2px' }} />
+                            Chargement...
+                          </>
+                        ) : (
+                          'Afficher plus'
+                        )}
                       </button>
-                    ))
-                )}
-              </div>}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 

@@ -1745,7 +1745,7 @@ export const CollaborationDetail = () => {
       suggestedOrgs.map(org =>
         suggestCollaborationPartnerService(collaboration.incidentId, {
           incident: collaboration.incidentId,
-          suggested_partner: org.id,
+          suggested_organisation: org.id,
           suggested_role: org.role === 'observateur' ? 'observer' : 'contributor',
           justification: org.comment || ''
         }).then(() => ({ ok: true, name: org.name }))
@@ -1797,6 +1797,10 @@ export const CollaborationDetail = () => {
     if (errors.length === 0) {
       setSuggestAlert({ type: 'success', message: `Suggestion(s) envoyée(s) avec succès pour : ${successes.join(', ')}.` });
       setSuggestedOrgs([]);
+      // Fermer le modal après un court délai pour que l'utilisateur voie le message de succès
+      setTimeout(() => {
+        closeSuggestModal();
+      }, 1500);
     } else if (successes.length > 0) {
       setSuggestAlert({ type: 'warning', message: `Succès : ${successes.join(', ')}. Erreurs : ${errors.join(' | ')}` });
     } else {

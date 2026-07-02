@@ -122,7 +122,7 @@ Liste des suggestions de partenaires
 Créer une suggestion (contributeur uniquement)
 - **Params**: 
   - `incidentId` (number)
-  - `data` (object): `{ suggested_partner, suggested_role, justification }`
+  - `data` (object): `{ suggested_organisation, suggested_role, justification }`
 - **Returns**: Suggestion créée
 
 #### `getSuggestionService(incidentId, suggestionId)`

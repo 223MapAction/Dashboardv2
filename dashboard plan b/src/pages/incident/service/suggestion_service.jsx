@@ -23,7 +23,7 @@ export const getSuggestionsService = async (incidentId) => {
 /**
  * Créer une suggestion de partenaire (contributeur uniquement ou observeur)
  * @param {number} incidentId 
- * @param {object} data - { suggested_partner, suggested_role, justification }
+ * @param {object} data - { suggested_organisation, suggested_role, justification }
  * @returns 
  */
 export const createSuggestionService = async (incidentId, data) => {
