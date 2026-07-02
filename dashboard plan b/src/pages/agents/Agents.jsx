@@ -118,7 +118,8 @@ const fetcher = async ([, organisationsList, search, role, status]) => {
         role: parsedRole,
         organisationId: orgId || '',
         organisationName: m.organisation_name || org?.name || 'Organisation inconnue',
-        organisationLogo: org?.logo || '',
+        organisationLogo: org?.avatar || '',
+        avatar: m.avatar || '',
         status: m.is_active ? 'active' : 'inactive',
         avatarColor: AVATAR_COLORS[getIndexFromId(m.id) % AVATAR_COLORS.length] || '#3AA2DD',
         joinedAt: m.date_joined || new Date().toISOString()
@@ -444,21 +445,28 @@ export const Agents = () => {
                             <tr key={index}>
                               <td>
                                 <div className="agents-cell-identity">
-                                  {agent.organisationLogo ? (
-                                    <img
-                                      src={agent.organisationLogo}
-                                      alt={agent.organisationName}
-                                      className="agents-avatar"
-                                      style={{
-                                        width: '32px',
-                                        height: '32px',
-                                        borderRadius: '50%',
-                                        objectFit: 'contain',
-                                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                                        flexShrink: 0
-                                      }}
-                                    />
+                                  {agent.avatar ? (
+                                    <>
+                                      <img
+                                        src={agent.avatar}
+                                        alt={agent.fullName}
+                                        className="agents-avatar"
+                                        style={{
+                                          width: '32px',
+                                          height: '32px',
+                                          borderRadius: '50%',
+                                          objectFit: 'cover',
+                                          flexShrink: 0
+                                        }}
+                                        onError={(e) => {
+                                          e.target.style.display = 'none';
+                                          e.target.nextSibling.style.display = 'flex';
+                                        }}
+                                      />
+                                      <div className="agents-avatar" style={{ backgroundColor: agent.avatarColor, display: 'none' }}>
+                                        {getInitials(agent.fullName)}
+                                      </div>
+                                    </>
                                   ) : (
                                     <div className="agents-avatar" style={{ backgroundColor: agent.avatarColor }}>
                                       {getInitials(agent.fullName)}

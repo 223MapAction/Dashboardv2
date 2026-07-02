@@ -138,6 +138,7 @@ export const removeOrganisationMemberService = async (organisationId, userId) =>
             `${API_URL_BASE}/MapApi/organisations/${organisationId}/members/${userId}/`
         );
         console.log('[Members] Membre retiré:', response.data);
+      
         return response.data;
     } catch (error) {
         console.error('[Members] Erreur retrait membre:', error?.response?.status, error?.response?.data);

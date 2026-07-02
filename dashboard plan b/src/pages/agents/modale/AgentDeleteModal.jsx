@@ -2,6 +2,7 @@ import React from 'react';
 import { Trash, TickCircle, CloseCircle } from 'iconsax-react';
 import { useAgentsContext } from './AgentsModalContext';
 import { removeOrganisationMemberService } from '../service/members_service';
+import { authService } from '../../auth/services/authService';
 
 export const AgentDeleteModal = () => {
   const {
@@ -22,8 +23,16 @@ export const AgentDeleteModal = () => {
     setIsDeleting(true);
     setDeleteAlert({ type: null, message: null });
     try {
+      // Récupérer l'ID de l'organisation de l'utilisateur connecté
+      const currentUser = authService.getCurrentUser();
+      const organisationId = currentUser?.organisation_member || currentUser?.organisation_id;
+      
+      if (!organisationId) {
+        throw new Error('Organisation non trouvée');
+      }
+
       await removeOrganisationMemberService(
-        deleteModal.agent.organisationId,
+        organisationId,
         deleteModal.agent.id
       );
       setDeleteAlert({ type: 'success', message: 'Agent supprimé avec succès !' });
@@ -33,6 +42,7 @@ export const AgentDeleteModal = () => {
       const msg =
         err?.response?.data?.detail ||
         err?.response?.data?.message ||
+        err?.message ||
         'Erreur lors de la suppression. Veuillez réessayer.';
       setDeleteAlert({ type: 'danger', message: msg });
     } finally {

@@ -1407,7 +1407,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                 ) : (
                   <>
                     <UserAdd size={18} variant="Bold" color="var(--color-surface)" />
-                    {safeIncident.isOwner || hasAcceptedRole || (isCollaborativeMode && takingOrg?.isMe) || isCollaborativeMode
+                    {safeIncident.isOwner || hasAcceptedRole
                       ? 'Inviter des organisations'
                       : safeIncident?.etat === 'declared'
                         ? "Agir sur cet incident"

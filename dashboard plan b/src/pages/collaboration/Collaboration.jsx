@@ -33,6 +33,7 @@ import {
 } from 'iconsax-react';
 import { Header, Sidebar } from '../../components/layout';
 import { CollaborationRequests } from '../collaboration-requests';
+import { SuggestRequests } from '../suggest-request/SuggestRequests';
 import { getCollaborationsService } from './service/collaboration_service';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
 import { BlurryImage } from '../../components/atoms/BlurryImage';
@@ -69,7 +70,8 @@ export const Collaboration = () => {
     setCollapsed: setSidebarCollapsed,
   } = useSidebarState();
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = searchParams.get('tab') === 'requests' ? 'requests' : 'collaborations';
+  const tabParam = searchParams.get('tab');
+  const activeTab = tabParam === 'requests' ? 'requests' : tabParam === 'suggestions' ? 'suggestions' : 'collaborations';
   const setActiveTab = (tab) => {
     const newParams = new URLSearchParams(searchParams);
     newParams.set('tab', tab);
@@ -182,7 +184,7 @@ export const Collaboration = () => {
       if (dateTo) {
         params.date_to = dateTo.toISOString().slice(0, 10);
       }
-      console.log('[Collaboration] Paramètres API:', params);
+      // console.log('[Collaboration] Paramètres API:', params);
       return getCollaborationsService(params);
     },
     {
@@ -424,11 +426,7 @@ export const Collaboration = () => {
   };
 
   const submitSuggestions = () => {
-    console.log('Suggestions envoyées', {
-      collabId: suggestOrgModal.collabId,
-      orgs: suggestedOrgs,
-      message: suggestMessage
-    });
+ 
     closeSuggestOrgModal();
   };
 
@@ -606,6 +604,13 @@ export const Collaboration = () => {
                 onClick={() => setActiveTab('requests')}
               >
                 Demandes
+              </button>
+              <button
+                type="button"
+                className={`collab-tab ${activeTab === 'suggestions' ? 'is-active' : ''}`}
+                onClick={() => setActiveTab('suggestions')}
+              >
+                Suggestions
               </button>
             </div>
 
@@ -935,9 +940,11 @@ export const Collaboration = () => {
                   </>
                 ) : null}
               </>
-            ) : (
+            ) : activeTab === 'requests' ? (
               <CollaborationRequests embedded={true} />
-            )}
+            ) : activeTab === 'suggestions' ? (
+              <SuggestRequests embedded={true} />
+            ) : null}
           </div>
         </main>
       </div>

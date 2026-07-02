@@ -162,30 +162,35 @@ export const CollaborationRequests = ({
   };
 
   // Détermine si le bouton Accepter/Refuser doit s'afficher pour une requête
-  // Logique : l'utilisateur connecté est-il le propriétaire de l'incident (taken_by) ?
+  // Logique : l'utilisateur connecté est-il le leader de l'incident ?
   // Et la demande ne vient-elle pas de lui-même ?
-  const shouldShowAcceptForReq = (req) => {
+  const shouldShowAcceptForReq = (req, userCollab) => {
     if (!req) return false;
     const currUser = authService.getCurrentUser();
     if (!currUser) return false;
 
     const myId = currUser.id ? String(currUser.id).toLowerCase() : '';
+    
+    // Vérifier que l'utilisateur est leader de l'incident
+    const isLeader = userCollab && userCollab.role?.toLowerCase() === 'leader' && userCollab.status === 'accepted';
+    
+    // Ou vérifier si l'utilisateur est le propriétaire initial (taken_by)
     const takenBy = req.incidentDetails?.taken_by ? String(req.incidentDetails.taken_by).toLowerCase() : '';
+    const isOwner = takenBy && takenBy === myId;
 
-    // Vérifier que l'utilisateur connecté est le propriétaire de l'incident
-    if (!takenBy || takenBy !== myId) {
-      console.log('[shouldShowAcceptForReq] Pas propriétaire — bouton masqué. Mon ID:', myId, '| taken_by:', takenBy);
+    if (!isLeader && !isOwner) {
+    /*   console.log */('[shouldShowAcceptForReq] Pas leader ni propriétaire — bouton masqué. Mon rôle:', userCollab?.role, '| Status:', userCollab?.status);
       return false;
     }
 
     // Vérifier que la demande ne vient pas de moi-même
     const reqUserId = req.userId ? String(req.userId).toLowerCase() : '';
     if (reqUserId && reqUserId === myId) {
-      console.log('[shouldShowAcceptForReq] Ma propre demande — bouton masqué');
+      // console.log('[shouldShowAcceptForReq] Ma propre demande — bouton masqué');
       return false;
     }
 
-    console.log('[shouldShowAcceptForReq] Je suis propriétaire, demande d\'un tiers — bouton affiché. Demandeur:', req.userFullName || req.userEmail);
+    // console.log('[shouldShowAcceptForReq] Je suis leader/propriétaire, demande d\'un tiers — bouton affiché. Demandeur:', req.userFullName || req.userEmail);
     return true;
   };
   const [showInfoBanner, setShowInfoBanner] = useState(true);
@@ -249,7 +254,7 @@ export const CollaborationRequests = ({
       if (search.trim()) {
         params.search = search.trim();
       }
-      console.log('[CollaborationRequests] Paramètres API getCollaborationDashboardService:', params);
+      // console.log('[CollaborationRequests] Paramètres API getCollaborationDashboardService:', params);
       return getCollaborationDashboardService(params);
     },
     { revalidateOnFocus: false }
@@ -913,10 +918,10 @@ export const CollaborationRequests = ({
             const acceptedOthers = incident.otherCollabs.filter(c => c.status === 'accepted');
             const pendingOthers = incident.otherCollabs.filter(c => c.status === 'pending');
 
-            const targetReq = incident.otherCollabs.find(oc => oc.status === 'pending' && shouldShowAcceptForReq(oc))
-              || incident.suggestions.find(s => s.status === 'pending' && shouldShowAcceptForReq(s));
+            const targetReq = incident.otherCollabs.find(oc => oc.status === 'pending' && shouldShowAcceptForReq(oc, myCollab))
+              || incident.suggestions.find(s => s.status === 'pending' && shouldShowAcceptForReq(s, myCollab));
 
-            const pendingReqToAction = targetReq || (myCollab?.status === 'pending' && shouldShowAcceptForReq(myCollab) ? myCollab : null);
+            const pendingReqToAction = targetReq || (myCollab?.status === 'pending' && shouldShowAcceptForReq(myCollab, myCollab) ? myCollab : null);
             const showAcceptReject = !!pendingReqToAction;
 
             return (
@@ -1035,8 +1040,8 @@ export const CollaborationRequests = ({
                       {(() => {
                         // Si shouldShowAcceptForReq est vrai pour une demande de cet incident,
                         // on affiche l'organisation du demandeur (l'utilisateur) au lieu de celle de l'incident.
-                        const targetReq = incident.otherCollabs.find(oc => oc.status === 'pending' && shouldShowAcceptForReq(oc))
-                          || incident.suggestions.find(s => s.status === 'pending' && shouldShowAcceptForReq(s));
+                        const targetReq = incident.otherCollabs.find(oc => oc.status === 'pending' && shouldShowAcceptForReq(oc, myCollab))
+                          || incident.suggestions.find(s => s.status === 'pending' && shouldShowAcceptForReq(s, myCollab));
 
                         const orgToShow = targetReq
                           ? (targetReq.organisationName || targetReq.organisation)

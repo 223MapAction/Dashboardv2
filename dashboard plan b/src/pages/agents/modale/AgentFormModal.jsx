@@ -381,7 +381,7 @@ export const AgentFormModal = () => {
           )}
 
           {/* ── Avatar preview ───────────────────────── */}
-          <div className="am-avatar-preview">
+        {/*   <div className="am-avatar-preview">
             <div
               className="am-avatar-circle"
               style={{ backgroundColor: watchedAvatarColor }}
@@ -412,7 +412,7 @@ export const AgentFormModal = () => {
                 )}
               />
             </div>
-          </div>
+          </div> */}
 
           {/* ── Champs ───────────────────────────────── */}
           <div className="am-form-grid">
@@ -465,7 +465,13 @@ export const AgentFormModal = () => {
                 {...register('role')}
               >
                 <option value="">Sélectionner un rôle…</option>
-                {ROLES.map((r) => (
+                {ROLES.filter((r) => {
+                  // Un bureau_agent ne peut pas créer un admin
+                  if (currentUser?.web_role === 'bureau_agent' && r.id === 'admin') {
+                    return false;
+                  }
+                  return true;
+                }).map((r) => (
                   <option key={r.id} value={r.id} title={r.description}>
                     {r.label}{r.mobileOnly ? ' (mobile)' : ''}
                   </option>
