@@ -767,7 +767,7 @@ export const CollaborationDetail = () => {
       : 'En cours',
     otherOption: collaborationData.other_option,
     image: collaborationData.incident_photo || collaborationData.incident_thumbnail || collaborationData.photo || collaborationData.thumbnail || collaborationData.incident_details?.photo || '',
-    organisation: collaborationData.organisation_name || `Utilisateur #${collaborationData.user}`,
+    organisation: collaborationData.organisation_name || ``,
     role: collaborationData.role,
     joinedAt: new Date(collaborationData.created_at).toLocaleDateString('fr-FR', {
       day: 'numeric',
