@@ -1,0 +1,5 @@
+# Fichiers macOS
+.DS_Store
+
+# Contexte local Claude Code (ne pas versionner)
+CLAUDE.md
