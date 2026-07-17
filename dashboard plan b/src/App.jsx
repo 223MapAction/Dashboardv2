@@ -1,19 +1,25 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { SWRConfig } from 'swr';
 import { Login, ForgotPassword, ResetPassword } from './pages/auth';
-import { Dashboard } from './pages/dashboard';
-import { Collaboration } from './pages/collaboration';
-import { CollaborationDetail } from './pages/collaboration-detail';
-import { Incident, IncidentDetailPage } from './pages/incident';
-import { Impact } from './pages/impact';
-import { Profile } from './pages/profile';
-import { TrashPage } from './pages/trash';
-import { Organisations } from './pages/organisations';
-import { Agents } from './pages/agents';
-import { MesInterventions } from './pages/mes-interventions';
 import { ProtectedRoute } from './components/auth';
 import { authService } from './pages/auth/services/authService';
-import { NotFound } from './pages/not-found';
+
+// Les pages protégées sont chargées à la demande : sans ça, mapbox-gl et
+// recharts partent dans le bundle initial et se téléchargent dès le login.
+// Les pages exportent des named exports, d'où le remap vers `default`.
+const Dashboard = lazy(() => import('./pages/dashboard').then((m) => ({ default: m.Dashboard })));
+const Collaboration = lazy(() => import('./pages/collaboration').then((m) => ({ default: m.Collaboration })));
+const CollaborationDetail = lazy(() => import('./pages/collaboration-detail').then((m) => ({ default: m.CollaborationDetail })));
+const Incident = lazy(() => import('./pages/incident').then((m) => ({ default: m.Incident })));
+const IncidentDetailPage = lazy(() => import('./pages/incident').then((m) => ({ default: m.IncidentDetailPage })));
+const Impact = lazy(() => import('./pages/impact').then((m) => ({ default: m.Impact })));
+const Profile = lazy(() => import('./pages/profile').then((m) => ({ default: m.Profile })));
+const TrashPage = lazy(() => import('./pages/trash').then((m) => ({ default: m.TrashPage })));
+const Organisations = lazy(() => import('./pages/organisations').then((m) => ({ default: m.Organisations })));
+const Agents = lazy(() => import('./pages/agents').then((m) => ({ default: m.Agents })));
+const MesInterventions = lazy(() => import('./pages/mes-interventions').then((m) => ({ default: m.MesInterventions })));
+const NotFound = lazy(() => import('./pages/not-found').then((m) => ({ default: m.NotFound })));
 
 
 function App() {
@@ -30,7 +36,20 @@ function App() {
   }
 
   return (
+    <SWRConfig
+      value={{
+        // Une même clé demandée plusieurs fois en moins de 5 s ne déclenche
+        // qu'une seule requête réseau.
+        dedupingInterval: 5000,
+        // Au retour sur une page, on réaffiche les données en cache pendant
+        // que la revalidation se fait en fond, au lieu d'un écran de loader.
+        keepPreviousData: true,
+        revalidateOnFocus: false,
+        errorRetryCount: 2,
+      }}
+    >
     <BrowserRouter>
+      <Suspense fallback={null}>
       <Routes>
         {/* Route publique - Login */}
         <Route path="/login" element={<Login onLogin={() => {}} />} />
@@ -143,7 +162,9 @@ function App() {
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+      </Suspense>
     </BrowserRouter>
+    </SWRConfig>
   );
 }
 

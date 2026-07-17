@@ -23,10 +23,13 @@ export const AgentDeleteModal = () => {
     setIsDeleting(true);
     setDeleteAlert({ type: null, message: null });
     try {
-      // Récupérer l'ID de l'organisation de l'utilisateur connecté
       const currentUser = authService.getCurrentUser();
-      const organisationId = currentUser?.organisation_member || currentUser?.organisation_id;
-      
+      const isSuperAdmin = currentUser?.web_role === 'super_admin';
+      // Super admin : utiliser l'organisation de l'agent, sinon celle de l'utilisateur connecté
+      const organisationId = isSuperAdmin
+        ? deleteModal.agent?.organisationId
+        : (currentUser?.organisation_member || currentUser?.organisation_id);
+
       if (!organisationId) {
         throw new Error('Organisation non trouvée');
       }

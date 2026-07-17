@@ -107,8 +107,14 @@ export const Collaboration = () => {
     setPage(1);
   }, [search, roleFilter, statusFilter, incidentFilter, dateFrom, dateTo, localStatusFilter]);
 
-  // Charger les incidents pour le filtre dropdown
-  const { data: rawIncidents } = useSWR('incidents_dropdown_list', () => getIncidentsService(1, 100));
+  // Charger les incidents pour le filtre dropdown.
+  // La liste bouge peu : on la garde en cache 5 min pour éviter un appel à
+  // chaque montage de la page.
+  const { data: rawIncidents } = useSWR(
+    'incidents_dropdown_list',
+    () => getIncidentsService(1, 100),
+    { dedupingInterval: 300000, revalidateIfStale: false }
+  );
   const incidentsList = useMemo(() => {
     return rawIncidents?.results || (Array.isArray(rawIncidents) ? rawIncidents : []);
   }, [rawIncidents]);
@@ -155,11 +161,10 @@ export const Collaboration = () => {
     return () => mq.removeEventListener('change', update);
   }, []);
 
-  // Utiliser useSWR pour charger les collaborations
-  const { data: swrData, error: swrError, isLoading, mutate } = useSWR(
-    ['collaborations', page, search, roleFilter, statusFilter, incidentFilter, dateFrom, dateTo, localStatusFilter],
-    () => {
-      const params = { page, page_size: pageSize };
+  // Construit les paramètres d'appel pour une page donnée.
+  const buildParams = useMemo(
+    () => (pageArg) => {
+      const params = { page: pageArg, page_size: pageSize };
       if (search.trim()) {
         params.search = search.trim();
       }
@@ -184,13 +189,36 @@ export const Collaboration = () => {
       if (dateTo) {
         params.date_to = dateTo.toISOString().slice(0, 10);
       }
-      // console.log('[Collaboration] Paramètres API:', params);
-      return getCollaborationsService(params);
+      return params;
     },
-    {
-      revalidateOnFocus: true,
-    }
+    [search, roleFilter, statusFilter, incidentFilter, dateFrom, dateTo, localStatusFilter]
   );
+
+  // Utiliser useSWR pour charger les collaborations
+  const { data: swrData, error: swrError, isLoading, mutate } = useSWR(
+    ['collaborations', page, search, roleFilter, statusFilter, incidentFilter, dateFrom, dateTo, localStatusFilter],
+    () => getCollaborationsService(buildParams(page))
+  );
+
+  // Précharger la page suivante dès que la page courante est affichée : le clic
+  // sur « suivant » lit alors le cache au lieu d'attendre le réseau.
+  const totalCount = swrData?.count || 0;
+  const hasNextPage = page * pageSize < totalCount;
+  useSWR(
+    hasNextPage
+      ? ['collaborations', page + 1, search, roleFilter, statusFilter, incidentFilter, dateFrom, dateTo, localStatusFilter]
+      : null,
+    () => getCollaborationsService(buildParams(page + 1)),
+    { revalidateIfStale: false, revalidateOnMount: true }
+  );
+
+  // Revalider en fond au retour sur l'onglet, sans vider le cache : les cartes
+  // restent affichées pendant le rafraîchissement.
+  useEffect(() => {
+    if (activeTab === 'collaborations') {
+      mutate();
+    }
+  }, [activeTab, mutate]);
 
   let shimmerColor = "#acb7c6"
 

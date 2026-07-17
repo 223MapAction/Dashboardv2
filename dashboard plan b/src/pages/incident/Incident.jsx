@@ -59,7 +59,7 @@ const adaptIncidentData = (incident, currentUserId = null) => {
       return null;
     })(),
     // Dates formatées
-    startDate: incident.created_at ? new Date(incident.created_at).toLocaleDateString('fr-FR') : 'Non spécifié',
+    startDate: incident.created_at ? new Date(incident.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }) + ', ' + new Date(incident.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }).replace(':', 'h') : 'Non spécifié',
     endDate: incident.resolution_end_date ? new Date(incident.resolution_end_date).toLocaleDateString('fr-FR') : 'En cours',
     // Informations supplémentaires
     objectives: incident.objectives || [],

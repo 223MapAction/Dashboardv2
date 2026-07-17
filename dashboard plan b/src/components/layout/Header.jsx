@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import useSWR from 'swr';
 import { User, Setting2, LogoutCurve, ArrowDown2, Notification, Danger, People, InfoCircle } from 'iconsax-react';
 import logoMapActionMin from '../../assets/logo-min.svg';
+import notifSound from '../../assets/notif.mp3';
 import { authService } from '../../pages/auth/services/authService';
 import { getNotifications, markNotificationAsRead } from './service/notification_service';
 import { BlurryImage } from '../atoms/BlurryImage';
@@ -70,6 +71,12 @@ export const Header = ({ onMenuToggle, user }) => {
           const data = JSON.parse(event.data);
           console.log('[WS-Notifications] Message reçu en temps réel:', data);
           if (data.event === 'notification' || data.message) {
+            // Jouer le son de notification
+            try {
+              const audio = new Audio(notifSound);
+              audio.play().catch(() => {});
+            } catch (e) {}
+
             const newNotification = {
               id: data.id || `notif-${Date.now()}`,
               title: data.title,

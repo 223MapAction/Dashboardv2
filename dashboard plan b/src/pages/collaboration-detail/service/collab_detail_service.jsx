@@ -229,6 +229,64 @@ export const sendMessageService = async (incidentId, data) => {
 };
 
 /**
+ * Modifier un message de discussion
+ * PATCH /MapApi/discussion/<incidentId>/<messageId>/
+ * @param {string} incidentId - ID de l'incident
+ * @param {string} messageId - ID du message
+ * @param {string} message - Nouveau contenu du message
+ * @returns {Promise<Object>} Message modifié
+ */
+export const updateDiscussionMessageService = async (incidentId, messageId, message) => {
+  try {
+    const axios = authService.createAuthenticatedAxios();
+    const response = await axios.patch(
+      `${API_URL_BASE}/MapApi/${DISCUSSION_URL}/${incidentId}/${messageId}/`,
+      { message },
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+    console.log('[Discussion] Message modifié:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('[Discussion] Erreur modification message:', error?.response?.status, error?.response?.data);
+    throw error;
+  }
+};
+
+/**
+ * Supprimer un message de discussion
+ * DELETE /MapApi/discussion/<incidentId>/<messageId>/
+ * @param {string} incidentId - ID de l'incident
+ * @param {string} messageId - ID du message
+ * @returns {Promise<void>}
+ */
+export const deleteDiscussionMessageService = async (incidentId, messageId) => {
+  try {
+    const axios = authService.createAuthenticatedAxios();
+    await axios.delete(`${API_URL_BASE}/MapApi/${DISCUSSION_URL}/${incidentId}/${messageId}/`);
+    console.log('[Discussion] Message supprimé:', messageId);
+  } catch (error) {
+    console.error('[Discussion] Erreur suppression message:', error?.response?.status, error?.response?.data);
+    throw error;
+  }
+};
+
+/**
+ * Génère une couleur déterministe à partir d'une chaîne (ID ou nom)
+ * @param {string} str - Chaîne de référence (senderId, senderName)
+ * @returns {string} Couleur HSL
+ */
+const generateAvatarColor = (str) => {
+  if (!str) return '#6C7278';
+  const strVal = String(str);
+  let hash = 0;
+  for (let i = 0; i < strVal.length; i++) {
+    hash = strVal.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const hue = Math.abs(hash) % 360;
+  return `hsl(${hue}, 55%, 45%)`;
+};
+
+/**
  * Formate un message pour l'affichage
  * @param {Object} message - Message brut de l'API
  * @returns {Object} Message formaté
@@ -241,20 +299,28 @@ export const formatMessage = (message) => {
 
   let senderId = null;
   let senderName = '';
+  let senderOrgName = '';
   let senderInitials = 'U';
+  let senderAvatar = '';
   let isMe = false;
 
   if (message.sender && typeof message.sender === 'object') {
     senderId = message.sender.id;
-    senderName = message.sender.organisation_name || `${message.sender.first_name || ''} ${message.sender.last_name || ''}`.trim() || `Utilisateur #${senderId}`;
+    const firstName = message.sender.first_name || '';
+    const lastName = message.sender.last_name || '';
+    senderName = `${firstName} ${lastName}`.trim() || `Utilisateur #${senderId}`;
+    senderOrgName = message.sender.organisation_name || '';
+    senderAvatar = message.sender.avatar || '';
 
-    const first = message.sender.first_name?.[0] || '';
-    const last = message.sender.last_name?.[0] || '';
+    const first = firstName?.[0] || '';
+    const last = lastName?.[0] || '';
     senderInitials = (first + last).toUpperCase() || 'U';
     isMe = currentUserId ? (senderId === currentUserId) : (message.is_me || false);
   } else {
     senderId = message.sender;
     senderName = message.sender_name || `Utilisateur #${senderId}`;
+    senderOrgName = message.sender_organisation_name || '';
+    senderAvatar = message.sender_avatar || '';
     senderInitials = message.sender_initials || 'U';
     isMe = message.is_me || false;
   }
@@ -276,8 +342,10 @@ export const formatMessage = (message) => {
     id: message.id,
     senderId,
     senderName,
+    senderOrgName,
+    senderAvatar,
     senderInitials,
-    senderColor: message.sender_color || (isMe ? 'var(--color-primary)' : '#6C7278'),
+    senderColor: message.sender_color || generateAvatarColor(senderId || senderName),
     message: message.message || '',
     audio: message.audio || null,
     attachment: message.attachment || null,
@@ -380,6 +448,8 @@ export default {
   sendAudioMessageService,
   sendAttachmentMessageService,
   sendMessageService,
+  updateDiscussionMessageService,
+  deleteDiscussionMessageService,
   formatMessage,
   filterMessagesByRecipient,
   groupMessagesByDate,

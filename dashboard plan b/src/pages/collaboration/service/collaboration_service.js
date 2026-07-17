@@ -14,7 +14,6 @@ export const getCollaborationsService = async (params = {}) => {
       params: { scope: 'self', ...params }
     });
 
-    console.log('[Collaboration] Collaborations récupérées:', response.data);
     return response?.data;
   } catch (error) {
     console.error('[Collaboration] Erreur récupération collaborations:', error?.response?.status, error?.response?.data);

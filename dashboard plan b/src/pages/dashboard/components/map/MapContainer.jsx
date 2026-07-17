@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useSWR from 'swr';
 import Map, { Marker } from 'react-map-gl/mapbox';
@@ -115,6 +115,9 @@ const MAP_STYLES = {
   }
 };
 
+const DEFAULT_MALI_LAT = 12.65; // Bamako
+const DEFAULT_MALI_LNG = -8.0;
+
 // Traduit l'état de l'incident en français
 const translateEtat = (etat) => {
   switch (etat) {
@@ -131,7 +134,7 @@ const translateEtat = (etat) => {
   }
 };
 
-export const MapContainer = ({ incidents = [], isLoading = false }) => {
+export const MapContainer = () => {
   const [selectedIncidentId, setSelectedIncidentId] = useState(null);
   const [modalClosing, setModalClosing] = useState(false);
   const [modalShowing, setModalShowing] = useState(false);
@@ -273,11 +276,8 @@ export const MapContainer = ({ incidents = [], isLoading = false }) => {
 
 
 
-  const DEFAULT_MALI_LAT = 12.65; // Bamako
-  const DEFAULT_MALI_LNG = -8.0;
-
   // Filtre uniquement les incidents avec coordonnées valides et selon les critères de filtres
-  const validIncidents = normalizedIncidents.map((inc) => {
+  const validIncidents = useMemo(() => normalizedIncidents.map((inc) => {
     const latVal = inc.lattitude !== undefined ? inc.lattitude : inc.latitude;
     const lat = parseFloat(latVal);
     const lng = parseFloat(inc.longitude);
@@ -345,7 +345,7 @@ export const MapContainer = ({ incidents = [], isLoading = false }) => {
       // console.log(`[MAP] Incident ID ${inc.id} ("${inc.title}") ACCEPTE et affiché avec coordonnées réelles : [${inc._lat}, ${inc._lng}]`);
     }
     return true;
-  });
+  }), [normalizedIncidents, ownershipFilter, statusFilter, currentUserId]);
 
 
   const openModal = (incident) => {
@@ -394,7 +394,7 @@ export const MapContainer = ({ incidents = [], isLoading = false }) => {
     )
     : 0;
 
-  const isMapLoading = isLoading || (isLoadingPage && allIncidents.length === 0);
+  const isMapLoading = isLoadingPage && allIncidents.length === 0;
 
   return (
     <div className="card">

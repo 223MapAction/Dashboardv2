@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
-import useSWR, { useSWRConfig } from 'swr';
+import { useState, useEffect } from 'react';
+import useSWR from 'swr';
 import { useSidebarState } from '../../hooks/useSidebarState';
 import { Clock, CloseCircle } from 'iconsax-react';
 import { Header, Sidebar } from '../../components/layout';
@@ -8,8 +8,7 @@ import MapContainer from './components/map/MapContainer';
 import StatsWidgets from './components/widgets/StatsWidgets';
 import ActivityPanel from './components/activity/ActivityPanel';
 import './dashboard.css';
-import { getIncidentsService, getIncidentsNotResolvedService, getIncidentsResolvedService, getActivityFeedService, getDashboardStatsService } from './service/dashboard_service';
-import { logStats } from '../../utils/incidentStatsHelper';
+import { getActivityFeedService, getDashboardStatsService } from './service/dashboard_service';
 import { API_URL_BASE } from '../../config/api_url_base';
 import { authService } from '../auth/services/authService';
 
@@ -23,62 +22,18 @@ export const Dashboard = () => {
   const [activityModalOpen, setActivityModalOpen] = useState(false);
   const [activityModalClosing, setActivityModalClosing] = useState(false);
 
-  const { mutate } = useSWRConfig();
-
-  // Utiliser useSWR pour récupérer les incidents non résolus (actifs)
-  const { data: notResolvedData, isLoading: isLoadingNotResolved, mutate: mutateNotResolved } = useSWR(
-    '/incidents/not-resolved',
-    () => getIncidentsNotResolvedService(),
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: true,
-
-      onError: (err) => {
-        console.error('[DASHBOARD] Erreur chargement incidents actifs:', err);
-      }
-    }
-  );
-
-  // Utiliser useSWR pour récupérer les incidents résolus
-  const { data: resolvedData, isLoading: isLoadingResolved, mutate: mutateResolved } = useSWR(
-    '/incidents/resolved',
-    () => getIncidentsResolvedService(),
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: true,
-
-      onError: (err) => {
-        console.error('[DASHBOARD] Erreur chargement incidents résolus:', err);
-      }
-    }
-  );
-
-  // Fusionner les incidents résolus et non résolus
-  const incidents = useMemo(() => {
-    const active = notResolvedData?.results || (Array.isArray(notResolvedData) ? notResolvedData : []);
-    const resolved = resolvedData?.results || (Array.isArray(resolvedData) ? resolvedData : []);
-    return [...active, ...resolved];
-  }, [notResolvedData, resolvedData]);
-
-  const isLoadingIncidents = isLoadingNotResolved || isLoadingResolved;
-
-  const { data: statsData, isLoading: isLoadingStats, mutate: mutateStats } = useSWR(
+  // Les compteurs, widgets et la carte tirent leurs données de leurs propres
+  // sources : `dashboard-stats` ici, et l'endpoint paginé `incident-filter`
+  // directement dans MapContainer. SWR sert le cache immédiatement puis
+  // revalide en arrière-plan.
+  const { data: statsData } = useSWR(
     '/MapApi/incidents/dashboard-stats/',
     () => getDashboardStatsService(),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: true,
-
     }
   );
-
-  // Revalider et actualiser toutes les données du tableau de bord au chargement du composant (clic sur l'onglet)
-  useEffect(() => {
-    mutateNotResolved();
-    mutateResolved();
-    mutateStats();
-    mutate('/org-incidents');
-  }, [mutateNotResolved, mutateResolved, mutateStats, mutate]);
 
   const [activitiesList, setActivitiesList] = useState([]);
   const [nextUrl, setNextUrl] = useState(null);
@@ -220,13 +175,6 @@ export const Dashboard = () => {
     }, 250);
   };
 
-  // Logger les statistiques quand les incidents sont chargés
-  useEffect(() => {
-    if (incidents && incidents.length > 0) {
-      logStats(incidents);
-    }
-  }, [incidents]);
-
   return (
     <div className="dashboard-layout">
       {/* Sidebar gauche */}
@@ -250,13 +198,13 @@ export const Dashboard = () => {
         <main className="dashboard-content py-5 mt-5">
           <div className="dashboard-grid">
             {/* Carte en premier (grande) */}
-            <MapContainer incidents={incidents} isLoading={isLoadingIncidents} />
+            <MapContainer />
 
             {/* 3 cartes métriques */}
-            <MetricsCards incidents={incidents} stats={statsData} />
+            <MetricsCards stats={statsData} />
 
             {/* 3 widgets statistiques */}
-            <StatsWidgets incidents={incidents} stats={statsData} />
+            <StatsWidgets stats={statsData} />
           </div>
         </main>
 

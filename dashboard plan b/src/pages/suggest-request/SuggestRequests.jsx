@@ -22,10 +22,10 @@ import {
 import { Header, Sidebar } from '../../components/layout';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
 import {
-  getMyPendingReceivedSuggestionsService,
+  getMyReceivedSuggestionsService,
+  getMySentSuggestionsService,
   acceptPartnerSuggestionService,
-  rejectPartnerSuggestionService,
-  listDemandeDeCollaborationsService
+  rejectPartnerSuggestionService
 } from './service/suggest_service';
 import { SuggestIncidentDetailModal } from './modal/SuggestIncidentDetailModal';
 import { SuggestDecisionModal } from './modal/SuggestDecisionModal';
@@ -166,36 +166,34 @@ export const SuggestRequests = ({ embedded = false }) => {
     return rawUrl;
   };
 
-  /* ── SWR : Suggestions reçues ── */
+  /* ── SWR : Suggestions + Invitations reçues (l'API /my-suggestions/received/ retourne maintenant les deux) ── */
   const {
-    data: pendingSuggestions,
+    data: receivedSuggestions,
     error: errorSuggestions,
     mutate: mutateSuggestions,
     isLoading: loadingSuggestions
   } = useSWR(
-    typeFilter === 'suggestions' || typeFilter === 'all' ? ['my-received-suggestions', statusFilter] : null,
-    () => getMyPendingReceivedSuggestionsService(),
+    ['my-received-suggestions', statusFilter],
+    () => getMyReceivedSuggestionsService(),
     { revalidateOnFocus: false, refreshInterval: 5000, refreshWhenHidden: false }
   );
 
-  /* ── SWR : Invitations reçues ── */
+  /* ── SWR : Suggestions envoyées (j'ai créé ces suggestions) ── */
   const {
-    data: pendingInvitations,
-    error: errorInvitations,
-    mutate: mutateInvitations,
-    isLoading: loadingInvitations
+    data: sentSuggestions,
+    error: errorSentSuggestions,
+    mutate: mutateSentSuggestions,
+    isLoading: loadingSentSuggestions
   } = useSWR(
-    typeFilter === 'invitations' || typeFilter === 'all'
-      ? ['my-pending-invitations', { status: 'pending', role: 'contributor' }]
-      : null,
-    ([, params]) => listDemandeDeCollaborationsService(params),
+    typeFilter === 'suggestions' || typeFilter === 'all' ? ['my-sent-suggestions', statusFilter] : null,
+    () => getMySentSuggestionsService(),
     { revalidateOnFocus: false, refreshInterval: 5000, refreshWhenHidden: false }
   );
 
-  const hasError = errorSuggestions || errorInvitations;
+  const hasError = errorSuggestions || errorSentSuggestions;
   const isLoading =
-    ((typeFilter === 'suggestions' || typeFilter === 'all') && loadingSuggestions && !pendingSuggestions) ||
-    ((typeFilter === 'invitations' || typeFilter === 'all') && loadingInvitations && !pendingInvitations);
+    (loadingSuggestions && !receivedSuggestions) ||
+    ((typeFilter === 'suggestions' || typeFilter === 'all') && loadingSentSuggestions && !sentSuggestions);
 
   /* ── WebSocket ── */
   useEffect(() => {
@@ -269,7 +267,7 @@ export const SuggestRequests = ({ embedded = false }) => {
 
           // Revalider SWR en arrière-plan
           mutateSuggestions();
-          mutateInvitations();
+          mutateSentSuggestions();
         } catch (e) {
           console.error('[WS] Erreur parsing:', e);
         }
@@ -296,22 +294,59 @@ export const SuggestRequests = ({ embedded = false }) => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       socket?.close(1000, 'Component unmounting');
     };
-  }, [mutateSuggestions, mutateInvitations]);
+  }, [mutateSuggestions, mutateSentSuggestions]);
 
   /* ── Compile flat requests ── */
   const compiledRequests = useMemo(() => {
     const currUser = authService.getCurrentUser();
     const myOrgId = currUser?.organisation_member || currUser?.organisation_id || '';
 
-    const suggestions = (pendingSuggestions || []).map((item) => {
-      const partnerName = item.suggested_partner_name || 'Partenaire';
+    // Suggestions + Invitations reçues (l'API /my-suggestions/received/ retourne maintenant les deux)
+    // Une invitation est détectée par l'absence de suggested_partner_name (ou présence de is_invitation)
+    const received = (receivedSuggestions || []).map((item) => {
       const details = item.incident_details;
+      const isInvitation = !item.suggested_partner_name || item.is_invitation || item.type === 'invitation';
+      const partnerName = isInvitation
+        ? (item.suggested_by_organisation || item.sender_organisation || 'Organisation')
+        : (item.suggested_partner_name || 'Partenaire');
+      const direction = item.direction || (item.is_sender ? 'sent' : 'received');
+      const canRespond = item.can_respond || false;
+
+      if (isInvitation) {
+        return {
+          id: `inv_received_${item.id}`,
+          type: 'invitation',
+          direction,
+          projectTitle: item.incident_title || details?.title || 'Incident sans titre',
+          projectImage: details?.thumbnail || details?.photo || item.incident_photo || item.incident_thumbnail || '',
+          organisation: partnerName,
+          organisationInitials: getInitials(partnerName),
+          organisationColor: 'var(--color-warning)',
+          applicantName: item.suggested_by_name || item.sender_name || 'Membre',
+          applicantOrg: item.suggested_by_organisation || 'Organisation',
+          role: (item.suggested_role === 'observer' || item.suggested_role === 'observateur') ? 'Observateur'
+            : (item.suggested_role === 'leader') ? 'Leader' : 'Contributeur',
+          motif: item.justification || item.motivation || 'Invitation en attente.',
+          status: item.status || 'pending',
+          submittedAt: item.created_at || new Date().toISOString(),
+          respondedAt: item.updated_at || null,
+          incidentId: item.incident,
+          apiId: item.id,
+          incidentDetails: details,
+          incidentZone: item.incident_zone || details?.zone,
+          incidentDescription: item.incident_description || details?.description,
+          canRespond,
+          organisationName: item.suggested_by_organisation || partnerName,
+          userId: item.suggested_by || null
+        };
+      }
+
       return {
         id: `sug_received_${item.id}`,
         type: 'suggestion',
-        direction: item.direction || 'received',
+        direction,
         projectTitle: item.incident_title || details?.title || 'Incident sans titre',
-        projectImage: item.incident_thumbnail || item.incident_photo || '',
+        projectImage: details?.thumbnail || details?.photo || item.incident_photo || '',
         organisation: partnerName,
         organisationInitials: getInitials(partnerName),
         organisationColor: 'var(--color-primary)',
@@ -325,60 +360,46 @@ export const SuggestRequests = ({ embedded = false }) => {
         incidentId: item.incident,
         apiId: item.id,
         incidentDetails: details,
-        incidentZone: item.incident_zone,
-        incidentDescription: item.incident_description,
-        canRespond: item.can_respond || false,
+        incidentZone: item.incident_zone || details?.zone,
+        incidentDescription: item.incident_description || details?.description,
+        canRespond,
         organisationName: item.suggested_partner_organisation || partnerName,
         userId: item.suggested_partner || null
       };
     });
 
-    const invitations = (pendingInvitations || []).map((item) => {
-      const details = item.incident_details || item.incident_detail;
-      const projTitle = details?.title || item.incident_title || 'Incident sans titre';
-
-      const senderId = item.sender?.id ? String(item.sender.id).toLowerCase() : '';
-      const currentUserId = currUser?.id ? String(currUser.id).toLowerCase() : '';
-      const direction = (currentUserId && senderId === currentUserId) ? 'sent' : 'received';
-
-      const senderOrgId = item.sender?.organisation_id || '';
-      const senderOrgName = (senderOrgId && myOrgId && String(senderOrgId).toLowerCase() === String(myOrgId).toLowerCase())
-        ? (currUser?.organisation_name || 'Mon Organisation')
-        : (item.sender?.organisation_name || item.organisation_name || 'Partenaire');
-
-      const receiverOrgId = item.receiver?.organisation_id || '';
-      const receiverOrgName = (receiverOrgId && myOrgId && String(receiverOrgId).toLowerCase() === String(myOrgId).toLowerCase())
-        ? (currUser?.organisation_name || 'Mon Organisation')
-        : (item.receiver?.organisation_name || item.organisation_name || 'Partenaire');
-
-      const displayOrg = direction === 'sent' ? receiverOrgName : senderOrgName;
-
+    // Suggestions envoyées (j'ai créé ces suggestions → pas de boutons Accepter/Refuser)
+    const sent = (sentSuggestions || []).map((item) => {
+      const partnerName = item.suggested_partner_name || 'Partenaire';
+      const details = item.incident_details;
       return {
-        id: `invitation_pending_${item.id}`,
-        type: 'invitation',
-        direction,
-        projectTitle: projTitle,
-        projectImage: item.incident_thumbnail || '',
-        applicantName: item.user_full_name || item.invited_member_name || item.sender?.name || 'Membre',
-        applicantOrg: senderOrgName,
-        organisation: displayOrg,
-        organisationInitials: getInitials(displayOrg),
-        organisationColor: 'var(--color-warning)',
-        role: item.role === 'leader' ? 'Leader' : (item.role === 'contributor' || item.role === 'contributeur') ? 'Contributeur' : 'Observateur',
-        motif: item.justification || item.motivation || 'Invitation en attente.',
+        id: `sug_sent_${item.id}`,
+        type: 'suggestion',
+        direction: 'sent',
+        projectTitle: item.incident_title || details?.title || 'Incident sans titre',
+        projectImage: details?.thumbnail || details?.photo || item.incident_photo || '',
+        organisation: partnerName,
+        organisationInitials: getInitials(partnerName),
+        organisationColor: 'var(--color-primary)',
+        suggestedBy: item.suggested_by_name || 'Vous',
+        suggestedByOrg: item.suggested_by_organisation || 'Mon Organisation',
+        suggestionMessage: item.justification || 'Pas de message.',
+        role: (item.suggested_role === 'observer' || item.suggested_role === 'observateur') ? 'Observateur' : 'Contributeur',
         status: item.status || 'pending',
         submittedAt: item.created_at || new Date().toISOString(),
-        incidentId: details?.id || item.incident_id || item.incident,
+        respondedAt: item.updated_at || null,
+        incidentId: item.incident,
         apiId: item.id,
         incidentDetails: details,
-        predictionDetails: item.prediction_details,
-        userFullName: item.user_full_name || item.sender?.name,
-        organisationName: displayOrg,
-        userId: item.user || null
+        incidentZone: item.incident_zone || details?.zone,
+        incidentDescription: item.incident_description || details?.description,
+        canRespond: false,
+        organisationName: item.suggested_partner_organisation || partnerName,
+        userId: item.suggested_partner || null
       };
     });
 
-    return [...suggestions, ...invitations]
+    return [...received, ...sent]
       .map((r) => {
         if (r.apiId && statusOverrides[r.apiId]) {
           return { ...r, status: statusOverrides[r.apiId] };
@@ -386,7 +407,7 @@ export const SuggestRequests = ({ embedded = false }) => {
         return r;
       })
       .filter((r) => r.status !== 'accepted');
-  }, [pendingSuggestions, pendingInvitations, statusOverrides]);
+  }, [receivedSuggestions, sentSuggestions, statusOverrides]);
 
   // Merge WS (priorité aux données SWR quand elles existent)
   const swrApiIds = new Set(compiledRequests.map((r) => r.apiId).filter(Boolean));
@@ -448,7 +469,7 @@ export const SuggestRequests = ({ embedded = false }) => {
       }
 
       mutateSuggestions();
-      mutateInvitations();
+      mutateSentSuggestions();
       closeDecision();
     } catch (err) {
       console.error('[Decision] Erreur:', err);
@@ -464,7 +485,7 @@ export const SuggestRequests = ({ embedded = false }) => {
 
   /* ── Render helpers ── */
   const canActOnRequest = (req) => {
-    if (req.type === 'suggestion' && req.canRespond) return true;
+    if (req.canRespond) return true;
     return false;
   };
 
@@ -513,7 +534,7 @@ export const SuggestRequests = ({ embedded = false }) => {
       <p>Erreur lors du chargement des demandes.</p>
       <button
         className="btn btn-primary"
-        onClick={() => { mutateSuggestions(); mutateInvitations(); }}
+        onClick={() => { mutateSuggestions(); mutateSentSuggestions(); }}
       >
         Réessayer
       </button>
@@ -675,7 +696,10 @@ export const SuggestRequests = ({ embedded = false }) => {
                       WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden'
                     }}>
                       {isSuggestion
-                        ? <>Suggéré par <strong>{req.suggestedByOrg}</strong> — « {req.suggestionMessage} »</>
+                        ? (req.direction === 'sent'
+                          ? <>Vous avez suggéré <strong>{req.organisation}</strong> — « {req.suggestionMessage} »</>
+                          : <><strong>{req.suggestedByOrg}</strong> vous suggère d'intervenir — « {req.suggestionMessage} »</>
+                        )
                         : <>{req.direction === 'sent'
                           ? <>Vous avez envoyé une demande à <strong>{req.organisation}</strong></>
                           : <><strong>{req.applicantOrg || req.organisation}</strong> souhaite collaborer</>

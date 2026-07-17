@@ -228,14 +228,7 @@ export const CollaborationRequests = ({
   const { data: pendingSuggestions, error: errorSuggestions, mutate: mutatePendingSuggestions, isLoading: loadingSuggestions } = useSWR(
     typeFilter === 'sug-received' || typeFilter === 'all' ? 'my-pending-received-suggestions' : null,
     getMyPendingReceivedSuggestionsService,
-    {
-      revalidateOnFocus: false,
-      // Polling intelligent : 10 secondes (non-agressif)
-      // Désactivé quand l'onglet est en arrière-plan
-      refreshInterval: 5000,
-      // Arrêter le polling si l'onglet n'est pas visible
-      refreshWhenHidden: false,
-    }
+    { revalidateOnFocus: false }
   );
 
   const { data: activeCollabs, error: errorCollabs, mutate: mutateActiveCollabs, isLoading: loadingCollabs } = useSWR(
@@ -263,14 +256,7 @@ export const CollaborationRequests = ({
   const { data: pendingInvitations, error: errorInvitations, mutate: mutatePendingInvitations, isLoading: loadingInvitations } = useSWR(
     typeFilter === 'app-received' || typeFilter === 'all' ? ['my-pending-contributor-invitations', { status: 'pending', role: 'contributor' }] : null,
     ([, params]) => listDemandeDeCollaborationsService(params),
-    {
-      revalidateOnFocus: false,
-      // Polling intelligent : 5 secondes (non-agressif)
-      // Désactivé quand l'onglet est en arrière-plan
-      refreshInterval: 5000,
-      // Arrêter le polling si l'onglet n'est pas visible
-      refreshWhenHidden: false,
-    }
+    { revalidateOnFocus: false }
   );
 
   const hasDataError = errorSuggestions || errorCollabs || errorInvitations;

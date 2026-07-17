@@ -15,12 +15,15 @@ import { getOrganisationsService, formatOrganisation } from '../organisations/se
 import { BlurryImage } from '../../components/atoms/BlurryImage';
 import { API_URL_BASE } from '../../config/api_url_base';
 import { authService } from '../auth/services/authService';
+import sendMessageSound from '../../assets/send_message.mp3';
 import {
   getDiscussionMessagesService,
   sendMessageService,
-  formatMessage,
-  suggestCollaborationPartnerService
+  updateDiscussionMessageService,
+  deleteDiscussionMessageService,
+  formatMessage
 } from './service/collab_detail_service';
+import { createSuggestionService } from '../suggest-request/service/suggest_service';
 import {
   getTasksService,
   createTaskService,
@@ -588,7 +591,6 @@ export const CollaborationDetail = () => {
     return allMessages.map(msg => {
       const formatted = formatMessage(msg);
       if (!formatted) return null;
-      formatted.sender = formatted.senderName;
       return formatted;
     }).filter(Boolean);
   }, [allMessages]);
@@ -679,6 +681,10 @@ export const CollaborationDetail = () => {
   const [activeAudioId, setActiveAudioId] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
+  const [editingMessageId, setEditingMessageId] = useState(null);
+  const [editingMessageText, setEditingMessageText] = useState('');
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [deletingMessageId, setDeletingMessageId] = useState(null);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
   const audioInputRef = useRef(null);
@@ -1612,6 +1618,13 @@ export const CollaborationDetail = () => {
       }
 
       await mutateMessages();
+
+      // Jouer le son une fois le message envoyé avec succès
+      try {
+        const audio = new Audio(sendMessageSound);
+        audio.play().catch(() => {});
+      } catch (e) {}
+
       setNewMessage('');
       setAttachedFile(null);
       setAttachedAudio(null);
@@ -1630,6 +1643,43 @@ export const CollaborationDetail = () => {
     } finally {
       setSendingMessage(false);
     }
+  };
+
+  const handleEditMessage = async (msgId) => {
+    if (!editingMessageText.trim()) return;
+    setSavingEdit(true);
+    try {
+      await updateDiscussionMessageService(incidentId, msgId, editingMessageText.trim());
+      await mutateMessages();
+      setEditingMessageId(null);
+      setEditingMessageText('');
+    } catch (err) {
+      console.error('[handleEditMessage] Erreur:', err);
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  const handleDeleteMessage = async (msgId) => {
+    setDeletingMessageId(msgId);
+    try {
+      await deleteDiscussionMessageService(incidentId, msgId);
+      await mutateMessages();
+    } catch (err) {
+      console.error('[handleDeleteMessage] Erreur:', err);
+    } finally {
+      setDeletingMessageId(null);
+    }
+  };
+
+  const startEditMessage = (msg) => {
+    setEditingMessageId(msg.id);
+    setEditingMessageText(msg.message || '');
+  };
+
+  const cancelEditMessage = () => {
+    setEditingMessageId(null);
+    setEditingMessageText('');
   };
 
   const formatMessageTime = (timestamp) => {
@@ -1743,7 +1793,7 @@ export const CollaborationDetail = () => {
 
     const results = await Promise.allSettled(
       suggestedOrgs.map(org =>
-        suggestCollaborationPartnerService(collaboration.incidentId, {
+        createSuggestionService(collaboration.incidentId, {
           incident: collaboration.incidentId,
           suggested_organisation: org.id,
           suggested_role: org.role === 'observateur' ? 'observer' : 'contributor',
@@ -2331,113 +2381,220 @@ export const CollaborationDetail = () => {
                               <p className="collab-empty-subtitle">Lancez la discussion en envoyant le premier message aux collaborateurs.</p>
                             </div>
                           ) : (
-                            messages.map((msg) => (
+                            messages.map((msg) => {
+                              const currentUser = authService.getCurrentUser();
+                              const isSuperAdmin = currentUser?.web_role === 'super_admin' || currentUser?.web_role === 'org_admin';
+                              const canEditOrDelete = msg.isMe || isSuperAdmin;
+                              const isEditing = editingMessageId === msg.id;
+                              const isDeleting = deletingMessageId === msg.id;
+                              const renderAvatar = (isMe) => (
+                                <div
+                                  className="collab-message-avatar"
+                                  style={msg.senderAvatar ? { backgroundColor: 'transparent', overflow: 'hidden' } : { backgroundColor: msg.senderColor }}
+                                >
+                                  {msg.senderAvatar ? (
+                                    <img
+                                      src={msg.senderAvatar}
+                                      alt={msg.senderName}
+                                      style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
+                                      onError={(e) => {
+                                        e.target.style.display = 'none';
+                                        e.target.nextSibling.style.display = 'flex';
+                                      }}
+                                    />
+                                  ) : null}
+                                  <div style={msg.senderAvatar ? { display: 'none', width: '100%', height: '100%', borderRadius: '50%', alignItems: 'center', justifyContent: 'center' } : { width: '100%', height: '100%', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    {msg.senderInitials}
+                                  </div>
+                                </div>
+                              );
+                              return (
                               <div
                                 key={msg.id}
                                 className={`collab-message ${msg.isMe ? 'is-me' : ''}`}
                               >
-                                {!msg.isMe && (
-                                  <div
-                                    className="collab-message-avatar"
-                                    style={{ backgroundColor: msg.senderColor }}
-                                  >
-                                    {msg.senderInitials}
-                                  </div>
-                                )}
+                                {!msg.isMe && renderAvatar(false)}
                                 <div className="collab-message-content">
                                   {!msg.isMe && (
-                                    <div className="collab-message-sender">{msg.sender}</div>
+                                    <div className="collab-message-sender">
+                                      <span style={{ fontWeight: 'var(--font-weight-semibold)' }}>{msg.senderName}</span>
+                                      {msg.senderOrgName && (
+                                        <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', marginLeft: '4px' }}>• {msg.senderOrgName}</span>
+                                      )}
+                                    </div>
+                                  )}
+                                  {msg.isMe && msg.senderOrgName && (
+                                    <div className="collab-message-sender" style={{ textAlign: 'right' }}>
+                                      <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', marginRight: '4px' }}>{msg.senderOrgName} •</span>
+                                      <span style={{ fontWeight: 'var(--font-weight-semibold)' }}>{msg.senderName}</span>
+                                    </div>
                                   )}
                                   <div
                                     className={`collab-message-bubble ${(!msg.message && (msg.file || msg.audio)) ? 'is-media-only' : ''}`}
                                     style={(!msg.message && (msg.file || msg.audio)) ? { background: 'transparent', padding: 0, boxShadow: 'none', border: 'none' } : {}}
                                   >
-                                    {msg.message && <div style={{ marginBottom: (msg.file || msg.audio) ? '6px' : '0' }}>{msg.message}</div>}
-                                    {msg.file && (
-                                      <div className="collab-message-file" style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '12px',
-                                        padding: '12px 16px',
-                                        backgroundColor: 'var(--color-surface)',
-                                        borderRadius: '12px',
-                                        marginTop: '4px',
-                                        border: '1px solid var(--color-border)',
-                                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                                        textAlign: 'left',
-                                        minWidth: '240px'
-                                      }}>
-                                        <span className="collab-message-file-icon" style={{ display: 'flex', alignItems: 'center', fontSize: '24px' }}>
-                                          {getFileIcon(msg.file.name)}
-                                        </span>
-                                        <div className="collab-message-file-info" style={{ flex: 1 }}>
-                                          <div style={{ fontWeight: '500', fontSize: 'var(--font-size-body-small)', wordBreak: 'break-all', color: 'var(--color-text-primary)' }}>
-                                            {msg.file.name}
-                                          </div>
-                                          <div className="collab-message-file-actions" style={{ display: 'flex', gap: '8px', marginTop: '4px', alignItems: 'center' }}>
-                                            <button
-                                              type="button"
-                                              onClick={() => handleDownload(msg.file.url, msg.file.name, msg.id)}
-                                              disabled={downloadingMsgId === msg.id}
-                                              style={{ background: 'none', border: 'none', padding: 0, fontSize: '11px', fontWeight: '500', color: 'var(--color-primary)', textDecoration: 'none', cursor: downloadingMsgId === msg.id ? 'not-allowed' : 'pointer', opacity: downloadingMsgId === msg.id ? 0.7 : 1, display: 'flex', alignItems: 'center', gap: '4px' }}
-                                            >
-                                              {downloadingMsgId === msg.id ? (
-                                                <>
-                                                  <svg style={{ animation: 'spin 1s linear infinite', width: '12px', height: '12px', color: 'var(--color-primary)' }} viewBox="0 0 24 24" fill="none">
-                                                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" style={{ opacity: 0.25 }}></circle>
-                                                    <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" style={{ opacity: 0.75 }}></path>
-                                                  </svg>
-                                                  <span>En cours...</span>
-                                                </>
-                                              ) : (
-                                                'Télécharger'
-                                              )}
-                                            </button>
-                                            {msg.file.size > 0 && (
-                                              <>
-                                                <span style={{ fontSize: '10px', color: 'var(--color-text-muted)' }}>•</span>
-                                                <span className="collab-message-file-size" style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>
-                                                  {(msg.file.size / 1024).toFixed(2)} KB
-                                                </span>
-                                              </>
-                                            )}
-                                          </div>
+                                    {isEditing ? (
+                                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        <textarea
+                                          value={editingMessageText}
+                                          onChange={(e) => setEditingMessageText(e.target.value)}
+                                          style={{
+                                            width: '100%', minHeight: '60px', resize: 'vertical',
+                                            border: '1px solid var(--color-border)', borderRadius: '8px',
+                                            padding: '8px 12px', fontSize: 'var(--font-size-body)',
+                                            fontFamily: 'inherit'
+                                          }}
+                                          autoFocus
+                                        />
+                                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                                          <button
+                                            type="button"
+                                            onClick={cancelEditMessage}
+                                            disabled={savingEdit}
+                                            style={{
+                                              padding: '4px 12px', borderRadius: '6px', border: '1px solid var(--color-border)',
+                                              background: 'var(--color-surface)', fontSize: '12px', cursor: 'pointer'
+                                            }}
+                                          >
+                                            Annuler
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={() => handleEditMessage(msg.id)}
+                                            disabled={savingEdit || !editingMessageText.trim()}
+                                            style={{
+                                              padding: '4px 12px', borderRadius: '6px', border: 'none',
+                                              background: 'var(--color-primary)', color: '#fff', fontSize: '12px',
+                                              cursor: savingEdit ? 'not-allowed' : 'pointer', opacity: savingEdit ? 0.7 : 1
+                                            }}
+                                          >
+                                            {savingEdit ? 'Enregistrement...' : 'Enregistrer'}
+                                          </button>
                                         </div>
                                       </div>
+                                    ) : (
+                                      <>
+                                        {msg.message && <div style={{ marginBottom: (msg.file || msg.audio) ? '6px' : '0' }}>{msg.message}</div>}
+                                        {msg.file && (
+                                          <div className="collab-message-file" style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '12px',
+                                            padding: '12px 16px',
+                                            backgroundColor: 'var(--color-surface)',
+                                            borderRadius: '12px',
+                                            marginTop: '4px',
+                                            border: '1px solid var(--color-border)',
+                                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                                            textAlign: 'left',
+                                            minWidth: '240px'
+                                          }}>
+                                            <span className="collab-message-file-icon" style={{ display: 'flex', alignItems: 'center', fontSize: '24px' }}>
+                                              {getFileIcon(msg.file.name)}
+                                            </span>
+                                            <div className="collab-message-file-info" style={{ flex: 1 }}>
+                                              <div style={{ fontWeight: '500', fontSize: 'var(--font-size-body-small)', wordBreak: 'break-all', color: 'var(--color-text-primary)' }}>
+                                                {msg.file.name}
+                                              </div>
+                                              <div className="collab-message-file-actions" style={{ display: 'flex', gap: '8px', marginTop: '4px', alignItems: 'center' }}>
+                                                <button
+                                                  type="button"
+                                                  onClick={() => handleDownload(msg.file.url, msg.file.name, msg.id)}
+                                                  disabled={downloadingMsgId === msg.id}
+                                                  style={{ background: 'none', border: 'none', padding: 0, fontSize: '11px', fontWeight: '500', color: 'var(--color-primary)', textDecoration: 'none', cursor: downloadingMsgId === msg.id ? 'not-allowed' : 'pointer', opacity: downloadingMsgId === msg.id ? 0.7 : 1, display: 'flex', alignItems: 'center', gap: '4px' }}
+                                                >
+                                                  {downloadingMsgId === msg.id ? (
+                                                    <>
+                                                      <svg style={{ animation: 'spin 1s linear infinite', width: '12px', height: '12px', color: 'var(--color-primary)' }} viewBox="0 0 24 24" fill="none">
+                                                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" style={{ opacity: 0.25 }}></circle>
+                                                        <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" style={{ opacity: 0.75 }}></path>
+                                                      </svg>
+                                                      <span>En cours...</span>
+                                                    </>
+                                                  ) : (
+                                                    'Télécharger'
+                                                  )}
+                                                </button>
+                                                {msg.file.size > 0 && (
+                                                  <>
+                                                    <span style={{ fontSize: '10px', color: 'var(--color-text-muted)' }}>•</span>
+                                                    <span className="collab-message-file-size" style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>
+                                                      {(msg.file.size / 1024).toFixed(2)} KB
+                                                    </span>
+                                                  </>
+                                                )}
+                                              </div>
+                                            </div>
+                                          </div>
+                                        )}
+                                        {msg.audio && (
+                                          <div className="collab-message-audio" style={{
+                                            padding: '8px 12px',
+                                            backgroundColor: 'var(--color-surface)',
+                                            borderRadius: '12px',
+                                            marginTop: '4px',
+                                            border: '1px solid var(--color-border)',
+                                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                                            display: 'inline-block'
+                                          }}>
+                                            <CustomAudioPlayer
+                                              id={msg.id}
+                                              src={msg.audio}
+                                              activeAudioId={activeAudioId}
+                                              setActiveAudioId={setActiveAudioId}
+                                            />
+                                          </div>
+                                        )}
+                                      </>
                                     )}
-                                    {msg.audio && (
-                                      <div className="collab-message-audio" style={{
-                                        padding: '8px 12px',
-                                        backgroundColor: 'var(--color-surface)',
-                                        borderRadius: '12px',
-                                        marginTop: '4px',
-                                        border: '1px solid var(--color-border)',
-                                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                                        display: 'inline-block'
-                                      }}>
-                                        <CustomAudioPlayer
-                                          id={msg.id}
-                                          src={msg.audio}
-                                          activeAudioId={activeAudioId}
-                                          setActiveAudioId={setActiveAudioId}
-                                        />
+                                  </div>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+                                    <div className="collab-message-time">
+                                      {formatMessageTime(msg.timestamp)}
+                                    </div>
+                                    {canEditOrDelete && !isEditing && msg.message && (
+                                      <div style={{ display: 'flex', gap: '4px' }}>
+                                        <button
+                                          type="button"
+                                          onClick={() => startEditMessage(msg)}
+                                          title="Modifier"
+                                          style={{
+                                            background: 'none', border: 'none', padding: '2px',
+                                            cursor: 'pointer', color: 'var(--color-text-muted)',
+                                            display: 'flex', alignItems: 'center'
+                                          }}
+                                        >
+                                          <Edit2 size={12} variant="Linear" color="currentColor" />
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDeleteMessage(msg.id)}
+                                          disabled={isDeleting}
+                                          title="Supprimer"
+                                          style={{
+                                            background: 'none', border: 'none', padding: '2px',
+                                            cursor: isDeleting ? 'not-allowed' : 'pointer',
+                                            color: 'var(--color-danger)', opacity: isDeleting ? 0.5 : 1,
+                                            display: 'flex', alignItems: 'center'
+                                          }}
+                                        >
+                                          {isDeleting ? (
+                                            <svg style={{ animation: 'spin 1s linear infinite', width: '12px', height: '12px' }} viewBox="0 0 24 24" fill="none">
+                                              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" style={{ opacity: 0.25 }}></circle>
+                                              <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" style={{ opacity: 0.75 }}></path>
+                                            </svg>
+                                          ) : (
+                                            <Trash size={12} variant="Linear" color="currentColor" />
+                                          )}
+                                        </button>
                                       </div>
                                     )}
                                   </div>
-                                  <div className="collab-message-time">
-                                    {formatMessageTime(msg.timestamp)}
-                                  </div>
                                 </div>
-                                {msg.isMe && (
-                                  <div
-                                    className="collab-message-avatar"
-                                    style={{ backgroundColor: msg.senderColor }}
-                                  >
-                                    {msg.senderInitials}
-                                  </div>
-                                )}
+                                {msg.isMe && renderAvatar(true)}
                               </div>
-                            ))
+                              );
+                            })
                           )}
                           <div ref={messagesEndRef} />
                         </div>
@@ -2516,14 +2673,19 @@ export const CollaborationDetail = () => {
                                       disabled={sendingMessage}
                                     />
                                   </label>
-                                  <input
-                                    type="text"
+                                  <textarea
                                     className="collab-discussion-field"
                                     placeholder={sendingMessage ? "Envoi en cours..." : "Écrivez un message..."}
                                     value={newMessage}
-                                    onChange={(e) => setNewMessage(e.target.value)}
+                                    onChange={(e) => {
+                                      setNewMessage(e.target.value);
+                                      e.target.style.height = 'auto';
+                                      e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+                                    }}
                                     disabled={sendingMessage}
-                                    onKeyPress={(e) => {
+                                    rows={1}
+                                    style={{ resize: 'none', overflow: 'hidden', minHeight: '40px', maxHeight: '120px' }}
+                                    onKeyDown={(e) => {
                                       if (e.key === 'Enter' && !e.shiftKey) {
                                         e.preventDefault();
                                         sendMessage();
@@ -3114,10 +3276,15 @@ export const CollaborationDetail = () => {
                                           }}
                                         >
                                           {/* Image */}
-                                          {(task.proof_image || (task.proof?.type === 'image' && task.proof.url)) && (
+                                          {(task.proof_image || (task.proof?.type === 'image' && task.proof.url)) && (() => {
+                                            const proofUrl = task.proof_image || task.proof?.url || '';
+                                            const lowerUrl = proofUrl.split('?')[0].toLowerCase();
+                                            const isImage = lowerUrl.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg|tiff|heic|heif)$/);
+                                            if (!isImage) return null;
+                                            return (
                                             <div
                                               onClick={() => {
-                                                setActiveProofPreview({ type: 'image', url: task.proof_image || task.proof.url });
+                                                setActiveProofPreview({ type: 'image', url: proofUrl });
                                               }}
                                               style={{
                                                 cursor: 'pointer',
@@ -3131,7 +3298,7 @@ export const CollaborationDetail = () => {
                                               className="proof-hover-container"
                                             >
                                               <BlurryImage
-                                                src={task.proof_image || task.proof.url}
+                                                src={proofUrl}
                                                 alt="Preuve"
                                                 className="collab-task-proof-image"
                                                 style={{ width: '100%', height: 'auto', display: 'block', maxHeight: '400px', objectFit: 'cover', transition: 'transform 0.3s ease' }}
@@ -3144,7 +3311,8 @@ export const CollaborationDetail = () => {
                                                 <span>🔍 Cliquer pour agrandir</span>
                                               </div>
                                             </div>
-                                          )}
+                                            );
+                                          })()}
 
                                           {/* Vidéo */}
                                           {(task.proof_video || (task.proof?.type === 'video' && task.proof.url)) && (
@@ -3180,9 +3348,17 @@ export const CollaborationDetail = () => {
                                           )}
 
                                           {/* Document (PDF, Word, Excel, etc.) */}
-                                          {!task.proof_image && !task.proof_video && task.proof && (
+                                          {(() => {
+                                            const proofDocUrl = task.proof_image || task.proof?.url || task.proof || '';
+                                            const lowerDocUrl = (typeof proofDocUrl === 'string' ? proofDocUrl : '').split('?')[0].toLowerCase();
+                                            const isImage = lowerDocUrl.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg|tiff|heic|heif)$/);
+                                            const isVideo = task.proof_video || lowerDocUrl.match(/\.(mp4|avi|mov|wmv|flv|webm|mkv)$/);
+                                            if (isImage || isVideo) return null;
+                                            if (!proofDocUrl) return null;
+                                            const docName = lowerDocUrl.split('/').pop() || 'Document de preuve';
+                                            return (
                                             <a
-                                              href={task.proof.url || task.proof}
+                                              href={proofDocUrl}
                                               target="_blank"
                                               rel="noopener noreferrer"
                                               download
@@ -3202,7 +3378,7 @@ export const CollaborationDetail = () => {
                                               <DocumentUpload size={32} variant="Bold" color="var(--color-primary)" />
                                               <div style={{ flex: 1, minWidth: 0 }}>
                                                 <div style={{ fontSize: 'var(--font-size-body)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-text-primary)', marginBottom: 'var(--spacing-1)' }}>
-                                                  Document de preuve
+                                                  {decodeURIComponent(docName)}
                                                 </div>
                                                 <div style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-text-secondary)' }}>
                                                   Cliquer pour ouvrir ou télécharger
@@ -3210,7 +3386,8 @@ export const CollaborationDetail = () => {
                                               </div>
                                               <div style={{ fontSize: '20px', color: 'var(--color-primary)' }}>→</div>
                                             </a>
-                                          )}
+                                            );
+                                          })()}
                                         </div>
                                       )}
                                     </>
