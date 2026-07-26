@@ -4,6 +4,15 @@ import { API_URL_BASE } from '../../../config/api_url_base';
 
 const API_URL = API_URL_BASE;
 
+// Une seule opération de refresh à la fois. Sans ce verrou, dix requêtes qui
+// prennent un 401 en même temps déclencheraient dix POST /token/refresh/,
+// et les derniers échoueraient avec un refresh token déjà consommé.
+let refreshPromise = null;
+
+// Ces routes ne doivent jamais déclencher de rejeu : un 401 y est une réponse
+// métier légitime, et rejouer créerait une boucle infinie.
+const NO_RETRY_PATHS = ['/MapApi/login/', '/MapApi/token/refresh/'];
+
 // Clés de stockage
 const STORAGE_KEYS = {
   ACCESS_TOKEN: 'access_token',
@@ -234,13 +243,54 @@ export const authService = {
    */
   createAuthenticatedAxios: () => {
     const token = authService.getAccessToken();
-    return axios.create({
+    const instance = axios.create({
       baseURL: API_URL,
       headers: {
         Authorization: token ? `Bearer ${token}` : '',
         'Content-Type': 'application/json',
       },
     });
+
+    instance.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const original = error.config;
+        const status = error.response?.status;
+
+        const isRetryable =
+          status === 401 &&
+          original &&
+          !original._retry &&
+          !NO_RETRY_PATHS.some((path) => (original.url || '').includes(path));
+
+        if (!isRetryable) {
+          return Promise.reject(error);
+        }
+
+        original._retry = true;
+
+        // Les requêtes concurrentes s'abonnent au refresh en cours
+        // au lieu d'en démarrer chacune un nouveau.
+        if (!refreshPromise) {
+          refreshPromise = authService.refreshToken().finally(() => {
+            refreshPromise = null;
+          });
+        }
+
+        const newToken = await refreshPromise;
+
+        if (!newToken) {
+          // refreshToken() a déjà appelé logout() en cas d'échec.
+          window.location.assign('/login');
+          return Promise.reject(error);
+        }
+
+        original.headers = { ...original.headers, Authorization: `Bearer ${newToken}` };
+        return instance(original);
+      }
+    );
+
+    return instance;
   },
 };
 
