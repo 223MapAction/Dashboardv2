@@ -6,6 +6,7 @@ import { Eye, Edit2, Trash } from 'iconsax-react';
 import { BlurryImage } from '../../../../components/atoms/BlurryImage';
 import { useIncidentModalContext } from '../../modale/IncidentModalContext';
 import { authService } from '../../../auth/services/authService';
+import { isSuperAdmin as checkSuperAdmin, getAccessibleNavIds } from '../../../../utils/permissions';
 import { getCollaborationsService } from '../../service/collaboration_service';
 import Pagination from '../../../../components/molecules/Pagination';
 import './incident-list.css';
@@ -65,9 +66,9 @@ export const IncidentList = ({
 }) => {
   const { openDeleteModal, openAssignModal } = useIncidentModalContext();
   const user = authService.getCurrentUser();
-  const isSuperAdmin = user?.web_role === 'super_admin';
-  const orgRole = isSuperAdmin ? 'super_admin' : user?.org_role;
-  const isAdmin = orgRole === 'org_admin' || orgRole === 'bureau_agent';
+  const isSuperAdmin = checkSuperAdmin(user);
+  // « admin » ici = peut piloter les incidents sans être super_admin.
+  const isAdmin = !isSuperAdmin && getAccessibleNavIds(user).includes('incidents');
 
   const currentUserId = user?.id;
   const myOrgId = user?.organisation_member;
