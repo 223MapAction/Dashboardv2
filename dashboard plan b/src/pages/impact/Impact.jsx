@@ -115,38 +115,10 @@ export const Impact = () => {
     }
   );
 
-  // Logger les données pour analyse
   useEffect(() => {
-    if (globalImpactData) {
-      console.log('========================================');
-      console.log('📊 DONNÉES IMPACT GLOBAL REÇUES:');
-      console.log('========================================');
-      console.log('Structure complète:', JSON.stringify(globalImpactData, null, 2));
-      console.log('========================================');
-      console.log('Type de données:', typeof globalImpactData);
-      console.log('Est un tableau?', Array.isArray(globalImpactData));
-      console.log('Clés disponibles:', Object.keys(globalImpactData));
-      console.log('========================================');
-    }
-    if (apiError) {
-      console.error('❌ ERREUR API IMPACT:', apiError);
-    }
-  }, [globalImpactData, apiError]);
-
-  // Logger les incidents d'impact
-  useEffect(() => {
-    if (impactIncidentsData) {
-      console.log('========================================');
-      console.log('📋 INCIDENTS D\'IMPACT REÇUS:');
-      console.log('========================================');
-      console.log('Nombre d\'incidents:', impactIncidentsData.results?.length || impactIncidentsData.length || 0);
-      console.log('Structure:', JSON.stringify(impactIncidentsData, null, 2));
-      console.log('========================================');
-    }
-    if (incidentsError) {
-      console.error('❌ ERREUR API INCIDENTS:', incidentsError);
-    }
-  }, [impactIncidentsData, incidentsError]);
+    if (apiError) console.error('[Impact] Erreur API impact:', apiError);
+    if (incidentsError) console.error('[Impact] Erreur API incidents:', incidentsError);
+  }, [apiError, incidentsError]);
 
   // Utiliser les vraies données ou fallback sur MOCK
   const loadingIncidents = isLoadingImpact || isLoadingIncidents;
