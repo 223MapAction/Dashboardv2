@@ -1200,3 +1200,99 @@
     border-radius: 0 !important;
   }
 }
+/* ── Marqueurs regroupés ─────────────────────────────────────────────────────
+   Plusieurs incidents peuvent partager exactement la même position. Le badge
+   indique combien d'incidents se cachent derrière une punaise. */
+
+.incident-marker-count {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  z-index: 3;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: #111827;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 14px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.incident-group-popup .mapboxgl-popup-content {
+  padding: 10px 12px;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  max-width: 280px;
+}
+
+.incident-group-title {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #6C7278;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.incident-group-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.incident-group-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 6px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+
+.incident-group-item:hover,
+.incident-group-item:focus-visible {
+  background: #F3F4F6;
+  outline: none;
+}
+
+.incident-group-dot {
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #6C7278;
+}
+
+.incident-group-item.severity-active-high .incident-group-dot { background: #EF4444; }
+.incident-group-item.severity-active-medium .incident-group-dot { background: #F59E0B; }
+.incident-group-item.severity-active-low .incident-group-dot { background: #3AA2DD; }
+.incident-group-item.severity-resolved-others .incident-group-dot { background: #22C55E; }
+.incident-group-item.severity-resolved-mine .incident-group-dot { background: #10B981; }
+
+.incident-group-label {
+  flex: 1 1 auto;
+  font-size: 13px;
+  color: #1F2937;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.incident-group-etat {
+  flex: 0 0 auto;
+  font-size: 11px;
+  color: #6C7278;
+}

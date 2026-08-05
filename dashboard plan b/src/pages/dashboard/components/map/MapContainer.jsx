@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useSWR from 'swr';
-import Map, { Marker } from 'react-map-gl/mapbox';
+import Map, { Marker, Popup } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
 import { getIncidentService } from '../../../incident/service/incident_service';
@@ -347,6 +347,32 @@ export const MapContainer = () => {
     return true;
   }), [normalizedIncidents, ownershipFilter, statusFilter, currentUserId]);
 
+  // Plusieurs incidents peuvent partager exactement la même position (même site
+  // signalé plusieurs fois). Sans regroupement, les marqueurs se dessinent l'un
+  // sur l'autre et seul le dernier est visible : la carte semble alors perdre
+  // des incidents. On rend donc un marqueur par position, porteur du nombre
+  // d'incidents qu'il représente.
+  // Attention : `Map` est ici le composant react-map-gl importé en tête de
+  // fichier, pas la structure de données JavaScript. On indexe donc avec un
+  // objet simple pour éviter toute ambiguïté.
+  const incidentGroups = useMemo(() => {
+    const parPosition = Object.create(null);
+    const ordre = [];
+    for (const inc of validIncidents) {
+      const cle = `${inc._lat}|${inc._lng}`;
+      if (parPosition[cle]) {
+        parPosition[cle].incidents.push(inc);
+      } else {
+        parPosition[cle] = { cle, lat: inc._lat, lng: inc._lng, incidents: [inc] };
+        ordre.push(cle);
+      }
+    }
+    return ordre.map((cle) => parPosition[cle]);
+  }, [validIncidents]);
+
+  // Position dont la liste d'incidents est ouverte (uniquement si elle en a
+  // plusieurs — un marqueur isolé ouvre directement le détail).
+  const [groupeOuvert, setGroupeOuvert] = useState(null);
 
   const openModal = (incident) => {
     setModalClosing(false);
@@ -430,14 +456,20 @@ export const MapContainer = () => {
             }
           }}
         >
-          {/* Markers d'incidents */}
-          {!isMapLoading && validIncidents.map((incident) => {
-            const colorClass = getMarkerColorClass(incident, currentUserId);
+          {/* Markers d'incidents — un par position, pas un par incident */}
+          {!isMapLoading && incidentGroups.map((groupe) => {
+            const principal = groupe.incidents[0];
+            const nombre = groupe.incidents.length;
+            const colorClass = getMarkerColorClass(principal, currentUserId);
+            const libelle = nombre > 1
+              ? `${nombre} incidents à cet emplacement`
+              : `Voir l'incident ${principal.title}`;
+
             return (
               <Marker
-                key={incident.id}
-                longitude={incident._lng}
-                latitude={incident._lat}
+                key={groupe.cle}
+                longitude={groupe.lng}
+                latitude={groupe.lat}
                 anchor="center"
               >
                 <button
@@ -445,17 +477,61 @@ export const MapContainer = () => {
                   className={`incident-marker severity-${colorClass}`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    openModal(incident);
+                    if (nombre > 1) {
+                      setGroupeOuvert(groupe);
+                    } else {
+                      openModal(principal);
+                    }
                   }}
-                  aria-label={`Voir l'incident ${incident.title}`}
-                  title={incident.title}
+                  aria-label={libelle}
+                  title={libelle}
                 >
                   <span className="incident-marker-pulse" />
                   <span className="incident-marker-dot" />
+                  {nombre > 1 && (
+                    <span className="incident-marker-count">{nombre}</span>
+                  )}
                 </button>
               </Marker>
             );
           })}
+
+          {/* Liste des incidents partageant une même position */}
+          {groupeOuvert && (
+            <Popup
+              longitude={groupeOuvert.lng}
+              latitude={groupeOuvert.lat}
+              anchor="bottom"
+              offset={18}
+              closeOnClick={false}
+              onClose={() => setGroupeOuvert(null)}
+              className="incident-group-popup"
+            >
+              <p className="incident-group-title">
+                {groupeOuvert.incidents.length} incidents à cet emplacement
+              </p>
+              <ul className="incident-group-list">
+                {groupeOuvert.incidents.map((inc) => (
+                  <li key={inc.id}>
+                    <button
+                      type="button"
+                      className={`incident-group-item severity-${getMarkerColorClass(inc, currentUserId)}`}
+                      onClick={() => {
+                        setGroupeOuvert(null);
+                        openModal(inc);
+                      }}
+                    >
+                      <span className="incident-group-dot" />
+                      <span className="incident-group-label">
+                        {inc.title || 'Incident sans titre'}
+                      </span>
+                      <span className="incident-group-etat">{translateEtat(inc.etat)}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </Popup>
+          )}
         </Map>
 
 
