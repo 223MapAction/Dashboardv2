@@ -4,7 +4,7 @@ import { useOrganisationsContext } from '../context/OrganisationsContext';
 import { SECTORS, TYPES, COUNTRIES } from '../data/organisations';
 import { BlurryImage } from '../../../components/atoms/BlurryImage';
 
-import { EscapeToClose } from '../../../components/atoms/EscapeToClose';
+import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
 const FormOrganisationModal = () => {
   const {
     formModal,
@@ -30,44 +30,28 @@ const FormOrganisationModal = () => {
 
   if (!formModal.open) return null;
 
-  const isClosing = formAnimating === 'closing';
-  const panelClass = [
-    'am-offcanvas-panel',
-    isClosing ? 'am-offcanvas-panel--closing' : '',
-    formAnimating === 'opening' ? 'am-offcanvas-panel--opening' : '',
-  ].filter(Boolean).join(' ');
 
-  const backdropClass = [
-    'am-offcanvas-backdrop',
-    isClosing ? 'am-offcanvas-backdrop--closing' : '',
-  ].filter(Boolean).join(' ');
+
+  const titre = formModal.mode === 'create' ? 'Nouvelle organisation' : "Modifier l'organisation";
+  const verrouille = isSubmitting || modalAlert.type === 'success';
 
   return (
-    <>
-      <div className={backdropClass} onClick={closeFormModal} />
-      <EscapeToClose onClose={closeFormModal} />
+    <OffcanvasModal
+      onClose={closeFormModal}
+      isClosing={formAnimating === 'closing'}
+      title={titre}
+      ariaLabel={titre}
+      closeVariant="plain"
+      closeDisabled={verrouille}
+    >
+      {/* Le panneau etait lui-meme un <form>. La coquille rendant un <aside>,
+          le formulaire enveloppe desormais le corps, et le bouton d'envoi du
+          pied lui est rattache par l'attribut `form`. */}
       <form
-        className={panelClass}
-        role="dialog"
-        aria-modal="true"
-        aria-label={formModal.mode === 'create' ? 'Nouvelle organisation' : "Modifier l'organisation"}
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleSubmit();
-        }}
+        id="organisation-form"
+        onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}
+        style={{ display: 'contents' }}
       >
-        <div className="am-offcanvas-header">
-          <h5 className="am-offcanvas-title">
-            {formModal.mode === 'create' ? 'Nouvelle organisation' : 'Modifier l\'organisation'}
-          </h5>
-          <button
-            type="button"
-            className="btn-close"
-            onClick={closeFormModal}
-            disabled={isSubmitting || modalAlert.type === 'success'}
-            aria-label="Fermer"
-          />
-        </div>
 
         <div className="am-offcanvas-body" ref={bodyRef}>
           {modalAlert.message && (
@@ -281,6 +265,7 @@ const FormOrganisationModal = () => {
           </button>
           <button
             type="submit"
+            form="organisation-form"
             className="am-btn am-btn--primary"
             disabled={isSubmitting || modalAlert.type === 'success'}
           >
@@ -292,7 +277,7 @@ const FormOrganisationModal = () => {
           </button>
         </div>
       </form>
-    </>
+    </OffcanvasModal>
   );
 };
 

@@ -16,7 +16,7 @@ import {
 } from '../service/members_service';
 import { authService } from '../../auth/services/authService';
 
-import { EscapeToClose } from '../../../components/atoms/EscapeToClose';
+import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
 // ── Helpers ───────────────────────────────────────────────────────
 const getInitials = (name = '') =>
   name
@@ -325,43 +325,18 @@ export const AgentFormModal = () => {
     }
   };
 
-  // ── Classes animation ────────────────────────────────
-  const panelClass = [
-    'am-offcanvas-panel',
-    formAnimating === 'closing' ? 'am-offcanvas-panel--closing' : '',
-    formAnimating === 'opening' ? 'am-offcanvas-panel--opening' : '',
-  ].filter(Boolean).join(' ');
 
-  const backdropClass = [
-    'am-offcanvas-backdrop',
-    formAnimating === 'closing' ? 'am-offcanvas-backdrop--closing' : '',
-  ].filter(Boolean).join(' ');
 
   // ── Render ────────────────────────────────────────────
   return (
-    <>
-      <div className={backdropClass} onClick={closeFormModal} />
-      <EscapeToClose onClose={closeFormModal} />
-
-      <div
-        className={panelClass}
-        role="dialog"
-        aria-modal="true"
-        aria-label={isCreate ? 'Nouvel agent' : "Modifier l'agent"}
-      >
-        {/* ── Header ──────────────────────────────────── */}
-        <div className="am-offcanvas-header">
-          <h5 className="am-offcanvas-title">
-            {isCreate ? 'Nouvel agent' : "Modifier l'agent"}
-          </h5>
-          <button
-            type="button"
-            className="btn-close"
-            onClick={closeFormModal}
-            disabled={isSubmitting || modalAlert.type === 'success'}
-            aria-label="Fermer"
-          />
-        </div>
+    <OffcanvasModal
+      onClose={closeFormModal}
+      isClosing={formAnimating === 'closing'}
+      title={isCreate ? 'Nouvel agent' : "Modifier l'agent"}
+      ariaLabel={isCreate ? 'Nouvel agent' : "Modifier l'agent"}
+      closeVariant="plain"
+      closeDisabled={isSubmitting || modalAlert.type === 'success'}
+    >
 
         {/* ── Body (formulaire) ────────────────────────── */}
         <form
@@ -614,8 +589,7 @@ export const AgentFormModal = () => {
             {isCreate ? "Créer l'agent" : 'Enregistrer'}
           </button>
         </div>
-      </div>
-    </>
+      </OffcanvasModal>
   );
 };
 
