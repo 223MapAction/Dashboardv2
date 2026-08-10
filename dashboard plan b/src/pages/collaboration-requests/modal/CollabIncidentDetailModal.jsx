@@ -5,6 +5,7 @@ import { ShimmerThumbnail } from 'react-shimmer-effects';
 import { BlurryImage } from '../../../components/atoms/BlurryImage';
 import '../../../styles/modals.css';
 
+import { EscapeToClose } from '../../../components/atoms/EscapeToClose';
 export const CollabIncidentDetailModal = ({ incident, onClose }) => {
   if (!incident) return null;
   const details = incident.incidentDetails || {};
@@ -33,6 +34,7 @@ export const CollabIncidentDetailModal = ({ incident, onClose }) => {
   return (
     <>
       <div className={backdropClass} onClick={handleClose} />
+      <EscapeToClose onClose={handleClose} />
       <div
         className={panelClass}
         role="dialog"

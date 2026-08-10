@@ -14,6 +14,7 @@ import {
 } from 'iconsax-react';
 import { suggestCollaborationPartnerService, getOtherOrganisationsService } from '../service/collab_detail_service';
 
+import { EscapeToClose } from '../../../components/atoms/EscapeToClose';
 export const SuggestOrgModal = () => {
   const {
     collaboration,
@@ -182,6 +183,7 @@ export const SuggestOrgModal = () => {
   return (
     <>
       <div className={backdropClass} onClick={closeSuggestModal} />
+      <EscapeToClose onClose={closeSuggestModal} />
       <div
         className={panelClass}
         role="dialog"

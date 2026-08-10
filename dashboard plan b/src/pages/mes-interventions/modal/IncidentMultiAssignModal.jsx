@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useMesInterventionsModalContext } from '../MesInterventionsModalContext';
 import { CloseCircle, TickCircle, SearchNormal1, Profile } from 'iconsax-react';
 
+import { EscapeToClose } from '../../../components/atoms/EscapeToClose';
 const getInitials = (name = '') =>
   name
     .split(' ')
@@ -97,6 +98,7 @@ export const IncidentMultiAssignModal = () => {
   return (
     <>
       <div className={backdropClass} onClick={handleOverlayClick} />
+      <EscapeToClose onClose={handleOverlayClick} />
       <div
         className={panelClass}
         role="dialog"

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useCollaborationDetail } from '../context/CollaborationDetailContext';
+import { EscapeToClose } from '../../../components/atoms/EscapeToClose';
 import {
   CloseSquare,
   Add,
@@ -99,6 +100,7 @@ export const TaskModal = () => {
   return (
     <>
       <div className={backdropClass} onClick={closeTaskModal} />
+      <EscapeToClose onClose={closeTaskModal} />
       <div
         className={panelClass}
         role="dialog"

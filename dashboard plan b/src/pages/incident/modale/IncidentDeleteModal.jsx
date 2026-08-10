@@ -3,6 +3,7 @@ import { Trash, TickCircle, CloseCircle } from 'iconsax-react';
 import { useIncidentModalContext } from './IncidentModalContext';
 import { deleteIncidentService } from '../service/incident_service';
 
+import { EscapeToClose } from '../../../components/atoms/EscapeToClose';
 export const IncidentDeleteModal = () => {
   const {
     deleteModal,
@@ -69,6 +70,7 @@ export const IncidentDeleteModal = () => {
   return (
     <>
       <div className={backdropClass} onClick={handleOverlayClick} />
+      <EscapeToClose onClose={handleOverlayClick} />
       <div
         className={panelClass}
         role="alertdialog"

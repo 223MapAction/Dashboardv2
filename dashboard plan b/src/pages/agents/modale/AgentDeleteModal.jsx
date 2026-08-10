@@ -4,6 +4,7 @@ import { useAgentsContext } from './AgentsModalContext';
 import { removeOrganisationMemberService } from '../service/members_service';
 import { authService } from '../../auth/services/authService';
 
+import { EscapeToClose } from '../../../components/atoms/EscapeToClose';
 export const AgentDeleteModal = () => {
   const {
     deleteModal,
@@ -74,6 +75,7 @@ export const AgentDeleteModal = () => {
     <>
       {/* Backdrop */}
       <div className={backdropClass} onClick={closeDeleteModal} />
+      <EscapeToClose onClose={closeDeleteModal} />
 
       {/* Panel slide-from-right */}
       <div

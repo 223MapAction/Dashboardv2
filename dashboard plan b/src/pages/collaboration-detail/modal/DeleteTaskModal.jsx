@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Trash, CloseCircle, TickCircle } from 'iconsax-react';
 import { deleteTaskService } from '../../incident/service/task_service';
 
+import { EscapeToClose } from '../../../components/atoms/EscapeToClose';
 export const DeleteTaskModal = ({
   isOpen,
   onClose,
@@ -91,6 +92,7 @@ export const DeleteTaskModal = ({
   return (
     <>
       <div className={backdropClass} onClick={handleClose} />
+      <EscapeToClose onClose={handleClose} />
       <div
         className={panelClass}
         role="alertdialog"

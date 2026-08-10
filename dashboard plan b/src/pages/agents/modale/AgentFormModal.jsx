@@ -16,6 +16,7 @@ import {
 } from '../service/members_service';
 import { authService } from '../../auth/services/authService';
 
+import { EscapeToClose } from '../../../components/atoms/EscapeToClose';
 // ── Helpers ───────────────────────────────────────────────────────
 const getInitials = (name = '') =>
   name
@@ -340,6 +341,7 @@ export const AgentFormModal = () => {
   return (
     <>
       <div className={backdropClass} onClick={closeFormModal} />
+      <EscapeToClose onClose={closeFormModal} />
 
       <div
         className={panelClass}

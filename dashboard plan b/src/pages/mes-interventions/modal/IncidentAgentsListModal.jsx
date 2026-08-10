@@ -4,6 +4,7 @@ import { useMesInterventionsModalContext } from '../MesInterventionsModalContext
 import { CloseCircle, Profile, Edit2 } from 'iconsax-react';
 import { getIncidentAssignmentsService } from '../../incident/service/incident_service';
 
+import { EscapeToClose } from '../../../components/atoms/EscapeToClose';
 const AVATAR_COLORS = [
   '#EF4444', '#F97316', '#F59E0B', '#22C55E',
   '#3AA2DD', '#1E40AF', '#A855F7', '#EC4899',
@@ -118,6 +119,7 @@ export const IncidentAgentsListModal = () => {
   return (
     <>
       <div className={backdropClass} onClick={handleOverlayClick} />
+      <EscapeToClose onClose={handleOverlayClick} />
       <div
         className={panelClass}
         role="dialog"

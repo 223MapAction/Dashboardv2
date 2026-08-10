@@ -12,6 +12,7 @@ import {
 } from 'iconsax-react';
 import { getOtherOrganisationsService } from '../../../../collaboration-detail/service/collab_detail_service';
 
+import { EscapeToClose } from '../../../../../components/atoms/EscapeToClose';
 export const InviteOrgModal = () => {
   const {
     joinOpen,
@@ -180,6 +181,7 @@ export const InviteOrgModal = () => {
   return (
     <>
       <div className={backdropClass} onClick={closeJoinModal} />
+      <EscapeToClose onClose={closeJoinModal} />
       <div
         className={panelClass}
         role="dialog"

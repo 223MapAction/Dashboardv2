@@ -5,6 +5,7 @@ import { ShimmerThumbnail, ShimmerText } from 'react-shimmer-effects';
 import { getFieldReportsService } from '../../collaboration/service/collaboration_service';
 import { BlurryImage } from '../../../components/atoms/BlurryImage';
 
+import { EscapeToClose } from '../../../components/atoms/EscapeToClose';
 const formatDate = (isoString) => {
   if (!isoString) return 'Non spécifiée';
   try {
@@ -111,6 +112,7 @@ export const AgentReportsModal = ({ isOpen, onClose, incidentId, incidentTitle }
   return (
     <>
       <div className={backdropClass} onClick={handleClose} />
+      <EscapeToClose onClose={handleClose} />
       <div
         className={panelClass}
         role="dialog"

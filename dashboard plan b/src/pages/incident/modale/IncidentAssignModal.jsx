@@ -9,6 +9,7 @@ import { assignIncidentToAgentService, getIncidentAssignmentsService } from '../
 import { getOrganisationMembersService } from '../../agents/service/members_service';
 import { authService } from '../../auth/services/authService';
 
+import { EscapeToClose } from '../../../components/atoms/EscapeToClose';
 const schema = yup.object().shape({
   agent: yup.string().required('Veuillez sélectionner un agent.'),
   deadline: yup.string().nullable().optional()
@@ -318,6 +319,7 @@ export const IncidentAssignModal = () => {
   return (
     <>
       <div className={backdropClass} onClick={handleOverlayClick} />
+      <EscapeToClose onClose={handleOverlayClick} />
       <div
         className={panelClass}
         role="dialog"

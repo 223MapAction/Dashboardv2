@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { CloseCircle, TickCircle, CloseSquare, Crown1, People, Eye } from 'iconsax-react';
 import '../../../styles/modals.css';
 
+import { EscapeToClose } from '../../../components/atoms/EscapeToClose';
 const ROLE_META = {
   leader: { label: 'Leader', icon: Crown1, color: 'var(--color-warning)' },
   contributeur: { label: 'Contributeur', icon: People, color: 'var(--color-primary)' },
@@ -55,6 +56,7 @@ export const SuggestDecisionModal = ({
   return (
     <>
       <div className={backdropClass} onClick={handleClose} />
+      <EscapeToClose onClose={handleClose} />
       <aside
         className={panelClass}
         role="dialog"

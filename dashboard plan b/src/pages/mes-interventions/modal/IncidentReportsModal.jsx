@@ -6,6 +6,7 @@ import { ShimmerThumbnail, ShimmerText } from 'react-shimmer-effects';
 import { getFieldReportsService } from '../service/mes_interventions_service';
 import { BlurryImage } from '../../../components/atoms/BlurryImage';
 
+import { EscapeToClose } from '../../../components/atoms/EscapeToClose';
 const formatDate = (isoString) => {
   if (!isoString) return 'Non spécifiée';
   try {
@@ -100,6 +101,7 @@ export const IncidentReportsModal = () => {
   return (
     <>
       <div className={backdropClass} onClick={handleOverlayClick} />
+      <EscapeToClose onClose={handleOverlayClick} />
       <div
         className={panelClass}
         role="dialog"

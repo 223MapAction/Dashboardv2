@@ -924,3 +924,131 @@ h2,
   color: var(--color-text-muted);
   font-size: var(--font-size-body-small);
 }
+/* ═══════════════════════════════════════════════════════════════════════════
+   ACCESSIBILITÉ & RESPONSIVE — SOCLE GLOBAL
+   Ces règles s'appliquent à toute l'application. Elles rattrapent en un seul
+   endroit ce qui manquait dans les feuilles de style de chaque page.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Focus visible au clavier ─────────────────────────────────────────────
+   Seize fichiers posaient `outline: none` sans anneau de remplacement : la
+   navigation au clavier était invisible. Le `!important` est nécessaire pour
+   passer devant ces déclarations. `:focus-visible` n'affiche l'anneau qu'au
+   clavier, jamais au clic souris — le rendu visuel n'est donc pas altéré pour
+   les utilisateurs à la souris. */
+:where(a, button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"]), [role="button"], [role="tab"], [role="link"]):focus-visible {
+  outline: 2px solid var(--color-primary) !important;
+  outline-offset: 2px !important;
+  border-radius: var(--radius-sm);
+}
+
+/* Sur fond coloré, un anneau blanc reste lisible. */
+.btn-primary:focus-visible,
+.sidebar-item:focus-visible,
+[class*="-accept"]:focus-visible,
+[class*="-danger"]:focus-visible {
+  outline-color: #FFFFFF !important;
+}
+
+/* ── 2. Mouvement réduit ─────────────────────────────────────────────────────
+   Respecte le réglage système des utilisateurs sensibles au mouvement
+   (troubles vestibulaires, migraines). On ne supprime pas les transitions —
+   on les rend quasi instantanées, ce qui préserve les changements d'état. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── 3. Cibles tactiles ──────────────────────────────────────────────────────
+   44 × 44 px est le minimum recommandé par Apple (HIG) ; Android demande 48 dp.
+   On applique la règle sur pointeur grossier uniquement : au doigt. À la
+   souris, les densités compactes restent inchangées. */
+@media (pointer: coarse) {
+  button,
+  a[role="button"],
+  [role="button"],
+  .sidebar-item,
+  .am-pagination-btn,
+  input[type="checkbox"],
+  input[type="radio"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Les boutons dans un flux de texte ne doivent pas être étirés. */
+  a:not([role="button"]) {
+    min-height: 0;
+    min-width: 0;
+  }
+}
+
+/* ── 4. Zones sûres (iPhone à encoche, Android à barre gestuelle) ────────────
+   Nécessite viewport-fit=cover dans index.html. */
+body {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* ── 5. Confinement du défilement dans les surfaces flottantes ───────────────
+   Sans ça, arriver en bout de liste d'une modale fait défiler la page derrière. */
+[role="dialog"],
+[class*="modal"],
+[class*="-overlay"],
+[class*="-sheet"],
+[class*="-popup"] {
+  overscroll-behavior: contain;
+}
+
+/* ── 6. Débordement horizontal ───────────────────────────────────────────────
+   Filet de sécurité : aucune page ne doit défiler latéralement. */
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* ── 7. Typographie ──────────────────────────────────────────────────────────
+   Chiffres à chasse fixe : sans ça les compteurs « sautent » en se mettant à
+   jour, car les glyphes n'ont pas la même largeur. */
+.metric-value,
+[class*="-count"],
+[class*="-total"],
+[class*="-stat"],
+table td,
+time {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Évite les titres dont la dernière ligne ne porte qu'un mot. */
+h1, h2, h3, h4 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+/* ── 8. Contenu long ─────────────────────────────────────────────────────────
+   Un enfant de flex refuse de rétrécir sous la largeur de son contenu tant que
+   min-width vaut auto : c'est la cause n°1 des débordements horizontaux. */
+:where(.flex, [class*="-row"], [class*="-header"], [class*="-item"]) > * {
+  min-width: 0;
+}
+
+/* ── 9. Tableaux sur petit écran ─────────────────────────────────────────────
+   Défilement horizontal confiné au tableau plutôt qu'imposé à la page. */
+@media (max-width: 767.98px) {
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    max-width: 100%;
+  }
+}

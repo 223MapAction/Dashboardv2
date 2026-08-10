@@ -2,6 +2,7 @@ import React from 'react';
 import { Trash, TickCircle, CloseCircle } from 'iconsax-react';
 import { useOrganisationsContext } from '../context/OrganisationsContext';
 
+import { EscapeToClose } from '../../../components/atoms/EscapeToClose';
 const DeleteOrganisationModal = () => {
   const {
     deleteModal,
@@ -31,6 +32,7 @@ const DeleteOrganisationModal = () => {
   return (
     <>
       <div className={backdropClass} onClick={() => !(isDeleting || deleteAlert.type === 'success') && closeDeleteModal()} />
+      <EscapeToClose onClose={() => !(isDeleting || deleteAlert.type === 'success') && closeDeleteModal()} />
       <div
         className={panelClass}
         role="alertdialog"

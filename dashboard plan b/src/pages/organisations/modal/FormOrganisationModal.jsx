@@ -4,6 +4,7 @@ import { useOrganisationsContext } from '../context/OrganisationsContext';
 import { SECTORS, TYPES, COUNTRIES } from '../data/organisations';
 import { BlurryImage } from '../../../components/atoms/BlurryImage';
 
+import { EscapeToClose } from '../../../components/atoms/EscapeToClose';
 const FormOrganisationModal = () => {
   const {
     formModal,
@@ -44,6 +45,7 @@ const FormOrganisationModal = () => {
   return (
     <>
       <div className={backdropClass} onClick={closeFormModal} />
+      <EscapeToClose onClose={closeFormModal} />
       <form
         className={panelClass}
         role="dialog"
