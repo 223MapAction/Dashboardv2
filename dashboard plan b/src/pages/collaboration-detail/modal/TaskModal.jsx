@@ -50,8 +50,7 @@ export const TaskModal = () => {
     startEditTask,
     cancelEditTask,
     saveEditTask,
-    deleteTask,
-    taskToDelete,
+    setTaskToDelete,
   } = useCollaborationDetail();
 
   const bodyRef = useRef(null);
