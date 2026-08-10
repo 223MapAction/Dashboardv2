@@ -9,6 +9,7 @@ import {
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
 import { getTrashIncidentsService, restoreIncidentService, deleteIncidentService } from '../incident/service/incident_service';
 import { BlurryImage } from '../../components/atoms/BlurryImage';
+import { OffcanvasModal } from '../../components/molecules/OffcanvasModal';
 import './trash.css';
 
 // Composant Shimmer Skeleton pour le chargement des incidents de la corbeille
@@ -538,53 +539,18 @@ export const TrashPage = () => {
 
       {/* ── Modal confirmation ── */}
       {confirmId && (
-        <>
-          <div
-            className={[
-              'am-offcanvas-backdrop',
-              confirmClosing ? 'am-offcanvas-backdrop--closing' : '',
-            ].filter(Boolean).join(' ')}
-            onClick={closeConfirmModal}
-          />
-          <div
-            className={[
-              'am-offcanvas-panel',
-              'am-offcanvas-panel--sm',
-              confirmClosing ? 'am-offcanvas-panel--closing' : '',
-            ].filter(Boolean).join(' ')}
-            role="alertdialog"
-            aria-modal="true"
-            aria-label="Supprimer définitivement"
-          >
-            {/* Header */}
-            <div className="am-offcanvas-header am-offcanvas-header--danger">
-              <h5 className="am-offcanvas-title">Suppression définitive</h5>
-              <button
-                type="button"
-                className="btn-close btn-close-white"
-                onClick={closeConfirmModal}
-                aria-label="Fermer"
-              />
-            </div>
-
-            {/* Body */}
-            <div className="am-offcanvas-body am-offcanvas-body--centered">
-              <div className="am-delete-icon-wrap" aria-hidden="true">
-                <Trash size={32} variant="Bold" color="var(--color-danger)" />
-              </div>
-
-              <p className="am-delete-title">Confirmer la suppression</p>
-              <p className="am-delete-text">
-                Cette action est <strong>irréversible</strong>.<br />
-                {confirmId === 'batch'
-                  ? `Vous êtes sur le point de supprimer définitivement ${selected.size} incident(s) sélectionnés.`
-                  : "Vous êtes sur le point de supprimer définitivement cet incident."
-                } Ils ne pourront pas être récupérés.
-              </p>
-            </div>
-
-            {/* Footer */}
-            <div className="am-offcanvas-footer am-offcanvas-footer--col">
+        <OffcanvasModal
+          onClose={closeConfirmModal}
+          isClosing={Boolean(confirmClosing)}
+          title="Suppression définitive"
+          ariaLabel="Supprimer définitivement"
+          role="alertdialog"
+          tone="danger"
+          size="sm"
+          closeVariant="plain"
+          footerLayout="col"
+          footer={
+            <>
               <button
                 type="button"
                 className="am-btn am-btn--danger"
@@ -599,9 +565,24 @@ export const TrashPage = () => {
               >
                 Annuler
               </button>
+            </>
+          }
+        >
+          <div className="am-offcanvas-body am-offcanvas-body--centered">
+            <div className="am-delete-icon-wrap" aria-hidden="true">
+              <Trash size={32} variant="Bold" color="var(--color-danger)" />
             </div>
+
+            <p className="am-delete-title">Confirmer la suppression</p>
+            <p className="am-delete-text">
+              Cette action est <strong>irréversible</strong>.<br />
+              {confirmId === 'batch'
+                ? `Vous êtes sur le point de supprimer définitivement ${selected.size} incident(s) sélectionnés.`
+                : "Vous êtes sur le point de supprimer définitivement cet incident."
+              } Ils ne pourront pas être récupérés.
+            </p>
           </div>
-        </>
+        </OffcanvasModal>
       )}
 
       {/* ── Toast ── */}

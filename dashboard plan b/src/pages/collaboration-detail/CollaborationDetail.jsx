@@ -62,6 +62,7 @@ import {
   Pause,
   DocumentText
 } from 'iconsax-react';
+import { OffcanvasModal } from '../../components/molecules/OffcanvasModal';
 import './collaboration-detail.css';
 
 const formatFailureReason = (reason) => {
@@ -3620,33 +3621,46 @@ export const CollaborationDetail = () => {
 
       {/* Modal de résolution d'incident */}
       {showCloseModal && (
-        <>
-          <div
-            className={[
-              'am-offcanvas-backdrop',
-              !closeModalShowing ? 'am-offcanvas-backdrop--closing' : '',
-            ].filter(Boolean).join(' ')}
-            onClick={closeCloseModal}
-          />
-          <div
-            className={[
-              'am-offcanvas-panel',
-              !closeModalShowing ? 'am-offcanvas-panel--closing' : 'am-offcanvas-panel--opening',
-            ].filter(Boolean).join(' ')}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Résoudre l'incident"
-          >
-            <div className="am-offcanvas-header">
-              <h5 className="am-offcanvas-title">Résoudre l'incident</h5>
+        // Deux notions distinctes se ressemblent ici :
+        //   closeModalShowing → animation du panneau (sémantique inversée)
+        //   isClosing         → clôture de l'incident en cours (soumission)
+        <OffcanvasModal
+          onClose={closeCloseModal}
+          isClosing={!closeModalShowing}
+          title="Résoudre l'incident"
+          ariaLabel="Résoudre l'incident"
+          closeVariant="plain"
+          closeDisabled={isClosing}
+          footer={
+            <>
               <button
                 type="button"
-                className="btn-close"
+                className="am-btn am-btn--secondary"
                 onClick={closeCloseModal}
                 disabled={isClosing}
-              />
-            </div>
-
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                className="am-btn am-btn--primary"
+                onClick={handleCloseIncident}
+                disabled={isClosing || !resolutionStartDate || !resolutionEndDate}
+              >
+                {isClosing ? (
+                  <>
+                    <span className="am-spinner" aria-hidden="true" />
+                    Clôture en cours...
+                  </>
+                ) : (
+                  <>
+                    Resoudre cet incident
+                  </>
+                )}
+              </button>
+            </>
+          }
+        >
             <div className="am-offcanvas-body" ref={closeModalBodyRef}>
               {closeAlert && (
                 <div className={`am-alert am-alert--${closeAlert.type === 'success' ? 'success' : 'danger'}`} role="alert" style={{ marginBottom: 'var(--spacing-4)', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -3713,36 +3727,7 @@ export const CollaborationDetail = () => {
                 </p>
               </div>
             </div>
-
-            <div className="am-offcanvas-footer">
-              <button
-                type="button"
-                className="am-btn am-btn--secondary"
-                onClick={closeCloseModal}
-                disabled={isClosing}
-              >
-                Annuler
-              </button>
-              <button
-                type="button"
-                className="am-btn am-btn--primary"
-                onClick={handleCloseIncident}
-                disabled={isClosing || !resolutionStartDate || !resolutionEndDate}
-              >
-                {isClosing ? (
-                  <>
-                    <span className="am-spinner" aria-hidden="true" />
-                    Clôture en cours...
-                  </>
-                ) : (
-                  <>
-                    Resoudre cet incident
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </>
+        </OffcanvasModal>
       )}
       <AgentReportsModal
         isOpen={showReportsModal}
