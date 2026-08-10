@@ -746,7 +746,7 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
   .incident-modal {
     width: 100%;
   }
@@ -938,7 +938,7 @@
 /* ============================================
    RESPONSIVE MOBILE
    ============================================ */
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
 
   /* Modal Bootstrap sur mobile */
   .modal-dialog {
@@ -1154,7 +1154,7 @@
   display: none;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
   .map-filters-overlay {
     top: auto;
     bottom: 80px;

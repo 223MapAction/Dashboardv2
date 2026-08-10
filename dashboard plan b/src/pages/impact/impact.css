@@ -909,13 +909,13 @@
 }
 
 /* Responsive grid modifications */
-@media (max-width: 992px) {
+@media (max-width: 991.98px) {
   .impact-detail-grid {
     grid-template-columns: 1fr;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
   .impact-card-main {
     flex-direction: column;
     align-items: stretch;
@@ -1068,7 +1068,7 @@
   gap: var(--spacing-5);
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1023.98px) {
   .impact-grid-performance {
     grid-template-columns: 1fr;
   }
@@ -1077,7 +1077,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
   .impact-filters-group {
     grid-template-columns: 1fr;
   }

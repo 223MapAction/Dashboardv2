@@ -790,7 +790,7 @@
 }
 
 /* ── Responsive ────────────────────────────────────────────────── */
-@media (max-width: 576px) {
+@media (max-width: 575.98px) {
 
   .am-offcanvas-panel,
   .am-offcanvas-panel--sm {

@@ -180,7 +180,7 @@
 }
 
 /* Mobile responsive adjustments */
-@media (max-width: 480px) {
+@media (max-width: 479.98px) {
   .not-found-card {
     padding: var(--spacing-6) var(--spacing-4);
     border-radius: var(--radius-lg);

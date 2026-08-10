@@ -459,7 +459,7 @@
 }
 
 /* --- Datepicker responsive (sans portal) --- */
-@media (max-width: 1024px) {
+@media (max-width: 1023.98px) {
 
   .collab-datepicker .react-datepicker__day,
   .collab-datepicker .react-datepicker__day-name {
@@ -474,7 +474,7 @@
   }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
 
   /* Le bloc période devient pleine largeur dans la toolbar */
   .collab-date-range {
@@ -2704,7 +2704,7 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
   .collaboration-content {
     padding: var(--spacing-4);
   }

@@ -329,7 +329,7 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
   .incident-stats-container {
     padding: 1rem;
     gap: 1.5rem;

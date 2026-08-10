@@ -481,7 +481,7 @@
   gap: 20px;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 899.98px) {
   .incident-details-grid {
     grid-template-columns: 1fr;
   }
@@ -919,7 +919,7 @@
   gap: var(--spacing-5);
 }
 
-@media (max-width: 900px) {
+@media (max-width: 899.98px) {
   .incident-details-grid {
     grid-template-columns: 1fr;
     gap: var(--spacing-4);
@@ -1790,7 +1790,7 @@
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 639.98px) {
   .incident-group-header {
     flex-direction: column;
     align-items: stretch !important;

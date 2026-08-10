@@ -538,7 +538,7 @@
   gap: 16px;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1023.98px) {
   .incident-dark-dashboard {
     grid-template-columns: 1fr;
   }
@@ -552,7 +552,7 @@
   }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
   .incident-dark-dashboard {
     padding: 12px;
     gap: 16px;

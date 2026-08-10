@@ -469,7 +469,7 @@
 /* === RESPONSIVE === */
 
 /* Mobile (jusqu'à 767px) */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
   .notification-menu {
     max-width: 330px;
     right: -40px;
@@ -519,7 +519,7 @@
     width: calc(100% - 64px);
   }
 }
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 767.98px) {
   .app-header{
       width: 100%;
   }

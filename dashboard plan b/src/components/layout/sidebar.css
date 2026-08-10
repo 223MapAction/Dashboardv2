@@ -14,7 +14,7 @@
 }
 
 /* Mobile: overlay visible quand sidebar ouverte */
-@media (max-width: 1023px) {
+@media (max-width: 1023.98px) {
   .sidebar-overlay {
     display: block;
   }
@@ -227,7 +227,7 @@
 /* === RESPONSIVE === */
 
 /* Mobile - cacher le bouton toggle */
-@media (max-width: 1023px) {
+@media (max-width: 1023.98px) {
   .sidebar-toggle-btn {
     display: none;
   }

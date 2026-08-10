@@ -82,7 +82,7 @@
   background: #2E8FBF;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
   .stats-page-main {
     margin-left: 0;
   }

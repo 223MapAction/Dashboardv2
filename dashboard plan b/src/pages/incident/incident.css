@@ -28,7 +28,7 @@
 /* ============================================
    MOBILE (< 1024px) - Bascule liste/détail
    ============================================ */
-@media (max-width: 1023px) {
+@media (max-width: 1023.98px) {
   .incident-workspace .project-list-section,
   .incident-workspace .project-detail {
     width: 100%;

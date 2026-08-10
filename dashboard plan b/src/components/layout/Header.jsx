@@ -24,7 +24,7 @@ export const Header = ({ onMenuToggle, user }) => {
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: true,
-      dedupingInterval: 15000 // 15 seconds deduping
+    
     }
   );
 

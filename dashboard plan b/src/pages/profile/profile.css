@@ -523,7 +523,7 @@
 }
 
 /* --- Responsive --- */
-@media (max-width: 900px) {
+@media (max-width: 899.98px) {
   .profile-tabs-layout {
     grid-template-columns: 1fr;
   }
@@ -543,7 +543,7 @@
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 639.98px) {
   .profile-content {
     padding: 0 var(--spacing-3) var(--spacing-4);
   }
