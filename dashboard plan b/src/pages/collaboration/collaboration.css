@@ -5,6 +5,7 @@
 .collaboration-layout {
   display: flex;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   background-color: var(--color-background);
 }
@@ -15,6 +16,7 @@
   flex-direction: column;
   min-width: 0;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
 
 }
@@ -820,6 +822,7 @@
   width: 600px;
   max-width: 100%;
   height: 100vh;
+  height: 100dvh;
   background-color: var(--color-surface);
   box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
   display: flex;

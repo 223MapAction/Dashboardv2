@@ -239,6 +239,7 @@
     position: sticky;
     top: 0;
     height: 100vh;
+    height: 100dvh;
     width: 240px;
     left: 0;
     box-shadow: none;

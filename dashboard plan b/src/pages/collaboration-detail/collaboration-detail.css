@@ -7,6 +7,7 @@
   padding: 0 !important;
   margin: 0 !important;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   position: relative;
 }
@@ -1249,6 +1250,7 @@
   margin-left: auto;
   max-width: 700px;
   height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
 }
@@ -1260,6 +1262,7 @@
   display: flex;
   flex-direction: column;
   max-height: 100vh;
+  max-height: 100dvh;
 }
 
 .modal.tasks-modal-bootstrap .modal-body {
@@ -1443,6 +1446,7 @@
   width: 600px;
   max-width: 100%;
   height: 100vh;
+  height: 100dvh;
   background-color: var(--color-surface);
   box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
   display: flex;

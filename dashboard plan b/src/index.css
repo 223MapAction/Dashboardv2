@@ -91,6 +91,7 @@ body {
 
 #root {
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* === TYPOGRAPHY (ATOMS) === */
@@ -405,6 +406,7 @@ h2,
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* Top Management Bar */
@@ -593,6 +595,7 @@ h2,
 /* === LOGIN PAGE === */
 .login-container {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1042,13 +1045,66 @@ p {
 }
 
 /* ── 9. Tableaux sur petit écran ─────────────────────────────────────────────
-   Défilement horizontal confiné au tableau plutôt qu'imposé à la page. */
-@media (max-width: 767.98px) {
-  table {
-    display: block;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-x: contain;
-    max-width: 100%;
+   Les quatre tableaux du projet (incidents, agents, organisations, mes
+   interventions) ont déjà un conteneur `-table-wrap` en overflow-x: auto.
+   On ne touche donc PAS au `display` du tableau — le passer en `block`
+   casserait l'alignement des colonnes. On se contente de confiner le
+   défilement pour que le rebond en fin de course n'entraîne pas la page. */
+[class$="-table-wrap"] {
+  overscroll-behavior-x: contain;
+}
+
+/* ── 10. Zone sûre en bas d'écran ────────────────────────────────────────────
+   Sur iPhone à encoche et Android à navigation gestuelle, une bande de ~34 px
+   est réservée en bas. Un élément posé à `bottom: 0` passe dessous et devient
+   partiellement intouchable. On décale les surfaces fixées de cette hauteur. */
+.activity-fab,
+.chatbot-fab,
+.chatbot-panel,
+[class$="-fab"] {
+  bottom: calc(var(--spacing-6) + env(safe-area-inset-bottom));
+}
+
+.am-offcanvas-panel,
+[class*="-sheet"],
+[class*="-drawer"] {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ── 11. Panneaux flottants sur petit écran ──────────────────────────────────
+   Une largeur fixe supérieure à l'écran déborde. `min()` prend la plus petite
+   des deux valeurs : la largeur voulue sur grand écran, la place disponible
+   sinon. */
+.chatbot-panel {
+  width: min(380px, calc(100vw - 2 * var(--spacing-4)));
+  max-height: min(550px, calc(100dvh - 160px));
+  right: max(var(--spacing-4), env(safe-area-inset-right));
+}
+
+/* ── 12. Typographie fluide ──────────────────────────────────────────────────
+   Les tailles de titres étaient figées : 32 px sur un écran de 320 px occupe
+   un dixième de la largeur par caractère. `clamp()` fait varier la taille avec
+   la fenêtre, entre un plancher lisible et le plafond d'origine. Le corps de
+   texte reste à 14/16 px : en dessous, la lecture souffre et iOS zoome. */
+:root {
+  --font-size-h1: clamp(22px, 4.2vw + 12px, 32px);
+  --font-size-h2: clamp(18px, 2.6vw + 10px, 24px);
+  --font-size-h3: clamp(16px, 1.4vw + 12px, 18px);
+}
+
+/* ── 13. Gouttières adaptatives ──────────────────────────────────────────────
+   Sur 320-360 px, 32 px de marge de chaque côté consomment 20 % de la largeur
+   utile. On réduit les espacements les plus larges sur petit écran. */
+@media (max-width: 479.98px) {
+  :root {
+    --spacing-6: 16px;
+    --spacing-7: 20px;
+    --spacing-8: 24px;
   }
 }
+
+/* NOTE — grilles auto-adaptatives non appliquées.
+   Un `grid-template-columns: repeat(auto-fit, minmax(...))` global sur
+   [class$="-grid"] écraserait des grilles délibérées (.impact-grid-performance,
+   .impact-detail-grid, .dashboard-grid). À faire grille par grille, avec
+   contrôle visuel — pas en règle générale. */

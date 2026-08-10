@@ -5,6 +5,7 @@
 .agents-layout {
   display: flex;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   background-color: var(--color-background);
 }
@@ -15,6 +16,7 @@
   flex-direction: column;
   min-width: 0;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
 }
 

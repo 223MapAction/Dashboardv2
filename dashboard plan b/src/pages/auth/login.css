@@ -5,6 +5,7 @@
 .login-split {
   display: flex;
   min-height: 100vh;
+  min-height: 100dvh;
   background-color: var(--color-surface);
 }
 
@@ -17,6 +18,7 @@
   max-width: 560px;
   width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .login-brand {
@@ -200,6 +202,7 @@
   background-position: center;
   background-repeat: no-repeat;
   min-height: 100vh;
+  min-height: 100dvh;
  
   position: relative;
 }
