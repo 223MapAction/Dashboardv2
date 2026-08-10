@@ -394,7 +394,7 @@
   background-color: var(--color-surface);
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .mes-interventions-action-btn:hover {
@@ -437,7 +437,7 @@
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.2s, border-color 0.2s, opacity 0.2s, transform 0.2s;
   color: var(--color-text-primary);
 }
 

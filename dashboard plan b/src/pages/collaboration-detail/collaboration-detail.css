@@ -48,7 +48,7 @@
   font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .collab-detail-back:hover {
@@ -395,7 +395,7 @@
   font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
   margin-top: var(--spacing-2);
   width: 100%;
 }
@@ -634,7 +634,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
   flex-shrink: 0;
 }
 
@@ -654,7 +654,7 @@
   border: none;
   border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
   flex-shrink: 0;
 }
 
@@ -702,7 +702,7 @@
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
   flex-shrink: 0;
 }
 
@@ -730,7 +730,7 @@
   background-color: var(--color-background);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .collab-task-item.is-completed {
@@ -770,7 +770,7 @@
   border: 2px solid var(--color-border);
   border-radius: var(--radius-sm);
   background-color: var(--color-surface);
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
 }
 
 .collab-task-checkbox:checked+.collab-task-checkmark {
@@ -781,7 +781,7 @@
 .collab-task-checkmark svg {
   opacity: 0;
   transform: scale(0.5);
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
 }
 
 .collab-task-checkbox:checked+.collab-task-checkmark svg {
@@ -912,7 +912,7 @@
   font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
 }
 
 .collab-task-failure-cancel {
@@ -960,7 +960,7 @@
   font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 .collab-task-proof-btn:hover {
@@ -1042,7 +1042,7 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease;
   color: var(--color-text-secondary);
   font-size: var(--font-size-small);
   font-weight: var(--font-weight-medium);
@@ -1216,7 +1216,7 @@
   font-weight: var(--font-weight-semibold);
   font-family: var(--font-family);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .collab-task-create-btn:hover {
@@ -1552,7 +1552,7 @@
   font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
   flex-shrink: 0;
 }
 
@@ -1575,7 +1575,7 @@
   font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .tasks-close-collab-btn:hover {
@@ -1672,7 +1672,7 @@
   font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
 }
 
 .tasks-add-confirm:hover:not(:disabled) {
@@ -1861,7 +1861,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
 }
 
 .my-task-btn-cancel {
@@ -1907,7 +1907,7 @@
   font-weight: var(--font-weight-semibold);
   font-family: var(--font-family);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .collab-suggest-org-btn:hover {
@@ -2157,7 +2157,7 @@
   font-family: var(--font-family);
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 .role-option:hover {

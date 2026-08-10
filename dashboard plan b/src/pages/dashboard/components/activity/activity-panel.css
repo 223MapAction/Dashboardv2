@@ -193,7 +193,7 @@
   border: 1px solid var(--color-primary);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .activity-footer-btn:hover {

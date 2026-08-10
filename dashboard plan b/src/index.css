@@ -144,7 +144,7 @@ h2,
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, opacity 0.2s ease;
   text-decoration: none;
 }
 
@@ -229,7 +229,7 @@ h2,
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .input-field:focus {
@@ -319,7 +319,7 @@ h2,
   color: var(--color-text-secondary);
   text-decoration: none;
   border-radius: var(--radius-md);
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
   position: relative;
 }
 
@@ -717,7 +717,7 @@ h2,
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .social-button:hover {
@@ -897,7 +897,7 @@ h2,
   font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-medium);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
 }
 
 .am-pagination-btn:hover:not(:disabled) {

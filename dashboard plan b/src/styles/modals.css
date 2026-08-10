@@ -842,7 +842,7 @@
   background-color: var(--color-surface);
   border: 1.5px solid transparent;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.2s, border-color 0.2s, opacity 0.2s;
   width: 100%;
   text-align: left;
 }
