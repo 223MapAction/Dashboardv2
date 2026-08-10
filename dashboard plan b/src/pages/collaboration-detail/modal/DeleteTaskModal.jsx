@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Trash, CloseCircle, TickCircle } from 'iconsax-react';
 import { deleteTaskService } from '../../incident/service/task_service';
+import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
 
-import { EscapeToClose } from '../../../components/atoms/EscapeToClose';
 export const DeleteTaskModal = ({
   isOpen,
   onClose,
@@ -35,7 +35,7 @@ export const DeleteTaskModal = ({
       setIsClosing(true);
       const timer = setTimeout(() => {
         setShouldRender(false);
-      }, 300); // Matches transition duration
+      }, 300); // aligné sur la durée de transition
       return () => clearTimeout(timer);
     }
   }, [isOpen]);
@@ -77,69 +77,19 @@ export const DeleteTaskModal = ({
 
   if (!shouldRender) return null;
 
-  const panelClass = [
-    'am-offcanvas-panel',
-    'am-offcanvas-panel--sm',
-    isClosing ? 'am-offcanvas-panel--closing' : '',
-    isOpen && !isClosing ? 'am-offcanvas-panel--opening' : ''
-  ].filter(Boolean).join(' ');
-
-  const backdropClass = [
-    'am-offcanvas-backdrop',
-    isClosing ? 'am-offcanvas-backdrop--closing' : '',
-  ].filter(Boolean).join(' ');
-
   return (
-    <>
-      <div className={backdropClass} onClick={handleClose} />
-      <EscapeToClose onClose={handleClose} />
-      <div
-        className={panelClass}
-        role="alertdialog"
-        aria-modal="true"
-        aria-label="Supprimer la tâche"
-      >
-        {/* ── Header ─────────────────────────────────────── */}
-        <div className="am-offcanvas-header am-offcanvas-header--danger">
-          <h5 className="am-offcanvas-title">Supprimer la tâche</h5>
-          <button
-            type="button"
-            className="btn-close btn-close-white"
-            onClick={handleClose}
-            disabled={isDeleting}
-            aria-label="Fermer"
-          />
-        </div>
-
-        {/* ── Body ───────────────────────────────────────── */}
-        <div className="am-offcanvas-body am-offcanvas-body--centered" ref={bodyRef}>
-          {deleteAlert && (
-            <div className={`am-alert am-alert--${deleteAlert.type === 'success' ? 'success' : 'danger'}`} role="alert" style={{ width: '100%', marginBottom: 'var(--spacing-4)', display: 'flex', alignItems: 'center', gap: '8px', textAlign: 'left' }}>
-              {deleteAlert.type === 'success' ? (
-                <TickCircle size={18} variant="Bold" color="var(--color-success)" style={{ flexShrink: 0 }} />
-              ) : (
-                <CloseCircle size={18} variant="Bold" color="var(--color-danger)" style={{ flexShrink: 0 }} />
-              )}
-              <span className="am-alert__message" style={{ margin: 0 }}>{deleteAlert.message}</span>
-            </div>
-          )}
-
-          {/* Icône */}
-          <div className="am-delete-icon-wrap" aria-hidden="true">
-            <Trash size={32} variant="Bold" color="var(--color-danger)" />
-          </div>
-
-          {/* Titre + message */}
-          <p className="am-delete-title">Confirmer la suppression</p>
-          <p className="am-delete-text">
-            Vous êtes sur le point de supprimer la tâche :<br />
-            <strong>"{taskTitle || 'Sans titre'}"</strong>.
-            Cette action est <strong>irréversible</strong>.
-          </p>
-        </div>
-
-        {/* ── Footer ─────────────────────────────────────── */}
-        <div className="am-offcanvas-footer am-offcanvas-footer--col">
+    <OffcanvasModal
+      onClose={handleClose}
+      isClosing={isClosing}
+      title="Supprimer la tâche"
+      role="alertdialog"
+      tone="danger"
+      size="sm"
+      closeVariant="plain"
+      closeDisabled={isDeleting}
+      footerLayout="col"
+      footer={
+        <>
           <button
             type="button"
             className="am-btn am-btn--danger"
@@ -158,9 +108,33 @@ export const DeleteTaskModal = ({
           >
             Annuler
           </button>
+        </>
+      }
+    >
+      <div className="am-offcanvas-body am-offcanvas-body--centered" ref={bodyRef}>
+        {deleteAlert && (
+          <div className={`am-alert am-alert--${deleteAlert.type === 'success' ? 'success' : 'danger'}`} role="alert" style={{ width: '100%', marginBottom: 'var(--spacing-4)', display: 'flex', alignItems: 'center', gap: '8px', textAlign: 'left' }}>
+            {deleteAlert.type === 'success' ? (
+              <TickCircle size={18} variant="Bold" color="var(--color-success)" style={{ flexShrink: 0 }} />
+            ) : (
+              <CloseCircle size={18} variant="Bold" color="var(--color-danger)" style={{ flexShrink: 0 }} />
+            )}
+            <span className="am-alert__message" style={{ margin: 0 }}>{deleteAlert.message}</span>
+          </div>
+        )}
+
+        <div className="am-delete-icon-wrap" aria-hidden="true">
+          <Trash size={32} variant="Bold" color="var(--color-danger)" />
         </div>
+
+        <p className="am-delete-title">Confirmer la suppression</p>
+        <p className="am-delete-text">
+          Vous êtes sur le point de supprimer la tâche :<br />
+          <strong>&quot;{taskTitle || 'Sans titre'}&quot;</strong>.
+          Cette action est <strong>irréversible</strong>.
+        </p>
       </div>
-    </>
+    </OffcanvasModal>
   );
 };
 
