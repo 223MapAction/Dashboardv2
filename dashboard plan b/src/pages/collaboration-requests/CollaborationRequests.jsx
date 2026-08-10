@@ -35,11 +35,11 @@ import {
   acceptCollaborationService,
   rejectCollaborationService
 } from './service/partner_service';
-import { CollabIncidentDetailModal } from './modal/CollabIncidentDetailModal';
-import { DecisionModal } from './modal/DecisionModal';
+import { RequestIncidentDetailModal } from '../../components/collaboration/RequestIncidentDetailModal';
+import { RequestDecisionModal } from '../../components/collaboration/RequestDecisionModal';
 import { authService } from '../auth/services/authService';
 import { API_URL_BASE } from '../../config/api_url_base';
-import './collaboration-requests.css';
+import '../../styles/collaboration-requests.css';
 
 const STATUS_META = {
   pending: {
@@ -1250,7 +1250,7 @@ export const CollaborationRequests = ({
 
       {/* Decision modal */}
       {decisionRequest && (
-        <DecisionModal
+        <RequestDecisionModal
           request={decisionRequest}
           onClose={closeDecision}
           onConfirm={handleConfirmDecision}
@@ -1261,7 +1261,7 @@ export const CollaborationRequests = ({
       )}
       {/* Incident Detail Modal */}
       {selectedIncidentForModal && (
-        <CollabIncidentDetailModal
+        <RequestIncidentDetailModal
           incident={selectedIncidentForModal}
           onClose={() => setSelectedIncidentForModal(null)}
         />

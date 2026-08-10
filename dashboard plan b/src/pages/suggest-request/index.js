@@ -1,1 +1,1 @@
-export { CollaborationRequests } from './CollaborationRequests';
+export { SuggestRequests } from './SuggestRequests';

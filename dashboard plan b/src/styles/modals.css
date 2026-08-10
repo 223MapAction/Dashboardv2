@@ -881,3 +881,38 @@
 .animate-fade-in {
   animation: am-fade-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+/* ── Coquille OffcanvasModal ─────────────────────────────────────────────────
+   Ces classes remplacent les styles inline que chaque modale redéfinissait
+   dans son propre en-tête. */
+.am-offcanvas-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.am-offcanvas-subtitle {
+  margin: 0;
+  font-size: var(--font-size-body-small);
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.am-offcanvas-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--color-text-primary);
+  border-radius: var(--radius-sm);
+}
+
+.am-offcanvas-header--danger .am-offcanvas-close {
+  color: #FFFFFF;
+}

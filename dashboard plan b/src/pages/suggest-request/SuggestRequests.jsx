@@ -27,11 +27,11 @@ import {
   acceptPartnerSuggestionService,
   rejectPartnerSuggestionService
 } from './service/suggest_service';
-import { SuggestIncidentDetailModal } from './modal/SuggestIncidentDetailModal';
-import { SuggestDecisionModal } from './modal/SuggestDecisionModal';
+import { RequestIncidentDetailModal } from '../../components/collaboration/RequestIncidentDetailModal';
+import { RequestDecisionModal } from '../../components/collaboration/RequestDecisionModal';
 import { authService } from '../auth/services/authService';
 import { API_URL_BASE } from '../../config/api_url_base';
-import './collaboration-requests.css';
+import '../../styles/collaboration-requests.css';
 
 /* ──────────────────── Constants ──────────────────── */
 
@@ -789,7 +789,7 @@ export const SuggestRequests = ({ embedded = false }) => {
 
       {/* Decision Modal */}
       {decisionRequest && (
-        <SuggestDecisionModal
+        <RequestDecisionModal
           request={decisionRequest}
           onClose={closeDecision}
           onConfirm={handleConfirmDecision}
@@ -801,7 +801,7 @@ export const SuggestRequests = ({ embedded = false }) => {
 
       {/* Incident Detail Modal */}
       {selectedIncident && (
-        <SuggestIncidentDetailModal
+        <RequestIncidentDetailModal
           incident={selectedIncident}
           onClose={() => setSelectedIncident(null)}
         />
