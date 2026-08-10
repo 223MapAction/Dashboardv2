@@ -14,13 +14,12 @@ import {
 } from 'iconsax-react';
 import { suggestCollaborationPartnerService, getOtherOrganisationsService } from '../service/collab_detail_service';
 
-import { EscapeToClose } from '../../../components/atoms/EscapeToClose';
+import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
 export const SuggestOrgModal = () => {
   const {
     collaboration,
     showSuggestModal,
     suggestModalClosing,
-    suggestModalShowing,
     closeSuggestModal,
     suggestSearch,
     setSuggestSearch,
@@ -165,45 +164,19 @@ export const SuggestOrgModal = () => {
 
   if (!showSuggestModal) return null;
 
-  const panelClass = [
-    'am-offcanvas-panel',
-    suggestModalClosing ? 'am-offcanvas-panel--closing' : '',
-    suggestModalShowing && !suggestModalClosing ? 'am-offcanvas-panel--opening' : '',
-  ].filter(Boolean).join(' ');
-
-  const backdropClass = [
-    'am-offcanvas-backdrop',
-    suggestModalClosing ? 'am-offcanvas-backdrop--closing' : '',
-  ].filter(Boolean).join(' ');
-
   const selectableOrgs = organisations.filter(
     (o) => !suggestedOrgs.find((s) => s.id === o.id)
   );
 
   return (
-    <>
-      <div className={backdropClass} onClick={closeSuggestModal} />
-      <EscapeToClose onClose={closeSuggestModal} />
-      <div
-        className={panelClass}
-        role="dialog"
-        aria-modal="true"
-        aria-label={collaboration?.role == "leader" ? "Inviter des organisations" : "Suggérer des organisations"}
-      >
-        <div className="am-offcanvas-header">
-          <div className="d-flex flex-column" style={{ minWidth: 0, flex: 1 }}>
-            <h5 className="am-offcanvas-title">
-              {collaboration?.role == "leader" ? "Inviter des organisations" : "Suggérer des organisations"}
-            </h5>
-            <small style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '4px' }}>{collaboration?.title}</small>
-          </div>
-          <button
-            type="button"
-            className="btn-close"
-            onClick={closeSuggestModal}
-            aria-label="Fermer"
-          />
-        </div>
+    <OffcanvasModal
+      onClose={closeSuggestModal}
+      isClosing={Boolean(suggestModalClosing)}
+      title={collaboration?.role == "leader" ? "Inviter des organisations" : "Suggérer des organisations"}
+      subtitle={collaboration?.title}
+      ariaLabel={collaboration?.role == "leader" ? "Inviter des organisations" : "Suggérer des organisations"}
+      closeVariant="plain"
+    >
 
         <div className="am-offcanvas-body" ref={bodyRef}>
           {/* Alerte de retour */}
@@ -463,8 +436,7 @@ export const SuggestOrgModal = () => {
             )}
           </button>
         </div>
-      </div>
-    </>
+      </OffcanvasModal>
   );
 };
 

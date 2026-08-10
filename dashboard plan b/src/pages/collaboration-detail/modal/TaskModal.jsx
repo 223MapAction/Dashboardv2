@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useCollaborationDetail } from '../context/CollaborationDetailContext';
-import { EscapeToClose } from '../../../components/atoms/EscapeToClose';
+import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
 import {
   CloseSquare,
   Add,
@@ -19,7 +19,6 @@ export const TaskModal = () => {
     collaboration,
     showTaskModal,
     taskModalClosing,
-    taskModalShowing,
     closeTaskModal,
     draftTasks,
     setDraftTasks,
@@ -86,39 +85,15 @@ export const TaskModal = () => {
 
   if (!showTaskModal) return null;
 
-  const panelClass = [
-    'am-offcanvas-panel',
-    taskModalClosing ? 'am-offcanvas-panel--closing' : '',
-    taskModalShowing && !taskModalClosing ? 'am-offcanvas-panel--opening' : '',
-  ].filter(Boolean).join(' ');
-
-  const backdropClass = [
-    'am-offcanvas-backdrop',
-    taskModalClosing ? 'am-offcanvas-backdrop--closing' : '',
-  ].filter(Boolean).join(' ');
-
   return (
-    <>
-      <div className={backdropClass} onClick={closeTaskModal} />
-      <EscapeToClose onClose={closeTaskModal} />
-      <div
-        className={panelClass}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Gérer mes tâches"
-      >
-        <div className="am-offcanvas-header">
-          <div className="d-flex flex-column" style={{ minWidth: 0, flex: 1 }}>
-            <h5 className="am-offcanvas-title">Gérer mes tâches</h5>
-            <small style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '4px' }}>{collaboration?.title}</small>
-          </div>
-          <button
-            type="button"
-            className="btn-close"
-            onClick={closeTaskModal}
-            aria-label="Fermer"
-          />
-        </div>
+    <OffcanvasModal
+      onClose={closeTaskModal}
+      isClosing={Boolean(taskModalClosing)}
+      title="Gérer mes tâches"
+      subtitle={collaboration?.title}
+      ariaLabel="Gérer mes tâches"
+      closeVariant="plain"
+    >
 
         <div className="am-offcanvas-body" ref={bodyRef}>
           {taskSubmitAlert && (
@@ -446,7 +421,6 @@ export const TaskModal = () => {
             )}
           </button>
         </div>
-      </div>
-    </>
+      </OffcanvasModal>
   );
 };

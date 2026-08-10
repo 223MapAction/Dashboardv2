@@ -12,12 +12,11 @@ import {
 } from 'iconsax-react';
 import { getOtherOrganisationsService } from '../../../../collaboration-detail/service/collab_detail_service';
 
-import { EscapeToClose } from '../../../../../components/atoms/EscapeToClose';
+import { OffcanvasModal } from '../../../../../components/molecules/OffcanvasModal';
 export const InviteOrgModal = () => {
   const {
     joinOpen,
     joinClosing,
-    joinShowing,
     closeJoinModal,
     safeIncident,
     handleJoinSubmit,
@@ -167,41 +166,15 @@ export const InviteOrgModal = () => {
 
   if (!joinOpen) return null;
 
-  const panelClass = [
-    'am-offcanvas-panel',
-    joinClosing ? 'am-offcanvas-panel--closing' : '',
-    joinShowing && !joinClosing ? 'am-offcanvas-panel--opening' : '',
-  ].filter(Boolean).join(' ');
-
-  const backdropClass = [
-    'am-offcanvas-backdrop',
-    joinClosing ? 'am-offcanvas-backdrop--closing' : '',
-  ].filter(Boolean).join(' ');
-
   return (
-    <>
-      <div className={backdropClass} onClick={closeJoinModal} />
-      <EscapeToClose onClose={closeJoinModal} />
-      <div
-        className={panelClass}
-        role="dialog"
-        aria-modal="true"
-        aria-label={safeIncident.isOwner || hasAcceptedRole ? 'Inviter des organisations' : "Rejoindre l'action"}
-      >
-        <div className="am-offcanvas-header">
-          <div className="d-flex flex-column" style={{ minWidth: 0, flex: 1 }}>
-            <h5 className="am-offcanvas-title">
-              {safeIncident.isOwner || hasAcceptedRole ? 'Inviter des organisations' : "Rejoindre l'action"}
-            </h5>
-            <small className="text-muted mt-1">{safeIncident.title}</small>
-          </div>
-          <button
-            type="button"
-            className="btn-close"
-            onClick={closeJoinModal}
-            aria-label="Fermer"
-          />
-        </div>
+    <OffcanvasModal
+      onClose={closeJoinModal}
+      isClosing={Boolean(joinClosing)}
+      title={safeIncident.isOwner || hasAcceptedRole ? 'Inviter des organisations' : "Rejoindre l'action"}
+      subtitle={safeIncident.title}
+      ariaLabel={safeIncident.isOwner || hasAcceptedRole ? 'Inviter des organisations' : "Rejoindre l'action"}
+      closeVariant="plain"
+    >
 
         <form onSubmit={handleJoinSubmit} id="invite-org-form" className="am-offcanvas-body" noValidate>
 
@@ -660,8 +633,7 @@ export const InviteOrgModal = () => {
             )}
           </button>
         </div>
-      </div>
-    </>
+      </OffcanvasModal>
   );
 };
 
