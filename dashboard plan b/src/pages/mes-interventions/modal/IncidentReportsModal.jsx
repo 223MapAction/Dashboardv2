@@ -6,7 +6,7 @@ import { ShimmerThumbnail, ShimmerText } from 'react-shimmer-effects';
 import { getFieldReportsService } from '../service/mes_interventions_service';
 import { BlurryImage } from '../../../components/atoms/BlurryImage';
 
-import { EscapeToClose } from '../../../components/atoms/EscapeToClose';
+import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
 const formatDate = (isoString) => {
   if (!isoString) return 'Non spécifiée';
   try {
@@ -82,16 +82,6 @@ export const IncidentReportsModal = () => {
     closeReportsModal();
   };
 
-  const panelClass = [
-    'am-offcanvas-panel',
-    reportsClosing ? 'am-offcanvas-panel--closing' : '',
-  ].filter(Boolean).join(' ');
-
-  const backdropClass = [
-    'am-offcanvas-backdrop',
-    reportsClosing ? 'am-offcanvas-backdrop--closing' : '',
-  ].filter(Boolean).join(' ');
-
   const displayedReports = (reportsList || []).filter(report => {
     const reportIncidentId = report.incident ?? report.incident_id;
     if (reportIncidentId === undefined || reportIncidentId === null) return false;
@@ -99,31 +89,14 @@ export const IncidentReportsModal = () => {
   });
 
   return (
-    <>
-      <div className={backdropClass} onClick={handleOverlayClick} />
-      <EscapeToClose onClose={handleOverlayClick} />
-      <div
-        className={panelClass}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Liste des rapports de terrain"
-      >
-        <div className="am-offcanvas-header">
-          <div>
-            <h5 className="am-offcanvas-title">
-              Rapports de terrain
-            </h5>
-            <p className="text-muted" style={{ fontSize: '13px', margin: '4px 0 0 0' }}>
-              {currentIncident.title || 'Sans titre'}
-            </p>
-          </div>
-          <button
-            type="button"
-            className="btn-close"
-            onClick={handleOverlayClick}
-            aria-label="Fermer"
-          />
-        </div>
+    <OffcanvasModal
+      onClose={handleOverlayClick}
+      isClosing={Boolean(reportsClosing)}
+      title="Rapports de terrain"
+      subtitle={currentIncident.title || 'Sans titre'}
+      ariaLabel="Liste des rapports de terrain"
+      closeVariant="plain"
+    >
 
         <div className="am-offcanvas-body">
           {isLoading ? (
@@ -321,8 +294,7 @@ export const IncidentReportsModal = () => {
             Fermer
           </button>
         </div>
-      </div>
-    </>
+      </OffcanvasModal>
   );
 };
 

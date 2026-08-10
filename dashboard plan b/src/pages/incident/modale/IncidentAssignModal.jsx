@@ -9,7 +9,7 @@ import { assignIncidentToAgentService, getIncidentAssignmentsService } from '../
 import { getOrganisationMembersService } from '../../agents/service/members_service';
 import { authService } from '../../auth/services/authService';
 
-import { EscapeToClose } from '../../../components/atoms/EscapeToClose';
+import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
 const schema = yup.object().shape({
   agent: yup.string().required('Veuillez sélectionner un agent.'),
   deadline: yup.string().nullable().optional()
@@ -306,43 +306,15 @@ export const IncidentAssignModal = () => {
     });
   };
 
-  const panelClass = [
-    'am-offcanvas-panel',
-    assignClosing ? 'am-offcanvas-panel--closing' : '',
-  ].filter(Boolean).join(' ');
-
-  const backdropClass = [
-    'am-offcanvas-backdrop',
-    assignClosing ? 'am-offcanvas-backdrop--closing' : '',
-  ].filter(Boolean).join(' ');
-
   return (
-    <>
-      <div className={backdropClass} onClick={handleOverlayClick} />
-      <EscapeToClose onClose={handleOverlayClick} />
-      <div
-        className={panelClass}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Assigner un agent"
-      >
-        <div className="am-offcanvas-header">
-          <div>
-            <h5 className="am-offcanvas-title">
-              Assigner un agent
-            </h5>
-            <p className="text-muted" style={{ fontSize: '13px', margin: '4px 0 0 0' }}>
-              {assignModal.incident.title || 'Sans titre'}
-            </p>
-          </div>
-          <button
-            type="button"
-            className="btn-close"
-            onClick={handleOverlayClick}
-            aria-label="Fermer"
-            disabled={isAssigning || assignAlert.type === 'success'}
-          />
-        </div>
+    <OffcanvasModal
+      onClose={handleOverlayClick}
+      isClosing={Boolean(assignClosing)}
+      title="Assigner un agent"
+      subtitle={assignModal.incident.title || 'Sans titre'}
+      ariaLabel="Assigner un agent"
+      closeVariant="plain"
+    >
 
         <form onSubmit={handleSubmit(onSubmit)} id="assign-incident-form" className="am-offcanvas-body" ref={bodyRef} noValidate>
           {assignAlert && assignAlert.message && (
@@ -529,8 +501,7 @@ export const IncidentAssignModal = () => {
             {isAssigning ? 'Assignation...' : 'Assigner l\'agent'}
           </button>
         </div>
-      </div>
-    </>
+      </OffcanvasModal>
   );
 };
 

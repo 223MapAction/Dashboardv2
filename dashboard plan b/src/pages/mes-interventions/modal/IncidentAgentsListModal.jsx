@@ -4,7 +4,7 @@ import { useMesInterventionsModalContext } from '../MesInterventionsModalContext
 import { CloseCircle, Profile, Edit2 } from 'iconsax-react';
 import { getIncidentAssignmentsService } from '../../incident/service/incident_service';
 
-import { EscapeToClose } from '../../../components/atoms/EscapeToClose';
+import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
 const AVATAR_COLORS = [
   '#EF4444', '#F97316', '#F59E0B', '#22C55E',
   '#3AA2DD', '#1E40AF', '#A855F7', '#EC4899',
@@ -106,42 +106,15 @@ export const IncidentAgentsListModal = () => {
     }, 300);
   };
 
-  const panelClass = [
-    'am-offcanvas-panel',
-    agentsClosing ? 'am-offcanvas-panel--closing' : '',
-  ].filter(Boolean).join(' ');
-
-  const backdropClass = [
-    'am-offcanvas-backdrop',
-    agentsClosing ? 'am-offcanvas-backdrop--closing' : '',
-  ].filter(Boolean).join(' ');
-
   return (
-    <>
-      <div className={backdropClass} onClick={handleOverlayClick} />
-      <EscapeToClose onClose={handleOverlayClick} />
-      <div
-        className={panelClass}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Liste des agents assignés"
-      >
-        <div className="am-offcanvas-header">
-          <div>
-            <h5 className="am-offcanvas-title">
-              Équipe sur le terrain
-            </h5>
-            <p className="text-muted" style={{ fontSize: '13px', margin: '4px 0 0 0' }}>
-              {currentIncident.title || 'Sans titre'}
-            </p>
-          </div>
-          <button
-            type="button"
-            className="btn-close"
-            onClick={handleOverlayClick}
-            aria-label="Fermer"
-          />
-        </div>
+    <OffcanvasModal
+      onClose={handleOverlayClick}
+      isClosing={Boolean(agentsClosing)}
+      title="Équipe sur le terrain"
+      subtitle={currentIncident.title || 'Sans titre'}
+      ariaLabel="Liste des agents assignés"
+      closeVariant="plain"
+    >
 
         <div className="am-offcanvas-body">
           {isLoading ? (
@@ -280,8 +253,7 @@ export const IncidentAgentsListModal = () => {
             Fermer
           </button>
         </div>
-      </div>
-    </>
+      </OffcanvasModal>
   );
 };
 
