@@ -530,7 +530,7 @@
 /* --- Grid --- */
 .collab-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
   gap: var(--spacing-4);
 }
 
@@ -1834,7 +1834,7 @@
 
 .suggest-orgs-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(180px, 100%), 1fr));
   gap: var(--spacing-2);
   max-height: 280px;
   overflow-y: auto;

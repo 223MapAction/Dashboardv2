@@ -135,7 +135,7 @@
 /* --- Core KPI Cards Grid --- */
 .impact-kpis {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
   gap: var(--spacing-4);
 }
 
@@ -486,7 +486,7 @@
 
 .citizen-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
   gap: var(--spacing-4);
 }
 
@@ -977,7 +977,7 @@
 
 .tasks-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
   gap: var(--spacing-3);
   margin-top: var(--spacing-2);
 }
