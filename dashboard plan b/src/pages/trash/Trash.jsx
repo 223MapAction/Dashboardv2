@@ -105,7 +105,10 @@ const adaptTrashIncidentData = (incident) => {
     ...incident,
     title: incident.title || 'Sans titre',
     description: incident.description || 'Aucune description disponible',
-    image: incident.photo || 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=150',
+    // Pas de photo de remplacement : BlurryImage affiche son propre etat
+    // « aucune photo ». Une image de banque d'images faisait croire a une
+    // vraie photo du signalement, en plus d'appeler un CDN externe.
+    image: incident.photo || '',
     type: incident.zone || 'Non spécifié',
     location: incident.zone || 'Localisation non spécifiée',
     deletedAt: incident.created_at ? new Date(incident.created_at).toLocaleDateString('fr-FR') : 'Non spécifiée',
