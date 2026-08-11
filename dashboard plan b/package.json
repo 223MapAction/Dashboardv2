@@ -16,11 +16,11 @@
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
     "axios": "^1.15.2",
+    "bootstrap": "^5.3.2",
     "date-fns": "^4.1.0",
     "iconsax-react": "^0.0.8",
     "lodash.debounce": "^4.0.8",
     "mapbox-gl": "^3.22.0",
-    "maplibre-gl": "^5.23.0",
     "react": "^19.2.4",
     "react-datepicker": "^9.1.0",
     "react-dom": "^19.2.4",
