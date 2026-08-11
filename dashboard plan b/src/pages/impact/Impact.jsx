@@ -44,10 +44,10 @@ const STRUCTURE_LABELS = {
 };
 
 const SEVERITY_META = {
-  critical: { label: 'Critique', color: 'var(--color-danger)' },
-  high: { label: 'Élevée', color: 'var(--color-warning)' },
-  medium: { label: 'Modérée', color: 'var(--color-primary)' },
-  low: { label: 'Faible', color: 'var(--color-success)' }
+  critical: { label: 'Critique', color: 'var(--color-danger-text)' },
+  high: { label: 'Élevée', color: 'var(--color-warning-text)' },
+  medium: { label: 'Modérée', color: 'var(--color-primary-text)' },
+  low: { label: 'Faible', color: 'var(--color-success-text)' }
 };
 
 const getSeverity = (incident, prediction) => {

@@ -39,21 +39,21 @@ const STATUS_META = {
   pending: {
     label: 'En attente',
     icon: Clock,
-    color: 'var(--color-warning)',
+    color: 'var(--color-warning-text)',
     className: 'status-pending'
   },
   declined: {
     label: 'Refusée',
     icon: CloseCircle,
-    color: 'var(--color-danger)',
+    color: 'var(--color-danger-text)',
     className: 'status-rejected'
   }
 };
 
 const ROLE_META = {
-  leader: { label: 'Leader', icon: Crown1, color: 'var(--color-warning)' },
-  contributeur: { label: 'Contributeur', icon: People, color: 'var(--color-primary)' },
-  contributor: { label: 'Contributeur', icon: People, color: 'var(--color-primary)' },
+  leader: { label: 'Leader', icon: Crown1, color: 'var(--color-warning-text)' },
+  contributeur: { label: 'Contributeur', icon: People, color: 'var(--color-primary-text)' },
+  contributor: { label: 'Contributeur', icon: People, color: 'var(--color-primary-text)' },
   observateur: { label: 'Observateur', icon: Eye, color: 'var(--color-text-secondary)' },
   observer: { label: 'Observateur', icon: Eye, color: 'var(--color-text-secondary)' }
 };
@@ -600,7 +600,7 @@ export const SuggestRequests = ({ embedded = false }) => {
       {showInfoBanner && (
         <div className="collaboration-info-banner">
           <div className="info-banner-content">
-            <InfoCircle size={24} variant="Bold" className="info-banner-icon" style={{ color: 'var(--color-primary)' }} />
+            <InfoCircle size={24} variant="Bold" className="info-banner-icon" style={{ color: 'var(--color-primary-text)' }} />
             <div className="info-banner-text">
               <h4>Règles de collaboration sur les Incidents</h4>
               <p>
@@ -673,8 +673,8 @@ export const SuggestRequests = ({ embedded = false }) => {
                         backgroundColor: isSuggestion ? 'rgba(58,162,221,0.1)' : 'rgba(245,158,11,0.1)'
                       }}>
                         {isSuggestion
-                          ? <><MessageText1 size={12} variant="Bold" color="currentColor" style={{ color: 'var(--color-primary)' }} /> Suggestion</>
-                          : <><Import size={12} variant="Bold" color="currentColor" style={{ color: 'var(--color-warning)' }} /> Invitation</>
+                          ? <><MessageText1 size={12} variant="Bold" color="currentColor" style={{ color: 'var(--color-primary-text)' }} /> Suggestion</>
+                          : <><Import size={12} variant="Bold" color="currentColor" style={{ color: 'var(--color-warning-text)' }} /> Invitation</>
                         }
                       </span>
                       <span style={{ color: 'var(--color-text-muted)' }}>•</span>

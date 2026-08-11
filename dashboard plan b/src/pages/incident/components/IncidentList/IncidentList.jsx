@@ -246,12 +246,12 @@ export const IncidentList = ({
                         <div className="incident-table-badges">
                           {(() => {
                             if (incident.severity === 'high') {
-                              return <span className="incident-badge-glow" style={{ background: 'rgba(239, 68, 68, 0.12)', color: 'var(--color-danger)', borderColor: 'rgba(239, 68, 68, 0.3)' }}>Élevée</span>;
+                              return <span className="incident-badge-glow" style={{ background: 'rgba(239, 68, 68, 0.12)', color: 'var(--color-danger-text)', borderColor: 'rgba(239, 68, 68, 0.3)' }}>Élevée</span>;
                             }
                             if (incident.severity === 'medium') {
-                              return <span className="incident-badge-glow" style={{ background: 'rgba(245, 158, 11, 0.12)', color: 'var(--color-warning)', borderColor: 'rgba(245, 158, 11, 0.3)' }}>Moyenne</span>;
+                              return <span className="incident-badge-glow" style={{ background: 'rgba(245, 158, 11, 0.12)', color: 'var(--color-warning-text)', borderColor: 'rgba(245, 158, 11, 0.3)' }}>Moyenne</span>;
                             }
-                            return <span className="incident-badge-glow" style={{ background: 'rgba(34, 197, 94, 0.12)', color: 'var(--color-success)', borderColor: 'rgba(34, 197, 94, 0.3)' }}>Faible</span>;
+                            return <span className="incident-badge-glow" style={{ background: 'rgba(34, 197, 94, 0.12)', color: 'var(--color-success-text)', borderColor: 'rgba(34, 197, 94, 0.3)' }}>Faible</span>;
                           })()}
                         </div>
                       </td>
@@ -268,7 +268,7 @@ export const IncidentList = ({
                                     display: 'inline-flex',
                                     alignItems: 'center',
                                     background: 'rgba(34, 197, 94, 0.12)',
-                                    color: 'var(--color-success)',
+                                    color: 'var(--color-success-text)',
                                     border: '1px solid rgba(34, 197, 94, 0.3)',
                                     padding: '2px 8px',
                                     borderRadius: '12px',

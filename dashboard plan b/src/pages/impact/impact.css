@@ -121,7 +121,7 @@
 
 .impact-period-btn:hover {
   border-color: var(--color-primary);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   background-color: var(--color-surface);
 }
 
@@ -340,14 +340,14 @@
 
 .structure-chip:hover:not(:disabled) {
   border-color: var(--color-primary);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   background-color: var(--color-surface);
 }
 
 .structure-chip.active {
   background-color: rgba(58, 162, 221, 0.1);
   border-color: var(--color-primary);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   font-weight: var(--font-weight-bold);
 }
 
@@ -635,7 +635,7 @@
 
 .impact-card-type {
   font-weight: var(--font-weight-bold);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
@@ -712,7 +712,7 @@
 }
 
 .impact-toggle:hover {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   border-color: var(--color-primary);
   background-color: rgba(58, 162, 221, 0.08);
   box-shadow: var(--shadow-sm);
@@ -720,7 +720,7 @@
 
 .impact-toggle.is-open {
   transform: rotate(90deg);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   border-color: var(--color-primary);
   background-color: rgba(58, 162, 221, 0.1);
 }
@@ -778,7 +778,7 @@
 }
 .impact-detail-card.is-direct .impact-detail-header {
   background-color: rgba(58, 162, 221, 0.08);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .impact-detail-card.is-indirect {
@@ -794,7 +794,7 @@
 }
 .impact-detail-card.is-structures .impact-detail-header {
   background-color: rgba(245, 158, 11, 0.08);
-  color: var(--color-warning);
+  color: var(--color-warning-text);
 }
 
 /* Header inside detail cards */
@@ -951,7 +951,7 @@
 
 .text-primary {
   background-color: rgba(58, 162, 221, 0.1);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .text-purple {
@@ -961,7 +961,7 @@
 
 .text-success {
   background-color: rgba(34, 197, 94, 0.1);
-  color: var(--color-success);
+  color: var(--color-success-text);
 }
 
 .scrollable-list {
@@ -971,7 +971,7 @@
 
 .bg-blue {
   background-color: rgba(58, 162, 221, 0.1) !important;
-  color: var(--color-primary) !important;
+  color: var(--color-primary-text) !important;
   border-color: var(--color-primary) !important;
 }
 
@@ -1020,17 +1020,17 @@
 
 .task-badge.done {
   background-color: rgba(34, 197, 94, 0.12);
-  color: var(--color-success);
+  color: var(--color-success-text);
 }
 
 .task-badge.in_progress {
   background-color: rgba(58, 162, 221, 0.12);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .task-badge.failed {
   background-color: rgba(239, 68, 68, 0.12);
-  color: var(--color-danger);
+  color: var(--color-danger-text);
 }
 
 .task-badge.pending {

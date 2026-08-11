@@ -366,7 +366,7 @@ export const Header = ({ onMenuToggle, user }) => {
                   <div className="profile-name">{currentUser?.first_name || 'Utilisateur'}</div>
                   <div className="profile-email">{currentUser?.email}</div>
                   {currentUser?.organisation_name && (
-                    <div className="profile-org" style={{ fontSize: '13px', color: 'var(--color-primary)', marginTop: '4px', fontWeight: '500' }}>
+                    <div className="profile-org" style={{ fontSize: '13px', color: 'var(--color-primary-text)', marginTop: '4px', fontWeight: '500' }}>
                       {currentUser.organisation_name}
                     </div>
                   )}

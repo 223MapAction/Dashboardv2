@@ -386,7 +386,7 @@
 
 .agents-status-active {
   background-color: rgba(34, 197, 94, 0.1);
-  color: var(--color-success);
+  color: var(--color-success-text);
 }
 
 .agents-status-inactive {
@@ -422,7 +422,7 @@
 }
 
 .agents-icon-btn-edit {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   background-color: rgba(58, 162, 221, 0.1);
 }
 
@@ -431,7 +431,7 @@
 }
 
 .agents-icon-btn-delete {
-  color: var(--color-danger);
+  color: var(--color-danger-text);
   background-color: rgba(239, 68, 68, 0.08);
 }
 
@@ -625,7 +625,7 @@
 
 .agents-field-error {
   font-size: var(--font-size-caption);
-  color: var(--color-danger);
+  color: var(--color-danger-text);
 }
 
 /* Password field */

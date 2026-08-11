@@ -240,7 +240,7 @@
   font-weight: var(--font-weight-bold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   margin-top: 0;
   margin-bottom: var(--spacing-4);
 }
@@ -272,7 +272,7 @@
 }
 
 .collab-detail-meta-val.text-highlight {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   font-weight: var(--font-weight-semibold);
 }
 
@@ -285,11 +285,11 @@
 }
 
 .collab-detail-badge.badge-primary {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .collab-detail-badge.badge-success {
-  color: var(--color-success);
+  color: var(--color-success-text);
 }
 
 .collab-detail-badge.badge-warning {
@@ -297,7 +297,7 @@
 }
 
 .collab-detail-badge.badge-danger {
-  color: var(--color-danger);
+  color: var(--color-danger-text);
 }
 
 .collab-detail-badge.badge-info {
@@ -315,7 +315,7 @@
   font-size: 11px;
   font-weight: var(--font-weight-semibold);
   padding: 2px 8px;
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   border: 1px solid rgba(58, 162, 221, 0.3);
   border-radius: var(--radius-full);
 }
@@ -326,7 +326,7 @@
   gap: 2px;
   font-weight: var(--font-weight-bold);
   font-size: var(--font-size-body);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   line-height: 1;
 }
 
@@ -356,7 +356,7 @@
 
 .collab-detail-progress-percent {
   font-weight: var(--font-weight-bold);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   font-size: var(--font-size-body);
 }
 
@@ -829,7 +829,7 @@
 }
 
 .collab-task-meta .is-me {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   font-weight: var(--font-weight-semibold);
 }
 
@@ -864,7 +864,7 @@
 .collab-task-failure-label {
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-severity-high);
+  color: var(--color-severity-high-text);
   margin-bottom: 4px;
 }
 
@@ -954,7 +954,7 @@
   gap: var(--spacing-2);
   padding: var(--spacing-2) var(--spacing-3);
   background-color: transparent;
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   border: 1px solid var(--color-primary);
   border-radius: var(--radius-md);
   font-size: var(--font-size-body-small);
@@ -1051,11 +1051,11 @@
 }
 
 .collab-mobile-nav-item.active {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .collab-mobile-nav-item.active svg {
-  color: var(--color-primary) !important;
+  color: var(--color-primary-text) !important;
   fill: var(--color-primary) !important;
 }
 

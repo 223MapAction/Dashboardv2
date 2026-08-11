@@ -45,7 +45,7 @@ const STATUS_META = {
   pending: {
     label: 'En attente',
     icon: Clock,
-    color: 'var(--color-warning)',
+    color: 'var(--color-warning-text)',
     className: 'status-pending'
   },
  
@@ -53,16 +53,16 @@ const STATUS_META = {
   declined: {
     label: 'Refusée',
     icon: CloseCircle,
-    color: 'var(--color-danger)',
+    color: 'var(--color-danger-text)',
     className: 'status-rejected'
   }
 };
 
 const ROLE_META = {
-  leader: { label: 'Leader', icon: Crown1, color: 'var(--color-warning)' },
-  contributeur: { label: 'Contributeur', icon: People, color: 'var(--color-primary)' },
+  leader: { label: 'Leader', icon: Crown1, color: 'var(--color-warning-text)' },
+  contributeur: { label: 'Contributeur', icon: People, color: 'var(--color-primary-text)' },
   observateur: { label: 'Observateur', icon: Eye, color: 'var(--color-text-secondary)' },
-  contributor: { label: 'Contributeur', icon: People, color: 'var(--color-primary)' },
+  contributor: { label: 'Contributeur', icon: People, color: 'var(--color-primary-text)' },
   observer: { label: 'Observateur', icon: Eye, color: 'var(--color-text-secondary)' }
 };
 
@@ -508,7 +508,7 @@ export const CollaborationRequests = ({
           proposedCollaborators: (item.proposed_collaborators || []).map((pc) => ({
             name: pc.partner_name || 'Partenaire',
             initials: getInitials(pc.partner_name || 'PT'),
-            color: 'var(--color-success)',
+            color: 'var(--color-success-text)',
             role: pc.role || 'contributeur',
             comment: pc.justification || ''
           })),
@@ -747,7 +747,7 @@ export const CollaborationRequests = ({
       group.leader = {
         name: 'Vous',
         isMe: true,
-        color: 'var(--color-warning)'
+        color: 'var(--color-warning-text)'
       };
     }
     if (!group.leader) {
@@ -770,7 +770,7 @@ export const CollaborationRequests = ({
           name: isMe ? 'Vous' : (group.incidentDetails?.taken_by_name || takenByOrg.name || 'Leader'),
           org: takenByOrg.name,
           isMe,
-          color: 'var(--color-warning)'
+          color: 'var(--color-warning-text)'
         };
       }
     }
@@ -853,7 +853,7 @@ export const CollaborationRequests = ({
       {showInfoBanner && (
         <div className="collaboration-info-banner">
           <div className="info-banner-content">
-            <InfoCircle size={24} variant="Bold" className="info-banner-icon" style={{ color: 'var(--color-primary)' }} />
+            <InfoCircle size={24} variant="Bold" className="info-banner-icon" style={{ color: 'var(--color-primary-text)' }} />
             <div className="info-banner-text">
               <h4>Règles de collaboration sur les Incidents</h4>
               <p>
@@ -1014,11 +1014,11 @@ export const CollaborationRequests = ({
                           borderRadius: '4px',
                           fontSize: '11px',
                           fontWeight: '600',
-                          color: 'var(--color-warning)',
+                          color: 'var(--color-warning-text)',
                           backgroundColor: 'rgba(245, 158, 11, 0.12)',
                           border: 'none'
                         }}>
-                          <Crown1 size={13} variant="Bold" color="currentColor" style={{ color: 'var(--color-warning)' }} />
+                          <Crown1 size={13} variant="Bold" color="currentColor" style={{ color: 'var(--color-warning-text)' }} />
                           Leader : {incident.leader.org || incident.leader.name}
                         </span>
                       )}
@@ -1134,7 +1134,7 @@ export const CollaborationRequests = ({
                             <div className="scenario-explanation-box">
                               {myCollab.status === 'pending' ? (
                                 <p className="status-note status-pending">
-                                  <Clock size={16} variant="Bold" color="currentColor" style={{ color: 'var(--color-warning)' }} />
+                                  <Clock size={16} variant="Bold" color="currentColor" style={{ color: 'var(--color-warning-text)' }} />
                                   {myCollab.incidentDetails?.etat === "taken_into_account" ? (
                                     <>
                                       En attente de validation par le leader {incident.leader?.org && (<strong>({incident.leader.org})</strong>)}

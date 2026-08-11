@@ -179,7 +179,7 @@
   background-color: rgba(239, 68, 68, 0.10);
   /* --color-danger à 10% */
   border: 1px solid rgba(239, 68, 68, 0.28);
-  color: var(--color-danger);
+  color: var(--color-danger-text);
 }
 
 .am-alert__message {
@@ -323,7 +323,7 @@
 }
 
 .am-label__required {
-  color: var(--color-danger);
+  color: var(--color-danger-text);
   margin-left: 2px;
 }
 
@@ -397,7 +397,7 @@
 /* ── Field error message ───────────────────────────────────────── */
 .am-field-error {
   font-size: var(--font-size-caption);
-  color: var(--color-danger);
+  color: var(--color-danger-text);
   font-weight: var(--font-weight-medium);
   display: flex;
   align-items: center;
@@ -431,7 +431,7 @@
 }
 
 .am-password-toggle:hover {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .am-password-toggle:disabled {
@@ -450,7 +450,7 @@
   font-size: var(--font-size-caption);
   font-family: var(--font-family);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   padding: 0;
   transition: color 0.15s ease;
 }
@@ -608,17 +608,17 @@
 }
 
 .agents-bootstrap-alert.alert-success svg {
-  color: var(--color-success);
+  color: var(--color-success-text);
 }
 
 .agents-bootstrap-alert.alert-danger {
   background-color: rgba(239, 68, 68, 0.10);
   border: 1px solid rgba(239, 68, 68, 0.28);
-  color: var(--color-danger);
+  color: var(--color-danger-text);
 }
 
 .agents-bootstrap-alert.alert-danger svg {
-  color: var(--color-danger);
+  color: var(--color-danger-text);
 }
 
 /* ── Section mot de passe (création) ──────────────────────────── */
@@ -732,11 +732,11 @@
 
 .am-code-action-btn:hover:not(:disabled) {
   background-color: rgba(58, 162, 221, 0.10);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .am-code-action-btn--success {
-  color: var(--color-success) !important;
+  color: var(--color-success-text) !important;
   background-color: rgba(34, 197, 94, 0.10) !important;
 }
 
@@ -782,11 +782,11 @@
 }
 
 .am-copy-inline:hover {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .am-copy-inline--success {
-  color: var(--color-success);
+  color: var(--color-success-text);
 }
 
 /* ── Responsive ────────────────────────────────────────────────── */

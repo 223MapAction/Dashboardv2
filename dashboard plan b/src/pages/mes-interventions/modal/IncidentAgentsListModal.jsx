@@ -226,7 +226,7 @@ export const IncidentAgentsListModal = () => {
                       )}
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <span style={{ color: 'var(--color-text-muted)' }}>Date limite :</span>
-                        <span style={{ fontWeight: '600', color: 'var(--color-danger)' }}>{formatDate(agent.deadline)}</span>
+                        <span style={{ fontWeight: '600', color: 'var(--color-danger-text)' }}>{formatDate(agent.deadline)}</span>
                       </div>
                       {(agent.assignedByName || agent.assignedByEmail) && (
                         <div style={{ display: 'flex', flexDirection: 'column', marginTop: '4px', padding: '6px 8px', borderRadius: '4px', backgroundColor: 'var(--color-background-hover)', fontSize: '11px' }}>

@@ -331,7 +331,7 @@ export const InviteOrgModal = () => {
                   border: '1px solid rgba(58, 162, 221, 0.2)',
                   marginBottom: 'var(--spacing-5)'
                 }}>
-                  <p style={{ margin: 0, color: 'var(--color-primary)', fontSize: 'var(--font-size-body)', lineHeight: '1.6' }}>
+                  <p style={{ margin: 0, color: 'var(--color-primary-text)', fontSize: 'var(--font-size-body)', lineHeight: '1.6' }}>
                     <strong>Agir en interne</strong><br />
                     Vous allez prendre en charge cet incident en interne. Vous le gérerez avec vos propres équipes simplement sans qu'il ne devienne privé.
                   </p>
@@ -347,7 +347,7 @@ export const InviteOrgModal = () => {
                   border: '1px solid var(--color-border)',
                   marginBottom: 'var(--spacing-5)'
                 }}>
-                  <p style={{ margin: 0, color: 'var(--color-info)', fontSize: 'var(--font-size-body)', lineHeight: '1.6' }}>
+                  <p style={{ margin: 0, color: 'var(--color-info-text)', fontSize: 'var(--font-size-body)', lineHeight: '1.6' }}>
                     <strong>Prendre en compte en collaboration (Public)</strong><br />
                     En confirmant, vous deviendrez le <strong>leader</strong> de cet incident public. Vous serez responsable de sa coordination et de la collaboration avec les autres organisations partenaires.
                   </p>

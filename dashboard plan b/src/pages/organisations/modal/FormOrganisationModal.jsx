@@ -121,7 +121,7 @@ const FormOrganisationModal = () => {
                     style={formErrors.name ? { borderColor: 'var(--color-danger)' } : {}}
                   />
                   {formErrors.name && (
-                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger)' }}>{formErrors.name}</span>
+                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger-text)' }}>{formErrors.name}</span>
                   )}
                 </div>
 
@@ -137,7 +137,7 @@ const FormOrganisationModal = () => {
                     style={formErrors.acronym ? { borderColor: 'var(--color-danger)' } : {}}
                   />
                   {formErrors.acronym && (
-                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger)' }}>{formErrors.acronym}</span>
+                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger-text)' }}>{formErrors.acronym}</span>
                   )}
                 </div>
 
@@ -149,7 +149,7 @@ const FormOrganisationModal = () => {
                     {SECTORS.map((s) => <option key={s.en} value={s.en}>{s.fr}</option>)}
                   </select>
                   {formErrors.sector && (
-                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger)' }}>{formErrors.sector}</span>
+                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger-text)' }}>{formErrors.sector}</span>
                   )}
                 </div>
 
@@ -161,7 +161,7 @@ const FormOrganisationModal = () => {
                     {TYPES.map((t) => <option key={t.en} value={t.en}>{t.fr}</option>)}
                   </select>
                   {formErrors.type && (
-                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger)' }}>{formErrors.type}</span>
+                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger-text)' }}>{formErrors.type}</span>
                   )}
                 </div>
 
@@ -173,7 +173,7 @@ const FormOrganisationModal = () => {
                     {COUNTRIES.map((c) => <option key={c.en} value={c.en}>{c.fr}</option>)}
                   </select>
                   {formErrors.country && (
-                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger)' }}>{formErrors.country}</span>
+                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger-text)' }}>{formErrors.country}</span>
                   )}
                 </div>
 
@@ -188,7 +188,7 @@ const FormOrganisationModal = () => {
                     style={formErrors.email ? { borderColor: 'var(--color-danger)' } : {}}
                   />
                   {formErrors.email && (
-                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger)' }}>{formErrors.email}</span>
+                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger-text)' }}>{formErrors.email}</span>
                   )}
                 </div>
 
@@ -203,7 +203,7 @@ const FormOrganisationModal = () => {
                     style={formErrors.phone ? { borderColor: 'var(--color-danger)' } : {}}
                   />
                   {formErrors.phone && (
-                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger)' }}>{formErrors.phone}</span>
+                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger-text)' }}>{formErrors.phone}</span>
                   )}
                 </div>
 
@@ -218,7 +218,7 @@ const FormOrganisationModal = () => {
                     style={formErrors.website ? { borderColor: 'var(--color-danger)' } : {}}
                   />
                   {formErrors.website && (
-                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger)' }}>{formErrors.website}</span>
+                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger-text)' }}>{formErrors.website}</span>
                   )}
                 </div>
 
@@ -234,7 +234,7 @@ const FormOrganisationModal = () => {
                     <option value="inactive">Inactive</option>
                   </select>
                   {formErrors.status && (
-                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger)' }}>{formErrors.status}</span>
+                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger-text)' }}>{formErrors.status}</span>
                   )}
                 </div>
 
@@ -248,7 +248,7 @@ const FormOrganisationModal = () => {
                     style={formErrors.description ? { borderColor: 'var(--color-danger)' } : {}}
                   />
                   {formErrors.description && (
-                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger)' }}>{formErrors.description}</span>
+                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger-text)' }}>{formErrors.description}</span>
                   )}
                 </div>
               </div>

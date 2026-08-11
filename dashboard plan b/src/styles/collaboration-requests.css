@@ -89,7 +89,7 @@
 }
 
 .requests-type-tab.is-active {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   border-bottom-color: var(--color-primary);
 }
 
@@ -109,7 +109,7 @@
 
 .requests-type-tab.is-active .requests-tab-badge {
   background-color: rgba(58, 162, 221, 0.12);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .requests-tab-badge-highlight {
@@ -202,7 +202,7 @@
 
 .requests-filter-pill:hover {
   border-color: var(--color-primary);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .requests-filter-pill.is-active {
@@ -253,7 +253,7 @@
 }
 
 .info-banner-icon {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   flex-shrink: 0;
   margin-top: 2px;
 }
@@ -466,7 +466,7 @@
 }
 
 .incident-group-card.is-expanded .incident-group-toggle svg {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 /* Expanded body */
@@ -651,7 +651,7 @@
   padding: 2px 7px;
   border-radius: var(--radius-full);
   background-color: rgba(58, 162, 221, 0.1);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   border: 1px solid rgba(58, 162, 221, 0.2);
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
@@ -726,7 +726,7 @@
   font-size: 12px;
   font-weight: var(--font-weight-semibold);
   background-color: transparent;
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   border: 1px solid var(--color-primary);
   border-radius: var(--radius-md);
   cursor: pointer;
@@ -897,14 +897,14 @@
 .incident-group-toggle:hover {
   background-color: rgba(58, 162, 221, 0.08);
   border-color: var(--color-primary);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .incident-group-card.is-expanded .incident-group-toggle {
   transform: rotate(90deg);
   background-color: rgba(58, 162, 221, 0.12);
   border-color: var(--color-primary);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 /* ── Expanded Body ────────────────────────────────────────── */
@@ -1128,7 +1128,7 @@
   padding: 2px 8px;
   border-radius: 999px;
   background-color: rgba(58, 162, 221, 0.08);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   border: 1px solid rgba(58, 162, 221, 0.25);
   font-weight: 800;
   text-transform: uppercase;
@@ -1210,7 +1210,7 @@
   font-size: 12px;
   font-weight: 700;
   background-color: transparent;
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   border: 1.5px solid var(--color-primary);
   border-radius: var(--radius-md);
   cursor: pointer;

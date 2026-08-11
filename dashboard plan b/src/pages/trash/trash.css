@@ -111,7 +111,7 @@
 
 .trash-view-btn.active {
   background-color: var(--color-surface);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   box-shadow: var(--shadow-sm);
 }
 
@@ -488,22 +488,22 @@
 
 .trash-badge-declared {
   background-color: rgba(239, 68, 68, 0.1);
-  color: var(--color-danger);
+  color: var(--color-danger-text);
 }
 
 .trash-badge-in-progress {
   background-color: rgba(58, 162, 221, 0.1);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .trash-badge-taken {
   background-color: rgba(245, 158, 11, 0.1);
-  color: var(--color-warning);
+  color: var(--color-warning-text);
 }
 
 .trash-badge-resolved {
   background-color: rgba(34, 197, 94, 0.1);
-  color: var(--color-success);
+  color: var(--color-success-text);
 }
 
 .trash-card-type {
@@ -584,7 +584,7 @@
 }
 
 .trash-btn-restore {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   border-right: 1px solid var(--color-border);
 }
 
@@ -593,7 +593,7 @@
 }
 
 .trash-btn-delete {
-  color: var(--color-danger);
+  color: var(--color-danger-text);
 }
 
 .trash-btn-delete:hover {
@@ -889,12 +889,12 @@
 
   .trash-btn-restore svg {
     fill: var(--color-danger) !important;
-    color: var(--color-danger) !important;
+    color: var(--color-danger-text) !important;
   }
 
   .trash-btn-delete svg {
     fill: var(--color-danger) !important;
-    color: var(--color-danger) !important;
+    color: var(--color-danger-text) !important;
   }
 
   .trash-row-actions .trash-btn-restore,

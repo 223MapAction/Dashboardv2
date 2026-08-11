@@ -399,7 +399,7 @@ export const TrashPage = () => {
 
           {/* ── État d'erreur ── */}
           {incidentsError && (
-            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-danger)' }}>
+            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-danger-text)' }}>
               <p>Erreur lors du chargement des incidents supprimés.</p>
               <button
                 onClick={() => mutate()}

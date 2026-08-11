@@ -459,11 +459,11 @@
 }
 
 .incident-modal-status-step.is-done {
-  color: var(--color-success);
+  color: var(--color-success-text);
 }
 
 .incident-modal-status-step.is-current {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   font-weight: var(--font-weight-bold);
 }
 
@@ -501,7 +501,7 @@
 }
 
 .status-stepper-pending .incident-modal-status-step.is-current {
-  color: var(--color-warning);
+  color: var(--color-warning-text);
 }
 
 .status-stepper-pending .incident-modal-status-step.is-current .incident-modal-status-dot {
@@ -514,7 +514,7 @@
 }
 
 .status-stepper-taken_into_account .incident-modal-status-step.is-current {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .status-stepper-taken_into_account .incident-modal-status-step.is-current .incident-modal-status-dot {
@@ -529,7 +529,7 @@
 
 .status-stepper-resolved .incident-modal-status-step.is-current,
 .status-stepper-resolved .incident-modal-status-step.is-done {
-  color: var(--color-success);
+  color: var(--color-success-text);
 }
 
 .status-stepper-resolved .incident-modal-status-step.is-current .incident-modal-status-dot {
@@ -920,7 +920,7 @@
   margin-top: var(--spacing-4);
   padding: var(--spacing-3) var(--spacing-4);
   background-color: transparent;
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   border: 2px solid var(--color-primary);
   border-radius: var(--radius-md);
   font-size: var(--font-size-body);

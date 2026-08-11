@@ -286,12 +286,12 @@
 
 .incident-date-badge.is-pending {
   background-color: rgba(245, 158, 11, 0.15);
-  color: var(--color-warning);
+  color: var(--color-warning-text);
 }
 
 .incident-date-badge.is-resolved {
   background-color: rgba(34, 197, 94, 0.15);
-  color: var(--color-success);
+  color: var(--color-success-text);
   border: 1px solid rgba(34, 197, 94, 0.2);
 }
 
@@ -335,15 +335,15 @@
 }
 
 .variant-taken .badge-dot {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .variant-in-progress .badge-dot {
-  color: var(--color-warning);
+  color: var(--color-warning-text);
 }
 
 .variant-resolved .badge-dot {
-  color: var(--color-success);
+  color: var(--color-success-text);
 }
 
 .variant-declared {
@@ -354,30 +354,30 @@
 
 .variant-taken {
   background-color: rgba(58, 162, 221, 0.1);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   border-color: rgba(58, 162, 221, 0.2);
 }
 
 .variant-in-progress {
   background-color: rgba(245, 158, 11, 0.1);
-  color: var(--color-warning);
+  color: var(--color-warning-text);
   border-color: rgba(245, 158, 11, 0.2);
 }
 
 .variant-resolved {
   background-color: rgba(34, 197, 94, 0.1);
-  color: var(--color-success);
+  color: var(--color-success-text);
   border-color: rgba(34, 197, 94, 0.2);
 }
 
 .variant-taken-me {
   background-color: rgba(58, 162, 221, 0.15);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   border-color: rgba(58, 162, 221, 0.35);
 }
 
 .variant-taken-me .badge-dot {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .variant-taken-other {
@@ -392,12 +392,12 @@
 
 .variant-resolved-me {
   background-color: rgba(34, 197, 94, 0.15);
-  color: var(--color-success);
+  color: var(--color-success-text);
   border-color: rgba(34, 197, 94, 0.35);
 }
 
 .variant-resolved-me .badge-dot {
-  color: var(--color-success);
+  color: var(--color-success-text);
 }
 
 .variant-resolved-other {
@@ -460,7 +460,7 @@
 }
 
 .incident-action-btn.assign-btn {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   background-color: rgba(58, 162, 221, 0.1);
 }
 
@@ -469,7 +469,7 @@
 }
 
 .incident-action-btn.delete-btn {
-  color: var(--color-danger);
+  color: var(--color-danger-text);
   background-color: rgba(239, 68, 68, 0.08);
 }
 

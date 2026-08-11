@@ -2365,7 +2365,7 @@ export const CollaborationDetail = () => {
                                   borderRadius: '16px',
                                   padding: '6px 16px',
                                   fontSize: '12px',
-                                  color: 'var(--color-primary)',
+                                  color: 'var(--color-primary-text)',
                                   cursor: 'pointer',
                                   fontWeight: '500'
                                 }}
@@ -2502,11 +2502,11 @@ export const CollaborationDetail = () => {
                                                   type="button"
                                                   onClick={() => handleDownload(msg.file.url, msg.file.name, msg.id)}
                                                   disabled={downloadingMsgId === msg.id}
-                                                  style={{ background: 'none', border: 'none', padding: 0, fontSize: '11px', fontWeight: '500', color: 'var(--color-primary)', textDecoration: 'none', cursor: downloadingMsgId === msg.id ? 'not-allowed' : 'pointer', opacity: downloadingMsgId === msg.id ? 0.7 : 1, display: 'flex', alignItems: 'center', gap: '4px' }}
+                                                  style={{ background: 'none', border: 'none', padding: 0, fontSize: '11px', fontWeight: '500', color: 'var(--color-primary-text)', textDecoration: 'none', cursor: downloadingMsgId === msg.id ? 'not-allowed' : 'pointer', opacity: downloadingMsgId === msg.id ? 0.7 : 1, display: 'flex', alignItems: 'center', gap: '4px' }}
                                                 >
                                                   {downloadingMsgId === msg.id ? (
                                                     <>
-                                                      <svg style={{ animation: 'spin 1s linear infinite', width: '12px', height: '12px', color: 'var(--color-primary)' }} viewBox="0 0 24 24" fill="none">
+                                                      <svg style={{ animation: 'spin 1s linear infinite', width: '12px', height: '12px', color: 'var(--color-primary-text)' }} viewBox="0 0 24 24" fill="none">
                                                         <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" style={{ opacity: 0.25 }}></circle>
                                                         <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" style={{ opacity: 0.75 }}></path>
                                                       </svg>
@@ -2575,7 +2575,7 @@ export const CollaborationDetail = () => {
                                           style={{
                                             background: 'none', border: 'none', padding: '2px',
                                             cursor: isDeleting ? 'not-allowed' : 'pointer',
-                                            color: 'var(--color-danger)', opacity: isDeleting ? 0.5 : 1,
+                                            color: 'var(--color-danger-text)', opacity: isDeleting ? 0.5 : 1,
                                             display: 'flex', alignItems: 'center'
                                           }}
                                         >
@@ -2856,7 +2856,7 @@ export const CollaborationDetail = () => {
                                     {(task.completedAt || task.updated_at) && task.completed && (
                                       <>
                                         <span>•</span>
-                                        <span className="completed-date" style={{ color: 'var(--color-success)', fontWeight: '500' }}>
+                                        <span className="completed-date" style={{ color: 'var(--color-success-text)', fontWeight: '500' }}>
                                           Fait le {formatDateTime(task.completedAt || task.updated_at)}
                                         </span>
                                       </>
@@ -3004,7 +3004,7 @@ export const CollaborationDetail = () => {
                                   borderRadius: 'var(--radius-md)',
                                   animation: 'slideDown 0.2s ease-out'
                                 }}>
-                                  <div style={{ fontSize: 'var(--font-size-body-small)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-primary)', marginBottom: 'var(--spacing-2)' }}>
+                                  <div style={{ fontSize: 'var(--font-size-body-small)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-primary-text)', marginBottom: 'var(--spacing-2)' }}>
                                     Compléter la tâche avec une preuve
                                   </div>
                                   <p style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-text-secondary)', margin: '0 0 var(--spacing-3) 0' }}>
@@ -3127,7 +3127,7 @@ export const CollaborationDetail = () => {
                                             }}
                                             style={{
                                               backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                                              color: 'var(--color-danger)',
+                                              color: 'var(--color-danger-text)',
                                               border: 'none',
                                               borderLeft: '1px solid var(--color-border)',
                                               padding: '0 var(--spacing-3)',
@@ -3246,7 +3246,7 @@ export const CollaborationDetail = () => {
                                         style={{
                                           background: 'none',
                                           border: 'none',
-                                          color: 'var(--color-primary)',
+                                          color: 'var(--color-primary-text)',
                                           fontSize: 'var(--font-size-caption)',
                                           fontWeight: '500',
                                           display: 'inline-flex',
@@ -3385,7 +3385,7 @@ export const CollaborationDetail = () => {
                                                   Cliquer pour ouvrir ou télécharger
                                                 </div>
                                               </div>
-                                              <div style={{ fontSize: '20px', color: 'var(--color-primary)' }}>→</div>
+                                              <div style={{ fontSize: '20px', color: 'var(--color-primary-text)' }}>→</div>
                                             </a>
                                             );
                                           })()}
@@ -3722,7 +3722,7 @@ export const CollaborationDetail = () => {
               </div>
 
               <div className='alert alert-info'>
-                <p style={{ margin: 0, color: 'var(--color-info)', fontSize: 'var(--font-size-body)', lineHeight: '1.5' }}>
+                <p style={{ margin: 0, color: 'var(--color-info-text)', fontSize: 'var(--font-size-body)', lineHeight: '1.5' }}>
                   <strong>Attention :</strong> Cette action est irréversible. Une fois l'incident résolu, il ne pourra plus être modifié.
                 </p>
               </div>

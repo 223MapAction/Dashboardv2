@@ -80,12 +80,12 @@
 }
 
 .language-btn:hover {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   background-color: var(--color-surface);
 }
 
 .language-btn.active {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   background-color: var(--color-surface);
   box-shadow: var(--shadow-sm);
 }
@@ -264,7 +264,7 @@
   text-align: center;
   background: transparent;
   border: none;
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
@@ -452,7 +452,7 @@
 }
 
 .profile-menu-item.logout {
-  color: var(--color-severity-high);
+  color: var(--color-severity-high-text);
 }
 
 .profile-menu-item.logout svg {

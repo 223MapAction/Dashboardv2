@@ -3,10 +3,10 @@ import { CloseCircle, TickCircle, CloseSquare, Crown1, People, Eye } from 'icons
 import { OffcanvasModal } from '../molecules/OffcanvasModal';
 
 const ROLE_META = {
-  leader: { label: 'Leader', icon: Crown1, color: 'var(--color-warning)' },
-  contributeur: { label: 'Contributeur', icon: People, color: 'var(--color-primary)' },
+  leader: { label: 'Leader', icon: Crown1, color: 'var(--color-warning-text)' },
+  contributeur: { label: 'Contributeur', icon: People, color: 'var(--color-primary-text)' },
   observateur: { label: 'Observateur', icon: Eye, color: 'var(--color-text-secondary)' },
-  contributor: { label: 'Contributeur', icon: People, color: 'var(--color-primary)' },
+  contributor: { label: 'Contributeur', icon: People, color: 'var(--color-primary-text)' },
   observer: { label: 'Observateur', icon: Eye, color: 'var(--color-text-secondary)' }
 };
 
@@ -55,7 +55,7 @@ export const RequestDecisionModal = ({
             <div className="am-offcanvas-body" style={{ flex: 1, overflowY: 'auto' }}>
               {error && (
                 <div className="am-alert am-alert--danger" role="alert" style={{ marginBottom: 'var(--spacing-4)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <CloseCircle size={18} variant="Bold" color="var(--color-danger)" style={{ color: 'var(--color-danger)' }} />
+                  <CloseCircle size={18} variant="Bold" color="var(--color-danger)" style={{ color: 'var(--color-danger-text)' }} />
                   <span className="am-alert__message">{error}</span>
                 </div>
               )}

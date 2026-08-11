@@ -183,7 +183,7 @@ export const TaskModal = () => {
           {/* Liste des tâches en cours de création (draft) */}
           {draftTasks.length > 0 && (
             <div className="draft-tasks-section" style={{ marginTop: 'var(--spacing-4)', marginBottom: 'var(--spacing-4)', padding: 'var(--spacing-3)', backgroundColor: 'rgba(58, 162, 221, 0.05)', border: '1.5px dashed var(--color-primary)', borderRadius: 'var(--radius-md)' }}>
-              <h4 className="draft-tasks-title" style={{ fontSize: 'var(--font-size-body-large)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-primary)', marginBottom: 'var(--spacing-3)' }}>
+              <h4 className="draft-tasks-title" style={{ fontSize: 'var(--font-size-body-large)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-primary-text)', marginBottom: 'var(--spacing-3)' }}>
                 Tâches à ajouter ({draftTasks.length})
               </h4>
               <div className="draft-tasks-list" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)' }}>
@@ -201,7 +201,7 @@ export const TaskModal = () => {
                     <button
                       type="button"
                       onClick={() => setDraftTasks(draftTasks.filter((_, i) => i !== idx))}
-                      style={{ border: 'none', background: 'none', color: 'var(--color-danger)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center' }}
+                      style={{ border: 'none', background: 'none', color: 'var(--color-danger-text)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center' }}
                     >
                       <Trash size={18} variant="Linear" color="var(--color-danger)" />
                     </button>

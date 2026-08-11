@@ -35,7 +35,11 @@
   --color-border: #E2E8F0;
   --color-text-primary: #1A1C1E;
   --color-text-secondary: #6C7278;
-  --color-text-muted: #9CA3AF;
+  /* Assombri de #9CA3AF : ce jeton ne sert que de couleur de texte (139 usages,
+     aucun fond), et son contraste sur blanc n'atteignait que 2.54:1 — bien en
+     dessous du seuil WCAG AA de 4.5:1. Illisible sur un écran de téléphone en
+     plein soleil, le contexte des agents de terrain. */
+  --color-text-muted: #697282;
   --color-severity-low: #22C55E;
   --color-severity-medium: #F59E0B;
   --color-severity-high: #EF4444;
@@ -43,6 +47,23 @@
   --color-warning: #F59E0B;
   --color-danger: #EF4444;
   --color-info: #3AA2DD;
+
+  /* ── Variantes destinées au TEXTE ───────────────────────────────────────────
+     Les couleurs de marque ci-dessus restent inchangées : elles portent
+     l'identité visuelle sur les fonds, bordures, icônes et marqueurs de carte.
+     Mais posées comme couleur de texte sur blanc, aucune n'atteint le seuil
+     WCAG AA de 4.5:1 — la primaire plafonne à 2.84:1.
+
+     Ces variantes sont les mêmes teintes, assombries au strict minimum pour
+     franchir 4.5:1. À utiliser en `color:`, jamais en fond. */
+  --color-primary-text: #1E78AC;
+  --color-success-text: #17833F;
+  --color-warning-text: #9E6606;
+  --color-danger-text: #E21313;
+  --color-info-text: #1E78AC;
+  --color-severity-low-text: #17833F;
+  --color-severity-medium-text: #9E6606;
+  --color-severity-high-text: #E21313;
 
   --bs-btn-disabled-bg: rgba(58, 162, 221, 0.65) !important;
   --bs-btn-disabled-border-color: rgba(58, 162, 221, 0.65) !important;
@@ -201,7 +222,7 @@ h2,
 }
 
 .btn-icon:hover {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   background-color: rgba(58, 162, 221, 0.1);
 }
 
@@ -278,7 +299,7 @@ h2,
 .metric-value {
   font-size: var(--font-size-h1);
   font-weight: var(--font-weight-bold);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .metric-delta {
@@ -290,11 +311,11 @@ h2,
 }
 
 .metric-delta.positive {
-  color: var(--color-severity-low);
+  color: var(--color-severity-low-text);
 }
 
 .metric-delta.negative {
-  color: var(--color-severity-high);
+  color: var(--color-severity-high-text);
 }
 
 /* === CARDS (MOLECULES) === */
@@ -325,11 +346,11 @@ h2,
 
 .nav-item:hover {
   background-color: rgba(58, 162, 221, 0.05);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .nav-item.active {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   background-color: rgba(58, 162, 221, 0.1);
 }
 
@@ -654,7 +675,7 @@ h2,
 
 .forgot-password {
   font-size: var(--font-size-body-small);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   text-decoration: none;
   font-weight: var(--font-weight-medium);
 }
@@ -734,7 +755,7 @@ h2,
 }
 
 .signup-link {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   text-decoration: none;
   font-weight: var(--font-weight-semibold);
 }
@@ -902,7 +923,7 @@ h2,
 
 .am-pagination-btn:hover:not(:disabled) {
   border-color: var(--color-primary);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   background-color: var(--color-primary-light);
 }
 

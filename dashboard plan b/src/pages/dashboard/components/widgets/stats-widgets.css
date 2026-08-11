@@ -113,7 +113,7 @@
   padding: var(--spacing-3);
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-medium);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   background-color: transparent;
   border: none;
   cursor: pointer;
