@@ -1515,24 +1515,3 @@
   }
 }
 
-/* --- High-end Dark Shimmer overrides --- */
-.project-detail .shimmer-line,
-.project-detail .shimmer-thumbnail,
-.project-detail .shimmer-circular,
-.project-detail .shimmer-button,
-.project-detail .shimmer-title,
-.project-detail .shimmer-text-line,
-.project-detail .shimmer-box {
-  background: #d2d6deff !important;
-  background-size: 1000px 100% !important;
-  animation: shimmer 1.8s linear infinite forwards !important;
-  border-radius: 8px !important;
-  border: none !important;
-}
-
-.project-detail .shimmer-wrapper {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-}

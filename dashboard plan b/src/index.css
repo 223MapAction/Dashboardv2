@@ -842,15 +842,17 @@ h2,
   left: 0;
   width: 100%;
   height: 100%;
-  background: #f1f5f9;
+  /* Memes jetons que les squelettes de chargement : une image qui charge et un
+     bloc qui charge doivent scintiller pareil. */
+  background-color: var(--shimmer-base);
   background-image: linear-gradient(
     90deg,
-    rgba(226, 232, 240, 0.4) 0px,
-    rgba(241, 245, 249, 0.6) 40px,
-    rgba(226, 232, 240, 0.4) 80px
+    var(--shimmer-base) 0%,
+    var(--shimmer-eclat) 50%,
+    var(--shimmer-base) 100%
   );
   background-size: 200% 100%;
-  animation: blurry-image-shimmer 1.5s infinite linear;
+  animation: am-shimmer var(--shimmer-duree) linear infinite;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   transition: opacity 0.4s ease-out;
@@ -872,14 +874,6 @@ h2,
   filter: blur(0);
 }
 
-@keyframes blurry-image-shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
 
 /* === PAGINATION COMPONENT === */
 .am-pagination {
@@ -1143,4 +1137,81 @@ p {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SQUELETTES DE CHARGEMENT (SHIMMER)
+   Source unique pour toute l'application.
+
+   Trois traitements divergents coexistaient : le dégradé bleu-gris sombre
+   d'App.css, le dégradé clair de map.css, et un aplat sans dégradé dans
+   incident-detail.css — ce dernier ne scintillait donc pas du tout. Pire,
+   deux `@keyframes shimmer` concurrents étaient définis, l'un en pourcentages
+   et l'autre en pixels : le dernier chargé s'appliquait aux deux, cassant
+   forcément l'un des rendus.
+
+   Une seule animation, nommée `am-shimmer` pour ne plus pouvoir entrer en
+   collision avec celle de la bibliothèque.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Assez contrasté pour rester perceptible sur --color-surface comme sur
+     --color-background, contrairement au défaut de la bibliothèque
+     (#f6f6f6 → #f0f0f0) quasiment invisible. */
+  --shimmer-base: #E6EBF2;
+  --shimmer-eclat: #F3F6FA;
+  --shimmer-duree: 1.6s;
+}
+
+.shimmer,
+.shimmer-box,
+[class*='shimmer-'][class*='shimmer'] {
+  background-color: var(--shimmer-base) !important;
+  background-image: linear-gradient(
+    90deg,
+    var(--shimmer-base) 0%,
+    var(--shimmer-eclat) 50%,
+    var(--shimmer-base) 100%
+  ) !important;
+  background-size: 200% 100% !important;
+  background-repeat: no-repeat !important;
+  animation: am-shimmer var(--shimmer-duree) linear infinite !important;
+  border: none !important;
+}
+
+/* Rayons alignés sur le design system, pour que le squelette annonce la forme
+   réelle du contenu qu'il remplace. */
+.shimmer-thumbnail,
+.shimmer-box { border-radius: var(--radius-md) !important; }
+
+.shimmer-title-line,
+.shimmer-text-line { border-radius: var(--radius-sm) !important; }
+
+.shimmer-avatar,
+.shimmer-circular-image { border-radius: var(--radius-full) !important; }
+
+/* Le conteneur ne doit ni encadrer ni ombrer : c'est un placeholder, pas une
+   carte. Plusieurs pages le corrigeaient chacune de leur côté. */
+.shimmer-wrapper {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+@keyframes am-shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+/* Mouvement réduit : on fige le squelette sur une teinte unie plutôt que de
+   laisser la règle globale ramener l'animation à 0,01 ms — ce qui bloquerait
+   le dégradé sur une position arbitraire, souvent hors cadre. */
+@media (prefers-reduced-motion: reduce) {
+  .shimmer,
+  .shimmer-box,
+  [class*='shimmer-'][class*='shimmer'] {
+    background-image: none !important;
+    animation: none !important;
+  }
 }

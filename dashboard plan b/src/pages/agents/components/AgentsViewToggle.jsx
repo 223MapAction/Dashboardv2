@@ -13,7 +13,10 @@ const VUES = [
  */
 export const AgentsViewToggle = ({ vue, onChange }) => (
   <div className="agents-vue-toggle" role="radiogroup" aria-label="Affichage de l’équipe">
-    {VUES.map(({ id, libelle, icone: Icone }) => (
+    {VUES.map((vueDef) => {
+      const Icone = vueDef.icone;
+      const { id, libelle } = vueDef;
+      return (
       <button
         key={id}
         type="button"
@@ -26,7 +29,8 @@ export const AgentsViewToggle = ({ vue, onChange }) => (
         <Icone size={16} variant={vue === id ? 'Bold' : 'Linear'} color="currentColor" />
         <span>{libelle}</span>
       </button>
-    ))}
+      );
+    })}
   </div>
 );
 

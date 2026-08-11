@@ -486,3 +486,13 @@
 .agents-effectifs--filtre strong {
   color: var(--color-primary-text);
 }
+
+/* Squelette : mêmes gabarits que le contenu réel, pour qu'aucun saut de mise
+   en page ne se produise à la fin du chargement. */
+.agents-squelette-titre {
+  margin-bottom: var(--spacing-4);
+}
+
+.agents-squelette-carte {
+  pointer-events: none;
+}

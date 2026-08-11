@@ -19,61 +19,12 @@ import { AgentCard } from './components/AgentCard';
 import { AgentListRow } from './components/AgentListRow';
 import { AgentsFilters } from './components/AgentsFilters';
 import { AgentsResume } from './components/AgentsResume';
+import { AgentsSkeleton } from './components/AgentsSkeleton';
 import { authService } from '../auth/services/authService';
 import './agents.css';
 import './agents-roster.css';
 
 const EMPTY_ARRAY = [];
-
-const AgentTableSkeleton = () => (
-  <div className="agents-table-wrap">
-    <table className="agents-table has-sticky-actions">
-      <thead>
-        <tr>
-          <th>Agent</th>
-          <th>Rôle</th>
-          <th>Organisation</th>
-          <th>Depuis</th>
-          <th>Statut</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {[...Array(5)].map((_, idx) => (
-          <tr key={idx}>
-            <td>
-              <div className="agents-cell-identity" style={{ opacity: 0.7 }}>
-                <ShimmerCircularImage size={32} style={{ margin: 0 }} />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
-                  <ShimmerTitle line={1} gap={0} width={120} style={{ margin: 0 }} />
-                  <ShimmerText line={1} width={160} style={{ margin: 0 }} />
-                </div>
-              </div>
-            </td>
-            <td>
-              <ShimmerThumbnail height={20} width={70} rounded style={{ margin: 0 }} />
-            </td>
-            <td>
-              <ShimmerText line={1} width={100} style={{ margin: 0 }} />
-            </td>
-            <td>
-              <ShimmerText line={1} width={80} style={{ margin: 0 }} />
-            </td>
-            <td>
-              <ShimmerThumbnail height={20} width={60} rounded style={{ margin: 0 }} />
-            </td>
-            <td>
-              <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                <ShimmerThumbnail height={24} width={24} rounded style={{ margin: 0 }} />
-                <ShimmerThumbnail height={24} width={24} rounded style={{ margin: 0 }} />
-              </div>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-);
 
 const fetcher = async ([, organisationsList, search, role, status]) => {
   if (!organisationsList || organisationsList.length === 0) return [];
@@ -405,7 +356,7 @@ export const Agents = () => {
 
               {/* ── Tableau ── */}
               {isDataLoading ? (
-                <AgentTableSkeleton />
+                <AgentsSkeleton vue={vue} />
               ) : (
                 <>
                   {grouperParRole(paginatedAgents).map((groupe) => (

@@ -843,24 +843,7 @@
   padding: var(--spacing-5) 0;
 }
 
-.shimmer-box {
-  background: linear-gradient(90deg,
-      #E5E7EB 0%,
-      #F3F4F6 50%,
-      #E5E7EB 100%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite ease-in-out;
-}
 
-@keyframes shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-
-  100% {
-    background-position: -200% 0;
-  }
-}
 
 /* ============================================
    ANIMATIONS MODAL BOOTSTRAP (slide depuis la droite)
