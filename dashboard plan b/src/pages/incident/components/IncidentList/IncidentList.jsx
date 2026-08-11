@@ -1,6 +1,6 @@
 import React from 'react';
 import useSWR from 'swr';
-import { SearchNormal1, ArrowDown2 } from 'iconsax-react';
+import { SearchNormal1 } from 'iconsax-react';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText, ShimmerCircularImage } from 'react-shimmer-effects';
 import { Eye, Edit2, Trash } from 'iconsax-react';
 import { BlurryImage } from '../../../../components/atoms/BlurryImage';
@@ -9,6 +9,7 @@ import { authService } from '../../../auth/services/authService';
 import { isSuperAdmin as checkSuperAdmin, getAccessibleNavIds } from '../../../../utils/permissions';
 import { getCollaborationsService } from '../../service/collaboration_service';
 import Pagination from '../../../../components/molecules/Pagination';
+import { FiltersBar } from '../../../../components/molecules/FiltersBar';
 import './incident-list.css';
 
 import { TableActionsMenu } from '../../../../components/molecules/TableActionsMenu';
@@ -94,36 +95,27 @@ export const IncidentList = ({
         </p>
       </header>
 
-      {/* Filters bar */}
-      <div className="project-filters">
-        <div className="project-search">
-          <SearchNormal1 size={18} variant="Linear" color="#6C7278" />
-          <input
-            type="search"
-            id="incidents-search-input"
-            name="incidents-search-query"
-            autoComplete="off"
-            placeholder="Rechercher un signalement, une commune..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-
-        <div className="project-filters-row">
-
-          <div className="project-select">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="">Tous les statuts</option>
-              <option value="declared">Déclaré</option>
-              <option value="taken_into_account">Pris en compte</option>
-              <option value="resolved">Résolu</option>
-            </select>
-            <ArrowDown2 size={16} variant="Linear" color="#6C7278" />
-          </div>
-        </div>
+      <div className="project-filtres-zone">
+        <FiltersBar
+          recherche={search}
+          onRecherche={setSearch}
+          placeholder="Rechercher un signalement, une commune…"
+          selects={[{
+            id: 'statut',
+            valeur: statusFilter,
+            onChange: setStatusFilter,
+            ariaLabel: 'Filtrer par statut',
+            tousLabel: 'Tous les statuts',
+            options: [
+              { value: 'declared', label: 'Déclaré' },
+              { value: 'taken_into_account', label: 'Pris en compte' },
+              { value: 'resolved', label: 'Résolu' },
+            ],
+          }]}
+          onEffacer={() => { setSearch(''); setStatusFilter(''); }}
+          resultats={count}
+          nomResultat="signalement"
+        />
       </div>
 
       {/* Table */}

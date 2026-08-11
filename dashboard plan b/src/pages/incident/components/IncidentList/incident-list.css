@@ -33,6 +33,18 @@
   line-height: 1.5;
 }
 
+/* Habillage de la barre de filtres commune : la carte translucide reste
+   propre a cette page, les controles a l'interieur sont partages. */
+.project-filtres-zone {
+  margin: 0 var(--spacing-5) var(--spacing-4) var(--spacing-5);
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: saturate(180%) blur(16px);
+  -webkit-backdrop-filter: saturate(180%) blur(16px);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+}
+
 /* ============================================
    FILTERS (Sticky Toolbar)
    ============================================ */
