@@ -160,6 +160,18 @@
   }
 }
 
+/* Au doigt, 40 px ne suffit pas. La regle globale de index.css vise `select`
+   nu et perd contre le selecteur de classe ci-dessus — l'exception se pose
+   donc ici, a cote de la mesure qu'elle releve. */
+@media (pointer: coarse) {
+  .am-filtres-recherche,
+  .am-filtres-select,
+  .am-filtres-select select,
+  .am-filtres-effacer {
+    min-height: 44px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .am-filtres-recherche,
   .am-filtres-select,

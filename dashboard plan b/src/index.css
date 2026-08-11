@@ -1024,10 +1024,29 @@ h2,
     min-width: 44px;
   }
 
+  /* Les listes déroulantes et les champs de saisie manquaient à l'appel : la
+     règle ci-dessus ne couvrait que les cases à cocher et les boutons radio.
+     Mesuré au doigt : 32 px pour le filtre de la carte, 24 px pour les champs
+     de recherche — on vise à côté une fois sur trois. */
+  select,
+  input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]) {
+    min-height: 44px;
+  }
+
   /* Les boutons dans un flux de texte ne doivent pas être étirés. */
   a:not([role="button"]) {
     min-height: 0;
     min-width: 0;
+  }
+
+  /* …sauf les liens d'appel et de courriel, que la règle précédente ramenait
+     à la hauteur du texte : 16 px sur la fiche agent. C'est pourtant le geste
+     le plus courant d'un coordinateur — appeler quelqu'un sur le terrain. */
+  a[href^="tel:"],
+  a[href^="mailto:"] {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
   }
 }
 

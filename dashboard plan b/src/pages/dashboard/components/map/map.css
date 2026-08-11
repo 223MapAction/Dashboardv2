@@ -1099,6 +1099,17 @@
   color: #ffffff;
 }
 
+/* Safari iOS zoome automatiquement sur tout champ dont la police descend sous
+   16 px, et ne dezoome pas ensuite : la carte se retrouve recadree apres un
+   simple changement de filtre. Le `!important` ci-dessus impose d'en remettre
+   un ici pour le contrer. */
+@media (pointer: coarse) {
+  .map-filter-select {
+    font-size: 16px !important;
+    min-height: 44px;
+  }
+}
+
 .map-filter-buttons {
   display: flex;
   gap: 4px;
