@@ -1095,6 +1095,7 @@
   border: none !important;
   height: auto;
   min-height: calc(100vh - 150px);
+  min-height: calc(100dvh - 150px);
   /* Header + bottom nav */
 }
 
@@ -1135,6 +1136,7 @@
   /* S'assurer que la discussion s'affiche correctement */
   .collab-discussion {
     height: calc(100vh - 220px) !important;
+    height: calc(100dvh - 220px) !important;
   }
 
   .collab-discussion-messages {
@@ -1391,6 +1393,7 @@
 
   .collab-discussion {
     height: calc(100vh - 200px) !important;
+    height: calc(100dvh - 200px) !important;
   }
 
   .collab-mobile-nav {

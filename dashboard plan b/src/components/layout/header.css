@@ -154,6 +154,7 @@
   z-index: 1100;
   animation: notificationSlideIn 0.25s cubic-bezier(0.32, 0.72, 0.35, 1) forwards;
   max-height: calc(100vh - 100px);
+  max-height: calc(100dvh - 100px);
   display: flex;
   flex-direction: column;
   transform-origin: top right;
@@ -475,10 +476,12 @@
     right: -40px;
  
     max-height: calc(100vh - 80px);
+    max-height: calc(100dvh - 80px);
   }
   
   .notification-list {
     max-height: calc(100vh - 200px);
+    max-height: calc(100dvh - 200px);
   }
   
  
