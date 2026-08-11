@@ -12,7 +12,7 @@ import {
   Edit2,
   TickCircle
 } from 'iconsax-react';
-import { suggestCollaborationPartnerService, getOtherOrganisationsService } from '../service/collab_detail_service';
+import { getOtherOrganisationsService } from '../service/collab_detail_service';
 
 import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
 export const SuggestOrgModal = () => {
@@ -28,7 +28,6 @@ export const SuggestOrgModal = () => {
     updateSuggestedRole,
     updateSuggestedComment,
     suggestAlert,
-    setSuggestAlert,
     suggestSubmitting,
     handleSuggestSubmit,
     ROLE_OPTIONS,

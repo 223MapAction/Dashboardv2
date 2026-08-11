@@ -26,7 +26,6 @@ import {
 import { Header, Sidebar } from '../../components/layout';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
 import {
-  getPartnerSuggestionService,
   getMyPendingReceivedSuggestionsService,
   acceptPartnerSuggestionService,
   rejectPartnerSuggestionService,

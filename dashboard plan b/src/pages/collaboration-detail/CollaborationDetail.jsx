@@ -10,7 +10,7 @@ import { SuggestOrgModal } from './modal/SuggestOrgModal';
 import { DeleteTaskModal } from './modal/DeleteTaskModal';
 import { AgentReportsModal } from './modal/AgentReportsModal';
 import { NotFound } from '../not-found';
-import { getCollaborationService, getCollaborationsService } from '../collaboration/service/collaboration_service';
+import { getCollaborationService } from '../collaboration/service/collaboration_service';
 import { getOrganisationsService, formatOrganisation } from '../organisations/service/organisation_service';
 import { BlurryImage } from '../../components/atoms/BlurryImage';
 import { API_URL_BASE } from '../../config/api_url_base';

@@ -9,7 +9,7 @@ import {
   ShimmerCircularImage,
   ShimmerButton
 } from 'react-shimmer-effects';
-import { takeInChargeIncidentService, getIncidentService, getIncidentPredictionService, togglePublicIncidentService } from '../../service/incident_service';
+import { takeInChargeIncidentService, getIncidentService, getIncidentPredictionService } from '../../service/incident_service';
 import { requestCollaborationService, getCollaborationsService } from '../../service/collaboration_service';
 import { getIncidentChatHistoryService, sendIncidentChatMessageService } from '../../service/chat_service';
 import { authService } from '../../../auth/services/authService';

@@ -9,7 +9,7 @@ import { MesInterventionsModalProvider, useMesInterventionsModalContext } from '
 import { MesInterventionsAssignModal } from './modal/MesInterventionsAssignModal';
 import { IncidentAgentsListModal } from './modal/IncidentAgentsListModal';
 import { IncidentReportsModal } from './modal/IncidentReportsModal';
-import { getOrgInternalIncidentsService, toggleIncidentPublicService } from './service/mes_interventions_service';
+import { getOrgInternalIncidentsService } from './service/mes_interventions_service';
 import { getIncidentAssignmentsService } from '../incident/service/incident_service';
 import { BlurryImage } from '../../components/atoms/BlurryImage';
 import Pagination from '../../components/molecules/Pagination';

@@ -20,13 +20,6 @@ import {
 } from 'iconsax-react';
 import { Header, Sidebar } from '../../components/layout';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
-import {
-  getIncidentsService,
-  getIncidentPredictionService,
-  getIncidentAssignmentsService,
-  getResolvedIncidentsService
-} from '../incident/service/incident_service';
-import { getTasksService } from '../incident/service/task_service';
 import { getGlobalImpactService, getImpactIncidentsService } from './service/impact_service';
 import { authService } from '../auth/services/authService';
 import Pagination from '../../components/molecules/Pagination';

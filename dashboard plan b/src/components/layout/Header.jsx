@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useSWR from 'swr';
 import { User, Setting2, LogoutCurve, ArrowDown2, Notification, Danger, People, InfoCircle } from 'iconsax-react';
-import logoMapActionMin from '../../assets/logo-min.svg';
 import notifSound from '../../assets/notif.mp3';
 import { authService } from '../../pages/auth/services/authService';
 import { getNotifications, markNotificationAsRead } from './service/notification_service';
