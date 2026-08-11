@@ -26,6 +26,7 @@ import DeleteOrganisationModal from './modal/DeleteOrganisationModal';
 import { BlurryImage } from '../../components/atoms/BlurryImage';
 import Pagination from '../../components/molecules/Pagination';
 
+import { ResponsiveTable } from '../../components/molecules/ResponsiveTable';
 import { TableActionsMenu } from '../../components/molecules/TableActionsMenu';
 const COLOR_PALETTE = [
   '#EF4444', '#F97316', '#F59E0B', '#22C55E',
@@ -403,6 +404,85 @@ export const Organisations = () => {
     closeDeleteModal, confirmDelete
   };
 
+  // Une seule description des colonnes : tableau au-dessus de 900px, cartes en
+  // dessous. Les six colonnes imposaient un defilement horizontal sur mobile.
+  const colonnes = [
+    {
+      id: 'organisation', entete: 'Organisation', priorite: 'titre',
+      rendu: (org) => (
+        <div className="orgs-table-org">
+          {org.logo_url ? (
+            <BlurryImage
+              src={org.logo_url}
+              alt={org.name}
+              className="orgs-avatar"
+              style={{ objectFit: 'cover' }}
+            />
+          ) : (
+            <div className="orgs-avatar" style={{ backgroundColor: org.color }}>
+              {(org.acronym || org.name || '?').slice(0, 2).toUpperCase()}
+            </div>
+          )}
+          <div>
+            <span className="orgs-table-org-name">{org.name}</span>
+            <span className="orgs-table-org-type">{getTypeLabel(org.type)}</span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      id: 'secteur', entete: 'Secteur', priorite: 'detail',
+      rendu: (org) => (
+        <span style={{ fontSize: 'var(--font-size-body-small)', color: 'var(--color-text-secondary)' }}>
+          {getSectorLabel(org.sector)}
+        </span>
+      ),
+    },
+    {
+      id: 'localisation', entete: 'Localisation', priorite: 'sousTitre',
+      rendu: (org) => (
+        <span style={{ fontSize: 'var(--font-size-body-small)', color: 'var(--color-text-secondary)' }}>
+          {org.city}, {getCountryLabel(org.country)}
+        </span>
+      ),
+    },
+    {
+      id: 'signalements', entete: 'Signalements prise en compte', priorite: 'detail',
+      rendu: (org) => (
+        <span style={{ fontWeight: 'var(--font-weight-semibold)' }}>{org.activeProjects}</span>
+      ),
+    },
+    {
+      id: 'membres', entete: 'Membres', priorite: 'detail',
+      rendu: (org) => (
+        <span style={{ fontWeight: 'var(--font-weight-semibold)' }}>
+          {org.membersCount.toLocaleString('fr')}
+        </span>
+      ),
+    },
+    {
+      id: 'statut', entete: 'Statut', priorite: 'marquant',
+      rendu: (org) => (
+        <span className={`orgs-status orgs-status-${org.status}`}>
+          <span className="orgs-status-dot" />
+          {org.status === 'active' ? 'Active' : 'Inactive'}
+        </span>
+      ),
+    },
+  ];
+
+  const actionsDe = (org) => (
+    <div className="orgs-row-actions">
+      <TableActionsMenu
+        ariaLabel={`Actions sur ${org.name || 'cette organisation'}`}
+        actions={[
+          { id: 'edit', label: 'Modifier', icon: Edit2, onSelect: () => openEdit(org) },
+          { id: 'delete', label: 'Supprimer', icon: Trash, tone: 'danger', onSelect: () => openDelete(org) },
+        ]}
+      />
+    </div>
+  );
+
   return (
     <OrganisationsContext.Provider value={contextValue}>
       <div className="orgs-layout">
@@ -537,79 +617,15 @@ export const Organisations = () => {
                   <p>Aucune organisation ne correspond à vos critères.</p>
                 </div>
               ) : (
-                <div className="orgs-table-wrap">
-                  <table className="orgs-table has-sticky-actions">
-                    <thead>
-                      <tr>
-                        <th>Organisation</th>
-                        <th>Secteur</th>
-                        <th>Localisation</th>
-                        <th>Signalements prise en compte</th>
-                        <th>Membres</th>
-                        <th>Statut</th>
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filtered.map((org) => (
-                        <tr key={org.id}>
-                          <td>
-                            <div className="orgs-table-org">
-                              {org.logo_url ? (
-                                <BlurryImage
-                                  src={org.logo_url}
-                                  alt={org.name}
-                                  className="orgs-avatar"
-                                  style={{ objectFit: 'cover' }}
-                                />
-                              ) : (
-                                <div
-                                  className="orgs-avatar"
-                                  style={{ backgroundColor: org.color }}
-                                >
-                                  {(org.acronym || org.name || '?').slice(0, 2).toUpperCase()}
-                                </div>
-                              )}
-                              <div>
-                                <span className="orgs-table-org-name">{org.name}</span>
-                                <span className="orgs-table-org-type">{getTypeLabel(org.type)}</span>
-                              </div>
-                            </div>
-                          </td>
-                          <td style={{ fontSize: 'var(--font-size-body-small)', color: 'var(--color-text-secondary)' }}>
-                            {getSectorLabel(org.sector)}
-                          </td>
-                          <td style={{ fontSize: 'var(--font-size-body-small)', color: 'var(--color-text-secondary)' }}>
-                            {org.city}, {getCountryLabel(org.country)}
-                          </td>
-                          <td style={{ textAlign: 'center', fontWeight: 'var(--font-weight-semibold)' }}>
-                            {org.activeProjects}
-                          </td>
-                          <td style={{ textAlign: 'center', fontWeight: 'var(--font-weight-semibold)' }}>
-                            {org.membersCount.toLocaleString('fr')}
-                          </td>
-                          <td>
-                            <span className={`orgs-status orgs-status-${org.status}`}>
-                              <span className="orgs-status-dot" />
-                              {org.status === 'active' ? 'Active' : 'Inactive'}
-                            </span>
-                          </td>
-                          <td>
-                            <div className="orgs-row-actions">
-                              <TableActionsMenu
-                                ariaLabel={`Actions sur ${org.name || 'cette organisation'}`}
-                                actions={[
-                                  { id: 'edit', label: 'Modifier', icon: Edit2, onSelect: () => openEdit(org) },
-                                  { id: 'delete', label: 'Supprimer', icon: Trash, tone: 'danger', onSelect: () => openDelete(org) },
-                                ]}
-                              />
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <ResponsiveTable
+                  colonnes={colonnes}
+                  donnees={filtered}
+                  cleDe={(o) => o.id}
+                  actions={actionsDe}
+                  classeTable="orgs-table"
+                  classeWrap="orgs-table-wrap"
+                  libelleListe="Organisations"
+                />
               )}
 
               <Pagination

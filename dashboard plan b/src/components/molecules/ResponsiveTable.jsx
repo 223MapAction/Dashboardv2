@@ -42,6 +42,11 @@ export const ResponsiveTable = ({
   classeLigne,
   accentDe,
   libelleListe,
+  // Chaque page garde ses propres styles de tableau. Sans ca, une seule
+  // feuille de style s'appliquerait aux trois listes et les toucherait
+  // toutes des qu'on en ajuste une.
+  classeTable = 'incident-table',
+  classeWrap = 'incident-table-wrap',
   className = '',
 }) => {
   const compacte = useListeCompacte();
@@ -65,8 +70,8 @@ export const ResponsiveTable = ({
   }
 
   return (
-    <div className="incident-table-wrap">
-      <table className={`incident-table has-sticky-actions ${className}`}>
+    <div className={classeWrap}>
+      <table className={`${classeTable} has-sticky-actions ${className}`}>
         <thead>
           <tr>
             {colonnes.map((c) => (

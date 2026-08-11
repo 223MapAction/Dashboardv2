@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useSyncExternalStore, useMemo } from 'react';
 
 /**
  * Suit une media query depuis JavaScript.
@@ -10,26 +10,31 @@ import { useState, useEffect } from 'react';
  * `loading="lazy"` pose sur BlurryImage. En passant par JS, une seule des deux
  * vues existe.
  *
+ * `useSyncExternalStore` plutot qu'un useState + useEffect : matchMedia est
+ * exactement ce que cette API adresse — une source de verite exterieure a
+ * React. Elle lit la valeur au moment du rendu, donc pas de premier rendu a
+ * la mauvaise largeur, et pas de setState dans un effet.
+ *
  * @param {string} requete ex. '(max-width: 899.98px)'
  * @returns {boolean}
  */
 export const useMediaQuery = (requete) => {
-  const [correspond, setCorrespond] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia(requete).matches
+  const mql = useMemo(
+    () => (typeof window === 'undefined' ? null : window.matchMedia(requete)),
+    [requete]
   );
 
-  useEffect(() => {
-    const mql = window.matchMedia(requete);
-    // Resynchronise a l'abonnement : la largeur a pu changer entre le premier
-    // rendu et l'effet (rotation de l'ecran, ouverture du clavier).
-    setCorrespond(mql.matches);
-
-    const surChangement = (e) => setCorrespond(e.matches);
-    mql.addEventListener('change', surChangement);
-    return () => mql.removeEventListener('change', surChangement);
-  }, [requete]);
-
-  return correspond;
+  return useSyncExternalStore(
+    (surChangement) => {
+      if (!mql) return () => {};
+      mql.addEventListener('change', surChangement);
+      return () => mql.removeEventListener('change', surChangement);
+    },
+    () => (mql ? mql.matches : false),
+    // Cote serveur, on part du tableau : c'est la forme la plus riche, et le
+    // client corrige des le premier rendu.
+    () => false
+  );
 };
 
 /**
