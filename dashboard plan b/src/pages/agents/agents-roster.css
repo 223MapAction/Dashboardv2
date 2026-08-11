@@ -442,3 +442,47 @@
   align-self: flex-start;
   flex: 0 0 auto;
 }
+
+/* ── États des filtres ────────────────────────────────────────────────────────
+   Un filtre actif doit se voir sans lire son contenu : sinon on oublie qu'on
+   filtre, et on croit l'équipe plus petite qu'elle n'est. */
+.agents-search.is-active,
+.agents-select-wrap.is-active {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(58, 162, 221, 0.12);
+}
+
+.agents-search.is-active,
+.agents-select-wrap.is-active select {
+  color: var(--color-primary-text);
+}
+
+.agents-effacer {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 var(--spacing-3);
+  min-height: 40px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-family: var(--font-family);
+  font-size: var(--font-size-body-small);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.agents-effacer:hover {
+  border-color: var(--color-danger);
+  background-color: rgba(239, 68, 68, 0.06);
+  color: var(--color-danger-text);
+}
+
+/* La ligne de résultats filtrés se distingue de la répartition globale : ce
+   n'est pas la même information, elle ne doit pas se lire pareil. */
+.agents-effectifs--filtre strong {
+  color: var(--color-primary-text);
+}

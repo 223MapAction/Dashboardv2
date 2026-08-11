@@ -17,7 +17,8 @@ import { TableActionsMenu } from '../../components/molecules/TableActionsMenu';
 import { grouperParRole } from './roles';
 import { AgentCard } from './components/AgentCard';
 import { AgentListRow } from './components/AgentListRow';
-import { AgentsViewToggle } from './components/AgentsViewToggle';
+import { AgentsFilters } from './components/AgentsFilters';
+import { AgentsResume } from './components/AgentsResume';
 import { authService } from '../auth/services/authService';
 import './agents.css';
 import './agents-roster.css';
@@ -292,6 +293,16 @@ export const Agents = () => {
     try { localStorage.setItem('mapaction_agents_vue', v); } catch { /* stockage indisponible */ }
   };
 
+  const filtreActif = Boolean(searchInput || roleFilter || statusFilter);
+
+  const effacerFiltres = () => {
+    setSearchInput('');
+    setSearch('');
+    debouncedSetSearch.cancel();
+    setRoleFilter('');
+    setStatusFilter('');
+  };
+
   // Actions disponibles sur un agent, selon les droits de l'utilisateur connecte.
   const actionsPour = (agent) => [
     peutModifier(agent) && { id: 'edit', label: 'Modifier', icon: Edit2, onSelect: () => openEdit(agent) },
@@ -370,61 +381,27 @@ export const Agents = () => {
                 </button>
               </div>
 
-              {/* ── Effectifs ──
-                  Une ligne compacte plutot que quatre cartes : les effectifs par
-                  role sont deja portes par les en-tetes de groupe. Seuls les
-                  totaux, utiles quand l'equipe est nombreuse, restent ici. */}
-              <p className="agents-effectifs">
-                <strong>{statsTotal}</strong> agent{statsTotal > 1 ? 's' : ''}
-                <span className="agents-effectifs-sep" aria-hidden="true">·</span>
-                <strong>{statsActive}</strong> actif{statsActive > 1 ? 's' : ''}
-                <span className="agents-effectifs-sep" aria-hidden="true">·</span>
-                <strong>{statsTerrain}</strong> sur le terrain
-                <span className="agents-effectifs-sep" aria-hidden="true">·</span>
-                <strong>{statsAdmins}</strong> en administration
-              </p>
+              <AgentsResume
+                filtreActif={filtreActif}
+                nbResultats={filtered.length}
+                total={statsTotal}
+                actifs={statsActive}
+                terrain={statsTerrain}
+                admins={statsAdmins}
+              />
 
-              {/* ── Toolbar ── */}
-              <div className="agents-toolbar">
-                <div className="agents-search">
-                  <SearchNormal1 size={16} variant="Linear" color="var(--color-text-muted)" />
-                  <input
-                    type="search"
-                    id="agents-search-input"
-                    name="agents-search-query"
-                    autoComplete="off"
-                    placeholder="Nom, email, organisation..."
-                    value={searchInput}
-                    onChange={(e) => {
-                      setSearchInput(e.target.value);
-                      debouncedSetSearch(e.target.value);
-                    }}
-                  />
-                </div>
-
-                <div className="agents-select-wrap">
-                  <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>
-                    <option value="">Tous les rôles</option>
-                    {ROLES.map((r) => (
-                      <option key={r.id} value={r.id}>{r.label}</option>
-                    ))}
-                  </select>
-                  <ArrowDown2 size={14} variant="Linear" color="var(--color-text-muted)" />
-                </div>
-
-
-
-                <div className="agents-select-wrap">
-                  <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                    <option value="">Tous les statuts</option>
-                    <option value="active">Actif</option>
-                    <option value="inactive">Inactif</option>
-                  </select>
-                  <ArrowDown2 size={14} variant="Linear" color="var(--color-text-muted)" />
-                </div>
-
-                <AgentsViewToggle vue={vue} onChange={changerVue} />
-              </div>
+              <AgentsFilters
+                recherche={searchInput}
+                onRecherche={(v) => { setSearchInput(v); debouncedSetSearch(v); }}
+                role={roleFilter}
+                onRole={setRoleFilter}
+                statut={statusFilter}
+                onStatut={setStatusFilter}
+                vue={vue}
+                onVue={changerVue}
+                onEffacer={effacerFiltres}
+                filtreActif={filtreActif}
+              />
 
               {/* ── Tableau ── */}
               {isDataLoading ? (
