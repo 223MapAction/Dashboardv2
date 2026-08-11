@@ -55,6 +55,7 @@ import { NotFound } from '../../../not-found';
 import { BlurryImage } from '../../../../components/atoms/BlurryImage';
 
 
+import { ImageViewer } from '../../../../components/molecules/ImageViewer';
 const formatMessageTime = (dateStr) => {
   if (!dateStr) return '';
   try {
@@ -2409,12 +2410,11 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
         <InviteOrgModal key={"InviteOrgModalIncident"} />
         {/* Modal pour afficher l'image en grand */}
         {isImageModalOpen && safeIncident.image && (
-          <div className="image-zoom-modal" onClick={() => setIsImageModalOpen(false)}>
-            <button className="image-zoom-close" onClick={() => setIsImageModalOpen(false)}>
-              <CloseCircle size={32} variant="Bold" color="#FFF" />
-            </button>
-            <BlurryImage src={safeIncident.image} alt="Incident Zoom" className="image-zoom-content" onClick={(e) => e.stopPropagation()} />
-          </div>
+          <ImageViewer
+            src={safeIncident.image}
+            alt={safeIncident.title || 'Photo du signalement'}
+            onClose={() => setIsImageModalOpen(false)}
+          />
         )}
 
       </section>
