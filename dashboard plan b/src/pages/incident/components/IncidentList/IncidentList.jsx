@@ -9,6 +9,7 @@ import { authService } from '../../../auth/services/authService';
 import { isSuperAdmin as checkSuperAdmin, getAccessibleNavIds } from '../../../../utils/permissions';
 import { getCollaborationsService } from '../../service/collaboration_service';
 import Pagination from '../../../../components/molecules/Pagination';
+import { ResponsiveTable } from '../../../../components/molecules/ResponsiveTable';
 import { FiltersBar } from '../../../../components/molecules/FiltersBar';
 import './incident-list.css';
 
@@ -84,6 +85,295 @@ export const IncidentList = ({
   // le total complet — c'est ce qui rendait le filtre menteur.
   const filtered = incidents;
 
+  // Chaque colonne est decrite une fois. ResponsiveTable en fait un <tr> sur
+  // grand ecran et une carte sur telephone : le meme `rendu` sert aux deux,
+  // donc un badge modifie ne peut pas diverger entre les deux vues.
+  const lignes = filtered.map((incident) => {
+    const takenOrgId = incident.taken_by_organisation?.id;
+    const estMoi = Boolean(myOrgId && takenOrgId && String(takenOrgId) === String(myOrgId));
+    const collabList = Array.isArray(collaborations)
+      ? collaborations
+      : Array.isArray(collaborations?.results) ? collaborations.results : [];
+
+    return {
+      ...incident,
+      _takingOrg: (incident.taken_by_organisation || incident.taken_by)
+        ? {
+          isMe: estMoi,
+          name: estMoi ? myOrgName : (incident.taken_by_organisation?.name || incident.taken_by_name || ''),
+        }
+        : null,
+      _collabRequest: collabList.find((c) => c.incident === incident.id),
+    };
+  });
+
+  const colonnes = [
+    {
+      id: 'signalement', entete: 'Signalement', priorite: 'titre',
+      rendu: (incident) => (
+                            <div className="incident-table-main-col">
+                              <BlurryImage
+                                src={incident.thumbnail ||  ""}
+                                alt={incident.title}
+                                className="incident-table-img"
+                              />
+                              <div>
+                                <span className="incident-table-title">
+                                  {incident.title || 'Sans titre'}
+                                  {incident.isOwner ? (
+                                    <span className="incident-owner-tag" style={{ marginLeft: '8px', fontSize: '10px', padding: '2px 6px', background: 'var(--color-primary)', color: 'white', borderRadius: '4px' }}>Moi</span>
+                                  ) : incident.takenBy ? (
+                                    <span className="incident-owner-tag" style={{ marginLeft: '8px', fontSize: '10px', padding: '2px 6px', background: '#9CA3AF', color: 'white', borderRadius: '4px' }}>Autre</span>
+                                  ) : null}
+                                </span>
+                                <span className="incident-table-subtitle">{incident.description?.substring(0, 50)}...</span>
+                              </div>
+                            </div>
+      ),
+    },
+    {
+      id: 'localisation', entete: 'Localisation', priorite: 'sousTitre',
+      rendu: (incident) => (
+        <span className="incident-table-cell-text">
+                            {incident.location || 'Inconnue'}
+                            {incident.coordinates && (
+                              <div style={{ fontSize: '11px', color: 'var(--color-text-muted)', marginTop: '2px' }}>
+                                {incident.coordinates.lat.toFixed(3)}, {incident.coordinates.lng.toFixed(3)}
+                              </div>
+                            )}
+        </span>
+      ),
+    },
+    {
+      id: 'periode', entete: 'Période', priorite: 'detail',
+      rendu: (incident) => (
+                            <div className="incident-periode">
+                              {/* Date et fleche dans le meme span : sinon la fleche part
+                                  seule a la ligne suivante quand la cellule est etroite. */}
+                              <span className="incident-periode-debut">
+                                {incident.startDate}
+                                <span className="incident-periode-lien" aria-hidden="true">→</span>
+                              </span>
+                              {incident.endDate === 'En cours' ? (
+                                <span className="incident-date-badge is-pending">En cours</span>
+                              ) : (
+                                <span className="incident-date-badge is-resolved">{incident.endDate}</span>
+                              )}
+                            </div>
+      ),
+    },
+    {
+      id: 'etat', entete: 'État', priorite: 'marquant',
+      rendu: (incident) => (
+                            <div className="incident-etat">
+                              <div className="incident-table-badges">
+                                {incident.badges?.map((b, idx) => (
+                                  <span key={idx} className={`incident-badge-glow variant-${b.variant}`}>
+                                    {b.label}
+                                  </span>
+                                ))}
+                              </div>
+                              <div className="incident-table-badges">
+                                {(() => {
+                                  if (incident.severity === 'high') {
+                                    return <span className="incident-badge-glow" style={{ background: 'rgba(239, 68, 68, 0.12)', color: 'var(--color-danger-text)', borderColor: 'rgba(239, 68, 68, 0.3)' }}>Gravité élevée</span>;
+                                  }
+                                  if (incident.severity === 'medium') {
+                                    return <span className="incident-badge-glow" style={{ background: 'rgba(245, 158, 11, 0.12)', color: 'var(--color-warning-text)', borderColor: 'rgba(245, 158, 11, 0.3)' }}>Gravité moyenne</span>;
+                                  }
+                                  return <span className="incident-badge-glow" style={{ background: 'rgba(34, 197, 94, 0.12)', color: 'var(--color-success-text)', borderColor: 'rgba(34, 197, 94, 0.3)' }}>Gravité faible</span>;
+                                })()}
+                              </div>
+                            </div>
+      ),
+    },
+    {
+      id: 'prise-en-charge', entete: 'Prise en charge & Collaboration', priorite: 'bloc',
+      rendu: (incident) => (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                              {incident._takingOrg ? (
+                                <div>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                    <span style={{ fontWeight: '600', color: 'var(--color-text-primary)' }}>
+                                      {incident._takingOrg.name}
+                                    </span>
+                                    {incident._takingOrg.isMe ? (
+                                      <span style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        background: 'rgba(34, 197, 94, 0.12)',
+                                        color: 'var(--color-success-text)',
+                                        border: '1px solid rgba(34, 197, 94, 0.3)',
+                                        padding: '2px 8px',
+                                        borderRadius: '12px',
+                                        fontSize: '11px',
+                                        fontWeight: '600'
+                                      }}>
+                                        Moi
+                                      </span>
+                                    ) : (
+                                      <span style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        background: 'rgba(108, 114, 120, 0.12)',
+                                        color: 'var(--color-text-secondary)',
+                                        border: '1px solid rgba(108, 114, 120, 0.3)',
+                                        padding: '2px 8px',
+                                        borderRadius: '12px',
+                                        fontSize: '11px',
+                                        fontWeight: '600'
+                                      }}>
+                                        Autre
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div style={{
+                                    fontSize: '12px',
+                                    color: 'var(--color-text-secondary)',
+                                    marginTop: '4px',
+                                    fontStyle: 'italic',
+                                    lineHeight: '1.4'
+                                  }}>
+                                    {(() => {
+                                      const mode = incident.take_in_charge_mode;
+                                      const isInternal = mode === 'internal' || mode === 'interne';
+                                      const isCollaborative = mode === 'collaborative' || mode === 'collaboratif';
+                                      if (isInternal) {
+                                        return incident._takingOrg.isMe
+                                          ? "Nous travaillons en interne sur cet incident avec nos équipes"
+                                          : `${incident._takingOrg.name} travaille déjà en interne sur cet incident avec ses équipes`;
+                                      } else if (isCollaborative) {
+                                        return incident._takingOrg.isMe
+                                          ? "Nous collaborons avec d'autres organisations sur cet incident"
+                                          : `${incident._takingOrg.name} collabore avec d'autres organisations sur cet incident`;
+                                      } else {
+                                        return incident._takingOrg.isMe
+                                          ? "Pris en charge par notre organisation"
+                                          : `Pris en charge par ${incident._takingOrg.name}`;
+                                      }
+                                    })()}
+                                  </div>
+                                </div>
+                              ) : (
+                                <span style={{ color: 'var(--color-text-muted)', fontSize: '13px', fontStyle: 'italic' }}>
+                                  Disponible
+                                </span>
+                              )}
+
+                              {incident._collabRequest && (
+                                <div style={{ marginTop: '2px' }}>
+                                  {(() => {
+                                    const role = incident._collabRequest.role || '';
+                                    const status = incident._collabRequest.status || 'pending';
+
+                                    const getRoleLabel = (r) => {
+                                      const norm = r.toLowerCase();
+                                      if (norm === 'leader') return 'Leader';
+                                      if (norm === 'contributor' || norm === 'contributeur') return 'Contributeur';
+                                      if (norm === 'observer' || norm === 'observateur') return 'Observateur';
+                                      return r;
+                                    };
+
+                                    const getStatusLabel = (s) => {
+                                      const norm = s.toLowerCase();
+                                      if (norm === 'accepted' || norm === 'in-progress') return 'Acceptée';
+                                      if (norm === 'pending') return 'En attente';
+                                      if (norm === 'rejected' || norm === 'refused') return 'Refusée';
+                                      return s;
+                                    };
+
+                                    const isAccepted = status === 'accepted' || status === 'in-progress';
+                                    const isPending = status === 'pending';
+                                    const isRejected = status === 'rejected' || status === 'refused';
+
+                                    let badgeColor = 'var(--color-text-secondary)';
+                                    let badgeBg = 'rgba(108, 114, 120, 0.1)';
+                                    let badgeBorder = 'rgba(108, 114, 120, 0.2)';
+
+                                    if (isAccepted) {
+                                      badgeColor = 'var(--color-success)';
+                                      badgeBg = 'rgba(34, 197, 94, 0.1)';
+                                      badgeBorder = 'rgba(34, 197, 94, 0.2)';
+                                    } else if (isPending) {
+                                      badgeColor = 'var(--color-warning)';
+                                      badgeBg = 'rgba(245, 158, 11, 0.1)';
+                                      badgeBorder = 'rgba(245, 158, 11, 0.2)';
+                                    } else if (isRejected) {
+                                      badgeColor = 'var(--color-danger)';
+                                      badgeBg = 'rgba(239, 68, 68, 0.1)';
+                                      badgeBorder = 'rgba(239, 68, 68, 0.2)';
+                                    }
+
+                                    return (
+                                      <span style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '6px',
+                                        padding: '4px 10px',
+                                        borderRadius: '6px',
+                                        fontSize: '11px',
+                                        fontWeight: '600',
+                                        color: badgeColor,
+                                        backgroundColor: badgeBg,
+                                        borderColor: badgeBorder,
+                                        borderWidth: '1px',
+                                        borderStyle: 'solid'
+                                      }}>
+
+                                        {String(incident._collabRequest.organisation_id) !== String(myOrgId)
+                                          ? (isPending ? "Vous avez des demandes de collaboration en attente" : `Demande de collaboration : ${getStatusLabel(status)}`)
+                                          : getRoleLabel(role) === "Leader" 
+                                            ? "" 
+                                            : `(Moi) j'ai fais une demande en tant que ${getRoleLabel(role)} : ${getStatusLabel(status)}`
+                                        }
+                                      </span>
+                                    );
+                                  })()}
+                                </div>
+                              )}
+                            </div>
+      ),
+    },
+  ];
+
+  // Le lisere colore du bord gauche de la carte double le badge de gravite,
+  // il ne le remplace pas : la couleur seule ne doit jamais porter le sens.
+  const accentDe = (incident) =>
+    incident.severity === 'high' ? 'var(--color-severity-high)'
+      : incident.severity === 'medium' ? 'var(--color-severity-medium)'
+        : 'var(--color-severity-low)';
+
+  const actionsDe = (incident) => (
+    <div onClick={(e) => e.stopPropagation()}>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                              <TableActionsMenu
+                                ariaLabel={`Actions sur ${incident.title || 'cet incident'}`}
+                                actions={[
+                                  {
+                                    id: 'view',
+                                    label: 'Voir le détail',
+                                    icon: Eye,
+                                    onSelect: () => onSelectIncident && onSelectIncident(incident),
+                                  },
+                                  (incident.isOwner || incident._takingOrg?.isMe) && {
+                                    id: 'assign',
+                                    label: 'Assigner à un agent',
+                                    icon: Edit2,
+                                    onSelect: () => openAssignModal(incident),
+                                  },
+                                  !isAdmin && {
+                                    id: 'delete',
+                                    label: "Supprimer l'incident",
+                                    icon: Trash,
+                                    tone: 'danger',
+                                    onSelect: () => openDeleteModal(incident),
+                                  },
+                                ].filter(Boolean)}
+                              />
+                            </div>
+    </div>
+  );
+
   return (
     <section className="project-list-section">
       {/* Header */}
@@ -130,307 +420,16 @@ export const IncidentList = ({
             <p>Aucun signalement ne correspond à vos critères.</p>
           </div>
         ) : (
-          <div className="incident-table-wrap">
-            <table className="incident-table has-sticky-actions">
-              <thead>
-                <tr>
-                  <th>Signalement</th>
-                  <th>Localisation</th>
-                  <th>Période</th>
-                  <th>État</th>
-                  <th>Prise en charge & Collaboration</th>
-                  <th className="incident-th-actions">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((incident) => {
-
-                  const getTakingOrg = (inc) => {
-                    if (!inc.taken_by_organisation && !inc.taken_by) return null;
-
-                    let isMe = false;
-                    let name = '';
-
-                    const takenOrgId = inc.taken_by_organisation?.id;
-                    const takenOrgName = inc.taken_by_organisation?.name;
-
-                    if (myOrgId && takenOrgId && String(takenOrgId) === String(myOrgId)) {
-                      isMe = true;
-                    }
-
-                    if (isMe) {
-                      name = myOrgName;
-                    } else {
-                      name = takenOrgName || inc.taken_by_name || '';
-                    }
-
-                    return { isMe, name };
-                  };
-
-                  const takingOrg = getTakingOrg(incident);
-                  const collabList = Array.isArray(collaborations)
-                    ? collaborations
-                    : Array.isArray(collaborations?.results)
-                      ? collaborations.results
-                      : [];
-                  const collabRequest = collabList.find(c => c.incident === incident.id);
-
-                  return (
-                    <tr
-                      key={incident.id}
-                      onClick={() => onSelectIncident && onSelectIncident(incident)}
-                      className={incident.id === selectedId ? 'is-selected' : ''}
-                    >
-                      <td>
-                        <div className="incident-table-main-col">
-                          <BlurryImage
-                            src={incident.thumbnail ||  ""}
-                            alt={incident.title}
-                            className="incident-table-img"
-                          />
-                          <div>
-                            <span className="incident-table-title">
-                              {incident.title || 'Sans titre'}
-                              {incident.isOwner ? (
-                                <span className="incident-owner-tag" style={{ marginLeft: '8px', fontSize: '10px', padding: '2px 6px', background: 'var(--color-primary)', color: 'white', borderRadius: '4px' }}>Moi</span>
-                              ) : incident.takenBy ? (
-                                <span className="incident-owner-tag" style={{ marginLeft: '8px', fontSize: '10px', padding: '2px 6px', background: '#9CA3AF', color: 'white', borderRadius: '4px' }}>Autre</span>
-                              ) : null}
-                            </span>
-                            <span className="incident-table-subtitle">{incident.description?.substring(0, 50)}...</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="incident-table-cell-text">
-                        {incident.location || 'Inconnue'}
-                        {incident.coordinates && (
-                          <div style={{ fontSize: '11px', color: 'var(--color-text-muted)', marginTop: '2px' }}>
-                            {incident.coordinates.lat.toFixed(3)}, {incident.coordinates.lng.toFixed(3)}
-                          </div>
-                        )}
-                      </td>
-                      {/* Periode : les deux colonnes de dates fusionnent. La date de
-                          resolution valait « En cours » tant que rien n'etait resolu —
-                          soit un statut dans une colonne de date. Reunies, elles se
-                          lisent comme un intervalle. */}
-                      <td className="incident-table-cell-text">
-                        <div className="incident-periode">
-                          {/* Date et fleche dans le meme span : sinon la fleche part
-                              seule a la ligne suivante quand la cellule est etroite. */}
-                          <span className="incident-periode-debut">
-                            {incident.startDate}
-                            <span className="incident-periode-lien" aria-hidden="true">→</span>
-                          </span>
-                          {incident.endDate === 'En cours' ? (
-                            <span className="incident-date-badge is-pending">En cours</span>
-                          ) : (
-                            <span className="incident-date-badge is-resolved">{incident.endDate}</span>
-                          )}
-                        </div>
-                      </td>
-                      {/* Etat : statut et gravite decrivent tous deux ou en est le
-                          signalement. Empiles dans une meme colonne, ils se lisent
-                          d'un seul coup d'oeil au lieu de deux. */}
-                      <td>
-                        <div className="incident-etat">
-                          <div className="incident-table-badges">
-                            {incident.badges?.map((b, idx) => (
-                              <span key={idx} className={`incident-badge-glow variant-${b.variant}`}>
-                                {b.label}
-                              </span>
-                            ))}
-                          </div>
-                          <div className="incident-table-badges">
-                            {(() => {
-                              if (incident.severity === 'high') {
-                                return <span className="incident-badge-glow" style={{ background: 'rgba(239, 68, 68, 0.12)', color: 'var(--color-danger-text)', borderColor: 'rgba(239, 68, 68, 0.3)' }}>Gravité élevée</span>;
-                              }
-                              if (incident.severity === 'medium') {
-                                return <span className="incident-badge-glow" style={{ background: 'rgba(245, 158, 11, 0.12)', color: 'var(--color-warning-text)', borderColor: 'rgba(245, 158, 11, 0.3)' }}>Gravité moyenne</span>;
-                              }
-                              return <span className="incident-badge-glow" style={{ background: 'rgba(34, 197, 94, 0.12)', color: 'var(--color-success-text)', borderColor: 'rgba(34, 197, 94, 0.3)' }}>Gravité faible</span>;
-                            })()}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="incident-table-cell-text" style={{ minWidth: '260px' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          {takingOrg ? (
-                            <div>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                                <span style={{ fontWeight: '600', color: 'var(--color-text-primary)' }}>
-                                  {takingOrg.name}
-                                </span>
-                                {takingOrg.isMe ? (
-                                  <span style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    background: 'rgba(34, 197, 94, 0.12)',
-                                    color: 'var(--color-success-text)',
-                                    border: '1px solid rgba(34, 197, 94, 0.3)',
-                                    padding: '2px 8px',
-                                    borderRadius: '12px',
-                                    fontSize: '11px',
-                                    fontWeight: '600'
-                                  }}>
-                                    Moi
-                                  </span>
-                                ) : (
-                                  <span style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    background: 'rgba(108, 114, 120, 0.12)',
-                                    color: 'var(--color-text-secondary)',
-                                    border: '1px solid rgba(108, 114, 120, 0.3)',
-                                    padding: '2px 8px',
-                                    borderRadius: '12px',
-                                    fontSize: '11px',
-                                    fontWeight: '600'
-                                  }}>
-                                    Autre
-                                  </span>
-                                )}
-                              </div>
-                              <div style={{
-                                fontSize: '12px',
-                                color: 'var(--color-text-secondary)',
-                                marginTop: '4px',
-                                fontStyle: 'italic',
-                                lineHeight: '1.4'
-                              }}>
-                                {(() => {
-                                  const mode = incident.take_in_charge_mode;
-                                  const isInternal = mode === 'internal' || mode === 'interne';
-                                  const isCollaborative = mode === 'collaborative' || mode === 'collaboratif';
-                                  if (isInternal) {
-                                    return takingOrg.isMe
-                                      ? "Nous travaillons en interne sur cet incident avec nos équipes"
-                                      : `${takingOrg.name} travaille déjà en interne sur cet incident avec ses équipes`;
-                                  } else if (isCollaborative) {
-                                    return takingOrg.isMe
-                                      ? "Nous collaborons avec d'autres organisations sur cet incident"
-                                      : `${takingOrg.name} collabore avec d'autres organisations sur cet incident`;
-                                  } else {
-                                    return takingOrg.isMe
-                                      ? "Pris en charge par notre organisation"
-                                      : `Pris en charge par ${takingOrg.name}`;
-                                  }
-                                })()}
-                              </div>
-                            </div>
-                          ) : (
-                            <span style={{ color: 'var(--color-text-muted)', fontSize: '13px', fontStyle: 'italic' }}>
-                              Disponible
-                            </span>
-                          )}
-
-                          {collabRequest && (
-                            <div style={{ marginTop: '2px' }}>
-                              {(() => {
-                                const role = collabRequest.role || '';
-                                const status = collabRequest.status || 'pending';
-
-                                const getRoleLabel = (r) => {
-                                  const norm = r.toLowerCase();
-                                  if (norm === 'leader') return 'Leader';
-                                  if (norm === 'contributor' || norm === 'contributeur') return 'Contributeur';
-                                  if (norm === 'observer' || norm === 'observateur') return 'Observateur';
-                                  return r;
-                                };
-
-                                const getStatusLabel = (s) => {
-                                  const norm = s.toLowerCase();
-                                  if (norm === 'accepted' || norm === 'in-progress') return 'Acceptée';
-                                  if (norm === 'pending') return 'En attente';
-                                  if (norm === 'rejected' || norm === 'refused') return 'Refusée';
-                                  return s;
-                                };
-
-                                const isAccepted = status === 'accepted' || status === 'in-progress';
-                                const isPending = status === 'pending';
-                                const isRejected = status === 'rejected' || status === 'refused';
-
-                                let badgeColor = 'var(--color-text-secondary)';
-                                let badgeBg = 'rgba(108, 114, 120, 0.1)';
-                                let badgeBorder = 'rgba(108, 114, 120, 0.2)';
-
-                                if (isAccepted) {
-                                  badgeColor = 'var(--color-success)';
-                                  badgeBg = 'rgba(34, 197, 94, 0.1)';
-                                  badgeBorder = 'rgba(34, 197, 94, 0.2)';
-                                } else if (isPending) {
-                                  badgeColor = 'var(--color-warning)';
-                                  badgeBg = 'rgba(245, 158, 11, 0.1)';
-                                  badgeBorder = 'rgba(245, 158, 11, 0.2)';
-                                } else if (isRejected) {
-                                  badgeColor = 'var(--color-danger)';
-                                  badgeBg = 'rgba(239, 68, 68, 0.1)';
-                                  badgeBorder = 'rgba(239, 68, 68, 0.2)';
-                                }
-
-                                return (
-                                  <span style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '6px',
-                                    padding: '4px 10px',
-                                    borderRadius: '6px',
-                                    fontSize: '11px',
-                                    fontWeight: '600',
-                                    color: badgeColor,
-                                    backgroundColor: badgeBg,
-                                    borderColor: badgeBorder,
-                                    borderWidth: '1px',
-                                    borderStyle: 'solid'
-                                  }}>
-
-                                    {String(collabRequest.organisation_id) !== String(myOrgId)
-                                      ? (isPending ? "Vous avez des demandes de collaboration en attente" : `Demande de collaboration : ${getStatusLabel(status)}`)
-                                      : getRoleLabel(role) === "Leader" 
-                                        ? "" 
-                                        : `(Moi) j'ai fais une demande en tant que ${getRoleLabel(role)} : ${getStatusLabel(status)}`
-                                    }
-                                  </span>
-                                );
-                              })()}
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                      <td onClick={(e) => e.stopPropagation()}>
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-                          <TableActionsMenu
-                            ariaLabel={`Actions sur ${incident.title || 'cet incident'}`}
-                            actions={[
-                              {
-                                id: 'view',
-                                label: 'Voir le détail',
-                                icon: Eye,
-                                onSelect: () => onSelectIncident && onSelectIncident(incident),
-                              },
-                              (incident.isOwner || takingOrg?.isMe) && {
-                                id: 'assign',
-                                label: 'Assigner à un agent',
-                                icon: Edit2,
-                                onSelect: () => openAssignModal(incident),
-                              },
-                              !isAdmin && {
-                                id: 'delete',
-                                label: "Supprimer l'incident",
-                                icon: Trash,
-                                tone: 'danger',
-                                onSelect: () => openDeleteModal(incident),
-                              },
-                            ].filter(Boolean)}
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <ResponsiveTable
+            colonnes={colonnes}
+            donnees={lignes}
+            cleDe={(i) => i.id}
+            actions={actionsDe}
+            accentDe={accentDe}
+            onLigneClick={onSelectIncident}
+            classeLigne={(i) => (i.id === selectedId ? 'is-selected' : '')}
+            libelleListe="Signalements"
+          />
         )}
         <Pagination
           page={page}

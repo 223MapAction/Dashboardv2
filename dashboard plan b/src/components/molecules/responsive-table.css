@@ -1,0 +1,178 @@
+/* ============================================================================
+   CARTES DE LISTE (mobile)
+   Le pendant compact de nos tableaux. Reprend les jetons du systeme : rien
+   d'invente ici, sinon le lisere de gravite explique plus bas.
+   ============================================================================ */
+
+.rt-cartes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.rt-carte {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+  /* Marge a gauche pour le lisere : le contenu ne doit pas le chevaucher. */
+  padding-left: calc(var(--spacing-4) + 3px);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+/* Le lisere de gravite.
+   Sur un telephone, on trie une file de signalements au pouce, sans lire.
+   Une arete coloree sur le bord gauche se percoit en balayant la liste, la ou
+   un badge demande de s'arreter sur chaque carte. Elle ne porte jamais
+   l'information seule : le badge de gravite reste present dans la carte, pour
+   qui distingue mal les couleurs. */
+.rt-carte::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 3px;
+  background-color: var(--rt-accent, transparent);
+}
+
+/* ── Tete : identite a gauche, menu a droite ───────────────────────────────── */
+.rt-carte-tete {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+}
+
+.rt-carte-identite {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  min-width: 0;
+  flex: 1;
+}
+
+/* Le titre est un bouton, mais il doit se lire comme un titre. */
+.rt-carte-lien {
+  display: block;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.rt-carte-lien:hover {
+  color: var(--color-primary-text);
+}
+
+.rt-carte-soustitre {
+  font-size: var(--font-size-body-small);
+  color: var(--color-text-secondary);
+}
+
+.rt-carte-actions {
+  flex-shrink: 0;
+}
+
+/* ── Marquants : ce qui se voit sans lire ──────────────────────────────────── */
+.rt-carte-marquants {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+/* ── Details : paires libelle / valeur ─────────────────────────────────────
+   Une seule colonne. Deux colonnes tiendraient sur 390 px mais pas sur 320,
+   et une valeur longue (« Pris en compte avec action ») casserait
+   l'alignement d'une ligne sur deux. */
+.rt-carte-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  margin: 0;
+  padding-top: var(--spacing-3);
+  border-top: 1px solid var(--color-border);
+}
+
+.rt-paire {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+}
+
+.rt-paire dt {
+  flex-shrink: 0;
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+.rt-paire dd {
+  margin: 0;
+  min-width: 0;
+  text-align: right;
+  font-size: var(--font-size-body-small);
+  color: var(--color-text-primary);
+}
+
+/* ── Blocs : contenus multi-lignes sur toute la largeur ────────────────────── */
+.rt-carte-bloc {
+  padding-top: var(--spacing-3);
+  border-top: 1px solid var(--color-border);
+}
+
+.rt-carte-bloc-titre {
+  margin: 0 0 var(--spacing-2);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+/* Un bloc qui suit la liste de details n'a pas besoin d'un second filet. */
+.rt-carte-details + .rt-carte-bloc {
+  padding-top: 0;
+  border-top: none;
+}
+
+/* Une ligne desactivee reste lisible : on baisse l'opacite du contenu, pas
+   du texte lui-meme, pour ne pas passer sous le seuil de contraste. */
+.rt-carte.is-inactive .rt-carte-identite,
+.rt-carte.is-inactive .rt-carte-details {
+  opacity: 0.7;
+}
+
+@media (max-width: 359.98px) {
+  /* Sous 360 px, une valeur alignee a droite finit collee a son libelle.
+     On les empile plutot que de les serrer. */
+  .rt-paire {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .rt-paire dd {
+    text-align: left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rt-carte-lien {
+    transition: none;
+  }
+}
