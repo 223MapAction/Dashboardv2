@@ -522,7 +522,7 @@ export const Organisations = () => {
               {/* ── Tableau ── */}
               {swrLoading ? (
                 <div className="orgs-table-wrap">
-                  <table className="orgs-table">
+                  <table className="orgs-table has-sticky-actions">
                     <thead>
                       <tr>
                         <th>Organisation</th>
@@ -568,7 +568,7 @@ export const Organisations = () => {
                 </div>
               ) : (
                 <div className="orgs-table-wrap">
-                  <table className="orgs-table">
+                  <table className="orgs-table has-sticky-actions">
                     <thead>
                       <tr>
                         <th>Organisation</th>

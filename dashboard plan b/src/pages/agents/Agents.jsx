@@ -33,7 +33,7 @@ const EMPTY_ARRAY = [];
 
 const AgentTableSkeleton = () => (
   <div className="agents-table-wrap">
-    <table className="agents-table">
+    <table className="agents-table has-sticky-actions">
       <thead>
         <tr>
           <th>Agent</th>
@@ -446,7 +446,7 @@ export const Agents = () => {
               ) : (
                 <>
                   <div className="agents-table-wrap">
-                    <table className="agents-table">
+                    <table className="agents-table has-sticky-actions">
                       <thead>
                         <tr>
                           <th>Agent</th><th>Rôle</th><th>Organisation</th>

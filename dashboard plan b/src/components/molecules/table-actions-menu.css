@@ -108,3 +108,48 @@
     padding: 12px 12px;
   }
 }
+
+/* ── Colonne d'actions figée à droite ────────────────────────────────────────
+   Le menu condensé réduit la largeur de la colonne, mais ne supprime pas le
+   défilement : les tableaux imposent un min-width de 700 à 1000px, et la
+   colonne d'actions reste au bout. Mesuré sur /agents à 320px : 515px de
+   défilement nécessaires pour atteindre le bouton.
+
+   On fige donc la dernière colonne au bord droit. Elle flotte au-dessus du
+   contenu qui défile dessous, avec un liseré et une ombre portée vers la
+   gauche qui signalent la superposition. Le bouton reste atteignable à toute
+   largeur, sans défiler.
+
+   `background` est obligatoire : sans fond opaque, le contenu défilant
+   passerait visiblement sous la colonne figée. */
+.has-sticky-actions th:last-child,
+.has-sticky-actions td:last-child {
+  position: sticky;
+  right: 0;
+  z-index: 2;
+  background-color: var(--color-surface);
+  box-shadow: -8px 0 12px -8px rgba(15, 23, 42, 0.18);
+}
+
+.has-sticky-actions thead th:last-child {
+  z-index: 3;
+}
+
+/* La ligne survolée ou sélectionnée doit teinter la cellule figée aussi,
+   sinon elle trancherait comme un bloc blanc au milieu de la ligne. */
+.has-sticky-actions tbody tr:hover td:last-child {
+  background-color: var(--color-background);
+}
+
+.has-sticky-actions tbody tr.is-selected td:last-child {
+  background-color: rgba(58, 162, 221, 0.06);
+}
+
+/* Sur grand écran, le tableau tient sans défiler : l'ombre n'aurait plus de
+   sens et ferait une barre verticale parasite. */
+@media (min-width: 1280px) {
+  .has-sticky-actions th:last-child,
+  .has-sticky-actions td:last-child {
+    box-shadow: none;
+  }
+}

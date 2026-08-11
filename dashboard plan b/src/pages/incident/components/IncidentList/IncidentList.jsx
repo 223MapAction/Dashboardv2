@@ -15,7 +15,7 @@ import { TableActionsMenu } from '../../../../components/molecules/TableActionsM
 // Composant shimmer pour le chargement (version table)
 const IncidentTableSkeleton = () => (
   <div className="incident-table-wrap">
-    <table className="incident-table">
+    <table className="incident-table has-sticky-actions">
       <thead>
         <tr>
           <th>Incident</th>
@@ -145,7 +145,7 @@ export const IncidentList = ({
           </div>
         ) : (
           <div className="incident-table-wrap">
-            <table className="incident-table">
+            <table className="incident-table has-sticky-actions">
               <thead>
                 <tr>
                   <th>Incident</th>

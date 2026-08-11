@@ -55,7 +55,7 @@ const adaptIncidentData = (incident) => {
 
 const TableSkeleton = () => (
   <div className="mes-interventions-table-wrap">
-    <table className="mes-interventions-table">
+    <table className="mes-interventions-table has-sticky-actions">
       <thead>
         <tr>
           <th>Incident</th>
@@ -382,7 +382,7 @@ const MesInterventionsContent = () => {
           ) : (
             <>
               <div className="mes-interventions-table-wrap">
-                <table className="mes-interventions-table">
+                <table className="mes-interventions-table has-sticky-actions">
                   <thead>
                     <tr>
                       <th>Incident</th>
