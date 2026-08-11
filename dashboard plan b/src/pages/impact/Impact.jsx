@@ -308,11 +308,20 @@ export const Impact = () => {
             <div className="impact-filters-section">
               <div className="impact-filters-group">
                 <div className="impact-filter-col">
-                  <label className="impact-filter-label">Période</label>
-                  <div className="impact-period-filters">
+                  {/* Ce n'est pas un <label> : il ne designe aucun champ, mais
+                      un groupe de boutons. Un lecteur d'ecran annoncait une
+                      etiquette pour un controle inexistant. En span + groupe
+                      nomme, il annonce « Periode, groupe » a l'entree. */}
+                  <span className="impact-filter-label" id="impact-filtre-periode">Période</span>
+                  <div
+                    className="impact-period-filters"
+                    role="group"
+                    aria-labelledby="impact-filtre-periode"
+                  >
                     <button
                       type="button"
                       className={`impact-period-btn ${periodFilter === 'all' ? 'is-active' : ''}`}
+                      aria-pressed={periodFilter === 'all'}
                       onClick={() => setPeriodFilter('all')}
                     >
                       Toute la période
@@ -320,6 +329,7 @@ export const Impact = () => {
                     <button
                       type="button"
                       className={`impact-period-btn ${periodFilter === '30d' ? 'is-active' : ''}`}
+                      aria-pressed={periodFilter === '30d'}
                       onClick={() => setPeriodFilter('30d')}
                     >
                       30 derniers jours
@@ -327,6 +337,7 @@ export const Impact = () => {
                     <button
                       type="button"
                       className={`impact-period-btn ${periodFilter === '90d' ? 'is-active' : ''}`}
+                      aria-pressed={periodFilter === '90d'}
                       onClick={() => setPeriodFilter('90d')}
                     >
                       90 derniers jours
@@ -334,6 +345,7 @@ export const Impact = () => {
                     <button
                       type="button"
                       className={`impact-period-btn ${periodFilter === 'year' ? 'is-active' : ''}`}
+                      aria-pressed={periodFilter === 'year'}
                       onClick={() => setPeriodFilter('year')}
                     >
                       Cette année
@@ -342,11 +354,16 @@ export const Impact = () => {
                 </div>
 
                 <div className="impact-filter-col">
-                  <label className="impact-filter-label">Statut des Signalements</label>
-                  <div className="impact-period-filters">
+                  <span className="impact-filter-label" id="impact-filtre-statut">Statut des Signalements</span>
+                  <div
+                    className="impact-period-filters"
+                    role="group"
+                    aria-labelledby="impact-filtre-statut"
+                  >
                     <button
                       type="button"
                       className={`impact-period-btn ${statusFilter === 'both' ? 'is-active' : ''}`}
+                      aria-pressed={statusFilter === 'both'}
                       onClick={() => setStatusFilter('both')}
                     >
                       Les 2 ensembles
@@ -354,6 +371,7 @@ export const Impact = () => {
                     <button
                       type="button"
                       className={`impact-period-btn ${statusFilter === 'resolved' ? 'is-active' : ''}`}
+                      aria-pressed={statusFilter === 'resolved'}
                       onClick={() => setStatusFilter('resolved')}
                     >
                       Incidents résolus
@@ -361,6 +379,7 @@ export const Impact = () => {
                     <button
                       type="button"
                       className={`impact-period-btn ${statusFilter === 'taken_with_action' ? 'is-active' : ''}`}
+                      aria-pressed={statusFilter === 'taken_with_action'}
                       onClick={() => setStatusFilter('taken_with_action')}
                     >
                       Pris en compte avec action
@@ -507,11 +526,16 @@ export const Impact = () => {
                     </div>
 
                     <div className="impact-structures-interactive">
-                      <span className="structures-filter-title">Filtrer par type :</span>
-                      <div className="structures-grid-chips">
+                      <span className="structures-filter-title" id="impact-filtre-structure">Filtrer par type :</span>
+                      <div
+                        className="structures-grid-chips"
+                        role="group"
+                        aria-labelledby="impact-filtre-structure"
+                      >
                         <button
                           type="button"
                           className={`structure-chip ${structureFilter === 'all' ? 'active' : ''}`}
+                          aria-pressed={structureFilter === 'all'}
                           onClick={() => setStructureFilter('all')}
                         >
                           Tous ({globals.totalStructures || 0})
@@ -523,6 +547,7 @@ export const Impact = () => {
                               key={key}
                               type="button"
                               className={`structure-chip ${structureFilter === key ? 'active' : ''}`}
+                              aria-pressed={structureFilter === key}
                               disabled={count === 0}
                               onClick={() => setStructureFilter(key)}
                             >
