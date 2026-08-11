@@ -52,6 +52,20 @@
   gap: var(--spacing-2);
   border-bottom: 2px solid var(--color-border);
   padding-bottom: 0;
+  /* Les trois onglets réclament 365px : sous 400px de large, « Suggestions »
+     sortait du cadre et se faisait rogner par le overflow-x: hidden global,
+     devenant inatteignable. On défile plutôt que de perdre un onglet. */
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+.collab-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.collab-tab {
+  flex-shrink: 0;
 }
 
 .collab-tab {
