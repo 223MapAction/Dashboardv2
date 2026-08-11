@@ -6,8 +6,8 @@ import {
   Element4,
   Briefcase, Award, Trash, Buildings2, Profile2User, Lock1
 } from 'iconsax-react';
-import logoMapAction from '../../assets/logo.svg';
-import logoMapActionMin from '../../assets/logo-min.svg';
+import logoMapAction from '../../assets/logo.webp';
+import logoMapActionMin from '../../assets/logo-min.webp';
 import './sidebar.css';
 import {
   User,          // Mon profil
