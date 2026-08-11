@@ -300,6 +300,34 @@
   color: var(--color-text-secondary);
 }
 
+/* Periode : « declare le X → resolu le Y ». La fleche porte le sens, donc
+   elle reste lisible mais discrete ; les deux dates gardent le meme poids. */
+.incident-periode {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  flex-wrap: wrap;
+  row-gap: var(--spacing-1);
+}
+
+.incident-periode-debut {
+  white-space: nowrap;
+}
+
+.incident-periode-lien {
+  color: var(--color-text-tertiary, var(--color-text-secondary));
+  font-size: 13px;
+  margin-left: var(--spacing-2);
+}
+
+/* Etat : statut au-dessus, gravite en dessous. */
+.incident-etat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  align-items: flex-start;
+}
+
 /* Badges in table */
 .incident-table-badges {
   display: flex;

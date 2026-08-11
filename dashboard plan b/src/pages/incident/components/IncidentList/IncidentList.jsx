@@ -20,11 +20,10 @@ const IncidentTableSkeleton = () => (
         <tr>
           <th>Signalement</th>
           <th>Localisation</th>
-          <th>Date de déclaration</th>
-          <th>Date de résolution</th>
-          <th>Statut</th>
+          <th>Période</th>
+          <th>État</th>
           <th>Prise en charge & Collaboration</th>
-          <th></th>
+          <th className="incident-th-actions">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -38,10 +37,9 @@ const IncidentTableSkeleton = () => (
                 </div>
               </div>
             </td>
-            <td><ShimmerText line={1} width={100} /></td>
-            <td><ShimmerText line={1} width={80} /></td>
-            <td><ShimmerText line={1} width={80} /></td>
-            <td><ShimmerThumbnail height={24} width={80} rounded /></td>
+            <td><ShimmerText line={2} width={100} /></td>
+            <td><ShimmerText line={1} width={140} /></td>
+            <td><ShimmerThumbnail height={24} width={90} rounded /></td>
             <td><ShimmerText line={2} width={120} /></td>
             <td><ShimmerCircularImage size={32} /></td>
           </tr>
@@ -150,12 +148,10 @@ export const IncidentList = ({
                 <tr>
                   <th>Signalement</th>
                   <th>Localisation</th>
-                  <th>Date de déclaration</th>
-                  <th>Date de résolution</th>
-                  <th>Statut</th>
-                  <th>Gravité</th>
+                  <th>Période</th>
+                  <th>État</th>
                   <th>Prise en charge & Collaboration</th>
-                  <th></th>
+                  <th className="incident-th-actions">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -225,34 +221,48 @@ export const IncidentList = ({
                           </div>
                         )}
                       </td>
-                      <td className="incident-table-cell-text">{incident.startDate}</td>
+                      {/* Periode : les deux colonnes de dates fusionnent. La date de
+                          resolution valait « En cours » tant que rien n'etait resolu —
+                          soit un statut dans une colonne de date. Reunies, elles se
+                          lisent comme un intervalle. */}
                       <td className="incident-table-cell-text">
-                        {incident.endDate === 'En cours' ? (
-                          <span className="incident-date-badge is-pending">En cours</span>
-                        ) : (
-                          <span className="incident-date-badge is-resolved">{incident.endDate}</span>
-                        )}
-                      </td>
-                      <td>
-                        <div className="incident-table-badges">
-                          {incident.badges?.map((b, idx) => (
-                            <span key={idx} className={`incident-badge-glow variant-${b.variant}`}>
-                              {b.label}
-                            </span>
-                          ))}
+                        <div className="incident-periode">
+                          {/* Date et fleche dans le meme span : sinon la fleche part
+                              seule a la ligne suivante quand la cellule est etroite. */}
+                          <span className="incident-periode-debut">
+                            {incident.startDate}
+                            <span className="incident-periode-lien" aria-hidden="true">→</span>
+                          </span>
+                          {incident.endDate === 'En cours' ? (
+                            <span className="incident-date-badge is-pending">En cours</span>
+                          ) : (
+                            <span className="incident-date-badge is-resolved">{incident.endDate}</span>
+                          )}
                         </div>
                       </td>
+                      {/* Etat : statut et gravite decrivent tous deux ou en est le
+                          signalement. Empiles dans une meme colonne, ils se lisent
+                          d'un seul coup d'oeil au lieu de deux. */}
                       <td>
-                        <div className="incident-table-badges">
-                          {(() => {
-                            if (incident.severity === 'high') {
-                              return <span className="incident-badge-glow" style={{ background: 'rgba(239, 68, 68, 0.12)', color: 'var(--color-danger-text)', borderColor: 'rgba(239, 68, 68, 0.3)' }}>Élevée</span>;
-                            }
-                            if (incident.severity === 'medium') {
-                              return <span className="incident-badge-glow" style={{ background: 'rgba(245, 158, 11, 0.12)', color: 'var(--color-warning-text)', borderColor: 'rgba(245, 158, 11, 0.3)' }}>Moyenne</span>;
-                            }
-                            return <span className="incident-badge-glow" style={{ background: 'rgba(34, 197, 94, 0.12)', color: 'var(--color-success-text)', borderColor: 'rgba(34, 197, 94, 0.3)' }}>Faible</span>;
-                          })()}
+                        <div className="incident-etat">
+                          <div className="incident-table-badges">
+                            {incident.badges?.map((b, idx) => (
+                              <span key={idx} className={`incident-badge-glow variant-${b.variant}`}>
+                                {b.label}
+                              </span>
+                            ))}
+                          </div>
+                          <div className="incident-table-badges">
+                            {(() => {
+                              if (incident.severity === 'high') {
+                                return <span className="incident-badge-glow" style={{ background: 'rgba(239, 68, 68, 0.12)', color: 'var(--color-danger-text)', borderColor: 'rgba(239, 68, 68, 0.3)' }}>Gravité élevée</span>;
+                              }
+                              if (incident.severity === 'medium') {
+                                return <span className="incident-badge-glow" style={{ background: 'rgba(245, 158, 11, 0.12)', color: 'var(--color-warning-text)', borderColor: 'rgba(245, 158, 11, 0.3)' }}>Gravité moyenne</span>;
+                              }
+                              return <span className="incident-badge-glow" style={{ background: 'rgba(34, 197, 94, 0.12)', color: 'var(--color-success-text)', borderColor: 'rgba(34, 197, 94, 0.3)' }}>Gravité faible</span>;
+                            })()}
+                          </div>
                         </div>
                       </td>
                       <td className="incident-table-cell-text" style={{ minWidth: '260px' }}>
