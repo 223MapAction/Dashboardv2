@@ -25,6 +25,7 @@ import DeleteOrganisationModal from './modal/DeleteOrganisationModal';
 import { BlurryImage } from '../../components/atoms/BlurryImage';
 import Pagination from '../../components/molecules/Pagination';
 
+import { TableActionsMenu } from '../../components/molecules/TableActionsMenu';
 const COLOR_PALETTE = [
   '#EF4444', '#F97316', '#F59E0B', '#22C55E',
   '#3AA2DD', '#1E40AF', '#A855F7', '#EC4899',
@@ -199,7 +200,7 @@ export const Organisations = () => {
 
   // ── Ouvrir modal édition ─────────────────────────────────
   const openEdit = (org, e) => {
-    e.stopPropagation();
+    e?.stopPropagation();
     setForm({
       name: org.name,
       acronym: org.acronym,
@@ -236,7 +237,7 @@ export const Organisations = () => {
   };
 
   const removePhoto = (e) => {
-    e.stopPropagation();
+    e?.stopPropagation();
     setField('logo_url', null);
     setField('logo', null);
   };
@@ -356,7 +357,7 @@ export const Organisations = () => {
 
   // ── Supprimer ────────────────────────────────────────────
   const openDelete = (org, e) => {
-    e.stopPropagation();
+    e?.stopPropagation();
     setDeleteAlert({ type: null, message: null });
     setDeleteAnimating('opening');
     setDeleteModal({ open: true, org });
@@ -373,7 +374,7 @@ export const Organisations = () => {
   };
 
   const confirmDelete = async (e) => {
-    e.stopPropagation();
+    e?.stopPropagation();
     setIsDeleting(true);
     setDeleteAlert({ type: null, message: null });
     console.log(deleteModal.org);
@@ -625,20 +626,13 @@ export const Organisations = () => {
                           </td>
                           <td>
                             <div className="orgs-row-actions">
-                              <button
-                                className="orgs-icon-btn orgs-icon-btn-edit"
-                                onClick={(e) => openEdit(org, e)}
-                                title="Modifier"
-                              >
-                                <Edit2 size={16} variant="Linear" />
-                              </button>
-                              <button
-                                className="orgs-icon-btn orgs-icon-btn-delete"
-                                onClick={(e) => openDelete(org, e)}
-                                title="Supprimer"
-                              >
-                                <Trash size={16} variant="Linear" />
-                              </button>
+                              <TableActionsMenu
+                                ariaLabel={`Actions sur ${org.name || 'cette organisation'}`}
+                                actions={[
+                                  { id: 'edit', label: 'Modifier', icon: Edit2, onSelect: () => openEdit(org) },
+                                  { id: 'delete', label: 'Supprimer', icon: Trash, tone: 'danger', onSelect: () => openDelete(org) },
+                                ]}
+                              />
                             </div>
                           </td>
                         </tr>

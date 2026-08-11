@@ -17,6 +17,7 @@ import debounce from 'lodash.debounce';
 import './mes-interventions.css';
 
 
+import { TableActionsMenu } from '../../components/molecules/TableActionsMenu';
 // Initiales pour les avatars
 const getInitials = (name = '') =>
   name
@@ -497,25 +498,24 @@ const MesInterventionsContent = () => {
                             </span>
                           </td>
                           <td onClick={(e) => e.stopPropagation()}>
-                            <div style={{ display: 'flex', gap: '8px' }}>
-                              <button
-                                type="button"
-                                className="btn btn-primary"
-                                style={{ width: "max-content" }}
-                                onClick={(e) => { e.stopPropagation(); openAssignModal(incident); }}
-                                title="Gérer l'équipe"
-                              >
-                                Gérer l'équipe
-                              </button>
-
-                              <button
-                                type="button"
-                                className="btn btn-light"
-                                onClick={(e) => { e.stopPropagation(); handleGoToIncidentDetail(incident); }}
-                                title="Voir le détail"
-                              >
-                                <Eye size={16} variant="Bold" color="#6C7278" />
-                              </button>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                              <TableActionsMenu
+                                ariaLabel={`Actions sur ${incident.title || 'cette intervention'}`}
+                                actions={[
+                                  {
+                                    id: 'detail',
+                                    label: 'Voir le détail',
+                                    icon: Eye,
+                                    onSelect: () => handleGoToIncidentDetail(incident),
+                                  },
+                                  {
+                                    id: 'team',
+                                    label: "Gérer l'équipe",
+                                    icon: People,
+                                    onSelect: () => openAssignModal(incident),
+                                  },
+                                ]}
+                              />
                             </div>
                           </td>
                         </tr>

@@ -382,27 +382,6 @@
   background-color: var(--color-success);
 }
 
-/* Boutons d'action */
-.mes-interventions-action-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
-  background-color: var(--color-surface);
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-}
-
-.mes-interventions-action-btn:hover {
-  background-color: rgba(58, 162, 221, 0.08);
-  color: var(--color-primary-text);
-  border-color: var(--color-primary);
-}
-
 /* ── États vides et erreurs ─────────────── */
 .mes-interventions-empty,
 .mes-interventions-error-card {

@@ -14,6 +14,7 @@ import { getOrganisationMembersService, getAgentsStatsService } from './service/
 import AgentsContext from './modale/AgentsModalContext';
 import { AgentFormModal, AgentDeleteModal } from './modale';
 import Pagination from '../../components/molecules/Pagination';
+import { TableActionsMenu } from '../../components/molecules/TableActionsMenu';
 import { authService } from '../auth/services/authService';
 import './agents.css';
 
@@ -208,12 +209,27 @@ export const Agents = () => {
     setTimeout(() => setFormAnimating(false), 350);
   };
 
+  // Un agent de bureau ne peut ni modifier ni supprimer un administrateur.
+  //
+  // Les trois orthographes testées ci-dessous sont conservées telles quelles :
+  // seule la valeur `super_admin` a été observée en réponse réelle de l'API, et
+  // normaliser sans avoir vu un compte `bureau_agent` reviendrait à parier sur
+  // les droits en production.
+  const estAgentDeBureau = () =>
+    currentUser?.web_role === 'bureau_agent'
+    || currentUser?.web_role === 'bureau'
+    || currentUser?.web_role === 'agent_de_bureau';
+
+  const estAdministrateur = (agent) =>
+    agent?.role === 'admin' || agent?.role === 'super_admin' || agent?.role === 'admin_organisation';
+
+  const peutModifier = (agent) => !(estAgentDeBureau() && estAdministrateur(agent));
+  const peutSupprimer = (agent) => !estAgentDeBureau() || agent?.role === 'terrain';
+
   // ── Ouvrir modal édition ──────────────────────────────────────
   const openEdit = (agent, e) => {
     e?.stopPropagation();
-    const isOffice = currentUser?.web_role === 'bureau_agent' || currentUser?.web_role === 'bureau' || currentUser?.web_role === 'agent_de_bureau';
-    const isTargetAdmin = agent?.role === 'admin' || agent?.role === 'super_admin' || agent?.role === 'admin_organisation';
-    if (isOffice && isTargetAdmin) {
+    if (!peutModifier(agent)) {
       return;
     }
     setModalAlert({ type: null, message: null });
@@ -237,8 +253,7 @@ export const Agents = () => {
   // ── Ouvrir modal suppression ──────────────────────────────────
   const openDelete = (agent, e) => {
     e?.stopPropagation();
-    const isOffice = currentUser?.web_role === 'bureau_agent' || currentUser?.web_role === 'bureau' || currentUser?.web_role === 'agent_de_bureau';
-    if (isOffice && agent.role !== 'terrain') {
+    if (!peutSupprimer(agent)) {
       return;
     }
     setDeleteAlert({ type: null, message: null });
@@ -508,27 +523,24 @@ export const Agents = () => {
                               </td>
                               <td>
                                 <div className="agents-row-actions">
-                                  {!(
-                                    (currentUser?.web_role === 'bureau_agent' || currentUser?.web_role === 'bureau' || currentUser?.web_role === 'agent_de_bureau') &&
-                                    (agent.role === 'admin' || agent.role === 'super_admin' || agent.role === 'admin_organisation')
-                                  ) && (
-                                    <button
-                                      className="agents-icon-btn agents-icon-btn-edit"
-                                      onClick={(e) => openEdit(agent, e)}
-                                      title="Modifier"
-                                    >
-                                      <Edit2 size={16} variant="Bold" color="var(--color-primary)" />
-                                    </button>
-                                  )}
-                                  {(!(currentUser?.web_role === 'bureau_agent' || currentUser?.web_role === 'bureau' || currentUser?.web_role === 'agent_de_bureau') || agent.role === 'terrain') && (
-                                    <button
-                                      className="agents-icon-btn agents-icon-btn-delete"
-                                      onClick={(e) => openDelete(agent, e)}
-                                      title="Supprimer"
-                                    >
-                                      <Trash size={16} variant="Bold" color="var(--color-danger)" />
-                                    </button>
-                                  )}
+                                  <TableActionsMenu
+                                    ariaLabel={`Actions sur ${agent.fullName || 'cet agent'}`}
+                                    actions={[
+                                      peutModifier(agent) && {
+                                        id: 'edit',
+                                        label: 'Modifier',
+                                        icon: Edit2,
+                                        onSelect: () => openEdit(agent),
+                                      },
+                                      peutSupprimer(agent) && {
+                                        id: 'delete',
+                                        label: 'Supprimer',
+                                        icon: Trash,
+                                        tone: 'danger',
+                                        onSelect: () => openDelete(agent),
+                                      },
+                                    ].filter(Boolean)}
+                                  />
                                 </div>
                               </td>
                             </tr>

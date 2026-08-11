@@ -408,37 +408,6 @@
   gap: var(--spacing-1);
 }
 
-.agents-icon-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: none;
-  border-radius: var(--radius-md);
-  background: transparent;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.agents-icon-btn-edit {
-  color: var(--color-primary-text);
-  background-color: rgba(58, 162, 221, 0.1);
-}
-
-.agents-icon-btn-edit:hover {
-  background-color: rgba(58, 162, 221, 0.2);
-}
-
-.agents-icon-btn-delete {
-  color: var(--color-danger-text);
-  background-color: rgba(239, 68, 68, 0.08);
-}
-
-.agents-icon-btn-delete:hover {
-  background-color: rgba(239, 68, 68, 0.18);
-}
-
 /* Empty state */
 .agents-empty {
   display: flex;

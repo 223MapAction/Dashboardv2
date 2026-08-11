@@ -11,6 +11,7 @@ import { getCollaborationsService } from '../../service/collaboration_service';
 import Pagination from '../../../../components/molecules/Pagination';
 import './incident-list.css';
 
+import { TableActionsMenu } from '../../../../components/molecules/TableActionsMenu';
 // Composant shimmer pour le chargement (version table)
 const IncidentTableSkeleton = () => (
   <div className="incident-table-wrap">
@@ -70,7 +71,6 @@ export const IncidentList = ({
   // « admin » ici = peut piloter les incidents sans être super_admin.
   const isAdmin = !isSuperAdmin && getAccessibleNavIds(user).includes('incidents');
 
-  const currentUserId = user?.id;
   const myOrgId = user?.organisation_member;
   const myOrgName = user?.organisation_name || 'Mon Organisation';
 
@@ -400,28 +400,31 @@ export const IncidentList = ({
                         </div>
                       </td>
                       <td onClick={(e) => e.stopPropagation()}>
-                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', alignItems: 'center' }}>
-                          {(incident.isOwner || takingOrg?.isMe) && (
-                            <button
-                              type="button"
-                              className="btn btn-primary"
-                              onClick={() => openAssignModal(incident)}
-                              title="Assigner à un agent"
-                              style={{ width: 'max-content' }}
-                            >
-                              Assigner à un agent
-                            </button>
-                          )}
-                          {!isAdmin && (
-                            <button
-                              type="button"
-                              className="incident-action-btn delete-btn"
-                              onClick={() => openDeleteModal(incident)}
-                              title="Supprimer l'incident"
-                            >
-                              <Trash size={16} variant="Bold" color="var(--color-danger)" />
-                            </button>
-                          )}
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                          <TableActionsMenu
+                            ariaLabel={`Actions sur ${incident.title || 'cet incident'}`}
+                            actions={[
+                              {
+                                id: 'view',
+                                label: 'Voir le détail',
+                                icon: Eye,
+                                onSelect: () => onSelectIncident && onSelectIncident(incident),
+                              },
+                              (incident.isOwner || takingOrg?.isMe) && {
+                                id: 'assign',
+                                label: 'Assigner à un agent',
+                                icon: Edit2,
+                                onSelect: () => openAssignModal(incident),
+                              },
+                              !isAdmin && {
+                                id: 'delete',
+                                label: "Supprimer l'incident",
+                                icon: Trash,
+                                tone: 'danger',
+                                onSelect: () => openDeleteModal(incident),
+                              },
+                            ].filter(Boolean)}
+                          />
                         </div>
                       </td>
                     </tr>

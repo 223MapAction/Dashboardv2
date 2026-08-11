@@ -445,38 +445,6 @@
   background-color: rgba(58, 162, 221, 0.2);
 }
 
-/* Incident List Actions Table Buttons */
-.incident-action-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: none;
-  border-radius: var(--radius-md);
-  background: transparent;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.incident-action-btn.assign-btn {
-  color: var(--color-primary-text);
-  background-color: rgba(58, 162, 221, 0.1);
-}
-
-.incident-action-btn.assign-btn:hover {
-  background-color: rgba(58, 162, 221, 0.2);
-}
-
-.incident-action-btn.delete-btn {
-  color: var(--color-danger-text);
-  background-color: rgba(239, 68, 68, 0.08);
-}
-
-.incident-action-btn.delete-btn:hover {
-  background-color: rgba(239, 68, 68, 0.18);
-}
-
 /* ============================================
    RESPONSIVE
    ============================================ */

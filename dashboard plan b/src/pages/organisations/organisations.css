@@ -414,45 +414,6 @@
   opacity: 1;
 }
 
-.orgs-icon-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: none;
-  border-radius: var(--radius-md);
-  background: transparent;
-  cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.orgs-icon-btn-edit {
-  fill: var(--color-primary);
-  background-color: rgba(58, 162, 221, 0.1);
-}
-
-.orgs-icon-btn-edit svg {
-  fill: var(--color-primary);
-}
-
-.orgs-icon-btn-edit:hover {
-  background-color: rgba(58, 162, 221, 0.2);
-}
-
-.orgs-icon-btn-delete {
-  fill: var(--color-danger);
-  background-color: rgba(239, 68, 68, 0.08);
-}
-
-.orgs-icon-btn-delete svg {
-  fill: var(--color-danger);
-}
-
-.orgs-icon-btn-delete:hover {
-  background-color: rgba(239, 68, 68, 0.18);
-}
-
 /* Empty state */
 .orgs-empty {
   display: flex;
