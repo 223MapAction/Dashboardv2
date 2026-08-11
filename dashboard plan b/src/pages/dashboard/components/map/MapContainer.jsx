@@ -657,32 +657,9 @@ export const MapContainer = () => {
 
         {/* Indicateur de chargement progressif et bouton "Charger plus" */}
         {!isMapLoading && (
-          <div
-            style={{
-              position: 'absolute',
-              bottom: '20px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              zIndex: 10,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '8px'
-            }}
-          >
+          <div className="map-status-stack">
             {/* Compteur d'incidents affichés */}
-            <div
-              style={{
-                background: 'rgba(255, 255, 255, 0.95)',
-                backdropFilter: 'blur(8px)',
-                padding: '8px 16px',
-                borderRadius: '20px',
-                fontSize: '13px',
-                fontWeight: '600',
-                color: '#374151',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-              }}
-            >
+            <div className="map-incidents-count">
               {validIncidents.length} incident{validIncidents.length > 1 ? 's' : ''} affiché{validIncidents.length > 1 ? 's' : ''}
             </div>
 

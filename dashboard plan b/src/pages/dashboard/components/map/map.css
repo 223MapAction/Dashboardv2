@@ -1299,3 +1299,47 @@
   font-size: 11px;
   color: #6C7278;
 }
+
+/* ── Bandeau d'état de la carte (compteur + « charger plus ») ────────────────
+   Centré en bas sur grand écran. Sous 480 px, la légende « Gravité » occupe le
+   coin inférieur gauche sur environ 105 px : un bloc centré la recouvrait, et
+   les libellés « Moyenne » et « Faible » passaient sous le compteur. On ancre
+   donc à droite, où les deux tiennent côte à côte même sur 320 px. */
+.map-status-stack {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.map-incidents-count {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  white-space: nowrap;
+}
+
+@media (max-width: 479.98px) {
+  .map-status-stack {
+    left: auto;
+    right: var(--spacing-3);
+    transform: none;
+    align-items: flex-end;
+    max-width: calc(100% - 105px - var(--spacing-3) * 2);
+  }
+
+  .map-incidents-count {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}
