@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { FiltersBar } from '../../components/molecules/FiltersBar';
+import { useRechercheDebouncee } from '../../hooks/useRechercheDebouncee';
 import useSWR from 'swr';
 import { useSidebarState } from '../../hooks/useSidebarState';
 import {
@@ -131,7 +133,12 @@ export const SuggestRequests = ({ embedded = false }) => {
   } = useSidebarState();
 
   /* ── State ── */
-  const [search, setSearch] = useState('');
+  const {
+    saisie: searchInput,
+    setSaisie: setSearchInput,
+    recherche: search,
+    reinitialiser: reinitialiserRecherche,
+  } = useRechercheDebouncee();
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [showInfoBanner, setShowInfoBanner] = useState(true);
@@ -554,17 +561,15 @@ export const SuggestRequests = ({ embedded = false }) => {
       )}
 
       {/* Toolbar */}
-      <div className="requests-toolbar">
-        <div className="requests-search">
-          <SearchNormal1 size={18} variant="Linear" color="currentColor" style={{ color: 'var(--color-text-secondary)' }} />
-          <input
-            type="text"
-            placeholder="Rechercher un signalement, rôle, organisation…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-
+      <FiltersBar
+        recherche={searchInput}
+        onRecherche={setSearchInput}
+        placeholder="Rechercher un signalement, un rôle, une organisation…"
+        onEffacer={() => { reinitialiserRecherche(); setStatusFilter('all'); setTypeFilter('all'); }}
+        actifSupplementaire={statusFilter !== 'all' || typeFilter !== 'all'}
+        resultats={filtered.length}
+        nomResultat="suggestion"
+      >
         {/* Filtre par type */}
         <div className="requests-filters">
           {TYPE_FILTERS.map(({ key, label, icon: Icon }) => (
@@ -579,7 +584,6 @@ export const SuggestRequests = ({ embedded = false }) => {
             </button>
           ))}
         </div>
-
         {/* Filtre par statut */}
         <div className="requests-filters">
           {STATUS_FILTERS.map(({ key, label, icon: Icon }) => (
@@ -594,7 +598,8 @@ export const SuggestRequests = ({ embedded = false }) => {
             </button>
           ))}
         </div>
-      </div>
+      </FiltersBar>
+
 
       {/* Info banner */}
       {showInfoBanner && (

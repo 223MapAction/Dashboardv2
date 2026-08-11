@@ -9,6 +9,8 @@ import {
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
 import { getTrashIncidentsService, restoreIncidentService, deleteIncidentService } from '../incident/service/incident_service';
 import { BlurryImage } from '../../components/atoms/BlurryImage';
+import { FiltersBar } from '../../components/molecules/FiltersBar';
+import { useRechercheDebouncee } from '../../hooks/useRechercheDebouncee';
 import { OffcanvasModal } from '../../components/molecules/OffcanvasModal';
 import './trash.css';
 
@@ -146,7 +148,12 @@ export const TrashPage = () => {
     return rawList.map(adaptTrashIncidentData);
   }, [incidentsData]);
 
-  const [search, setSearch] = useState('');
+  const {
+    saisie: searchInput,
+    setSaisie: setSearchInput,
+    recherche: search,
+    reinitialiser: reinitialiserRecherche,
+  } = useRechercheDebouncee();
   const [typeFilter, setTypeFilter] = useState('');
   const [toast, setToast] = useState(null);
   const [confirmId, setConfirmId] = useState(null);
@@ -451,25 +458,22 @@ export const TrashPage = () => {
               </div>
 
               {/* ── Filtres ── */}
-              <div className="trash-filters">
-                <div className="trash-search">
-                  <SearchNormal1 size={16} variant="Linear" color="var(--color-text-muted)" />
-                  <input
-                    type="text"
-                    placeholder="Rechercher un signalement..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                  />
-                </div>
-
-                <div className="trash-select-wrap">
-                  <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-                    <option value="">Tous les types</option>
-                    {types.map((t) => <option key={t} value={t}>{t}</option>)}
-                  </select>
-                  <ArrowDown2 size={14} variant="Linear" color="var(--color-text-muted)" />
-                </div>
-
+              <FiltersBar
+                recherche={searchInput}
+                onRecherche={setSearchInput}
+                placeholder="Rechercher un signalement, un lieu…"
+                selects={[{
+                  id: 'type',
+                  valeur: typeFilter,
+                  onChange: setTypeFilter,
+                  ariaLabel: 'Filtrer par type',
+                  tousLabel: 'Tous les types',
+                  options: types.map((t) => ({ value: t, label: t })),
+                }]}
+                onEffacer={() => { reinitialiserRecherche(); setTypeFilter(''); }}
+                resultats={filtered.length}
+                nomResultat="signalement"
+              >
                 <label className="trash-select-all">
                   <input
                     type="checkbox"
@@ -507,10 +511,7 @@ export const TrashPage = () => {
                   </button>
                 </div>
 
-                <span className="trash-count-label" style={{ marginLeft: 'var(--spacing-2)' }}>
-                  {filtered.length} résultat{filtered.length > 1 ? 's' : ''}
-                </span>
-              </div>
+              </FiltersBar>
 
               {/* ── Contenu ── */}
               {filtered.length === 0 ? (

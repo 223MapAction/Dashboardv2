@@ -26,6 +26,13 @@ import './filters-bar.css';
  * @param {string}   [nomResultat] singulier du mot compte, ex. « signalement »
  * @param {node}     [children]   controles supplementaires (bascule de vue…)
  */
+/**
+ * Valeur d'une liste qui signifie « je ne filtre pas ».
+ * C'est '' dans la plupart des cas, mais pas toujours : sur Mes interventions
+ * la valeur par defaut de la source est une vraie option, pas un vide.
+ */
+const valeurNeutre = (select) => select.neutre ?? '';
+
 export const FiltersBar = ({
   recherche = '',
   onRecherche,
@@ -34,9 +41,16 @@ export const FiltersBar = ({
   onEffacer,
   resultats,
   nomResultat = 'résultat',
+  // Certaines pages filtrent par pastilles plutot que par liste deroulante —
+  // c'est le bon choix quand il y a peu d'options et qu'on veut basculer d'un
+  // clic. La barre ne peut pas le deviner, la page le lui dit.
+  actifSupplementaire = false,
   children,
 }) => {
-  const filtreActif = Boolean(recherche) || selects.some((s) => Boolean(s.valeur));
+  const filtreActif =
+    Boolean(recherche) ||
+    selects.some((s) => s.valeur !== valeurNeutre(s)) ||
+    actifSupplementaire;
 
   return (
     <div className="am-filtres">
@@ -53,13 +67,18 @@ export const FiltersBar = ({
         </div>
 
         {selects.map((s) => (
-          <div key={s.id} className={`am-filtres-select${s.valeur ? ' is-active' : ''}`}>
+          <div
+            key={s.id}
+            className={`am-filtres-select${s.valeur !== valeurNeutre(s) ? ' is-active' : ''}`}
+          >
             <select
               value={s.valeur}
               onChange={(e) => s.onChange(e.target.value)}
               aria-label={s.ariaLabel}
             >
-              <option value="">{s.tousLabel}</option>
+              {/* Certaines listes n'ont pas de « tous » : leur valeur par defaut
+                  est une vraie option. On n'en fabrique pas une vide. */}
+              {s.tousLabel && <option value="">{s.tousLabel}</option>}
               {s.options.map((o) => (
                 <option key={o.value} value={o.value}>{o.label}</option>
               ))}

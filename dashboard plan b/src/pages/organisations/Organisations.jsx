@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { useRechercheDebouncee } from '../../hooks/useRechercheDebouncee';
+import { FiltersBar } from '../../components/molecules/FiltersBar';
 import useSWR from 'swr';
-import debounce from 'lodash.debounce';
 import { useSidebarState } from '../../hooks/useSidebarState';
 import { Header, Sidebar } from '../../components/layout';
 import {
@@ -78,23 +79,16 @@ export const Organisations = () => {
   const [page, setPage] = useState(1);
   const pageSize = 20;
 
-  const [searchInput, setSearchInput] = useState('');
-  const [search, setSearch] = useState('');
+  const {
+    saisie: searchInput,
+    setSaisie: setSearchInput,
+    recherche: search,
+    reinitialiser: reinitialiserRecherche,
+  } = useRechercheDebouncee();
   const [sectorFilter, setSectorFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
 
-  // Debounce search input de 200ms
-  const debouncedSetSearch = useMemo(
-    () => debounce((val) => setSearch(val), 200),
-    []
-  );
-
-  useEffect(() => {
-    return () => {
-      debouncedSetSearch.cancel();
-    };
-  }, [debouncedSetSearch]);
 
   // Reset page to 1 on filter/search change
   useEffect(() => {
@@ -472,52 +466,28 @@ export const Organisations = () => {
               </div>
 
               {/* ── Toolbar ── */}
-              <div className="orgs-toolbar">
-                <div className="orgs-search">
-                  <SearchNormal1 size={16} variant="Linear" color="var(--color-text-muted)" />
-                  <input
-                    type="search"
-                    id="orgs-search-input"
-                    name="orgs-search-query"
-                    autoComplete="off"
-                    placeholder="Nom, acronyme, ville, pays..."
-                    value={searchInput}
-                    onChange={(e) => {
-                      setSearchInput(e.target.value);
-                      debouncedSetSearch(e.target.value);
-                    }}
-                  />
-                </div>
-
-                <div className="orgs-select-wrap">
-                  <select value={sectorFilter} onChange={(e) => setSectorFilter(e.target.value)}>
-                    <option value="">Tous les secteurs</option>
-                    {SECTORS.map((s) => <option key={s.en} value={s.en}>{s.fr}</option>)}
-                  </select>
-                  <ArrowDown2 size={14} variant="Linear" color="var(--color-text-muted)" />
-                </div>
-
-                <div className="orgs-select-wrap">
-                  <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-                    <option value="">Tous les types</option>
-                    {TYPES.map((t) => <option key={t.en} value={t.en}>{t.fr}</option>)}
-                  </select>
-                  <ArrowDown2 size={14} variant="Linear" color="var(--color-text-muted)" />
-                </div>
-
-                <div className="orgs-select-wrap">
-                  <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                    <option value="">Tous les statuts</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                  </select>
-                  <ArrowDown2 size={14} variant="Linear" color="var(--color-text-muted)" />
-                </div>
-
-                <span className="orgs-count-label">
-                  {filtered.length} organisation{filtered.length > 1 ? 's' : ''}
-                </span>
-              </div>
+              <FiltersBar
+                recherche={searchInput}
+                onRecherche={setSearchInput}
+                placeholder="Rechercher un nom, un acronyme, une ville, un pays…"
+                selects={[
+                  { id: 'secteur', valeur: sectorFilter, onChange: setSectorFilter,
+                    ariaLabel: 'Filtrer par secteur', tousLabel: 'Tous les secteurs',
+                    options: SECTORS.map((o) => ({ value: o.en, label: o.fr })) },
+                  { id: 'type', valeur: typeFilter, onChange: setTypeFilter,
+                    ariaLabel: 'Filtrer par type', tousLabel: 'Tous les types',
+                    options: TYPES.map((o) => ({ value: o.en, label: o.fr })) },
+                  { id: 'statut', valeur: statusFilter, onChange: setStatusFilter,
+                    ariaLabel: 'Filtrer par statut', tousLabel: 'Tous les statuts',
+                    options: [{ value: 'active', label: 'Active' }, { value: 'inactive', label: 'Inactive' }] },
+                ]}
+                onEffacer={() => {
+                  reinitialiserRecherche();
+                  setSectorFilter(''); setTypeFilter(''); setStatusFilter('');
+                }}
+                resultats={filtered.length}
+                nomResultat="organisation"
+              />
 
               {/* ── Tableau ── */}
               {swrLoading ? (

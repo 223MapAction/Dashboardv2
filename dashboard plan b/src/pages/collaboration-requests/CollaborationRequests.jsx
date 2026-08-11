@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { FiltersBar } from '../../components/molecules/FiltersBar';
+import { useRechercheDebouncee } from '../../hooks/useRechercheDebouncee';
 import useSWR, { mutate } from 'swr';
 import Pagination from '../../components/molecules/Pagination';
 import { useSidebarState } from '../../hooks/useSidebarState';
@@ -193,7 +195,12 @@ export const CollaborationRequests = ({
     return true;
   };
   const [showInfoBanner, setShowInfoBanner] = useState(true);
-  const [search, setSearch] = useState('');
+  const {
+    saisie: searchInput,
+    setSaisie: setSearchInput,
+    recherche: search,
+    reinitialiser: reinitialiserRecherche,
+  } = useRechercheDebouncee();
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [page, setPage] = useState(1);
@@ -806,17 +813,15 @@ export const CollaborationRequests = ({
 
 
       {/* Toolbar */}
-      <div className="requests-toolbar">
-        <div className="requests-search">
-          <SearchNormal1 size={18} variant="Linear" color="currentColor" style={{ color: 'var(--color-text-secondary)' }} />
-          <input
-            type="text"
-            placeholder="Rechercher un signalement, rôle, organisation…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-
+      <FiltersBar
+        recherche={searchInput}
+        onRecherche={setSearchInput}
+        placeholder="Rechercher un signalement, un rôle, une organisation…"
+        onEffacer={() => { reinitialiserRecherche(); setStatusFilter('all'); }}
+        actifSupplementaire={statusFilter !== 'all'}
+        resultats={filtered.length}
+        nomResultat="demande"
+      >
         <div className="requests-filters">
           <button
             type="button"
@@ -846,7 +851,8 @@ export const CollaborationRequests = ({
           </button>
 
         </div>
-      </div>
+      </FiltersBar>
+
 
       {/* Collapsible Info Banner (Scenarios 2 & 3 Explanation) */}
       {showInfoBanner && (

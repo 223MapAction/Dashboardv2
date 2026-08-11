@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import { FiltersBar } from '../../components/molecules/FiltersBar';
+import { useRechercheDebouncee } from '../../hooks/useRechercheDebouncee';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import useSWR from 'swr';
-import debounce from 'lodash.debounce';
 import { useSidebarState } from '../../hooks/useSidebarState';
 import Pagination from '../../components/molecules/Pagination';
 import { getIncidentsService } from '../incident/service/incident_service';
@@ -81,8 +82,12 @@ export const Collaboration = () => {
   const [page, setPage] = useState(1);
   const pageSize = 20;
 
-  const [searchInput, setSearchInput] = useState('');
-  const [search, setSearch] = useState('');
+  const {
+    saisie: searchInput,
+    setSaisie: setSearchInput,
+    recherche: search,
+    reinitialiser: reinitialiserRecherche,
+  } = useRechercheDebouncee();
   const [roleFilter, setRoleFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('accepted');
   const [localStatusFilter, setLocalStatusFilter] = useState('all');
@@ -90,17 +95,6 @@ export const Collaboration = () => {
   const [dateRange, setDateRange] = useState([null, null]);
   const [dateFrom, dateTo] = dateRange;
 
-  // Debounce search input de 200ms
-  const debouncedSetSearch = useMemo(
-    () => debounce((val) => setSearch(val), 200),
-    []
-  );
-
-  useEffect(() => {
-    return () => {
-      debouncedSetSearch.cancel();
-    };
-  }, [debouncedSetSearch]);
 
   // Réinitialiser la page à 1 lors du changement de filtre
   useEffect(() => {
@@ -646,22 +640,37 @@ export const Collaboration = () => {
             {activeTab === 'collaborations' ? (
               <>
                 {/* Toolbar */}
-                <div className="collab-toolbar">
-                  <div className="collab-search">
-                    <SearchNormal1 size={18} variant="Linear" color="#6C7278" />
-                    <input
-                      type="text"
-                      placeholder="Rechercher par titre, organisation, lieu..."
-                      value={searchInput}
-                      onChange={(e) => {
-                        setSearchInput(e.target.value);
-                        debouncedSetSearch(e.target.value);
-                      }}
-                    />
-                  </div>
-
-                  <div className="collab-filters">
-                    {/* Filtre par période */}
+                <FiltersBar
+                  recherche={searchInput}
+                  onRecherche={setSearchInput}
+                  placeholder="Rechercher un titre, une organisation, un lieu…"
+                  selects={[
+                    { id: 'statut', valeur: statusFilter, onChange: setStatusFilter,
+                      ariaLabel: 'Filtrer par statut', neutre: 'all',
+                      options: [
+                        { value: 'all', label: 'Tous les statuts' },
+                        { value: 'accepted', label: 'Acceptée' },
+                        { value: 'pending', label: 'En attente' },
+                        { value: 'declined', label: 'Refusée' },
+                      ] },
+                    { id: 'role', valeur: roleFilter, onChange: setRoleFilter,
+                      ariaLabel: 'Filtrer par rôle', tousLabel: 'Tous les rôles',
+                      options: [
+                        { value: 'leader', label: 'Leader' },
+                        { value: 'contributor', label: 'Contributeur' },
+                        { value: 'observer', label: 'Observateur' },
+                      ] },
+                    { id: 'signalement', valeur: incidentFilter, onChange: setIncidentFilter,
+                      ariaLabel: 'Filtrer par signalement', tousLabel: 'Tous les signalements',
+                      options: incidentsList.map((inc) => ({ value: inc.id, label: inc.title })) },
+                  ]}
+                  onEffacer={() => {
+                    reinitialiserRecherche();
+                    setStatusFilter('all'); setRoleFilter(''); setIncidentFilter('');
+                    setLocalStatusFilter('all'); resetDateRange();
+                  }}
+                  actifSupplementaire={localStatusFilter !== 'all' || Boolean(dateFrom) || Boolean(dateTo)}
+                >
                     <div className="collab-date-range">
                       <Calendar size={16} variant="Bold" color="#3AA2DD" />
                       <span className="collab-date-label">Période :</span>
@@ -730,53 +739,7 @@ export const Collaboration = () => {
                       </span>
                     </button>
 
-                    <div className="collab-select">
-                      <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        aria-label="Filtrer par statut API"
-                      >
-                        <option value="all">Tous les statuts</option>
-                        <option value="accepted">Acceptée</option>
-                        <option value="pending">En attente</option>
-                        <option value="declined">Refusée</option>
-                      </select>
-                      <ArrowDown2 size={16} variant="Linear" color="#6C7278" />
-                    </div>
-
-                    <div className="collab-select">
-                      <select
-                        value={roleFilter}
-                        onChange={(e) => setRoleFilter(e.target.value)}
-                        aria-label="Filtrer par rôle API"
-                      >
-                        <option value="">Tous les rôles</option>
-                        <option value="leader">Leader</option>
-                        <option value="contributor">Contributeur</option>
-                        <option value="observer">Observateur</option>
-                      </select>
-                      <ArrowDown2 size={16} variant="Linear" color="#6C7278" />
-                    </div>
-
-                    <div className="collab-select">
-                      <select
-                        value={incidentFilter}
-                        onChange={(e) => setIncidentFilter(e.target.value)}
-                        aria-label="Filtrer par signalement"
-                      >
-                        <option value="">Tous les signalements</option>
-                        {incidentsList.map((inc) => (
-                          <option key={inc.id} value={inc.id}>
-                            {inc.title}
-                          </option>
-                        ))}
-                      </select>
-                      <ArrowDown2 size={16} variant="Linear" color="#6C7278" />
-                    </div>
-                  </div>
-
-
-                </div>
+                </FiltersBar>
 
                 {/* État de chargement avec react-shimmer-effects */}
                 {isLoading && (

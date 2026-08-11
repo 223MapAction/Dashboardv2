@@ -1,4 +1,6 @@
 import React, { useState, useMemo } from 'react';
+import { useRechercheDebouncee } from '../../hooks/useRechercheDebouncee';
+import { FiltersBar } from '../../components/molecules/FiltersBar';
 import { useNavigate } from 'react-router-dom';
 import useSWR from 'swr';
 import { useSidebarState } from '../../hooks/useSidebarState';
@@ -13,7 +15,6 @@ import { getOrgInternalIncidentsService } from './service/mes_interventions_serv
 import { getIncidentAssignmentsService } from '../incident/service/incident_service';
 import { BlurryImage } from '../../components/atoms/BlurryImage';
 import Pagination from '../../components/molecules/Pagination';
-import debounce from 'lodash.debounce';
 import './mes-interventions.css';
 
 
@@ -231,25 +232,18 @@ const MesInterventionsContent = () => {
     setMutateIncidents
   } = useMesInterventionsModalContext();
 
-  const [searchInput, setSearchInput] = useState('');
-  const [search, setSearch] = useState('');
+  const {
+    saisie: searchInput,
+    setSaisie: setSearchInput,
+    recherche: search,
+    reinitialiser: reinitialiserRecherche,
+  } = useRechercheDebouncee();
   const [statusFilter, setStatusFilter] = useState('');
   const [sourceFilter, setSourceFilter] = useState('agents_or_internal');
 
   const [page, setPage] = useState(1);
   const pageSize = 20;
 
-  // Debounce search input de 300ms
-  const debouncedSetSearch = useMemo(
-    () => debounce((val) => setSearch(val), 300),
-    []
-  );
-
-  React.useEffect(() => {
-    return () => {
-      debouncedSetSearch.cancel();
-    };
-  }, [debouncedSetSearch]);
 
   // Reset page to 1 on filter/search change
   React.useEffect(() => {
@@ -330,46 +324,32 @@ const MesInterventionsContent = () => {
           </header>
 
           {/* Filtres et Barre de recherche */}
-          <div className="mes-interventions-filters">
-            <div className="mes-interventions-search">
-              <SearchNormal1 size={18} variant="Linear" color="#6C7278" />
-              <input
-                type="text"
-                placeholder="Rechercher par titre, description, localisation..."
-                value={searchInput}
-                onChange={(e) => {
-                  setSearchInput(e.target.value);
-                  debouncedSetSearch(e.target.value);
-                }}
-              />
-            </div>
-
-            <div className="mes-interventions-select-wrapper">
-              <select
-                value={sourceFilter}
-                onChange={(e) => setSourceFilter(e.target.value)}
-                aria-label="Filtrer par source"
-              >
-                <option value="agents_or_internal">Agents & Internes</option>
-                <option value="internal">Internes uniquement</option>
-                <option value="agents">Agents uniquement</option>
-              </select>
-              <ArrowDown2 size={16} variant="Linear" color="#6C7278" />
-            </div>
-
-            <div className="mes-interventions-select-wrapper">
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                aria-label="Filtrer par statut"
-              >
-                <option value="">Tous les statuts</option>
-                <option value="En cours">En cours </option>
-                <option value="terminer">Terminer</option>
-              </select>
-              <ArrowDown2 size={16} variant="Linear" color="#6C7278" />
-            </div>
-          </div>
+          <FiltersBar
+            recherche={searchInput}
+            onRecherche={setSearchInput}
+            placeholder="Rechercher un titre, une description, un lieu…"
+            selects={[
+              { id: 'source', valeur: sourceFilter, onChange: setSourceFilter,
+                ariaLabel: 'Filtrer par source', neutre: 'agents_or_internal',
+                options: [
+                  { value: 'agents_or_internal', label: 'Agents & internes' },
+                  { value: 'internal', label: 'Internes uniquement' },
+                  { value: 'agents', label: 'Agents uniquement' },
+                ] },
+              { id: 'statut', valeur: statusFilter, onChange: setStatusFilter,
+                ariaLabel: 'Filtrer par statut', tousLabel: 'Tous les statuts',
+                options: [
+                  { value: 'En cours', label: 'En cours' },
+                  { value: 'terminer', label: 'Terminée' },
+                ] },
+            ]}
+            onEffacer={() => {
+              reinitialiserRecherche();
+              setSourceFilter('agents_or_internal'); setStatusFilter('');
+            }}
+            resultats={data?.count ?? incidents.length}
+            nomResultat="intervention"
+          />
 
           {/* Affichage des données / Chargement */}
           {isLoading ? (
