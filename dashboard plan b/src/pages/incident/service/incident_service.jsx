@@ -13,7 +13,7 @@ const INCIDENTS_URL = 'incidents';
  * @param {number} pageSize - Taille de la page (default: 10)
  * @returns {Promise<Object>} - { count, next, previous, results }
  */
-export const getIncidentsService = async (page = null, pageSize = null, search = '') => {
+export const getIncidentsService = async (page = null, pageSize = null, search = '', etat = '') => {
   try {
     const axios = authService.createAuthenticatedAxios();
     
@@ -27,6 +27,10 @@ export const getIncidentsService = async (page = null, pageSize = null, search =
     
     if (search) {
       params.push(`search=${encodeURIComponent(search)}`);
+    }
+
+    if (etat) {
+      params.push(`etat=${encodeURIComponent(etat)}`);
     }
 
     const queryString = params.length > 0 ? `?${params.join('&')}` : '';

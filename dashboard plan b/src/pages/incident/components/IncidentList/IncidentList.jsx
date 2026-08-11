@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import useSWR from 'swr';
 import { SearchNormal1, ArrowDown2 } from 'iconsax-react';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText, ShimmerCircularImage } from 'react-shimmer-effects';
@@ -77,15 +77,11 @@ export const IncidentList = ({
     getCollaborationsService
   );
 
-  const filtered = useMemo(() => {
-    return incidents.filter((i) => {
-      const matchesStatus =
-        !statusFilter ||
-        i.etat === statusFilter;
-
-      return matchesStatus;
-    });
-  }, [incidents, statusFilter]);
+  // Le filtre par statut est desormais applique par le serveur (parametre
+  // `etat`), donc sur l'ensemble du jeu de donnees. Le refaire ici ne
+  // filtrerait que la page courante tout en laissant la pagination annoncer
+  // le total complet — c'est ce qui rendait le filtre menteur.
+  const filtered = incidents;
 
   return (
     <section className="project-list-section">

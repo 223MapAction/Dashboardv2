@@ -120,8 +120,12 @@ export const Incident = () => {
     isLoading: isLoadingIncidents,
     mutate: mutateIncidents
   } = useSWR(
-    ['/incidents/all', page, search],
-    () => getIncidentsService(page, pageSize, search),
+    // statusFilter fait partie de la cle : sans lui, changer de statut ne
+    // redemandait rien au serveur et le filtre ne s'appliquait qu'aux lignes
+    // deja recues — soit la page courante, pendant que la pagination
+    // continuait d'annoncer le total complet.
+    ['/incidents/all', page, search, statusFilter],
+    () => getIncidentsService(page, pageSize, search, statusFilter),
     {
       revalidateOnReconnect: true,
       onSuccess: (data) => {
