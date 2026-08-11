@@ -5,7 +5,6 @@ import { useSidebarState } from '../../hooks/useSidebarState';
 import { Header, Sidebar } from '../../components/layout';
 import {
   SearchNormal1, ArrowDown2, Add, Edit2, Trash,
-  People, TickCircle, ShieldTick, Briefcase,
 } from 'iconsax-react';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText, ShimmerCircularImage } from 'react-shimmer-effects';
 import { ROLES, AVATAR_COLORS } from './data/agents';
@@ -15,19 +14,13 @@ import AgentsContext from './modale/AgentsModalContext';
 import { AgentFormModal, AgentDeleteModal } from './modale';
 import Pagination from '../../components/molecules/Pagination';
 import { TableActionsMenu } from '../../components/molecules/TableActionsMenu';
+import { grouperParRole } from './roles';
+import { AgentCard } from './components/AgentCard';
+import { AgentListRow } from './components/AgentListRow';
+import { AgentsViewToggle } from './components/AgentsViewToggle';
 import { authService } from '../auth/services/authService';
 import './agents.css';
-
-// ── Helpers ───────────────────────────────────────────────────────
-const getRoleConfig = (roleId) =>
-  ROLES.find((r) => r.id === roleId) || { label: roleId, color: '#9CA3AF' };
-
-const getInitials = (name) =>
-  name
-    .split(' ')
-    .slice(0, 2)
-    .map((n) => n[0]?.toUpperCase() || '')
-    .join('');
+import './agents-roster.css';
 
 const EMPTY_ARRAY = [];
 
@@ -115,6 +108,7 @@ const fetcher = async ([, organisationsList, search, role, status]) => {
         fullName: `${m.first_name || ''} ${m.last_name || ''}`.trim() || m.email,
         email: m.email,
         phone: m.phone || '',
+        agentCode: m.agent_code || '',
         address: m.address || '',
         role: parsedRole,
         organisationId: orgId || '',
@@ -284,6 +278,26 @@ export const Agents = () => {
   const [page, setPage] = useState(1);
   const pageSize = 20;
 
+  // Preference d'affichage, conservee entre les sessions comme celle de la sidebar.
+  const [vue, setVue] = useState(() => {
+    try {
+      return localStorage.getItem('mapaction_agents_vue') === 'liste' ? 'liste' : 'fiches';
+    } catch {
+      return 'fiches';
+    }
+  });
+
+  const changerVue = (v) => {
+    setVue(v);
+    try { localStorage.setItem('mapaction_agents_vue', v); } catch { /* stockage indisponible */ }
+  };
+
+  // Actions disponibles sur un agent, selon les droits de l'utilisateur connecte.
+  const actionsPour = (agent) => [
+    peutModifier(agent) && { id: 'edit', label: 'Modifier', icon: Edit2, onSelect: () => openEdit(agent) },
+    peutSupprimer(agent) && { id: 'delete', label: 'Supprimer', icon: Trash, tone: 'danger', onSelect: () => openDelete(agent) },
+  ].filter(Boolean);
+
   // Reset page to 1 on filter/search change
   useEffect(() => {
     setPage(1);
@@ -356,45 +370,19 @@ export const Agents = () => {
                 </button>
               </div>
 
-              {/* ── Statistiques ── */}
-              <div className="agents-stats">
-                <div className="agents-stat">
-                  <div className="agents-stat-icon agents-stat-icon-primary">
-                    <People size={20} variant="Bold" color="var(--color-primary)" />
-                  </div>
-                  <div>
-                    <div className="agents-stat-value">{statsTotal}</div>
-                    <div className="agents-stat-label">Total agents</div>
-                  </div>
-                </div>
-                <div className="agents-stat">
-                  <div className="agents-stat-icon agents-stat-icon-success">
-                    <TickCircle size={20} variant="Bold" color="var(--color-success)" />
-                  </div>
-                  <div>
-                    <div className="agents-stat-value">{statsActive}</div>
-                    <div className="agents-stat-label">Actifs</div>
-                  </div>
-                </div>
-                <div className="agents-stat">
-                  <div className="agents-stat-icon agents-stat-icon-warning">
-                    <ShieldTick size={20} variant="Bold" color="var(--color-warning)" />
-                  </div>
-                  <div>
-                    <div className="agents-stat-value">{statsAdmins}</div>
-                    <div className="agents-stat-label">Admins</div>
-                  </div>
-                </div>
-                <div className="agents-stat">
-                  <div className="agents-stat-icon agents-stat-icon-danger">
-                    <Briefcase size={20} variant="Bold" color="var(--color-danger)" />
-                  </div>
-                  <div>
-                    <div className="agents-stat-value">{statsTerrain}</div>
-                    <div className="agents-stat-label">Agents terrain</div>
-                  </div>
-                </div>
-              </div>
+              {/* ── Effectifs ──
+                  Une ligne compacte plutot que quatre cartes : les effectifs par
+                  role sont deja portes par les en-tetes de groupe. Seuls les
+                  totaux, utiles quand l'equipe est nombreuse, restent ici. */}
+              <p className="agents-effectifs">
+                <strong>{statsTotal}</strong> agent{statsTotal > 1 ? 's' : ''}
+                <span className="agents-effectifs-sep" aria-hidden="true">·</span>
+                <strong>{statsActive}</strong> actif{statsActive > 1 ? 's' : ''}
+                <span className="agents-effectifs-sep" aria-hidden="true">·</span>
+                <strong>{statsTerrain}</strong> sur le terrain
+                <span className="agents-effectifs-sep" aria-hidden="true">·</span>
+                <strong>{statsAdmins}</strong> en administration
+              </p>
 
               {/* ── Toolbar ── */}
               <div className="agents-toolbar">
@@ -435,9 +423,7 @@ export const Agents = () => {
                   <ArrowDown2 size={14} variant="Linear" color="var(--color-text-muted)" />
                 </div>
 
-                <span className="agents-count-label">
-                  {filtered.length} agent{filtered.length > 1 ? 's' : ''}
-                </span>
+                <AgentsViewToggle vue={vue} onChange={changerVue} />
               </div>
 
               {/* ── Tableau ── */}
@@ -445,110 +431,41 @@ export const Agents = () => {
                 <AgentTableSkeleton />
               ) : (
                 <>
-                  <div className="agents-table-wrap">
-                    <table className="agents-table has-sticky-actions">
-                      <thead>
-                        <tr>
-                          <th>Agent</th><th>Rôle</th><th>Organisation</th>
-                          <th>Depuis</th><th>Statut</th><th></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {paginatedAgents.map((agent, index) => {
-                          const roleConfig = getRoleConfig(agent.role);
-                          return (
-                            <tr key={index}>
-                              <td>
-                                <div className="agents-cell-identity">
-                                  {agent.avatar ? (
-                                    <>
-                                      <img
-                                        src={agent.avatar}
-                                        alt={agent.fullName}
-                                        className="agents-avatar"
-                                        style={{
-                                          width: '32px',
-                                          height: '32px',
-                                          borderRadius: '50%',
-                                          objectFit: 'cover',
-                                          flexShrink: 0
-                                        }}
-                                        onError={(e) => {
-                                          e.target.style.display = 'none';
-                                          e.target.nextSibling.style.display = 'flex';
-                                        }}
-                                      />
-                                      <div className="agents-avatar" style={{ backgroundColor: agent.avatarColor, display: 'none' }}>
-                                        {getInitials(agent.fullName)}
-                                      </div>
-                                    </>
-                                  ) : (
-                                    <div className="agents-avatar" style={{ backgroundColor: agent.avatarColor }}>
-                                      {getInitials(agent.fullName)}
-                                    </div>
-                                  )}
-                                  <div>
-                                    <span className="agents-full-name">{agent.fullName}</span>
-                                    <span className="agents-email">{agent.email}</span>
-                                  </div>
-                                </div>
-                              </td>
-                              <td>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                  <span
-                                    className="agents-role"
-                                    style={{ backgroundColor: `${roleConfig.color}18`, color: roleConfig.color }}
-                                    title={roleConfig.description}
-                                  >
-                                    {roleConfig.label}
-                                  </span>
-                                  {roleConfig.mobileOnly && (
-                                    <span style={{ fontSize: '11px', padding: '2px 6px', borderRadius: '999px', backgroundColor: 'rgba(34,197,94,0.1)', color: '#22C55E', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                                      Mobile
-                                    </span>
-                                  )}
-                                </div>
-                              </td>
-                              <td style={{ fontSize: 'var(--font-size-body-small)', color: 'var(--color-text-secondary)' }}>
-                                {agent.organisationName || '—'}
-                              </td>
-                              <td style={{ fontSize: 'var(--font-size-body-small)', color: 'var(--color-text-secondary)' }}>
-                                {new Date(agent.joinedAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
-                              </td>
-                              <td>
-                                <span className={`agents-status agents-status-${agent.status}`}>
-                                  <span className="agents-status-dot" />
-                                  {agent.status === 'active' ? 'Actif' : 'Inactif'}
-                                </span>
-                              </td>
-                              <td>
-                                <div className="agents-row-actions">
-                                  <TableActionsMenu
-                                    ariaLabel={`Actions sur ${agent.fullName || 'cet agent'}`}
-                                    actions={[
-                                      peutModifier(agent) && {
-                                        id: 'edit',
-                                        label: 'Modifier',
-                                        icon: Edit2,
-                                        onSelect: () => openEdit(agent),
-                                      },
-                                      peutSupprimer(agent) && {
-                                        id: 'delete',
-                                        label: 'Supprimer',
-                                        icon: Trash,
-                                        tone: 'danger',
-                                        onSelect: () => openDelete(agent),
-                                      },
-                                    ].filter(Boolean)}
-                                  />
-                                </div>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
+                  {grouperParRole(paginatedAgents).map((groupe) => (
+                    <section key={groupe.role} className="agents-groupe">
+                      <h2 className="agents-groupe-titre">
+                        {groupe.libelle}
+                        <span className="agents-groupe-compte">{groupe.agents.length}</span>
+                      </h2>
+
+                      {vue === 'fiches' ? (
+                        <div className="agents-grille">
+                          {groupe.agents.map((agent) => (
+                            <AgentCard key={agent.id} agent={agent} actions={actionsPour(agent)} />
+                          ))}
+                        </div>
+                      ) : (
+                        <ul className="agents-liste">
+                          {groupe.agents.map((agent) => (
+                            <AgentListRow key={agent.id} agent={agent} actions={actionsPour(agent)} />
+                          ))}
+                        </ul>
+                      )}
+                    </section>
+                  ))}
+
+                  {paginatedAgents.length === 0 && (
+                    <div className="agents-vide">
+                      <p className="agents-vide-titre">Aucun agent ne correspond</p>
+                      <p className="agents-vide-texte">
+                        Modifiez votre recherche, ou invitez un nouvel agent dans l’équipe.
+                      </p>
+                      <button type="button" className="agents-add-btn" onClick={openCreate}>
+                        <Add size={18} color="#fff" />
+                        Nouvel agent
+                      </button>
+                    </div>
+                  )}
 
                   <Pagination
                     page={page}

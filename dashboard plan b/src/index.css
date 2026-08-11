@@ -1129,3 +1129,18 @@ p {
    [class$="-grid"] écraserait des grilles délibérées (.impact-grid-performance,
    .impact-detail-grid, .dashboard-grid). À faire grille par grille, avec
    contrôle visuel — pas en règle générale. */
+
+/* ── Texte réservé aux lecteurs d'écran ──────────────────────────────────────
+   Visuellement absent, mais lu à voix haute et présent dans l'arbre
+   d'accessibilité — contrairement à display:none, qui le supprimerait. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
