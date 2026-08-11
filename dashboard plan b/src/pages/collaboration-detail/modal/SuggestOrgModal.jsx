@@ -60,12 +60,15 @@ export const SuggestOrgModal = () => {
   // donc un changement de recherche invalide automatiquement toutes les pages.
   const getKey = useCallback(
     (pageIndex, previousPageData) => {
+      // Modale fermée : aucune requête. Le `return null` du rendu n'empêche pas
+      // les hooks de tourner, la liste se chargeait donc en pure perte.
+      if (!showSuggestModal) return null;
       // On a atteint la fin : plus de page suivante.
       if (previousPageData && !previousPageData.next) return null;
       // Sinon on demande la page suivante (pageIndex commence à 0).
       return ['other-organisations', debouncedSearch, pageIndex + 1];
     },
-    [debouncedSearch]
+    [showSuggestModal, debouncedSearch]
   );
 
   const fetcher = useCallback(([, search, pageNumber]) => {

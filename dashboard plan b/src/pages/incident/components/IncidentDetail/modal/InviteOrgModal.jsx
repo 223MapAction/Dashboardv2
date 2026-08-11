@@ -66,13 +66,20 @@ export const InviteOrgModal = () => {
     };
   }, [orgSearch, debouncedSetSearch]);
 
-  // Récupération paginée avec useSWRInfinite
+  // Récupération paginée avec useSWRInfinite.
+  //
+  // La clé vaut null tant que la modale est fermée, ce qui suspend toute
+  // requête. C'est indispensable : le `return null` plus bas n'empêche pas les
+  // hooks de s'exécuter, si bien que la liste complète des organisations était
+  // chargée page par page — trois requêtes en cascade, jusqu'à 1,5 s — à chaque
+  // ouverture d'un signalement, pour une modale souvent jamais ouverte.
   const getKey = useCallback(
     (pageIndex, previousPageData) => {
+      if (!joinOpen) return null;
       if (previousPageData && !previousPageData.next) return null;
       return ['other-organisations-invite', debouncedSearch, pageIndex + 1];
     },
-    [debouncedSearch]
+    [joinOpen, debouncedSearch]
   );
 
   const fetcher = useCallback(([, search, pageNumber]) => {
