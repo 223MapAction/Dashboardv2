@@ -48,9 +48,9 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed: controlledCollapsed, onC
     },
     {
       id: 'incidents',
-      label: 'Incidents',
+      label: 'Signalements',
       icon: Briefcase,
-      path: '/incidents'
+      path: '/signalements'
     },
     {
       id: 'mes-interventions',

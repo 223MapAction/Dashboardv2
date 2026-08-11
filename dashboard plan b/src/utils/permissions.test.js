@@ -70,12 +70,12 @@ describe('canAccessPath', () => {
   });
 
   it('autorise les sous-chemins des routes permises', () => {
-    expect(canAccessPath(orgAdmin, '/incidents/42')).toBe(true);
+    expect(canAccessPath(orgAdmin, '/signalements/42')).toBe(true);
     expect(canAccessPath(orgAdmin, '/collaboration-detail/7')).toBe(true);
   });
 
   it('ne confond pas un préfixe avec un segment de chemin', () => {
-    expect(canAccessPath(orgAdmin, '/incidents-archives')).toBe(false);
+    expect(canAccessPath(orgAdmin, '/signalements-archives')).toBe(false);
   });
 
   it('refuse tout à un rôle inconnu', () => {

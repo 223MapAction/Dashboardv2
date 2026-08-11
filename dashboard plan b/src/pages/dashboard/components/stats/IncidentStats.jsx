@@ -74,7 +74,7 @@ export const IncidentStats = ({ stats }) => {
             </div>
             <div className="stat-content">
               <div className="stat-value">{statusStats.total}</div>
-              <div className="stat-label">Total des incidents</div>
+              <div className="stat-label">Total des signalements</div>
             </div>
           </div>
 
@@ -84,7 +84,7 @@ export const IncidentStats = ({ stats }) => {
             </div>
             <div className="stat-content">
               <div className="stat-value">{statusStats.resolved}</div>
-              <div className="stat-label">Incidents résolus</div>
+              <div className="stat-label">Signalements résolus</div>
             </div>
           </div>
 

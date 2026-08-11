@@ -430,7 +430,7 @@ export const MapContainer = () => {
           <div className="map-loading-overlay">
             <div className="map-loading-spinner">
               <div className="spinner"></div>
-              <p>Chargement des incidents...</p>
+              <p>Chargement des signalements...</p>
             </div>
           </div>
         )}
@@ -559,8 +559,8 @@ export const MapContainer = () => {
               onChange={(e) => setOwnershipFilter(e.target.value)}
               aria-label="Filtre d'attribution"
             >
-              <option value="all">Tous les incidents</option>
-              <option value="mine">Mes incidents</option>
+              <option value="all">Tous les signalements</option>
+              <option value="mine">Mes signalements</option>
             </select>
           </div>
 
@@ -939,7 +939,7 @@ export const MapContainer = () => {
                       type="button"
                       className="btn btn-primary"
                       onClick={() => {
-                        navigate(`/incidents/${selectedIncident.id}`, { state: { from: '/dashboard' } });
+                        navigate(`/signalements/${selectedIncident.id}`, { state: { from: '/dashboard' } });
                       }}
                     >
                       Savoir plus

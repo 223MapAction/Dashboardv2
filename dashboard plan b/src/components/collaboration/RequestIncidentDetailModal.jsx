@@ -38,7 +38,7 @@ export const RequestIncidentDetailModal = ({ incident, onClose }) => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {details.photo && (
                     <div>
-                      <h4 className='body-large mb-1'>Image de l'incident</h4>
+                      <h4 className='body-large mb-1'>Image de le signalement</h4>
                       <BlurryImage
                         src={details.photo}
                         alt="Aperçu de l'incident"
@@ -55,7 +55,7 @@ export const RequestIncidentDetailModal = ({ incident, onClose }) => {
 
                   {details.video && (
                     <div>
-                      <h4 className='body-large mb-1'>Vidéo de l'incident</h4>
+                      <h4 className='body-large mb-1'>Vidéo de le signalement</h4>
                       {!videoLoaded && (
                         <ShimmerThumbnail height={240} rounded />
                       )}

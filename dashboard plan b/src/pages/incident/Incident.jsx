@@ -229,7 +229,7 @@ export const Incident = () => {
             <IncidentList
               incidents={incidents}
               isLoading={isLoadingIncidents}
-              onSelectIncident={(incident) => navigate(`/incidents/${incident.id}`, { state: { incident } })}
+              onSelectIncident={(incident) => navigate(`/signalements/${incident.id}`, { state: { incident } })}
               search={searchInput}
               setSearch={(val) => {
                 setSearchInput(val);

@@ -944,7 +944,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
       <section className="project-detail empty">
         <div className="project-detail-empty">
           <Briefcase size={48} variant="Linear" color="var(--color-text-muted)" />
-          <p>Sélectionnez un incident dans la liste pour voir ses détails</p>
+          <p>Sélectionnez un signalement dans la liste pour voir ses détails</p>
         </div>
       </section>
     );
@@ -1452,7 +1452,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
               <People size={20} variant="Bold" color="var(--color-warning)" />
               <div style={{ fontSize: '14px', fontWeight: '500' }}>
                 <span>
-                  <strong>Incident ouvert à la collaboration :</strong> Des organisations se mobilisent déjà pour intervenir, mais aucun leader n'est encore désigné pour coordonner les actions. Prenez le leadership ou rejoignez l'effort !
+                  <strong>Signalement ouvert à la collaboration :</strong> Des organisations se mobilisent déjà pour intervenir, mais aucun leader n'est encore désigné pour coordonner les actions. Prenez le leadership ou rejoignez l'effort !
                 </span>
               </div>
             </div>
@@ -1480,11 +1480,11 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                 <div style={{ fontSize: '14px', fontWeight: '500' }}>
                   {takingOrg.isMe ? (
                     <span>
-                      <strong>Incident géré en interne :</strong> Votre organisation travaille actuellement sur cet incident en interne avec ses propres équipes.
+                      <strong>Signalement géré en interne :</strong> Votre organisation travaille actuellement sur cet incident en interne avec ses propres équipes.
                     </span>
                   ) : (
                     <span>
-                      <strong>Incident géré en interne :</strong> L'organisation <strong>{takingOrg.name}</strong> a pris en charge cet incident et travaille dessus en interne avec ses propres équipes.
+                      <strong>Signalement géré en interne :</strong> L'organisation <strong>{takingOrg.name}</strong> a pris en charge cet incident et travaille dessus en interne avec ses propres équipes.
                     </span>
                   )}
                 </div>
@@ -1510,7 +1510,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                 {safeIncident.image ? (
                   <BlurryImage
                     src={safeIncident.image}
-                    alt="Incident"
+                    alt="Signalement"
                     className="incident-actual-image clickable"
                     onClick={() => setIsImageModalOpen(true)}
                   />
@@ -1768,7 +1768,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                   color: 'var(--color-text-muted)',
                   fontSize: '14px'
                 }}>
-                  <span>Aucune vidéo disponible pour cet incident</span>
+                  <span>Aucune vidéo disponible pour cet signalement</span>
                 </div>
               )}
             </div>

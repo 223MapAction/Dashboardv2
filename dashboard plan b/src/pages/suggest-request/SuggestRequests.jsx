@@ -559,7 +559,7 @@ export const SuggestRequests = ({ embedded = false }) => {
           <SearchNormal1 size={18} variant="Linear" color="currentColor" style={{ color: 'var(--color-text-secondary)' }} />
           <input
             type="text"
-            placeholder="Rechercher un incident, rôle, organisation…"
+            placeholder="Rechercher un signalement, rôle, organisation…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -602,12 +602,12 @@ export const SuggestRequests = ({ embedded = false }) => {
           <div className="info-banner-content">
             <InfoCircle size={24} variant="Bold" className="info-banner-icon" style={{ color: 'var(--color-primary-text)' }} />
             <div className="info-banner-text">
-              <h4>Règles de collaboration sur les Incidents</h4>
+              <h4>Règles de collaboration sur les Signalements</h4>
               <p>
-                <strong>1. Sans Leader :</strong> Si aucun leader n'a encore pris l'incident en charge, toute demande d'observation ou de contribution est <strong>automatiquement acceptée</strong>.
+                <strong>1. Sans Leader :</strong> Si aucun leader n'a encore pris le signalement en charge, toute demande d'observation ou de contribution est <strong>automatiquement acceptée</strong>.
               </p>
               <p>
-                <strong>2. Prise en charge par un Leader :</strong> Dès qu'une organisation prend en charge l'incident en tant que <strong>Leader</strong>, toutes les contributions existantes repassent en statut <strong>« En attente »</strong> pour validation manuelle. Les observateurs restent actifs.
+                <strong>2. Prise en charge par un Leader :</strong> Dès qu'une organisation prend en charge le signalement en tant que <strong>Leader</strong>, toutes les contributions existantes repassent en statut <strong>« En attente »</strong> pour validation manuelle. Les observateurs restent actifs.
               </p>
             </div>
           </div>

@@ -16,21 +16,21 @@ export const MetricsCards = ({ stats: statsData }) => {
   const metrics = [
     {
       id: 'total-alerts',
-      label: 'Total des incidents',
+      label: 'Total des signalements',
       value: stats.total.toString(),
       color: 'primary',
       icon: <NotificationBing size={24} variant="Bold" color="#3AA2DD" />
     },
     {
       id: 'taken-into-account',
-      label: 'Incidents pris en compte',
+      label: 'Signalements pris en compte',
       value: stats.takenIntoAccount.toString(),
       color: 'warning',
       icon: <Activity size={24} variant="Bold" color="#F59E0B" />
     },
     {
       id: 'resolved',
-      label: 'Incidents résolus',
+      label: 'Signalements résolus',
       value: stats.resolved.toString(),
       color: 'success',
       icon: <TickCircle size={24} variant="Bold" color="#22C55E" />

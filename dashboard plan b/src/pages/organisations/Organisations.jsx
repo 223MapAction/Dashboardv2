@@ -466,7 +466,7 @@ export const Organisations = () => {
                   </div>
                   <div>
                     <div className="orgs-stat-value">{statsProjects}</div>
-                    <div className="orgs-stat-label">Nombre d'incidents</div>
+                    <div className="orgs-stat-label">Nombre de signalements</div>
                   </div>
                 </div>
               </div>
@@ -528,7 +528,7 @@ export const Organisations = () => {
                         <th>Organisation</th>
                         <th>Secteur</th>
                         <th>Localisation</th>
-                        <th>Incidents prise en compte</th>
+                        <th>Signalements prise en compte</th>
                         <th>Membres</th>
                         <th>Statut</th>
                         <th></th>
@@ -574,7 +574,7 @@ export const Organisations = () => {
                         <th>Organisation</th>
                         <th>Secteur</th>
                         <th>Localisation</th>
-                        <th>Incidents prise en compte</th>
+                        <th>Signalements prise en compte</th>
                         <th>Membres</th>
                         <th>Statut</th>
                         <th></th>

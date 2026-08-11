@@ -886,7 +886,7 @@ export const CollaborationDetail = () => {
 
                       {/* Subsection 1: L'Incident */}
                       <div className="collab-detail-subsection">
-                        <h4 className="collab-detail-subsection-title">L'Incident</h4>
+                        <h4 className="collab-detail-subsection-title">L'Signalement</h4>
                         <div className="collab-detail-meta-group">
                           <div className="collab-detail-meta-row">
                             <span className="collab-detail-meta-label">Titre</span>
@@ -1768,7 +1768,7 @@ export const CollaborationDetail = () => {
         resolution_end_date: resolutionEndDate,
         resolution_file: resolutionFile
       });
-      setCloseAlert({ type: 'success', message: 'Incident résolu avec succès !' });
+      setCloseAlert({ type: 'success', message: 'Signalement résolu avec succès !' });
       setTimeout(() => {
         closeCloseModal();
         mutateCollaboration(); // Recharger uniquement les données SWR au lieu de la page entière
@@ -2067,7 +2067,7 @@ export const CollaborationDetail = () => {
 
                       {/* Subsection 1: L'Incident (Most Important) */}
                       <div className="collab-detail-subsection">
-                        <h4 className="collab-detail-subsection-title">L'Incident</h4>
+                        <h4 className="collab-detail-subsection-title">L'Signalement</h4>
                         <div className="collab-detail-meta-group">
                           {collaboration?.title && (
                             <div className="collab-detail-meta-row">
@@ -2101,7 +2101,7 @@ export const CollaborationDetail = () => {
                           )}
                           {collaboration?.incidentDetails?.etat && (
                             <div className="collab-detail-meta-row">
-                              <span className="collab-detail-meta-label">État incident</span>
+                              <span className="collab-detail-meta-label">État signalement</span>
                               <span className="collab-detail-meta-val">
                                 <span className={`collab-detail-badge ${getEtatBadgeClass(collaboration.incidentDetails.etat)}`}>
                                   {formatEtat(collaboration.incidentDetails.etat)}

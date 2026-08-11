@@ -43,7 +43,7 @@ const RESTRICTED_PATHS = [
   '/dashboard',
   '/collaboration',
   '/collaboration-detail',
-  '/incidents',
+  '/signalements',
   '/mes-interventions',
   '/agents',
   '/profile',

@@ -18,7 +18,7 @@ const IncidentTableSkeleton = () => (
     <table className="incident-table has-sticky-actions">
       <thead>
         <tr>
-          <th>Incident</th>
+          <th>Signalement</th>
           <th>Localisation</th>
           <th>Date de déclaration</th>
           <th>Date de résolution</th>
@@ -93,7 +93,7 @@ export const IncidentList = ({
     <section className="project-list-section">
       {/* Header */}
       <header className="project-list-header">
-        <h1 className="project-list-title">Incidents</h1>
+        <h1 className="project-list-title">Signalements</h1>
         <p className="project-list-subtitle">
           Rejoignez des initiatives environnementales en cours ou proposez votre
           expertise pour soutenir les communautés locales.
@@ -109,7 +109,7 @@ export const IncidentList = ({
             id="incidents-search-input"
             name="incidents-search-query"
             autoComplete="off"
-            placeholder="Rechercher un incident, une commune..."
+            placeholder="Rechercher un signalement, une commune..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -141,14 +141,14 @@ export const IncidentList = ({
             <div className='mb-2'>
               <SearchNormal1 size={48} variant="Linear" color="var(--color-text-muted)" />
             </div>
-            <p>Aucun incident ne correspond à vos critères.</p>
+            <p>Aucun signalement ne correspond à vos critères.</p>
           </div>
         ) : (
           <div className="incident-table-wrap">
             <table className="incident-table has-sticky-actions">
               <thead>
                 <tr>
-                  <th>Incident</th>
+                  <th>Signalement</th>
                   <th>Localisation</th>
                   <th>Date de déclaration</th>
                   <th>Date de résolution</th>

@@ -342,7 +342,7 @@ export const Impact = () => {
                 </div>
 
                 <div className="impact-filter-col">
-                  <label className="impact-filter-label">Statut des Incidents</label>
+                  <label className="impact-filter-label">Statut des Signalements</label>
                   <div className="impact-period-filters">
                     <button
                       type="button"
@@ -542,7 +542,7 @@ export const Impact = () => {
                           <Activity size={24} variant="Bold" color="var(--color-danger)" />
                         </div>
                         <div>
-                          <span className="impact-kpi-label">Incidents sans analyse</span>
+                          <span className="impact-kpi-label">Signalements sans analyse</span>
                           <div className="impact-kpi-value">
                             {globals.incidentsWithoutAnalysis || 0}
                           </div>
@@ -673,7 +673,7 @@ export const Impact = () => {
                       <SearchNormal1 size={18} variant="Linear" color="#6C7278" />
                       <input
                         type="text"
-                        placeholder="Rechercher un incident par titre, description, zone…"
+                        placeholder="Rechercher un signalement par titre, description, zone…"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                       />
@@ -683,7 +683,7 @@ export const Impact = () => {
                   {filteredIncidents.length === 0 ? (
                     <div className="impact-empty">
                       <Award size={48} variant="Linear" color="#9CA3AF" />
-                      <p>Aucun incident ne correspond à vos critères et filtres actuels.</p>
+                      <p>Aucun signalement ne correspond à vos critères et filtres actuels.</p>
                     </div>
                   ) : (
                     <div className="impact-list">
@@ -960,7 +960,7 @@ export const Impact = () => {
                                 <div className="impact-orgs">
                                   <h4 className="impact-orgs-label">Actions & Tâches effectives ({incTasks.length})</h4>
                                   {incTasks.length === 0 ? (
-                                    <span className="text-muted">Aucune tâche assignée à cet incident.</span>
+                                    <span className="text-muted">Aucune tâche assignée à cet signalement.</span>
                                   ) : (
                                     <div className="tasks-grid">
                                       {incTasks.map((t) => {

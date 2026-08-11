@@ -357,7 +357,7 @@ export const TrashPage = () => {
           <button
             className="trash-btn-restore"
             onClick={() => handleRestore(incident.id)}
-            title="Restaurer cet incident"
+            title="Restaurer cet signalement"
           >
             <RotateLeft size={16} variant="Linear" color="var(--color-primary)" />
             Restaurer
@@ -400,7 +400,7 @@ export const TrashPage = () => {
           {/* ── État d'erreur ── */}
           {incidentsError && (
             <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-danger-text)' }}>
-              <p>Erreur lors du chargement des incidents supprimés.</p>
+              <p>Erreur lors du chargement des signalements supprimés.</p>
               <button
                 onClick={() => mutate()}
                 style={{ marginTop: '12px', padding: '8px 16px', cursor: 'pointer' }}
@@ -453,7 +453,7 @@ export const TrashPage = () => {
                   <SearchNormal1 size={16} variant="Linear" color="var(--color-text-muted)" />
                   <input
                     type="text"
-                    placeholder="Rechercher un incident..."
+                    placeholder="Rechercher un signalement..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
@@ -516,7 +516,7 @@ export const TrashPage = () => {
                     <Trash size={48} variant="Linear" color="var(--color-border)" />
                   </div>
                   <p className="trash-empty-title">La corbeille est vide</p>
-                  <p className="trash-empty-sub">Aucun incident supprimé ne correspond à vos critères.</p>
+                  <p className="trash-empty-sub">Aucun signalement supprimé ne correspond à vos critères.</p>
                 </div>
               ) : viewMode === 'grid' ? (
                 <div className="trash-grid">

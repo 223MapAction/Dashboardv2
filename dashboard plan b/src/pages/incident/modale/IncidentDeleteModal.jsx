@@ -24,7 +24,7 @@ export const IncidentDeleteModal = () => {
     setDeleteAlert({ type: null, message: null });
     try {
       await deleteIncidentService(deleteModal.incident.id);
-      setDeleteAlert({ type: 'success', message: 'Incident supprimé avec succès !' });
+      setDeleteAlert({ type: 'success', message: 'Signalement supprimé avec succès !' });
       mutateIncidents();
       setTimeout(() => closeDeleteModal(), 2000);
     } catch (err) {

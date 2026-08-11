@@ -58,7 +58,7 @@ const TableSkeleton = () => (
     <table className="mes-interventions-table has-sticky-actions">
       <thead>
         <tr>
-          <th>Incident</th>
+          <th>Signalement</th>
           <th>Localisation</th>
           <th>Mode</th>
           <th>Date de déclaration</th>
@@ -300,7 +300,7 @@ const MesInterventionsContent = () => {
   };
 
   const handleGoToIncidentDetail = (incident) => {
-    navigate(`/incidents/${incident.id}`, {
+    navigate(`/signalements/${incident.id}`, {
       state: { incident, from: '/mes-interventions' }
     });
   };
@@ -376,8 +376,8 @@ const MesInterventionsContent = () => {
             <TableSkeleton />
           ) : incidents.length === 0 ? (
             <div className="mes-interventions-empty">
-              <p className="h1 mb-p pb-0">Aucun incident</p>
-              <p className="mt-2">Aucun incident assigné ne correspond à vos critères.</p>
+              <p className="h1 mb-p pb-0">Aucun signalement</p>
+              <p className="mt-2">Aucun signalement assigné ne correspond à vos critères.</p>
             </div>
           ) : (
             <>
@@ -385,7 +385,7 @@ const MesInterventionsContent = () => {
                 <table className="mes-interventions-table has-sticky-actions">
                   <thead>
                     <tr>
-                      <th>Incident</th>
+                      <th>Signalement</th>
                       <th>Localisation</th>
                       <th>Mode</th>
                       <th>Date de déclaration</th>

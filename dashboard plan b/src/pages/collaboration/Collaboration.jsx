@@ -762,9 +762,9 @@ export const Collaboration = () => {
                       <select
                         value={incidentFilter}
                         onChange={(e) => setIncidentFilter(e.target.value)}
-                        aria-label="Filtrer par incident"
+                        aria-label="Filtrer par signalement"
                       >
-                        <option value="">Tous les incidents</option>
+                        <option value="">Tous les signalements</option>
                         {incidentsList.map((inc) => (
                           <option key={inc.id} value={inc.id}>
                             {inc.title}

@@ -52,7 +52,7 @@ export const IncidentStatsPage = () => {
         
         <main className="stats-page-content py-5 mt-5">
           <div className="stats-page-header">
-            <h1 className="stats-page-title">Statistiques des Incidents</h1>
+            <h1 className="stats-page-title">Statistiques des Signalements</h1>
             <p className="stats-page-subtitle">
               Vue d'ensemble complète des incidents par statut, localité, type et gravité
             </p>

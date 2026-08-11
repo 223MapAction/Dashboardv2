@@ -811,7 +811,7 @@ export const CollaborationRequests = ({
           <SearchNormal1 size={18} variant="Linear" color="currentColor" style={{ color: 'var(--color-text-secondary)' }} />
           <input
             type="text"
-            placeholder="Rechercher un incident, rôle, organisation…"
+            placeholder="Rechercher un signalement, rôle, organisation…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -854,12 +854,12 @@ export const CollaborationRequests = ({
           <div className="info-banner-content">
             <InfoCircle size={24} variant="Bold" className="info-banner-icon" style={{ color: 'var(--color-primary-text)' }} />
             <div className="info-banner-text">
-              <h4>Règles de collaboration sur les Incidents</h4>
+              <h4>Règles de collaboration sur les Signalements</h4>
               <p>
-                <strong>1. Sans Leader :</strong> Si aucun leader n'a encore pris l'incident en charge, toute demande d'observation ou de contribution est <strong>automatiquement acceptée</strong>.
+                <strong>1. Sans Leader :</strong> Si aucun leader n'a encore pris le signalement en charge, toute demande d'observation ou de contribution est <strong>automatiquement acceptée</strong>.
               </p>
               <p>
-                <strong>2. Prise en charge par un Leader :</strong> Dès qu'une organisation prend en charge l'incident en tant que <strong>Leader</strong>, toutes les contributions existantes repassent en status <strong>"En attente"</strong> pour lui permettre de les valider manuellement. Les observateurs restent actifs.
+                <strong>2. Prise en charge par un Leader :</strong> Dès qu'une organisation prend en charge le signalement en tant que <strong>Leader</strong>, toutes les contributions existantes repassent en status <strong>"En attente"</strong> pour lui permettre de les valider manuellement. Les observateurs restent actifs.
               </p>
             </div>
           </div>
@@ -1151,7 +1151,7 @@ export const CollaborationRequests = ({
                                   ) : hasLeader ? (
                                     <>Approuvée par le leader (<strong>{incident.leader?.org || incident.leader?.name}</strong>).</>
                                   ) : (
-                                    <>Active (Auto-acceptée car aucun leader n'est désigné sur l'incident).</>
+                                    <>Active (Auto-acceptée car aucun leader n'est désigné sur le signalement).</>
                                   )}
                                 </p>
                               ) : (
@@ -1164,7 +1164,7 @@ export const CollaborationRequests = ({
 
                           </div>
                         ) : (
-                          <p className="no-participation-text">Vous ne participez pas encore à cet incident.</p>
+                          <p className="no-participation-text">Vous ne participez pas encore à cet signalement.</p>
                         )}
                         <button
                           type="button"
@@ -1211,7 +1211,7 @@ export const CollaborationRequests = ({
                           <>
                             <h4 className="detail-section-title">Suggestions de partenaires ({incident.suggestions.length})</h4>
                             {incident.suggestions.length === 0 ? (
-                              <p className="no-actions-text">Aucune suggestion pour cet incident.</p>
+                              <p className="no-actions-text">Aucune suggestion pour cet signalement.</p>
                             ) : (
                               <div className="incident-suggestions-list">
                                 {incident.suggestions.map((sug) => (
