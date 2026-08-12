@@ -276,7 +276,7 @@ export const deleteDiscussionMessageService = async (incidentId, messageId) => {
  * @returns {string} Couleur HSL
  */
 const generateAvatarColor = (str) => {
-  if (!str) return '#6C7278';
+  if (!str) return 'var(--color-text-secondary)';
   const strVal = String(str);
   let hash = 0;
   for (let i = 0; i < strVal.length; i++) {

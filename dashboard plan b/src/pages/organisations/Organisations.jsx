@@ -29,12 +29,7 @@ import Pagination from '../../components/molecules/Pagination';
 import { ResponsiveTable } from '../../components/molecules/ResponsiveTable';
 import { COLONNES_ORGANISATIONS, mediaOrganisation, libellePays } from './colonnes';
 import { TableActionsMenu } from '../../components/molecules/TableActionsMenu';
-const COLOR_PALETTE = [
-  '#EF4444', '#F97316', '#F59E0B', '#22C55E',
-  '#3AA2DD', '#1E40AF', '#A855F7', '#EC4899',
-  '#10B981', '#6366F1',
-];
-
+import { AVATAR_COLORS, AVATAR_COULEUR_DEFAUT } from '../../utils/couleursAvatar';
 const EMPTY_FORM = {
   name: '',
   acronym: '',
@@ -100,7 +95,7 @@ export const Organisations = () => {
       id: o.id,
       name: o.name,
       acronym: o.acronym || '',
-      color: o.primary_color || '#3AA2DD',
+      color: o.primary_color || AVATAR_COULEUR_DEFAUT,
       sector: o.activity_sector || '',
       type: o.organisation_type || '',
       country: o.intervention_country || '',
@@ -264,7 +259,7 @@ export const Organisations = () => {
       partner_status: formData.status || 'active',
       phone: formData.phone || null,
       website_url: formData.website || null,
-      primary_color: formData.color || '#3AA2DD',
+      primary_color: formData.color || AVATAR_COULEUR_DEFAUT,
       is_premium: true,
       members_count: 0,
       subdomain: subdomainVal,

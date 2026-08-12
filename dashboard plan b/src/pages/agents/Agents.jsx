@@ -7,7 +7,7 @@ import {
   SearchNormal1, ArrowDown2, Add, Edit2, Trash,
 } from 'iconsax-react';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText, ShimmerCircularImage } from 'react-shimmer-effects';
-import { ROLES, AVATAR_COLORS } from './data/agents';
+import { ROLES } from './data/agents';
 import { getOrganisationsService } from '../organisations/service/organisation_service';
 import { getOrganisationMembersService, getAgentsStatsService } from './service/members_service';
 import AgentsContext from './modale/AgentsModalContext';
@@ -24,6 +24,7 @@ import { authService } from '../auth/services/authService';
 import './agents.css';
 import './agents-roster.css';
 import { useReinitialisationSurChangement } from '../../hooks/useReinitialisationSurChangement';
+import { AVATAR_COLORS, AVATAR_COULEUR_DEFAUT } from '../../utils/couleursAvatar';
 
 
 const EMPTY_ARRAY = [];
@@ -65,7 +66,7 @@ const fetcher = async ([, search, role, status]) => {
         organisationName: m.organisation_name || 'Organisation inconnue',
         avatar: m.avatar || '',
         status: m.is_active ? 'active' : 'inactive',
-        avatarColor: AVATAR_COLORS[getIndexFromId(m.id) % AVATAR_COLORS.length] || '#3AA2DD',
+        avatarColor: AVATAR_COLORS[getIndexFromId(m.id) % AVATAR_COLORS.length] || AVATAR_COULEUR_DEFAUT,
         joinedAt: m.date_joined || new Date().toISOString()
       });
     });

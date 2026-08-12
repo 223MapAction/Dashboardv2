@@ -1529,7 +1529,7 @@ export const Collaboration = () => {
                       setTimeout(() => openTasksModal(c), 300);
                     }}
                   >
-                    <div className="mobile-sheet-action-icon" style={{ backgroundColor: 'rgba(58, 162, 221, 0.12)' }}>
+                    <div className="mobile-sheet-action-icon" style={{ backgroundColor: 'rgba(var(--rgb-primary), 0.12)' }}>
                       <TaskSquare size={20} variant="Bold" color="var(--color-primary-text)" />
                     </div>
                     <div className="mobile-sheet-action-text">
@@ -1550,7 +1550,7 @@ export const Collaboration = () => {
                       setTimeout(() => openAddTaskModal(c), 300);
                     }}
                   >
-                    <div className="mobile-sheet-action-icon" style={{ backgroundColor: 'rgba(58, 162, 221, 0.12)' }}>
+                    <div className="mobile-sheet-action-icon" style={{ backgroundColor: 'rgba(var(--rgb-primary), 0.12)' }}>
                       <Add size={20} variant="Bold" color="var(--color-primary-text)" />
                     </div>
                     <div className="mobile-sheet-action-text">
@@ -1569,7 +1569,7 @@ export const Collaboration = () => {
                       setTimeout(() => openSuggestOrgModal(c), 300);
                     }}
                   >
-                    <div className="mobile-sheet-action-icon" style={{ backgroundColor: 'rgba(245, 158, 11, 0.12)' }}>
+                    <div className="mobile-sheet-action-icon" style={{ backgroundColor: 'rgba(var(--rgb-warning), 0.12)' }}>
                       <Buildings2 size={20} variant="Bold" color="var(--color-warning-text)" />
                     </div>
                     <div className="mobile-sheet-action-text">

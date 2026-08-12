@@ -81,7 +81,7 @@
   right: var(--spacing-2);
   border-radius: var(--radius-md);
   background-color: var(--color-surface);
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 1px 6px rgba(var(--rgb-ombre), 0.25);
 }
 
 /* ── Tete : identite a gauche, menu a droite ───────────────────────────────── */

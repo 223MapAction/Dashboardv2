@@ -22,6 +22,7 @@ import './mes-interventions.css';
 
 
 import { TableActionsMenu } from '../../components/molecules/TableActionsMenu';
+import { AVATAR_COLORS, AVATAR_COULEUR_DEFAUT } from '../../utils/couleursAvatar';
 // Initiales pour les avatars
 const getInitials = (name = '') =>
   name
@@ -58,12 +59,6 @@ const adaptIncidentData = (incident) => {
 };
 
 
-const AVATAR_COLORS = [
-  '#EF4444', '#F97316', '#F59E0B', '#22C55E',
-  '#3AA2DD', '#1E40AF', '#A855F7', '#EC4899',
-  '#10B981', '#6366F1'
-];
-
 const IncidentAgentsStack = ({ incident }) => {
   const { openAgentsModal } = useMesInterventionsModalContext();
   const { data: assignmentsData, isLoading } = useSWR(
@@ -77,7 +72,7 @@ const IncidentAgentsStack = ({ incident }) => {
       const agentId = a.agent || a.id;
       const fullName = a.agent_name || `Agent #${agentId}`;
       const email = a.agent_email || '';
-      const avatarColor = AVATAR_COLORS[Math.abs(agentId) % AVATAR_COLORS.length] || '#3AA2DD';
+      const avatarColor = AVATAR_COLORS[Math.abs(agentId) % AVATAR_COLORS.length] || AVATAR_COULEUR_DEFAUT;
 
       const isReporter = a.incident_detail?.user_id?.id === agentId;
       const roleVal = isReporter ? a.incident_detail?.user_id?.org_role : null;

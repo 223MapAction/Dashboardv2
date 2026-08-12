@@ -104,11 +104,11 @@
 }
 
 .activity-item.unread {
-  background-color: rgba(58, 162, 221, 0.05);
+  background-color: rgba(var(--rgb-primary), 0.05);
 }
 
 .activity-item.unread:hover {
-  background-color: rgba(58, 162, 221, 0.08);
+  background-color: rgba(var(--rgb-primary), 0.08);
 }
 
 .activity-unread-dot {
@@ -139,19 +139,19 @@
 }
 
 .activity-item.activity-success .activity-icon-wrapper {
-  background-color: rgba(34, 197, 94, 0.1);
+  background-color: rgba(var(--rgb-success), 0.1);
 }
 
 .activity-item.activity-warning .activity-icon-wrapper {
-  background-color: rgba(245, 158, 11, 0.1);
+  background-color: rgba(var(--rgb-warning), 0.1);
 }
 
 .activity-item.activity-danger .activity-icon-wrapper {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgba(var(--rgb-danger), 0.1);
 }
 
 .activity-item.activity-info .activity-icon-wrapper {
-  background-color: rgba(14, 116, 144, 0.1);
+  background-color: rgba(var(--rgb-primary-dark), 0.1);
 }
 
 .activity-content {

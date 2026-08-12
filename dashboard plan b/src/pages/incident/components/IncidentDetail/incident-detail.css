@@ -201,8 +201,8 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(180deg,
-      rgba(0, 0, 0, 0) 50%,
-      rgba(0, 0, 0, 0.55) 100%);
+      rgba(var(--rgb-ombre), 0) 50%,
+      rgba(var(--rgb-ombre), 0.55) 100%);
 }
 
 .project-detail .map-overlay-bottom {
@@ -235,7 +235,7 @@
   padding: 2px var(--spacing-2);
   font-size: var(--font-size-micro);
   font-weight: var(--font-weight-semibold);
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(var(--rgb-ombre), 0.5);
   border-radius: var(--radius-sm);
   align-self: flex-start;
 }
@@ -280,7 +280,7 @@
   width: 36px;
   height: 36px;
   border-radius: var(--radius-sm);
-  background-color: rgba(34, 197, 94, 0.1);
+  background-color: rgba(var(--rgb-success), 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -335,7 +335,7 @@
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
-  background-color: #000;
+  background-color: rgba(var(--rgb-ombre), 1);
   border-radius: var(--radius-md);
   overflow: hidden;
 }
@@ -392,7 +392,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(0 2px 4px rgba(var(--rgb-ombre), 0.3));
   transform: translateY(-4px);
 }
 
@@ -557,22 +557,22 @@
 }
 
 .project-detail .feed-role-info {
-  background-color: rgba(58, 162, 221, 0.12);
+  background-color: rgba(var(--rgb-primary), 0.12);
   color: var(--color-primary-text);
 }
 
 .project-detail .feed-role-success {
-  background-color: rgba(34, 197, 94, 0.12);
+  background-color: rgba(var(--rgb-success), 0.12);
   color: var(--color-success-text);
 }
 
 .project-detail .feed-role-warning {
-  background-color: rgba(245, 158, 11, 0.12);
+  background-color: rgba(var(--rgb-warning), 0.12);
   color: var(--color-warning-text);
 }
 
 .project-detail .feed-role-danger {
-  background-color: rgba(239, 68, 68, 0.12);
+  background-color: rgba(var(--rgb-danger), 0.12);
   color: var(--color-danger-text);
 }
 
@@ -719,7 +719,7 @@
     background: white;
     z-index: 10;
     border-top: 1px solid var(--color-border);
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 -2px 10px rgba(var(--rgb-ombre), 0.05);
   }
 }
 
@@ -729,7 +729,7 @@
 .join-modal-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(15, 23, 42, 0.45);
+  background-color: rgba(var(--rgb-text-primary), 0.45);
   z-index: 9999;
   display: flex;
   justify-content: flex-end;
@@ -747,7 +747,7 @@
   background-color: var(--color-surface);
   display: flex;
   flex-direction: column;
-  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.18);
+  box-shadow: -8px 0 32px rgba(var(--rgb-ombre), 0.18);
   animation: slideInRight 0.3s cubic-bezier(0.32, 0.72, 0.35, 1) forwards;
 }
 
@@ -954,7 +954,7 @@
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 24px rgba(var(--rgb-ombre), 0.12);
   padding: var(--spacing-1);
 }
 
@@ -973,7 +973,7 @@
 }
 
 .invite-orgs-option:hover {
-  background-color: rgba(58, 162, 221, 0.08);
+  background-color: rgba(var(--rgb-primary), 0.08);
 }
 
 .invite-orgs-avatar {
@@ -1079,7 +1079,7 @@
 }
 
 .invited-org-remove:hover {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgba(var(--rgb-danger), 0.1);
 }
 
 .invited-org-roles {
@@ -1130,7 +1130,7 @@
 .invited-org-role-desc {
   margin: 0;
   padding: var(--spacing-2) var(--spacing-3);
-  background-color: rgba(58, 162, 221, 0.06);
+  background-color: rgba(var(--rgb-primary), 0.06);
   border-left: 3px solid var(--color-primary);
   border-radius: var(--radius-sm);
   font-size: var(--font-size-caption);
@@ -1483,7 +1483,7 @@
 }
 
 .project-detail .incident-status-step.is-current .incident-status-dot {
-  box-shadow: 0 0 0 4px rgba(58, 162, 221, 0.18);
+  box-shadow: 0 0 0 4px rgba(var(--rgb-primary), 0.18);
 }
 
 .project-detail .incident-status-label {

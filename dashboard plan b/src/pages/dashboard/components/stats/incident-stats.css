@@ -11,7 +11,7 @@
   background: white;
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(var(--rgb-ombre), 0.08);
 }
 
 .stats-section-title {
@@ -49,7 +49,7 @@
 
 .status-stat-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(var(--rgb-ombre), 0.1);
 }
 
 .status-stat-card.total {
@@ -80,7 +80,7 @@
   height: 56px;
   border-radius: 12px;
   background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(var(--rgb-ombre), 0.08);
 }
 
 .status-stat-card.total .stat-icon svg {

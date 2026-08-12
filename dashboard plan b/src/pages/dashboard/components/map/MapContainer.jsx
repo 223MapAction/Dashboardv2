@@ -629,21 +629,21 @@ export const MapContainer = () => {
                 <div className="map-legend-item">
                   <span
                     className="map-legend-dot"
-                    style={{ backgroundColor: '#EF4444' }}
+                    style={{ backgroundColor: 'var(--color-severity-high)' }}
                   />
                   Élevée
                 </div>
                 <div className="map-legend-item">
                   <span
                     className="map-legend-dot"
-                    style={{ backgroundColor: '#F97316' }}
+                    style={{ backgroundColor: 'var(--color-warning)' }}
                   />
                   Moyenne
                 </div>
                 <div className="map-legend-item">
                   <span
                     className="map-legend-dot"
-                    style={{ backgroundColor: '#FACC15' }}
+                    style={{ backgroundColor: 'var(--color-severity-medium)' }}
                   />
                   Faible
                 </div>
@@ -656,14 +656,14 @@ export const MapContainer = () => {
                 <div className="map-legend-item">
                   <span
                     className="map-legend-dot"
-                    style={{ backgroundColor: '#3AA2DD' }}
+                    style={{ backgroundColor: 'var(--color-primary)' }}
                   />
                   Par d'autres
                 </div>
                 <div className="map-legend-item">
                   <span
                     className="map-legend-dot"
-                    style={{ backgroundColor: '#22C55E' }}
+                    style={{ backgroundColor: 'var(--color-severity-low)' }}
                   />
                   Par moi
                 </div>
@@ -695,7 +695,7 @@ export const MapContainer = () => {
                   fontSize: '13px',
                   fontWeight: '600',
                   borderRadius: '20px',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                  boxShadow: '0 2px 8px rgba(var(--rgb-ombre), 0.15)',
                   cursor: isLoadingMore || isLoadingPage ? 'not-allowed' : 'pointer',
                   opacity: isLoadingMore || isLoadingPage ? 0.7 : 1
                 }}

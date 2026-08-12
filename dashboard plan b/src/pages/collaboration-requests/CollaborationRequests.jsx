@@ -881,7 +881,7 @@ export const CollaborationRequests = ({
                         fontWeight: 'bold',
                         textTransform: 'uppercase',
                         backgroundColor: meta.color,
-                        boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
+                        boxShadow: '0 2px 6px rgba(var(--rgb-ombre),0.15)'
                       }}>
                         {meta.label}
                       </span>
@@ -960,7 +960,7 @@ export const CollaborationRequests = ({
                           fontSize: 'var(--font-size-micro)',
                           fontWeight: '600',
                           color: 'var(--color-warning-text)',
-                          backgroundColor: 'rgba(245, 158, 11, 0.12)',
+                          backgroundColor: 'rgba(var(--rgb-warning), 0.12)',
                           border: 'none'
                         }}>
                           <Crown1 size={13} variant="Bold" color="currentColor" style={{ color: 'var(--color-warning-text)' }} />
@@ -991,7 +991,7 @@ export const CollaborationRequests = ({
                             fontWeight: '600',
                             color: 'var(--color-text-secondary)',
                             borderColor: 'transparent',
-                            backgroundColor: 'rgba(108, 114, 120, 0.08)'
+                            backgroundColor: 'rgba(var(--rgb-text-secondary), 0.08)'
                           }}>
                             <Building size={13} variant="Bold" color="currentColor" style={{ color: 'var(--color-text-secondary)' }} />
                             {orgToShow}

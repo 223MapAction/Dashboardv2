@@ -13,6 +13,7 @@ import {
 import { getOtherOrganisationsService } from '../../../../collaboration-detail/service/collab_detail_service';
 
 import { OffcanvasModal } from '../../../../../components/molecules/OffcanvasModal';
+import { AVATAR_COULEUR_DEFAUT } from '../../../../../utils/couleursAvatar';
 export const InviteOrgModal = () => {
   const {
     joinOpen,
@@ -160,7 +161,7 @@ export const InviteOrgModal = () => {
   };
 
   const getOrgColor = (org) => {
-    return org.primary_color || '#3AA2DD';
+    return org.primary_color || AVATAR_COULEUR_DEFAUT;
   };
 
   const selectableOrgs = organisations.filter(
@@ -210,7 +211,7 @@ export const InviteOrgModal = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         padding: 'var(--spacing-4)',
-                        backgroundColor: workMode === 'interne' ? 'rgba(58, 162, 221, 0.08)' : 'var(--color-surface)',
+                        backgroundColor: workMode === 'interne' ? 'rgba(var(--rgb-primary), 0.08)' : 'var(--color-surface)',
                         borderRadius: 'var(--radius-md)',
                         border: workMode === 'interne' ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
                         cursor: safeIncident?.take_in_charge_mode ? 'not-allowed' : 'pointer',
@@ -221,7 +222,7 @@ export const InviteOrgModal = () => {
                         minHeight: '100px'
                       }}
                     >
-                      <EyeSlash size={24} variant={workMode === 'interne' ? "Bold" : "Linear"} color={workMode === 'interne' ? "var(--color-primary)" : "#6C7278"} />
+                      <EyeSlash size={24} variant={workMode === 'interne' ? "Bold" : "Linear"} color={workMode === 'interne' ? "var(--color-primary)" : "var(--color-text-secondary)"} />
                       <div style={{
                         fontSize: 'var(--font-size-body)',
                         fontWeight: 'var(--font-weight-bold)',
@@ -250,7 +251,7 @@ export const InviteOrgModal = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         padding: 'var(--spacing-4)',
-                        backgroundColor: workMode === 'collaboration' ? 'rgba(58, 162, 221, 0.08)' : 'var(--color-surface)',
+                        backgroundColor: workMode === 'collaboration' ? 'rgba(var(--rgb-primary), 0.08)' : 'var(--color-surface)',
                         borderRadius: 'var(--radius-md)',
                         border: workMode === 'collaboration' ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
                         cursor: 'pointer',
@@ -259,7 +260,7 @@ export const InviteOrgModal = () => {
                         minHeight: '100px'
                       }}
                     >
-                      <People size={24} variant={workMode === 'collaboration' ? "Bold" : "Linear"} color={workMode === 'collaboration' ? "var(--color-primary)" : "#6C7278"} />
+                      <People size={24} variant={workMode === 'collaboration' ? "Bold" : "Linear"} color={workMode === 'collaboration' ? "var(--color-primary)" : "var(--color-text-secondary)"} />
                       <div style={{
                         fontSize: 'var(--font-size-body)',
                         fontWeight: 'var(--font-weight-bold)',
@@ -329,9 +330,9 @@ export const InviteOrgModal = () => {
               {safeIncident?.etat === 'declared' && workMode === 'interne' && (
                 <div style={{
                   padding: 'var(--spacing-5)',
-                  backgroundColor: 'rgba(58, 162, 221, 0.08)',
+                  backgroundColor: 'rgba(var(--rgb-primary), 0.08)',
                   borderRadius: 'var(--radius-md)',
-                  border: '1px solid rgba(58, 162, 221, 0.2)',
+                  border: '1px solid rgba(var(--rgb-primary), 0.2)',
                   marginBottom: 'var(--spacing-5)'
                 }}>
                   <p style={{ margin: 0, color: 'var(--color-primary-text)', fontSize: 'var(--font-size-body)', lineHeight: '1.6' }}>
@@ -483,8 +484,8 @@ export const InviteOrgModal = () => {
                         className="invite-orgs-dropdown-footer"
                         style={{
                           flexShrink: 0,
-                          borderTop: '1px solid rgba(0, 0, 0, 0.06)',
-                          background: 'var(--color-surface, #ffffff)'
+                          borderTop: '1px solid rgba(var(--rgb-ombre), 0.06)',
+                          background: 'var(--color-surface)'
                         }}
                       >
                         <button
@@ -501,7 +502,7 @@ export const InviteOrgModal = () => {
                             padding: '10px',
                             margin: 0
                           }}
-                          onMouseEnter={(e) => !isLoadingMore && (e.currentTarget.style.backgroundColor = 'rgba(58, 162, 221, 0.08)')}
+                          onMouseEnter={(e) => !isLoadingMore && (e.currentTarget.style.backgroundColor = 'rgba(var(--rgb-primary), 0.08)')}
                           onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                         >
                           {isLoadingMore ? (

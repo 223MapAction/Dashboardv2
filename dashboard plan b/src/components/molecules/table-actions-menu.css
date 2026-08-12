@@ -16,16 +16,16 @@
   /* Cerclé et teinté en permanence : en fond transparent avec une icône grise,
      le bouton ne se révélait qu'au survol — donc jamais au doigt, où le survol
      n'existe pas. */
-  border: 1px solid rgba(58, 162, 221, 0.35);
+  border: 1px solid rgba(var(--rgb-primary), 0.35);
   border-radius: var(--radius-md);
-  background-color: rgba(58, 162, 221, 0.08);
+  background-color: rgba(var(--rgb-primary), 0.08);
   color: var(--color-primary-text);
   cursor: pointer;
   transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .table-actions-trigger:hover {
-  background-color: rgba(58, 162, 221, 0.18);
+  background-color: rgba(var(--rgb-primary), 0.18);
   border-color: var(--color-primary);
   color: var(--color-primary-text);
 }
@@ -33,7 +33,7 @@
 /* Le déclencheur reste teinté tant que son menu est ouvert : sans ça, on perd
    de vue quelle ligne on est en train de manipuler. */
 .table-actions-trigger.is-open {
-  background-color: rgba(58, 162, 221, 0.14);
+  background-color: rgba(var(--rgb-primary), 0.14);
   border-color: var(--color-primary);
   color: var(--color-primary-text);
 }
@@ -48,7 +48,7 @@
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16);
+  box-shadow: 0 12px 32px rgba(var(--rgb-text-primary), 0.16);
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -80,7 +80,7 @@
 
 .table-actions-item:hover:not(:disabled),
 .table-actions-item:focus-visible:not(:disabled) {
-  background-color: rgba(58, 162, 221, 0.1);
+  background-color: rgba(var(--rgb-primary), 0.1);
   color: var(--color-primary-text);
   outline: none;
 }
@@ -91,7 +91,7 @@
 
 .table-actions-item.is-danger:hover:not(:disabled),
 .table-actions-item.is-danger:focus-visible:not(:disabled) {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgba(var(--rgb-danger), 0.1);
   color: var(--color-danger-text);
 }
 
@@ -131,7 +131,7 @@
   right: 0;
   z-index: 2;
   background-color: var(--color-surface);
-  box-shadow: -8px 0 12px -8px rgba(15, 23, 42, 0.18);
+  box-shadow: -8px 0 12px -8px rgba(var(--rgb-text-primary), 0.18);
 }
 
 .has-sticky-actions thead th:last-child {
@@ -145,7 +145,7 @@
 }
 
 .has-sticky-actions tbody tr.is-selected td:last-child {
-  background-color: rgba(58, 162, 221, 0.06);
+  background-color: rgba(var(--rgb-primary), 0.06);
 }
 
 /* Sur grand écran, le tableau tient sans défiler : l'ombre n'aurait plus de

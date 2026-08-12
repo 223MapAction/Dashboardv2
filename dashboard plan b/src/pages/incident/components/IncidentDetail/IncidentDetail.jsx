@@ -799,15 +799,15 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
           ? {
             label: 'Résolu (Moi)',
             color: 'var(--color-success-text)',
-            bg: 'rgba(34, 197, 94, 0.12)',
-            border: 'rgba(34, 197, 94, 0.3)',
+            bg: 'rgba(var(--rgb-success), 0.12)',
+            border: 'rgba(var(--rgb-success), 0.3)',
             icon: <ShieldTick size={14} variant="Bold" color="var(--color-success)" style={{ marginRight: '6px' }} />
           }
           : {
             label: 'Résolu (Autre)',
             color: 'var(--color-text-secondary)',
-            bg: 'rgba(107, 114, 128, 0.12)',
-            border: 'rgba(107, 114, 128, 0.3)',
+            bg: 'rgba(var(--rgb-text-muted), 0.12)',
+            border: 'rgba(var(--rgb-text-muted), 0.3)',
             icon: <ShieldTick size={14} variant="Bold" color="var(--color-text-secondary)" style={{ marginRight: '6px' }} />
           };
       case 'taken_into_account':
@@ -815,15 +815,15 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
           ? {
             label: 'Pris en compte (Moi)',
             color: 'var(--color-primary-text)',
-            bg: 'rgba(58, 162, 221, 0.12)',
-            border: 'rgba(58, 162, 221, 0.3)',
+            bg: 'rgba(var(--rgb-primary), 0.12)',
+            border: 'rgba(var(--rgb-primary), 0.3)',
             icon: <ClipboardTick size={14} variant="Bold" color="var(--color-primary)" style={{ marginRight: '6px' }} />
           }
           : {
             label: 'Pris en compte (Autre)',
             color: 'var(--color-warning-text)',
-            bg: 'rgba(249, 115, 22, 0.12)',
-            border: 'rgba(249, 115, 22, 0.3)',
+            bg: 'rgba(var(--rgb-warning), 0.12)',
+            border: 'rgba(var(--rgb-warning), 0.3)',
             icon: <ClipboardTick size={14} variant="Bold" color="var(--color-warning)" style={{ marginRight: '6px' }} />
           };
       case 'declared':
@@ -831,8 +831,8 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
         return {
           label: 'Déclaré',
           color: 'var(--color-danger-text)',
-          bg: 'rgba(239, 68, 68, 0.12)',
-          border: 'rgba(239, 68, 68, 0.3)',
+          bg: 'rgba(var(--rgb-danger), 0.12)',
+          border: 'rgba(var(--rgb-danger), 0.3)',
           icon: <Danger size={14} variant="Bold" color="var(--color-danger)" style={{ marginRight: '6px' }} />
         };
     }
@@ -846,15 +846,15 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
       ? {
         label: 'Interne',
         color: 'var(--color-danger-text)',
-        bg: 'rgba(239, 68, 68, 0.12)',
-        border: 'rgba(239, 68, 68, 0.3)',
+        bg: 'rgba(var(--rgb-danger), 0.12)',
+        border: 'rgba(var(--rgb-danger), 0.3)',
         icon: <Briefcase size={14} variant="Bold" color="var(--color-danger)" style={{ marginRight: '6px' }} />
       }
       : {
         label: 'Collaboratif',
         color: 'var(--color-primary-text)',
-        bg: 'rgba(58, 162, 221, 0.12)',
-        border: 'rgba(58, 162, 221, 0.3)',
+        bg: 'rgba(var(--rgb-primary), 0.12)',
+        border: 'rgba(var(--rgb-primary), 0.3)',
         icon: <People size={14} variant="Bold" color="var(--color-primary)" style={{ marginRight: '6px' }} />
       };
   };
@@ -871,8 +871,8 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
       return {
         label: 'Observateur',
         color: 'var(--color-text-secondary)',
-        bg: 'rgba(108, 114, 120, 0.12)',
-        border: 'rgba(108, 114, 120, 0.3)',
+        bg: 'rgba(var(--rgb-text-secondary), 0.12)',
+        border: 'rgba(var(--rgb-text-secondary), 0.3)',
         icon: <Eye size={14} variant="Bold" color="var(--color-text-secondary)" style={{ marginRight: '6px' }} />
       };
     }
@@ -880,8 +880,8 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
       return {
         label: 'Contributeur',
         color: 'var(--color-primary-text)',
-        bg: 'rgba(58, 162, 221, 0.12)',
-        border: 'rgba(58, 162, 221, 0.3)',
+        bg: 'rgba(var(--rgb-primary), 0.12)',
+        border: 'rgba(var(--rgb-primary), 0.3)',
         icon: <People size={14} variant="Bold" color="var(--color-primary)" style={{ marginRight: '6px' }} />
       };
     }
@@ -889,8 +889,8 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
       return {
         label: 'Leader',
         color: 'var(--color-warning-text)',
-        bg: 'rgba(245, 158, 11, 0.12)',
-        border: 'rgba(245, 158, 11, 0.3)',
+        bg: 'rgba(var(--rgb-warning), 0.12)',
+        border: 'rgba(var(--rgb-warning), 0.3)',
         icon: <Crown1 size={14} variant="Bold" color="var(--color-warning)" style={{ marginRight: '6px' }} />
       };
     }
@@ -966,26 +966,26 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
     if (isAccepted) {
       return {
         color: 'var(--color-success-text)',
-        bg: 'rgba(34, 197, 94, 0.12)',
-        border: 'rgba(34, 197, 94, 0.3)'
+        bg: 'rgba(var(--rgb-success), 0.12)',
+        border: 'rgba(var(--rgb-success), 0.3)'
       };
     } else if (isPending) {
       return {
         color: 'var(--color-warning-text)',
-        bg: 'rgba(245, 158, 11, 0.12)',
-        border: 'rgba(245, 158, 11, 0.3)'
+        bg: 'rgba(var(--rgb-warning), 0.12)',
+        border: 'rgba(var(--rgb-warning), 0.3)'
       };
     } else if (isRejected) {
       return {
         color: 'var(--color-danger-text)',
-        bg: 'rgba(239, 68, 68, 0.12)',
-        border: 'rgba(239, 68, 68, 0.3)'
+        bg: 'rgba(var(--rgb-danger), 0.12)',
+        border: 'rgba(var(--rgb-danger), 0.3)'
       };
     }
     return {
       color: 'var(--color-text-secondary)',
-      bg: 'rgba(108, 114, 120, 0.12)',
-      border: 'rgba(108, 114, 120, 0.3)'
+      bg: 'rgba(var(--rgb-text-secondary), 0.12)',
+      border: 'rgba(var(--rgb-text-secondary), 0.3)'
     };
   };
 
@@ -1132,9 +1132,9 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                   fontSize: 'var(--font-size-caption)',
                   fontWeight: '600',
                   backgroundColor: (() => {
-                    if (safeIncident.severity === 'high') return 'rgba(239, 68, 68, 0.12)';
-                    if (safeIncident.severity === 'medium') return 'rgba(245, 158, 11, 0.12)';
-                    return 'rgba(34, 197, 94, 0.12)';
+                    if (safeIncident.severity === 'high') return 'rgba(var(--rgb-danger), 0.12)';
+                    if (safeIncident.severity === 'medium') return 'rgba(var(--rgb-warning), 0.12)';
+                    return 'rgba(var(--rgb-success), 0.12)';
                   })(),
                   color: (() => {
                     if (safeIncident.severity === 'high') return 'var(--color-danger)';
@@ -1142,9 +1142,9 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                     return 'var(--color-success)';
                   })(),
                   border: `1px solid ${(() => {
-                    if (safeIncident.severity === 'high') return 'rgba(239, 68, 68, 0.3)';
-                    if (safeIncident.severity === 'medium') return 'rgba(245, 158, 11, 0.3)';
-                    return 'rgba(34, 197, 94, 0.3)';
+                    if (safeIncident.severity === 'high') return 'rgba(var(--rgb-danger), 0.3)';
+                    if (safeIncident.severity === 'medium') return 'rgba(var(--rgb-warning), 0.3)';
+                    return 'rgba(var(--rgb-success), 0.3)';
                   })()}`,
                   whiteSpace: 'nowrap',
                   marginLeft: '8px'
@@ -1197,9 +1197,9 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                   alignItems: 'center',
                   gap: '8px',
                   padding: '8px 16px',
-                  backgroundColor: hasPendingRequest ? 'rgba(245, 158, 11, 0.12)' : 'var(--color-primary)',
+                  backgroundColor: hasPendingRequest ? 'rgba(var(--rgb-warning), 0.12)' : 'var(--color-primary)',
                   color: hasPendingRequest ? 'var(--color-warning)' : 'var(--color-surface)',
-                  border: hasPendingRequest ? '1px solid rgba(245, 158, 11, 0.3)' : 'none',
+                  border: hasPendingRequest ? '1px solid rgba(var(--rgb-warning), 0.3)' : 'none',
                   borderRadius: '8px',
                   fontSize: 'var(--font-size-body)',
                   fontWeight: '600',
@@ -1263,14 +1263,14 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
               gridColumn: '1 / -1',
               padding: '16px 20px',
               borderRadius: '12px',
-              background: 'rgba(245, 158, 11, 0.08)',
-              border: '1px solid rgba(245, 158, 11, 0.25)',
+              background: 'rgba(var(--rgb-warning), 0.08)',
+              border: '1px solid rgba(var(--rgb-warning), 0.25)',
               color: 'var(--color-text-primary)',
               display: 'flex',
               alignItems: 'center',
               gap: '12px',
               marginBottom: '20px',
-              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.02)'
+              boxShadow: '0 4px 20px rgba(var(--rgb-ombre), 0.02)'
             }}>
               <People size={20} variant="Bold" color="var(--color-warning)" />
               <div style={{ fontSize: 'var(--font-size-body)', fontWeight: '500' }}>
@@ -1290,14 +1290,14 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                 gridColumn: '1 / -1',
                 padding: '16px 20px',
                 borderRadius: '12px',
-                background: takingOrg.isMe ? 'rgba(34, 197, 94, 0.08)' : 'rgba(58, 162, 221, 0.08)',
-                border: takingOrg.isMe ? '1px solid rgba(34, 197, 94, 0.25)' : '1px solid rgba(58, 162, 221, 0.25)',
+                background: takingOrg.isMe ? 'rgba(var(--rgb-success), 0.08)' : 'rgba(var(--rgb-primary), 0.08)',
+                border: takingOrg.isMe ? '1px solid rgba(var(--rgb-success), 0.25)' : '1px solid rgba(var(--rgb-primary), 0.25)',
                 color: 'var(--color-text-primary)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '12px',
                 marginBottom: '20px',
-                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.02)'
+                boxShadow: '0 4px 20px rgba(var(--rgb-ombre), 0.02)'
               }}>
                 <Briefcase size={20} variant="Bold" color={takingOrg.isMe ? 'var(--color-success)' : 'var(--color-primary)'} />
                 <div style={{ fontSize: 'var(--font-size-body)', fontWeight: '500' }}>
@@ -1328,7 +1328,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                   position: 'relative',
                   overflow: 'hidden', borderRadius: '8px',
                   minHeight: '180px',
-                  backgroundColor: '#d2d6deff'
+                  backgroundColor: 'var(--color-border)'
                 }}>
                 {safeIncident.image ? (
                   <BlurryImage
@@ -1452,11 +1452,11 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                       display: 'flex',
                       gap: '4px',
                       zIndex: 10,
-                      backgroundColor: 'rgba(26, 32, 44, 0.85)',
+                      backgroundColor: 'rgba(var(--rgb-text-primary), 0.85)',
                       backdropFilter: 'blur(8px)',
                       padding: '4px',
                       borderRadius: '6px',
-                      border: '1px solid rgba(255, 255, 255, 0.1)'
+                      border: '1px solid rgba(var(--rgb-surface), 0.1)'
                     }}>
                       <button
                         type="button"
@@ -1469,7 +1469,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                           border: 'none',
                           cursor: 'pointer',
                           backgroundColor: detailMapStyle === 'satellite' ? 'var(--color-primary)' : 'transparent',
-                          color: detailMapStyle === 'satellite' ? '#ffffff' : 'var(--color-text-muted)',
+                          color: detailMapStyle === 'satellite' ? 'var(--color-surface)' : 'var(--color-text-muted)',
                           transition: 'all 0.2s ease'
                         }}
                       >
@@ -1486,7 +1486,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                           border: 'none',
                           cursor: 'pointer',
                           backgroundColor: detailMapStyle === 'streets' ? 'var(--color-primary)' : 'transparent',
-                          color: detailMapStyle === 'streets' ? '#ffffff' : 'var(--color-text-muted)',
+                          color: detailMapStyle === 'streets' ? 'var(--color-surface)' : 'var(--color-text-muted)',
                           transition: 'all 0.2s ease'
                         }}
                       >
@@ -1534,7 +1534,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                           width: '24px',
                           height: '24px',
                           borderRadius: '4px',
-                          backgroundColor: 'rgba(58, 162, 221, 0.1)',
+                          backgroundColor: 'rgba(var(--rgb-primary), 0.1)',
                           color: 'var(--color-primary-text)',
                           fontWeight: 'bold',
                           fontSize: 'var(--font-size-caption)'
@@ -1555,7 +1555,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                       </span>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                         {safeIncident.acting_organisations.map((org, index) => (
-                          <div key={org.id || index} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', backgroundColor: 'rgba(255, 255, 255, 0.02)', borderRadius: '6px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                          <div key={org.id || index} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', backgroundColor: 'rgba(var(--rgb-surface), 0.02)', borderRadius: '6px', border: '1px solid rgba(var(--rgb-surface), 0.05)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
 
 
@@ -1583,7 +1583,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                 VIDÉO DE L'INCIDENT
               </div>
               {safeIncident.video ? (
-                <div style={{ position: 'relative', width: '100%', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#000', aspectRatio: '16/9' }}>
+                <div style={{ position: 'relative', width: '100%', borderRadius: '8px', overflow: 'hidden', backgroundColor: 'rgba(var(--rgb-ombre), 1)', aspectRatio: '16/9' }}>
                   <video
                     controls
                     style={{ width: '100%', height: '100%', display: 'block', objectFit: 'contain' }}
@@ -1627,7 +1627,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                 minHeight: '400px',
                 border: '1px dashed var(--color-border)',
               }}>
-                <div className="spinner" style={{ width: '48px', height: '48px', border: '4px solid rgba(58, 162, 221, 0.25)', borderTopColor: 'var(--color-primary)' }} />
+                <div className="spinner" style={{ width: '48px', height: '48px', border: '4px solid rgba(var(--rgb-primary), 0.25)', borderTopColor: 'var(--color-primary)' }} />
                 <h3 style={{ margin: 0, fontSize: 'var(--font-size-h3)', color: 'var(--color-text-primary)' }}>Chargement de la prédiction...</h3>
                 <p style={{ fontSize: 'var(--font-size-body-small)', color: 'var(--color-text-secondary)', lineHeight: '1.6', maxWidth: '320px', margin: 0 }}>
                   Récupération de l'analyse IA en cours...
@@ -1656,7 +1656,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                       fontSize: 'var(--font-size-caption)',
                       color: 'var(--color-warning-text)',
                       padding: 'var(--spacing-2) var(--spacing-3)',
-                      backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                      backgroundColor: 'rgba(var(--rgb-warning), 0.1)',
                       borderRadius: 'var(--radius-sm)',
                       marginTop: 'var(--spacing-2)'
                     }}>
@@ -2143,7 +2143,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                 justifyContent: 'center',
                 backgroundColor: 'var(--color-surface)'
               }}>
-                <span className="chatbot-btn-spinner" style={{ width: '24px', height: '24px', border: '3px solid rgba(58, 162, 221, 0.25)', borderTopColor: 'var(--color-primary)' }} />
+                <span className="chatbot-btn-spinner" style={{ width: '24px', height: '24px', border: '3px solid rgba(var(--rgb-primary), 0.25)', borderTopColor: 'var(--color-primary)' }} />
               </div>
             ) : !pred ? (
               <div style={{

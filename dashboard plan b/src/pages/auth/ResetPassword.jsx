@@ -247,7 +247,7 @@ export const ResetPassword = () => {
             <div className="fp-success">
               <div className="fp-success-icon">
                 <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                  <circle cx="24" cy="24" r="24" fill="rgba(58,162,221,0.12)" />
+                  <circle cx="24" cy="24" r="24" fill="rgba(var(--rgb-primary),0.12)" />
                   <path
                     d="M14 24l7 7 13-13"
                     stroke="var(--color-primary)"

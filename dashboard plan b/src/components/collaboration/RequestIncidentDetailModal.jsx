@@ -47,7 +47,7 @@ export const RequestIncidentDetailModal = ({ incident, onClose }) => {
                           maxHeight: '240px',
                           objectFit: 'cover',
                           borderRadius: '8px',
-                          border: '1px solid #eaecf0',
+                          border: '1px solid var(--color-border)',
                         }}
                       />
                     </div>
@@ -68,7 +68,7 @@ export const RequestIncidentDetailModal = ({ incident, onClose }) => {
                           maxHeight: '240px',
                           objectFit: 'cover',
                           borderRadius: '8px',
-                          border: '1px solid #eaecf0',
+                          border: '1px solid var(--color-border)',
                           display: videoLoaded ? 'block' : 'none'
                         }}
                       />
@@ -117,10 +117,10 @@ export const RequestIncidentDetailModal = ({ incident, onClose }) => {
             {prediction.analysis && (
               <div style={{ marginBottom: '24px' }}>
                 <h4 style={{ fontSize: 'var(--font-size-caption)', fontWeight: 600, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>Analyse Intelligente (IA)</h4>
-                <div style={{ background: 'var(--color-background)', border: '1px solid #eaecf0', padding: '16px', borderRadius: '8px', fontSize: 'var(--font-size-body)', color: 'var(--color-text-secondary)', lineHeight: '1.5' }}>
+                <div style={{ background: 'var(--color-background)', border: '1px solid var(--color-border)', padding: '16px', borderRadius: '8px', fontSize: 'var(--font-size-body)', color: 'var(--color-text-secondary)', lineHeight: '1.5' }}>
                   <p style={{ margin: '0 0 12px 0' }}>{prediction.analysis}</p>
                   {prediction.recommendation && (
-                    <div style={{ borderTop: '1px solid #eaecf0', paddingTop: '12px' }}>
+                    <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '12px' }}>
                       <strong style={{ color: 'var(--color-text-primary)' }}>Recommandation : </strong>
                       {prediction.recommendation}
                     </div>

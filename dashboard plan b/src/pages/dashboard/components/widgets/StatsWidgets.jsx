@@ -16,13 +16,13 @@ const getStatusLabel = (etat) => {
 const getStatusStyle = (etat) => {
   switch (etat) {
     case 'resolved':
-      return { backgroundColor: 'rgba(34, 197, 94, 0.1)', color: 'var(--color-success-text)' };
+      return { backgroundColor: 'rgba(var(--rgb-success), 0.1)', color: 'var(--color-success-text)' };
     case 'taken_into_account':
     case 'in_progress':
-      return { backgroundColor: 'rgba(245, 158, 11, 0.1)', color: 'var(--color-warning-text)' };
+      return { backgroundColor: 'rgba(var(--rgb-warning), 0.1)', color: 'var(--color-warning-text)' };
     case 'declared':
     default:
-      return { backgroundColor: 'rgba(107, 114, 128, 0.1)', color: 'var(--color-text-secondary)' };
+      return { backgroundColor: 'rgba(var(--rgb-text-muted), 0.1)', color: 'var(--color-text-secondary)' };
   }
 };
 
@@ -183,8 +183,8 @@ export const StatsWidgets = ({ stats }) => {
                 <Tooltip
                   formatter={(value, name) => [`${value}%`, name]}
                   contentStyle={{
-                    backgroundColor: 'var(--color-bg-primary, #ffffff)',
-                    border: '1px solid var(--color-border, #e5e7eb)',
+                    backgroundColor: 'var(--color-surface)',
+                    border: '1px solid var(--color-border)',
                     borderRadius: '8px',
                     fontSize: 'var(--font-size-caption)',
                     color: 'var(--color-text-primary)'

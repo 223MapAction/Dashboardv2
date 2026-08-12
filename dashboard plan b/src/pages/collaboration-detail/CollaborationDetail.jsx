@@ -2230,7 +2230,7 @@ export const CollaborationDetail = () => {
                                             borderRadius: '12px',
                                             marginTop: '4px',
                                             border: '1px solid var(--color-border)',
-                                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                                            boxShadow: '0 2px 8px rgba(var(--rgb-ombre),0.05)',
                                             textAlign: 'left',
                                             minWidth: '240px'
                                           }}>
@@ -2279,7 +2279,7 @@ export const CollaborationDetail = () => {
                                             borderRadius: '12px',
                                             marginTop: '4px',
                                             border: '1px solid var(--color-border)',
-                                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                                            boxShadow: '0 2px 8px rgba(var(--rgb-ombre),0.05)',
                                             display: 'inline-block'
                                           }}>
                                             <CustomAudioPlayer
@@ -2673,9 +2673,9 @@ export const CollaborationDetail = () => {
                                 <div className="collab-task-failure-section" style={{
                                   marginTop: 'var(--spacing-2)',
                                   padding: '8px 12px',
-                                  backgroundColor: 'rgba(239, 68, 68, 0.05)',
+                                  backgroundColor: 'rgba(var(--rgb-danger), 0.05)',
                                   borderRadius: 'var(--radius-sm)',
-                                  borderLeft: '3px solid #EF4444'
+                                  borderLeft: '3px solid var(--color-danger)'
                                 }}>
                                   <div className="collab-task-failure-label" style={{ fontSize: 'var(--font-size-caption)', fontWeight: 'bold', color: 'var(--color-danger-text)' }}>Raison :</div>
                                   <div className="collab-task-failure-reason" style={{ fontSize: 'var(--font-size-body-small)', color: 'var(--color-text-secondary)' }}>
@@ -2743,7 +2743,7 @@ export const CollaborationDetail = () => {
                                 <div className="collab-task-proof-upload-panel" style={{
                                   marginTop: 'var(--spacing-3)',
                                   padding: 'var(--spacing-3)',
-                                  backgroundColor: 'rgba(58, 162, 221, 0.05)',
+                                  backgroundColor: 'rgba(var(--rgb-primary), 0.05)',
                                   border: '1.5px dashed var(--color-primary)',
                                   borderRadius: 'var(--radius-md)',
                                   animation: 'slideDown 0.2s ease-out'
@@ -2784,7 +2784,7 @@ export const CollaborationDetail = () => {
                                               position: 'absolute',
                                               top: '4px',
                                               right: '4px',
-                                              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                                              backgroundColor: 'rgba(var(--rgb-ombre), 0.6)',
                                               color: 'var(--color-surface)',
                                               border: 'none',
                                               borderRadius: '50%',
@@ -2816,7 +2816,7 @@ export const CollaborationDetail = () => {
                                               position: 'absolute',
                                               top: '4px',
                                               right: '4px',
-                                              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                                              backgroundColor: 'rgba(var(--rgb-ombre), 0.6)',
                                               color: 'var(--color-surface)',
                                               border: 'none',
                                               borderRadius: '50%',
@@ -2870,7 +2870,7 @@ export const CollaborationDetail = () => {
                                               setProofPreviewType(null);
                                             }}
                                             style={{
-                                              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                              backgroundColor: 'rgba(var(--rgb-danger), 0.1)',
                                               color: 'var(--color-danger-text)',
                                               border: 'none',
                                               borderLeft: '1px solid var(--color-border)',
@@ -2884,8 +2884,8 @@ export const CollaborationDetail = () => {
                                               transition: 'background-color 0.2s ease',
                                               minWidth: '40px'
                                             }}
-                                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.2)'}
-                                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)'}
+                                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(var(--rgb-danger), 0.2)'}
+                                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(var(--rgb-danger), 0.1)'}
                                           >
                                             ×
                                           </button>
@@ -2997,14 +2997,14 @@ export const CollaborationDetail = () => {
                                           alignItems: 'center',
                                           gap: '6px',
                                           padding: '4px 8px',
-                                          backgroundColor: 'rgba(58, 162, 221, 0.08)',
+                                          backgroundColor: 'rgba(var(--rgb-primary), 0.08)',
                                           borderRadius: '6px',
                                           cursor: 'pointer',
                                           marginBottom: '8px',
                                           transition: 'background-color 0.2s ease'
                                         }}
-                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(58, 162, 221, 0.15)'}
-                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(58, 162, 221, 0.08)'}
+                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(var(--rgb-primary), 0.15)'}
+                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(var(--rgb-primary), 0.08)'}
                                       >
                                         <span>{expandedCompletedProofs.includes(task.id) ? '▼ Masquer la preuve' : '▶ Afficher la preuve'}</span>
                                       </button>
@@ -3038,7 +3038,7 @@ export const CollaborationDetail = () => {
                                                 padding: 0,
                                                 border: 'none',
                                                 display: 'block',
-                                                backgroundColor: '#000',
+                                                backgroundColor: 'rgba(var(--rgb-ombre), 1)',
                                                 maxHeight: '400px',
                                                 position: 'relative',
                                                 width: '100%',
@@ -3055,7 +3055,7 @@ export const CollaborationDetail = () => {
                                               />
                                               <div className="proof-hover-overlay" style={{
                                                 position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                                                background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                background: 'rgba(var(--rgb-ombre),0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center',
                                                 opacity: 0, transition: 'opacity 0.3s ease', color: 'var(--color-surface)', gap: '8px', fontSize: 'var(--font-size-body-small)', fontWeight: '500'
                                               }}>
                                                 <span>🔍 Cliquer pour agrandir</span>
@@ -3082,13 +3082,13 @@ export const CollaborationDetail = () => {
                                               />
                                               <div style={{
                                                 position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                                                background: 'rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                                                background: 'rgba(var(--rgb-ombre),0.5)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                                                 color: 'var(--color-surface)', gap: '6px', fontSize: 'var(--font-size-caption)'
                                               }}>
                                                 <div style={{
-                                                  width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.2)',
+                                                  width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'rgba(var(--rgb-surface),0.2)',
                                                   display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)',
-                                                  border: '1px solid rgba(255,255,255,0.4)', transition: 'transform 0.2s ease'
+                                                  border: '1px solid rgba(var(--rgb-surface),0.4)', transition: 'transform 0.2s ease'
                                                 }} className="play-button-circle">
                                                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                                     <path d="M5.25 20.25V3.75L19.5 12L5.25 20.25Z" fill="currentColor" />
@@ -3124,7 +3124,7 @@ export const CollaborationDetail = () => {
                                                 color: 'inherit',
                                                 transition: 'background-color 0.2s ease'
                                               }}
-                                              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(58, 162, 221, 0.05)'}
+                                              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(var(--rgb-primary), 0.05)'}
                                               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--color-background)'}
                                             >
                                               <DocumentUpload size={32} variant="Bold" color="var(--color-primary)" />
@@ -3243,7 +3243,7 @@ export const CollaborationDetail = () => {
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                    backgroundColor: 'rgba(var(--rgb-ombre), 0.85)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -3257,16 +3257,16 @@ export const CollaborationDetail = () => {
                     onClick={(e) => e.stopPropagation()}
                     style={{
                       position: 'relative',
-                      backgroundColor: '#1E1E1E',
+                      backgroundColor: 'rgba(var(--rgb-ombre), 1)',
                       borderRadius: '16px',
                       padding: '16px',
                       maxWidth: '90%',
                       maxHeight: '90%',
-                      boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4)',
+                      boxShadow: '0 20px 25px -5px rgba(var(--rgb-ombre), 0.5), 0 10px 10px -5px rgba(var(--rgb-ombre), 0.4)',
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      border: '1px solid rgba(var(--rgb-surface), 0.1)',
                       animation: 'scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
                     }}
                   >
@@ -3290,7 +3290,7 @@ export const CollaborationDetail = () => {
                         cursor: 'pointer',
                         fontSize: 'var(--font-size-h3)',
                         fontWeight: 'bold',
-                        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.2)',
+                        boxShadow: '0 4px 6px -1px rgba(var(--rgb-ombre),0.2)',
                         transition: 'transform 0.2s ease, background-color 0.2s ease',
                         zIndex: 10
                       }}
@@ -3307,7 +3307,7 @@ export const CollaborationDetail = () => {
                     </button>
 
                     {/* Corps du modal */}
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', borderRadius: '12px', minHeight: '400px', backgroundColor: '#000000', width: '100%' }}>
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', borderRadius: '12px', minHeight: '400px', backgroundColor: 'rgba(var(--rgb-ombre), 1)', width: '100%' }}>
                       {activeProofPreview.type === 'image' ? (
                         <BlurryImage
                           src={activeProofPreview.url}
@@ -3337,7 +3337,7 @@ export const CollaborationDetail = () => {
                       )}
                     </div>
 
-                    <div style={{ marginTop: '12px', color: 'rgba(255, 255, 255, 0.7)', fontSize: 'var(--font-size-body-small)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{ marginTop: '12px', color: 'rgba(var(--rgb-surface), 0.7)', fontSize: 'var(--font-size-body-small)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span>Preuve de complétion</span>
 
                     </div>
@@ -3362,7 +3362,7 @@ export const CollaborationDetail = () => {
                 }
                 .proof-hover-container:hover .play-button-circle {
                   transform: scale(1.15);
-                  background-color: rgba(255,255,255,0.3) !important;
+                  background-color: rgba(var(--rgb-surface),0.3) !important;
                 }
               `}</style>
             </div>

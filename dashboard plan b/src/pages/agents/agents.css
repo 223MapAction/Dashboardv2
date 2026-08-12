@@ -76,7 +76,7 @@
 
 .agents-add-btn:hover {
   background-color: var(--color-primary-dark);
-  box-shadow: 0 4px 12px rgba(58, 162, 221, 0.3);
+  box-shadow: 0 4px 12px rgba(var(--rgb-primary), 0.3);
 }
 
 .agents-add-btn:active {
@@ -113,10 +113,10 @@
   flex-shrink: 0;
 }
 
-.agents-stat-icon-primary  { background-color: rgba(58, 162, 221, 0.1); }
-.agents-stat-icon-success  { background-color: rgba(34, 197, 94, 0.1); }
-.agents-stat-icon-warning  { background-color: rgba(245, 158, 11, 0.1); }
-.agents-stat-icon-danger   { background-color: rgba(239, 68, 68, 0.1); }
+.agents-stat-icon-primary  { background-color: rgba(var(--rgb-primary), 0.1); }
+.agents-stat-icon-success  { background-color: rgba(var(--rgb-success), 0.1); }
+.agents-stat-icon-warning  { background-color: rgba(var(--rgb-warning), 0.1); }
+.agents-stat-icon-danger   { background-color: rgba(var(--rgb-danger), 0.1); }
 
 .agents-stat-value {
   font-size: var(--font-size-h2);
@@ -142,7 +142,7 @@
   gap: var(--spacing-3);
   flex-wrap: wrap;
   align-items: center;
-  background-color: rgba(255, 255, 255, 0.85);
+  background-color: rgba(var(--rgb-surface), 0.85);
   backdrop-filter: saturate(180%) blur(12px);
   -webkit-backdrop-filter: saturate(180%) blur(12px);
   padding: var(--spacing-3) var(--spacing-4);
@@ -168,7 +168,7 @@
 
 .agents-search:focus-within {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(58, 162, 221, 0.1);
+  box-shadow: 0 0 0 3px rgba(var(--rgb-primary), 0.1);
 }
 
 .agents-search input {
@@ -283,7 +283,7 @@
   z-index: 3;
   background-color: var(--color-background);
   border-right: 1px solid var(--color-border);
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.03);
+  box-shadow: 2px 0 5px rgba(var(--rgb-ombre), 0.03);
 }
 
 .agents-table td:first-child {
@@ -292,7 +292,7 @@
   z-index: 2;
   background-color: var(--color-surface);
   border-right: 1px solid var(--color-border);
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.03);
+  box-shadow: 2px 0 5px rgba(var(--rgb-ombre), 0.03);
 }
 
 .agents-table tr:last-child td {
@@ -304,7 +304,7 @@
 }
 
 .agents-table tbody tr:hover {
-  background-color: rgba(58, 162, 221, 0.03);
+  background-color: rgba(var(--rgb-primary), 0.03);
 }
 
 .agents-table tbody tr:hover td:first-child {
@@ -380,12 +380,12 @@
 }
 
 .agents-status-active {
-  background-color: rgba(34, 197, 94, 0.1);
+  background-color: rgba(var(--rgb-success), 0.1);
   color: var(--color-success-text);
 }
 
 .agents-status-inactive {
-  background-color: rgba(156, 163, 175, 0.15);
+  background-color: rgba(var(--rgb-text-muted), 0.15);
   color: var(--color-text-muted);
 }
 
@@ -425,7 +425,7 @@
 .agents-modal-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.45);
+  background-color: rgba(var(--rgb-ombre), 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -571,7 +571,7 @@
 .agents-field input:focus,
 .agents-field select:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(58, 162, 221, 0.1);
+  box-shadow: 0 0 0 3px rgba(var(--rgb-primary), 0.1);
 }
 
 .agents-field input::placeholder {
@@ -684,7 +684,7 @@
   width: 64px;
   height: 64px;
   border-radius: var(--radius-full);
-  background-color: rgba(239, 68, 68, 0.08);
+  background-color: rgba(var(--rgb-danger), 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -809,7 +809,7 @@
 .agents-spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(var(--rgb-surface), 0.3);
   border-radius: 50%;
   border-top-color: var(--color-surface);
   animation: agentsSpin 0.8s linear infinite;
@@ -834,8 +834,8 @@
 }
 
 .agents-bootstrap-alert.alert-success {
-  background-color: rgba(34, 197, 94, 0.12);
-  border: 1px solid rgba(34, 197, 94, 0.3);
+  background-color: rgba(var(--rgb-success), 0.12);
+  border: 1px solid rgba(var(--rgb-success), 0.3);
   color: var(--color-success-text);
 }
 
@@ -844,8 +844,8 @@
 }
 
 .agents-bootstrap-alert.alert-danger {
-  background-color: rgba(239, 68, 68, 0.12);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background-color: rgba(var(--rgb-danger), 0.12);
+  border: 1px solid rgba(var(--rgb-danger), 0.3);
   color: var(--color-danger-text);
 }
 

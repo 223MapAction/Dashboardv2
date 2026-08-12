@@ -104,8 +104,35 @@
   --color-accent-text: #6D28D9;
   --color-accent-surface: #EDE9FE;
 
-  --bs-btn-disabled-bg: rgba(58, 162, 221, 0.65) !important;
-  --bs-btn-disabled-border-color: rgba(58, 162, 221, 0.65) !important;
+  /* ── Canaux RVB des memes couleurs ──────────────────────────────────────────
+     Un jeton hexadecimal ne peut pas servir dans un rgba() : il faut les trois
+     canaux separement. Sans ces jetons-ci, chaque voile translucide de
+     l'application reecrivait la couleur a la main — on comptait 525 rgba() qui
+     repetaient litteralement les valeurs ci-dessus. Changer la primaire aurait
+     donc laisse derriere elle 147 halos de l'ancienne teinte.
+
+     Ces valeurs DOIVENT rester synchronisees avec les jetons hexadecimaux
+     correspondants ; c'est la meme couleur ecrite dans deux notations, pas une
+     seconde palette.
+
+     Usage : rgba(var(--rgb-primary), 0.12) */
+  --rgb-primary: 58, 162, 221;        /* #3AA2DD */
+  --rgb-primary-dark: 43, 139, 196;   /* #2B8BC4 */
+  --rgb-success: 34, 197, 94;         /* #22C55E */
+  --rgb-warning: 245, 158, 11;        /* #F59E0B */
+  --rgb-danger: 239, 68, 68;          /* #EF4444 */
+  --rgb-accent: 139, 92, 246;         /* #8B5CF6 */
+  --rgb-surface: 255, 255, 255;       /* #FFFFFF */
+  --rgb-background: 248, 250, 252;    /* #F8FAFC */
+  --rgb-text-primary: 26, 28, 30;     /* #1A1C1E */
+  --rgb-text-secondary: 108, 114, 120;/* #6C7278 */
+  --rgb-text-muted: 105, 114, 130;    /* #697282 */
+  /* Les ombres ne sont pas une couleur de la palette : c'est du noir pur,
+     volontairement, pour ne pas teinter ce qu'elles assombrissent. */
+  --rgb-ombre: 0, 0, 0;
+
+  --bs-btn-disabled-bg: rgba(var(--rgb-primary), 0.65) !important;
+  --bs-btn-disabled-border-color: rgba(var(--rgb-primary), 0.65) !important;
 
   /* Spacing Scale - Base 4 */
   --spacing-1: 4px;
@@ -124,9 +151,9 @@
   --radius-full: 9999px;
 
   /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 2px 0 rgba(var(--rgb-ombre), 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(var(--rgb-ombre), 0.1), 0 2px 4px -1px rgba(var(--rgb-ombre), 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(var(--rgb-ombre), 0.1), 0 4px 6px -2px rgba(var(--rgb-ombre), 0.05);
 }
 
 /* === RESET & BASE === */
@@ -262,7 +289,7 @@ h2,
 
 .btn-icon:hover {
   color: var(--color-primary-text);
-  background-color: rgba(58, 162, 221, 0.1);
+  background-color: rgba(var(--rgb-primary), 0.1);
 }
 
 /* === INPUT FIELDS (MOLECULES) === */
@@ -295,7 +322,7 @@ h2,
 .input-field:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(58, 162, 221, 0.1);
+  box-shadow: 0 0 0 3px rgba(var(--rgb-primary), 0.1);
 }
 
 .search-bar {
@@ -384,13 +411,13 @@ h2,
 }
 
 .nav-item:hover {
-  background-color: rgba(58, 162, 221, 0.05);
+  background-color: rgba(var(--rgb-primary), 0.05);
   color: var(--color-primary-text);
 }
 
 .nav-item.active {
   color: var(--color-primary-text);
-  background-color: rgba(58, 162, 221, 0.1);
+  background-color: rgba(var(--rgb-primary), 0.1);
 }
 
 .nav-item.active::before {
@@ -660,7 +687,11 @@ h2,
   align-items: center;
   justify-content: center;
   padding: var(--spacing-4);
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  /* Le fond de la page de connexion partait de deux gris inventes sur place
+     (#f5f7fa, #c3cfe2), sans lien avec la palette. Il descend maintenant du
+     fond de l'application vers une teinte de la primaire : la premiere page
+     que voit l'utilisateur porte enfin les couleurs du produit. */
+  background: linear-gradient(135deg, var(--color-background) 0%, rgba(var(--rgb-primary), 0.22) 100%);
 }
 
 .login-card {
@@ -929,8 +960,8 @@ button.blurry-image-container {
 /* Echec : lisiblement different du vide, et cliquable pour reessayer. */
 .blurry-image-echec {
   padding: 0;
-  border: 1px dashed rgba(239, 68, 68, 0.45);
-  background-color: rgba(239, 68, 68, 0.07);
+  border: 1px dashed rgba(var(--rgb-danger), 0.45);
+  background-color: rgba(var(--rgb-danger), 0.07);
   color: var(--color-danger-text);
   cursor: pointer;
   transition: background-color var(--duree-rapide, 0.15s) ease;
@@ -938,7 +969,7 @@ button.blurry-image-container {
 
 .blurry-image-echec:hover,
 .blurry-image-echec:focus-visible {
-  background-color: rgba(239, 68, 68, 0.14);
+  background-color: rgba(var(--rgb-danger), 0.14);
 }
 
 .blurry-image-el {
@@ -1259,8 +1290,8 @@ p {
   /* Assez contrasté pour rester perceptible sur --color-surface comme sur
      --color-background, contrairement au défaut de la bibliothèque
      (#f6f6f6 → #f0f0f0) quasiment invisible. */
-  --shimmer-base: #E6EBF2;
-  --shimmer-eclat: #F3F6FA;
+  --shimmer-base: var(--color-border);
+  --shimmer-eclat: var(--color-background);
   --shimmer-duree: 1.6s;
 }
 

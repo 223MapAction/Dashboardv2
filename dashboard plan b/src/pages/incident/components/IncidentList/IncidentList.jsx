@@ -167,9 +167,9 @@ export const IncidentList = ({
           {incident.badges?.map((b, idx) => (
             <span key={idx} className={`incident-badge-glow variant-${b.variant}`}>{b.label}</span>
           ))}
-          {incident.severity === 'high' && <span className="incident-badge-glow" style={{ background: 'rgba(239, 68, 68, 0.12)', color: 'var(--color-danger-text)', borderColor: 'rgba(239, 68, 68, 0.3)' }}>Gravité élevée</span>}
-          {incident.severity === 'medium' && <span className="incident-badge-glow" style={{ background: 'rgba(245, 158, 11, 0.12)', color: 'var(--color-warning-text)', borderColor: 'rgba(245, 158, 11, 0.3)' }}>Gravité moyenne</span>}
-          {!['high', 'medium'].includes(incident.severity) && <span className="incident-badge-glow" style={{ background: 'rgba(34, 197, 94, 0.12)', color: 'var(--color-success-text)', borderColor: 'rgba(34, 197, 94, 0.3)' }}>Gravité faible</span>}
+          {incident.severity === 'high' && <span className="incident-badge-glow" style={{ background: 'rgba(var(--rgb-danger), 0.12)', color: 'var(--color-danger-text)', borderColor: 'rgba(var(--rgb-danger), 0.3)' }}>Gravité élevée</span>}
+          {incident.severity === 'medium' && <span className="incident-badge-glow" style={{ background: 'rgba(var(--rgb-warning), 0.12)', color: 'var(--color-warning-text)', borderColor: 'rgba(var(--rgb-warning), 0.3)' }}>Gravité moyenne</span>}
+          {!['high', 'medium'].includes(incident.severity) && <span className="incident-badge-glow" style={{ background: 'rgba(var(--rgb-success), 0.12)', color: 'var(--color-success-text)', borderColor: 'rgba(var(--rgb-success), 0.3)' }}>Gravité faible</span>}
         </>
       ),
       rendu: (incident) => (
@@ -184,12 +184,12 @@ export const IncidentList = ({
                               <div className="incident-table-badges">
                                 {(() => {
                                   if (incident.severity === 'high') {
-                                    return <span className="incident-badge-glow" style={{ background: 'rgba(239, 68, 68, 0.12)', color: 'var(--color-danger-text)', borderColor: 'rgba(239, 68, 68, 0.3)' }}>Gravité élevée</span>;
+                                    return <span className="incident-badge-glow" style={{ background: 'rgba(var(--rgb-danger), 0.12)', color: 'var(--color-danger-text)', borderColor: 'rgba(var(--rgb-danger), 0.3)' }}>Gravité élevée</span>;
                                   }
                                   if (incident.severity === 'medium') {
-                                    return <span className="incident-badge-glow" style={{ background: 'rgba(245, 158, 11, 0.12)', color: 'var(--color-warning-text)', borderColor: 'rgba(245, 158, 11, 0.3)' }}>Gravité moyenne</span>;
+                                    return <span className="incident-badge-glow" style={{ background: 'rgba(var(--rgb-warning), 0.12)', color: 'var(--color-warning-text)', borderColor: 'rgba(var(--rgb-warning), 0.3)' }}>Gravité moyenne</span>;
                                   }
-                                  return <span className="incident-badge-glow" style={{ background: 'rgba(34, 197, 94, 0.12)', color: 'var(--color-success-text)', borderColor: 'rgba(34, 197, 94, 0.3)' }}>Gravité faible</span>;
+                                  return <span className="incident-badge-glow" style={{ background: 'rgba(var(--rgb-success), 0.12)', color: 'var(--color-success-text)', borderColor: 'rgba(var(--rgb-success), 0.3)' }}>Gravité faible</span>;
                                 })()}
                               </div>
                             </div>
@@ -210,9 +210,9 @@ export const IncidentList = ({
                                       <span style={{
                                         display: 'inline-flex',
                                         alignItems: 'center',
-                                        background: 'rgba(34, 197, 94, 0.12)',
+                                        background: 'rgba(var(--rgb-success), 0.12)',
                                         color: 'var(--color-success-text)',
-                                        border: '1px solid rgba(34, 197, 94, 0.3)',
+                                        border: '1px solid rgba(var(--rgb-success), 0.3)',
                                         padding: '2px 8px',
                                         borderRadius: '12px',
                                         fontSize: 'var(--font-size-micro)',
@@ -224,9 +224,9 @@ export const IncidentList = ({
                                       <span style={{
                                         display: 'inline-flex',
                                         alignItems: 'center',
-                                        background: 'rgba(108, 114, 120, 0.12)',
+                                        background: 'rgba(var(--rgb-text-secondary), 0.12)',
                                         color: 'var(--color-text-secondary)',
-                                        border: '1px solid rgba(108, 114, 120, 0.3)',
+                                        border: '1px solid rgba(var(--rgb-text-secondary), 0.3)',
                                         padding: '2px 8px',
                                         borderRadius: '12px',
                                         fontSize: 'var(--font-size-micro)',
@@ -296,21 +296,21 @@ export const IncidentList = ({
                                     const isRejected = status === 'rejected' || status === 'refused';
 
                                     let badgeColor = 'var(--color-text-secondary)';
-                                    let badgeBg = 'rgba(108, 114, 120, 0.1)';
-                                    let badgeBorder = 'rgba(108, 114, 120, 0.2)';
+                                    let badgeBg = 'rgba(var(--rgb-text-secondary), 0.1)';
+                                    let badgeBorder = 'rgba(var(--rgb-text-secondary), 0.2)';
 
                                     if (isAccepted) {
                                       badgeColor = 'var(--color-success)';
-                                      badgeBg = 'rgba(34, 197, 94, 0.1)';
-                                      badgeBorder = 'rgba(34, 197, 94, 0.2)';
+                                      badgeBg = 'rgba(var(--rgb-success), 0.1)';
+                                      badgeBorder = 'rgba(var(--rgb-success), 0.2)';
                                     } else if (isPending) {
                                       badgeColor = 'var(--color-warning)';
-                                      badgeBg = 'rgba(245, 158, 11, 0.1)';
-                                      badgeBorder = 'rgba(245, 158, 11, 0.2)';
+                                      badgeBg = 'rgba(var(--rgb-warning), 0.1)';
+                                      badgeBorder = 'rgba(var(--rgb-warning), 0.2)';
                                     } else if (isRejected) {
                                       badgeColor = 'var(--color-danger)';
-                                      badgeBg = 'rgba(239, 68, 68, 0.1)';
-                                      badgeBorder = 'rgba(239, 68, 68, 0.2)';
+                                      badgeBg = 'rgba(var(--rgb-danger), 0.1)';
+                                      badgeBorder = 'rgba(var(--rgb-danger), 0.2)';
                                     }
 
                                     return (

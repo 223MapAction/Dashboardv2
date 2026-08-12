@@ -114,8 +114,8 @@ export const CustomAudioPlayer = ({ id, src, activeAudioId, setActiveAudioId }) 
 
           transition: 'transform 0.2s ease, box-shadow 0.2s ease'
         }}
-        onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 6px 14px rgba(0,0,0,0.2)'; }}
-        onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 10px rgba(0,0,0,0.15)'; }}
+        onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 6px 14px rgba(var(--rgb-ombre),0.2)'; }}
+        onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 10px rgba(var(--rgb-ombre),0.15)'; }}
       >
         {isPlaying ? <Pause size={20} variant="Bold" color="var(--color-surface)" /> : <Play size={20} variant="Bold" color="var(--color-surface)" style={{ marginLeft: '2px' }} />}
       </button>

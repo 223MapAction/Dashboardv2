@@ -87,7 +87,7 @@
 
 .collab-tab:hover {
   color: var(--color-text-primary);
-  background-color: rgba(58, 162, 221, 0.05);
+  background-color: rgba(var(--rgb-primary), 0.05);
 }
 
 .collab-tab.is-active {
@@ -157,7 +157,7 @@
   gap: var(--spacing-4);
   flex-wrap: wrap;
   align-items: center;
-  background-color: rgba(255, 255, 255, 0.85);
+  background-color: rgba(var(--rgb-surface), 0.85);
   backdrop-filter: saturate(180%) blur(12px);
   -webkit-backdrop-filter: saturate(180%) blur(12px);
   padding: var(--spacing-3) var(--spacing-4);
@@ -242,13 +242,13 @@
   height: 22px;
   padding: 0 6px;
   border-radius: var(--radius-full);
-  background-color: rgba(0, 0, 0, 0.08);
+  background-color: rgba(var(--rgb-ombre), 0.08);
   font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
 }
 
 .collab-filter-pill.is-active .collab-filter-count {
-  background-color: rgba(255, 255, 255, 0.25);
+  background-color: rgba(var(--rgb-surface), 0.25);
   color: var(--color-surface);
 }
 
@@ -266,7 +266,7 @@
 
 .collab-date-range:focus-within {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(58, 162, 221, 0.15);
+  box-shadow: 0 0 0 3px rgba(var(--rgb-primary), 0.15);
 }
 
 .collab-date-label {
@@ -305,14 +305,14 @@
   width: 28px;
   height: 28px;
   border: none;
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgba(var(--rgb-danger), 0.1);
   border-radius: 50%;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
 .collab-date-clear:hover {
-  background-color: rgba(239, 68, 68, 0.18);
+  background-color: rgba(var(--rgb-danger), 0.18);
 }
 
 /* --- Skin react-datepicker (couleurs projet) --- */
@@ -324,7 +324,7 @@
   font-family: var(--font-family);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.14);
+  box-shadow: 0 12px 32px rgba(var(--rgb-text-primary), 0.14);
   overflow: hidden;
   background-color: var(--color-surface);
 }
@@ -366,7 +366,7 @@
 }
 
 .collab-datepicker .react-datepicker__day:hover {
-  background-color: rgba(58, 162, 221, 0.12);
+  background-color: rgba(var(--rgb-primary), 0.12);
   color: var(--color-primary-text);
 }
 
@@ -381,14 +381,14 @@
 }
 
 .collab-datepicker .react-datepicker__day--keyboard-selected {
-  background-color: rgba(58, 162, 221, 0.15);
+  background-color: rgba(var(--rgb-primary), 0.15);
   color: var(--color-primary-text);
 }
 
 /* Range fill */
 .collab-datepicker .react-datepicker__day--in-range,
 .collab-datepicker .react-datepicker__day--in-selecting-range {
-  background-color: rgba(58, 162, 221, 0.15);
+  background-color: rgba(var(--rgb-primary), 0.15);
   color: var(--color-primary-text);
   border-radius: 0;
 }
@@ -448,7 +448,7 @@
 
 /* --- Portal overlay (mobile) --- */
 .react-datepicker__portal {
-  background-color: rgba(15, 23, 42, 0.55);
+  background-color: rgba(var(--rgb-text-primary), 0.55);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   z-index: 1000;
@@ -571,7 +571,7 @@
 .collab-card-clickable:hover {
   border-color: var(--color-primary);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 24px rgba(var(--rgb-ombre), 0.12);
 }
 
 .collab-card-clickable:active {
@@ -604,7 +604,7 @@
   letter-spacing: 0.04em;
   color: var(--color-surface);
   backdrop-filter: blur(8px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(var(--rgb-ombre), 0.2);
 }
 
 .collab-status-in-progress {
@@ -725,7 +725,7 @@
   background-color: var(--color-background);
   border-radius: var(--radius-full);
   overflow: hidden;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+  box-shadow: inset 0 1px 2px rgba(var(--rgb-ombre), 0.04);
 }
 
 .collab-progress-fill {
@@ -782,7 +782,7 @@
 .collab-tasks-btn:hover {
   background-color: var(--color-primary-dark, var(--color-primary-dark));
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(58, 162, 221, 0.3);
+  box-shadow: 0 4px 12px rgba(var(--rgb-primary), 0.3);
 }
 
 .collab-tasks-btn:active {
@@ -795,7 +795,7 @@
 .tasks-modal-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(var(--rgb-ombre), 0.5);
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -833,7 +833,7 @@
   height: 100vh;
   height: 100dvh;
   background-color: var(--color-surface);
-  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+  box-shadow: -4px 0 24px rgba(var(--rgb-ombre), 0.15);
   display: flex;
   flex-direction: column;
   animation: slideInRight 0.28s cubic-bezier(0.32, 0.72, 0, 1);
@@ -977,8 +977,8 @@
   flex-direction: column;
   gap: var(--spacing-3);
   padding: var(--spacing-3);
-  background-color: rgba(245, 158, 11, 0.08);
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  background-color: rgba(var(--rgb-warning), 0.08);
+  border: 1px solid rgba(var(--rgb-warning), 0.3);
   border-radius: var(--radius-md);
   animation: slideDown 0.25s ease;
 }
@@ -1101,11 +1101,11 @@
 
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(58, 162, 221, 0.4);
+    box-shadow: 0 0 0 0 rgba(var(--rgb-primary), 0.4);
   }
 
   50% {
-    box-shadow: 0 0 0 8px rgba(58, 162, 221, 0);
+    box-shadow: 0 0 0 8px rgba(var(--rgb-primary), 0);
   }
 }
 
@@ -1133,8 +1133,8 @@
   gap: 6px;
   margin-top: var(--spacing-2);
   padding: 8px var(--spacing-3);
-  background-color: rgba(58, 162, 221, 0.06);
-  border: 1px dashed rgba(58, 162, 221, 0.4);
+  background-color: rgba(var(--rgb-primary), 0.06);
+  border: 1px dashed rgba(var(--rgb-primary), 0.4);
   border-radius: var(--radius-md);
   color: var(--color-primary-text);
   font-size: var(--font-size-caption);
@@ -1147,7 +1147,7 @@
 .mobile-sheet-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(var(--rgb-ombre), 0.5);
   z-index: 1400;
   display: flex;
   align-items: flex-end;
@@ -1165,7 +1165,7 @@
   background-color: var(--color-surface);
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
-  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 -8px 32px rgba(var(--rgb-ombre), 0.2);
   display: flex;
   flex-direction: column;
   padding: var(--spacing-2) var(--spacing-4) var(--spacing-4);
@@ -1281,8 +1281,8 @@
 }
 
 .mobile-sheet-action.primary {
-  background-color: rgba(58, 162, 221, 0.06);
-  border-color: rgba(58, 162, 221, 0.3);
+  background-color: rgba(var(--rgb-primary), 0.06);
+  border-color: rgba(var(--rgb-primary), 0.3);
 }
 
 .mobile-sheet-action-icon {
@@ -1320,8 +1320,8 @@
   justify-content: center;
   gap: var(--spacing-2);
   padding: var(--spacing-4);
-  background-color: rgba(34, 197, 94, 0.08);
-  border: 1px solid rgba(34, 197, 94, 0.3);
+  background-color: rgba(var(--rgb-success), 0.08);
+  border: 1px solid rgba(var(--rgb-success), 0.3);
   border-radius: var(--radius-md);
   color: var(--color-success-text);
   font-size: var(--font-size-body-small);
@@ -1385,21 +1385,21 @@
 
 .collab-action-add-task {
   color: var(--color-primary-text);
-  border-color: rgba(58, 162, 221, 0.4);
+  border-color: rgba(var(--rgb-primary), 0.4);
 }
 
 .collab-action-add-task:hover {
-  background-color: rgba(58, 162, 221, 0.08);
+  background-color: rgba(var(--rgb-primary), 0.08);
   border-style: solid;
 }
 
 .collab-action-suggest {
   color: var(--color-warning-text);
-  border-color: rgba(245, 158, 11, 0.4);
+  border-color: rgba(var(--rgb-warning), 0.4);
 }
 
 .collab-action-suggest:hover {
-  background-color: rgba(245, 158, 11, 0.08);
+  background-color: rgba(var(--rgb-warning), 0.08);
   border-style: solid;
 }
 
@@ -1417,17 +1417,17 @@
 }
 
 .collab-role-leader {
-  background-color: rgba(245, 158, 11, 0.1);
+  background-color: rgba(var(--rgb-warning), 0.1);
   color: var(--color-warning-text);
 }
 
 .collab-role-contributeur {
-  background-color: rgba(58, 162, 221, 0.1);
+  background-color: rgba(var(--rgb-primary), 0.1);
   color: var(--color-primary-text);
 }
 
 .collab-role-observateur {
-  background-color: rgba(108, 114, 120, 0.1);
+  background-color: rgba(var(--rgb-text-secondary), 0.1);
   color: var(--color-text-secondary);
 }
 
@@ -1437,7 +1437,7 @@
 .centered-modal-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.55);
+  background-color: rgba(var(--rgb-ombre), 0.55);
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -1452,7 +1452,7 @@
   max-height: 90vh;
   background-color: var(--color-surface);
   border-radius: var(--radius-lg);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 16px 48px rgba(var(--rgb-ombre), 0.25);
   display: flex;
   flex-direction: column;
   animation: scaleIn 0.25s cubic-bezier(0.32, 0.72, 0, 1);
@@ -1522,7 +1522,7 @@
 .centered-modal-help {
   margin: 0 0 var(--spacing-2) 0;
   padding: var(--spacing-3);
-  background-color: rgba(245, 158, 11, 0.08);
+  background-color: rgba(var(--rgb-warning), 0.08);
   border-left: 3px solid var(--color-warning);
   border-radius: var(--radius-sm);
   font-size: var(--font-size-body-small);
@@ -1616,8 +1616,8 @@
   align-items: flex-start;
   gap: var(--spacing-2);
   padding: var(--spacing-3) var(--spacing-4);
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.04));
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  background: linear-gradient(135deg, rgba(var(--rgb-warning), 0.1), rgba(var(--rgb-warning), 0.04));
+  border: 1px solid rgba(var(--rgb-warning), 0.3);
   border-radius: var(--radius-md);
   font-size: var(--font-size-body-small);
   color: var(--color-text-primary);
@@ -1683,7 +1683,7 @@
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0);
+  box-shadow: 0 8px 24px rgba(var(--rgb-ombre), 0);
   padding: 4px;
   animation: slideDown 0.2s ease;
 }
@@ -1703,7 +1703,7 @@
 }
 
 .suggest-search-result:hover {
-  background-color: rgba(58, 162, 221, 0.08);
+  background-color: rgba(var(--rgb-primary), 0.08);
 }
 
 .suggest-search-empty {
@@ -1756,7 +1756,7 @@
 }
 
 .suggest-remove-btn:hover {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgba(var(--rgb-danger), 0.1);
 }
 
 /* Header de la row */
@@ -1784,7 +1784,7 @@
 .suggest-role-desc {
   margin: 0;
   padding: var(--spacing-2) var(--spacing-3);
-  background-color: rgba(58, 162, 221, 0.06);
+  background-color: rgba(var(--rgb-primary), 0.06);
   border-left: 3px solid var(--color-primary);
   border-radius: var(--radius-sm);
   font-size: var(--font-size-caption);
@@ -1865,12 +1865,12 @@
 
 .suggest-org-card:hover {
   border-color: var(--color-primary);
-  background-color: rgba(58, 162, 221, 0.04);
+  background-color: rgba(var(--rgb-primary), 0.04);
 }
 
 .suggest-org-card.is-selected {
   border-color: var(--color-success);
-  background-color: rgba(34, 197, 94, 0.08);
+  background-color: rgba(var(--rgb-success), 0.08);
 }
 
 .suggest-org-avatar {
@@ -2011,17 +2011,17 @@
 
 .my-task-item:hover {
   border-color: var(--color-primary);
-  box-shadow: 0 2px 8px rgba(58, 162, 221, 0.08);
+  box-shadow: 0 2px 8px rgba(var(--rgb-primary), 0.08);
 }
 
 .my-task-item.is-completed {
-  background-color: rgba(34, 197, 94, 0.04);
-  border-color: rgba(34, 197, 94, 0.3);
+  background-color: rgba(var(--rgb-success), 0.04);
+  border-color: rgba(var(--rgb-success), 0.3);
 }
 
 .my-task-item.is-failed {
-  background-color: rgba(239, 68, 68, 0.04);
-  border-color: rgba(239, 68, 68, 0.3);
+  background-color: rgba(var(--rgb-danger), 0.04);
+  border-color: rgba(var(--rgb-danger), 0.3);
 }
 
 .my-task-info {
@@ -2061,17 +2061,17 @@
 }
 
 .my-task-status.completed {
-  background-color: rgba(34, 197, 94, 0.1);
+  background-color: rgba(var(--rgb-success), 0.1);
   color: var(--color-success-text);
 }
 
 .my-task-status.failed {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgba(var(--rgb-danger), 0.1);
   color: var(--color-danger-text);
 }
 
 .my-task-status.pending {
-  background-color: rgba(245, 158, 11, 0.1);
+  background-color: rgba(var(--rgb-warning), 0.1);
   color: var(--color-warning-text);
 }
 
@@ -2096,11 +2096,11 @@
 }
 
 .my-task-action-btn.edit:hover {
-  background-color: rgba(58, 162, 221, 0.1);
+  background-color: rgba(var(--rgb-primary), 0.1);
 }
 
 .my-task-action-btn.delete:hover {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgba(var(--rgb-danger), 0.1);
 }
 
 /* Mode édition inline */
@@ -2183,7 +2183,7 @@
 .tasks-add-btn:hover {
   background-color: var(--color-primary-dark, var(--color-primary-dark));
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(58, 162, 221, 0.3);
+  box-shadow: 0 4px 12px rgba(var(--rgb-primary), 0.3);
 }
 
 .tasks-add-form {
@@ -2309,8 +2309,8 @@
   align-items: center;
   gap: var(--spacing-2);
   padding: var(--spacing-3) var(--spacing-4);
-  background-color: rgba(34, 197, 94, 0.1);
-  border: 1px solid rgba(34, 197, 94, 0.3);
+  background-color: rgba(var(--rgb-success), 0.1);
+  border: 1px solid rgba(var(--rgb-success), 0.3);
   border-radius: var(--radius-md);
   color: var(--color-success-text);
   font-size: var(--font-size-body-small);
@@ -2358,21 +2358,21 @@
 
 .task-item:hover {
   border-color: var(--color-primary);
-  box-shadow: 0 2px 8px rgba(58, 162, 221, 0.1);
+  box-shadow: 0 2px 8px rgba(var(--rgb-primary), 0.1);
 }
 
 .task-item.is-completed {
-  background-color: rgba(34, 197, 94, 0.03);
-  border-color: rgba(34, 197, 94, 0.3);
+  background-color: rgba(var(--rgb-success), 0.03);
+  border-color: rgba(var(--rgb-success), 0.3);
 }
 
 .task-item.is-failed {
-  background-color: rgba(239, 68, 68, 0.03);
-  border-color: rgba(239, 68, 68, 0.4);
+  background-color: rgba(var(--rgb-danger), 0.03);
+  border-color: rgba(var(--rgb-danger), 0.4);
 }
 
 .task-item.is-failed:hover {
-  border-color: rgba(239, 68, 68, 0.6);
+  border-color: rgba(var(--rgb-danger), 0.6);
 }
 
 .task-main {
@@ -2497,7 +2497,7 @@
 }
 
 .task-fail-btn:hover {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgba(var(--rgb-danger), 0.1);
   transform: scale(1.1);
 }
 
@@ -2510,7 +2510,7 @@
 .task-failure-section {
   margin-top: var(--spacing-3);
   padding: var(--spacing-3);
-  background-color: rgba(239, 68, 68, 0.05);
+  background-color: rgba(var(--rgb-danger), 0.05);
   border-left: 3px solid var(--color-danger);
   border-radius: var(--radius-sm);
 }
@@ -2534,8 +2534,8 @@
 .task-failure-form {
   margin-top: var(--spacing-3);
   padding: var(--spacing-4);
-  background-color: rgba(239, 68, 68, 0.03);
-  border: 2px solid rgba(239, 68, 68, 0.2);
+  background-color: rgba(var(--rgb-danger), 0.03);
+  border: 2px solid rgba(var(--rgb-danger), 0.2);
   border-radius: var(--radius-md);
   animation: slideDown 0.25s ease;
 }
@@ -2700,7 +2700,7 @@
   align-items: center;
   gap: var(--spacing-2);
   padding: 8px var(--spacing-3);
-  background-color: rgba(58, 162, 221, 0.1);
+  background-color: rgba(var(--rgb-primary), 0.1);
   border: 1px dashed var(--color-primary);
   border-radius: var(--radius-md);
   font-size: var(--font-size-body-small);
@@ -2711,7 +2711,7 @@
 }
 
 .task-proof-btn:hover {
-  background-color: rgba(58, 162, 221, 0.15);
+  background-color: rgba(var(--rgb-primary), 0.15);
   border-style: solid;
 }
 
