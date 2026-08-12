@@ -40,6 +40,7 @@ import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effec
 import { BlurryImage } from '../../components/atoms/BlurryImage';
 import './collaboration.css';
 import { useReinitialisationSurChangement } from '../../hooks/useReinitialisationSurChangement';
+import { BandeauErreur } from '../../components/molecules/BandeauErreur';
 
 
 registerLocale('fr', fr);
@@ -613,6 +614,12 @@ export const Collaboration = () => {
 
         <main className="collaboration-content">
           <div className="collab-page">
+
+            <BandeauErreur
+              erreur={swrError}
+              onReessayer={mutate}
+              message="Impossible de charger vos collaborations. La liste affichée peut ne plus être à jour."
+            />
             {/* Header avec tabs */}
             <div className="collab-page-header">
               <div>

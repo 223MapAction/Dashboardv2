@@ -23,6 +23,7 @@ import './mes-interventions.css';
 
 import { TableActionsMenu } from '../../components/molecules/TableActionsMenu';
 import { AVATAR_COLORS, AVATAR_COULEUR_DEFAUT } from '../../utils/couleursAvatar';
+import { BandeauErreur } from '../../components/molecules/BandeauErreur';
 // Initiales pour les avatars
 const getInitials = (name = '') =>
   name
@@ -207,7 +208,7 @@ const MesInterventionsContent = () => {
     return '';
   }, [statusFilter]);
 
-  const { data, isLoading, mutate } = useSWR(
+  const { data, error: erreurInterventions, isLoading, mutate } = useSWR(
     ['/MapApi/org-incidents', sourceFilter, mappedStatus, search, page],
     () => getOrgInternalIncidentsService({
       sourceFilter,
@@ -297,6 +298,11 @@ const MesInterventionsContent = () => {
         />
 
         <main className="mes-interventions-content">
+          <BandeauErreur
+            erreur={erreurInterventions}
+            onReessayer={mutate}
+            message="Impossible de charger vos interventions. La liste affichée peut ne plus être à jour."
+          />
           {/* Header de la page */}
           <header className="mes-interventions-header">
             <h1 className="mes-interventions-title">Mes interventions</h1>

@@ -30,6 +30,7 @@ import { ResponsiveTable } from '../../components/molecules/ResponsiveTable';
 import { COLONNES_ORGANISATIONS, mediaOrganisation, libellePays } from './colonnes';
 import { TableActionsMenu } from '../../components/molecules/TableActionsMenu';
 import { AVATAR_COLORS, AVATAR_COULEUR_DEFAUT } from '../../utils/couleursAvatar';
+import { BandeauErreur } from '../../components/molecules/BandeauErreur';
 const EMPTY_FORM = {
   name: '',
   acronym: '',
@@ -74,7 +75,7 @@ export const Organisations = () => {
     setPage(1);
   }, [search, sectorFilter, statusFilter, typeFilter]);
 
-  const { data: rawOrgs, isLoading: swrLoading, mutate: mutateOrgs } = useSWR(
+  const { data: rawOrgs, error: erreurOrgs, isLoading: swrLoading, mutate: mutateOrgs } = useSWR(
     ['organisation_list', page, search, sectorFilter, statusFilter, typeFilter],
     () => getOrganisationsService(page, pageSize, true, search, sectorFilter, statusFilter, typeFilter)
   );
@@ -416,6 +417,12 @@ export const Organisations = () => {
 
           <main className="orgs-content">
             <div className="orgs-page">
+
+              <BandeauErreur
+                erreur={erreurOrgs}
+                onReessayer={mutateOrgs}
+                message="Impossible de charger les organisations. La liste affichée peut ne plus être à jour."
+              />
 
               {/* ── En-tête ── */}
               <div className="orgs-page-header">
