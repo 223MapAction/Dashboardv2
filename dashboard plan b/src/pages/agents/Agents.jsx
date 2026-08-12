@@ -23,6 +23,8 @@ import { AgentsSkeleton } from './components/AgentsSkeleton';
 import { authService } from '../auth/services/authService';
 import './agents.css';
 import './agents-roster.css';
+import { useReinitialisationSurChangement } from '../../hooks/useReinitialisationSurChangement';
+
 
 const EMPTY_ARRAY = [];
 
@@ -268,10 +270,8 @@ export const Agents = () => {
     peutSupprimer(agent) && { id: 'delete', label: 'Supprimer', icon: Trash, tone: 'danger', onSelect: () => openDelete(agent) },
   ].filter(Boolean);
 
-  // Reset page to 1 on filter/search change
-  useEffect(() => {
-    setPage(1);
-  }, [search, roleFilter, statusFilter]);
+  // Retour a la premiere page des qu'un filtre change.
+  useReinitialisationSurChangement([search, roleFilter, statusFilter], () => setPage(1));
 
   const paginatedAgents = useMemo(() => {
     const startIndex = (page - 1) * pageSize;

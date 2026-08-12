@@ -10,6 +10,8 @@ import { getIncidentsFilteredService } from '../../service/dashboard_service';
 import { BlurryImage } from '../../../../components/atoms/BlurryImage';
 import { COUNTRIES } from '../../../organisations/data/organisations';
 import './map.css';
+import { useReinitialisationSurChangement } from '../../../../hooks/useReinitialisationSurChangement';
+
 
 // Token Mapbox depuis les variables d'environnement
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
@@ -195,13 +197,14 @@ export const MapContainer = () => {
 
   const scope = getScope();
 
-  // Réinitialiser quand les filtres changent
-  useEffect(() => {
+  // Repartir d'une liste vide des qu'un filtre change : les incidents deja
+  // charges appartiennent au filtre precedent.
+  useReinitialisationSurChangement([ownershipFilter, statusFilter, countryFilter], () => {
     setAllIncidents([]);
     setCurrentPage(1);
     setHasMorePages(true);
     loadedPagesRef.current = new Set();
-  }, [ownershipFilter, statusFilter, countryFilter]);
+  });
 
   // Charger une page d'incidents
   const { isLoading: isLoadingPage } = useSWR(

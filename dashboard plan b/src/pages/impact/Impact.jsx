@@ -24,6 +24,8 @@ import { getGlobalImpactService, getImpactIncidentsService } from './service/imp
 import { authService } from '../auth/services/authService';
 import Pagination from '../../components/molecules/Pagination';
 import './impact.css';
+import { useReinitialisationSurChangement } from '../../hooks/useReinitialisationSurChangement';
+
 
 const STRUCTURE_LABELS = {
   schools: 'Écoles',
@@ -82,9 +84,8 @@ export const Impact = () => {
   const [expanded, setExpanded] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search, periodFilter, statusFilter, structureFilter]);
+  // Retour a la premiere page des qu'un filtre change.
+  useReinitialisationSurChangement([search, periodFilter, statusFilter, structureFilter], () => setCurrentPage(1));
 
   const statusApiValue = statusFilter === 'both' ? 'all' : (statusFilter === 'taken_with_action' ? 'taken_action' : 'resolved');
 

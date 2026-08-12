@@ -39,6 +39,8 @@ import { getCollaborationsService } from './service/collaboration_service';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
 import { BlurryImage } from '../../components/atoms/BlurryImage';
 import './collaboration.css';
+import { useReinitialisationSurChangement } from '../../hooks/useReinitialisationSurChangement';
+
 
 registerLocale('fr', fr);
 
@@ -96,10 +98,11 @@ export const Collaboration = () => {
   const [dateFrom, dateTo] = dateRange;
 
 
-  // Réinitialiser la page à 1 lors du changement de filtre
-  useEffect(() => {
-    setPage(1);
-  }, [search, roleFilter, statusFilter, incidentFilter, dateFrom, dateTo, localStatusFilter]);
+  // Retour a la premiere page des qu'un filtre change.
+  useReinitialisationSurChangement(
+    [search, roleFilter, statusFilter, incidentFilter, dateFrom, dateTo, localStatusFilter],
+    () => setPage(1),
+  );
 
   // Les cent signalements qui remplissent la liste déroulante du filtre.
   //

@@ -10,6 +10,8 @@ import IncidentModalContext from './modale/IncidentModalContext';
 import IncidentDeleteModal from './modale/IncidentDeleteModal';
 import IncidentAssignModal from './modale/IncidentAssignModal';
 import './incident.css';
+import { useReinitialisationSurChangement } from '../../hooks/useReinitialisationSurChangement';
+
 
 // Fonction pour adapter les données de l'API au format attendu
 const adaptIncidentData = (incident, currentUserId = null) => {
@@ -108,10 +110,8 @@ export const Incident = () => {
     };
   }, [debouncedSetSearch]);
 
-  // Réinitialiser la page à 1 lorsque la recherche ou les filtres changent
-  useEffect(() => {
-    setPage(1);
-  }, [search, statusFilter]);
+  // Retour a la premiere page des qu'un filtre change.
+  useReinitialisationSurChangement([search, statusFilter], () => setPage(1));
 
   // Charger la liste des incidents avec useSWR
   const {

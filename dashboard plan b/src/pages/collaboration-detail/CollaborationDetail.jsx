@@ -109,24 +109,21 @@ const CustomAudioPlayer = ({ id, src, activeAudioId, setActiveAudioId }) => {
   // Si le token change mais que c'est le même fichier, on ne met pas à jour la source.
   const [stableSrc, setStableSrc] = useState(src);
 
-  useEffect(() => {
-    if (!src) return;
-    if (!stableSrc) {
-      setStableSrc(src);
-      return;
-    }
-    const oldBase = stableSrc.split('?')[0];
-    const newBase = src.split('?')[0];
-    if (oldBase !== newBase) {
-      setStableSrc(src);
-    }
-  }, [src, stableSrc]);
+  // Ajuste pendant le rendu, pas dans un effet : sinon le <audio> est monte une
+  // premiere fois avec l'ancienne source, puis remonte avec la nouvelle — ce
+  // qui coupe la lecture, exactement ce que ce code cherche a eviter.
+  const memeFichier = src && stableSrc && src.split('?')[0] === stableSrc.split('?')[0];
+  if (src && stableSrc !== src && !memeFichier) {
+    setStableSrc(src);
+  }
 
-  // Si un autre audio démarre, on met celui-ci en pause
+  // Si un autre audio démarre, on met celui-ci en pause.
+  // On ne touche plus a isPlaying ici : l'element emet un evenement 'pause',
+  // ecoute plus bas. Une seule source de verite, et l'etat reste juste meme
+  // quand la lecture s'arrete sans passer par nous (fin de piste, coupure).
   useEffect(() => {
     if (activeAudioId && activeAudioId !== id && isPlaying && audioRef.current) {
       audioRef.current.pause();
-      setIsPlaying(false);
     }
   }, [activeAudioId, id, isPlaying]);
 
@@ -152,14 +149,21 @@ const CustomAudioPlayer = ({ id, src, activeAudioId, setActiveAudioId }) => {
       if (setActiveAudioId && activeAudioId === id) setActiveAudioId(null);
     };
 
+    const onLecture = () => setIsPlaying(true);
+    const onPause = () => setIsPlaying(false);
+
     audio.addEventListener('loadedmetadata', setAudioData);
     audio.addEventListener('timeupdate', setAudioTime);
     audio.addEventListener('ended', onAudioEnd);
+    audio.addEventListener('play', onLecture);
+    audio.addEventListener('pause', onPause);
 
     return () => {
       audio.removeEventListener('loadedmetadata', setAudioData);
       audio.removeEventListener('timeupdate', setAudioTime);
       audio.removeEventListener('ended', onAudioEnd);
+      audio.removeEventListener('play', onLecture);
+      audio.removeEventListener('pause', onPause);
     };
   }, [id, activeAudioId, setActiveAudioId]);
 
@@ -168,10 +172,8 @@ const CustomAudioPlayer = ({ id, src, activeAudioId, setActiveAudioId }) => {
     if (!prevValue) {
       if (setActiveAudioId) setActiveAudioId(id);
       audioRef.current.play();
-      setIsPlaying(true);
     } else {
       audioRef.current.pause();
-      setIsPlaying(false);
     }
   };
 
