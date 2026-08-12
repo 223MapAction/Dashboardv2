@@ -16,6 +16,7 @@ import { getIncidentAssignmentsService } from '../incident/service/incident_serv
 import { BlurryImage } from '../../components/atoms/BlurryImage';
 import Pagination from '../../components/molecules/Pagination';
 import { ResponsiveTable } from '../../components/molecules/ResponsiveTable';
+import { creerColonnesInterventions, mediaIntervention } from './colonnes';
 import './mes-interventions.css';
 
 
@@ -248,148 +249,12 @@ const MesInterventionsContent = () => {
 
   };
 
-  // Une seule description des colonnes : ResponsiveTable en fait un tableau
-  // au-dessus de 900px et une carte en dessous. Neuf colonnes ne tenaient pas
-  // sur un telephone — c'est la page qui souffrait le plus du defilement.
-  const colonnes = [
-    {
-      id: 'signalement', entete: 'Signalement', priorite: 'titre',
-      rendu: (incident) => (
-        <>
-            <div className="mes-interventions-main-cell">
-              <BlurryImage
-                src={incident.image}
-                alt={incident.title}
-                className="mes-interventions-img"
-              />
-              <div>
-                <span className="mes-interventions-row-title">
-                  {incident.title || 'Sans titre'}
-                </span>
-                <span className="mes-interventions-row-desc">
-                  {incident.description
-                    ? incident.description.substring(0, 80) +
-                    (incident.description.length > 80 ? '...' : '')
-                    : 'Aucune description disponible.'}
-                </span>
-              </div>
-            </div>
-        </>
-      ),
-    },
-    {
-      id: 'localisation', entete: 'Localisation', priorite: 'sousTitre',
-      rendu: (incident) => (
-        <>
-            {incident.location || 'Inconnue'}
-        </>
-      ),
-    },
-    {
-      id: 'mode', entete: 'Mode', priorite: 'detail',
-      rendu: (incident) => (
-        <>
-            {incident.take_in_charge_mode && (
-              <span className={`take-in-charge-tag ${incident.take_in_charge_mode}`} style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                padding: '4px 10px',
-                borderRadius: '12px',
-                fontSize: '11px',
-                fontWeight: '600',
-                backgroundColor: (incident.take_in_charge_mode === 'internal' || incident.take_in_charge_mode === 'interne') ? 'rgba(58, 162, 221, 0.12)' : 'rgba(168, 85, 247, 0.12)',
-                color: (incident.take_in_charge_mode === 'internal' || incident.take_in_charge_mode === 'interne') ? 'var(--color-primary)' : '#A855F7',
-                border: (incident.take_in_charge_mode === 'internal' || incident.take_in_charge_mode === 'interne') ? '1px solid rgba(58, 162, 221, 0.3)' : '1px solid rgba(168, 85, 247, 0.3)'
-              }}>
-                {(incident.take_in_charge_mode === 'internal' || incident.take_in_charge_mode === 'interne') ? 'Interne' : 'Collaboratif'}
-              </span>
-            ) || (
-                <span style={{ color: 'var(--color-text-muted)', fontStyle: 'italic' }}>Non spécifié</span>
-              )}
-        </>
-      ),
-    },
-    {
-      id: 'declaration', entete: 'Date de déclaration', priorite: 'detail',
-      rendu: (incident) => (
-        <>
-            {incident.startDate}
-        </>
-      ),
-    },
-    {
-      id: 'resolution', entete: 'Date de résolution', priorite: 'detail',
-      rendu: (incident) => (
-        <>
-            {incident.endDate === 'En cours' ? (
-              <span className="mes-interventions-date-badge is-pending">En cours</span>
-            ) : (
-              <span className="mes-interventions-date-badge is-resolved">{incident.endDate}</span>
-            )}
-        </>
-      ),
-    },
-    {
-      id: 'progression', entete: 'Progression', priorite: 'marquant',
-      rendu: (incident) => (
-        <>
-            <div className="mes-interventions-progress-container">
-              <div className="mes-interventions-progress-bar-bg">
-                <div
-                  className="mes-interventions-progress-bar-fill"
-                  style={{ width: `${incident.progressValue}%` }}
-                />
-              </div>
-              <span className="mes-interventions-progress-label">
-                {incident.progressValue}%
-              </span>
-            </div>
-        </>
-      ),
-    },
-    {
-      id: 'equipe', entete: 'Équipe terrain', priorite: 'detail',
-      rendu: (incident) => (
-        <>
-            <IncidentAgentsStack incident={incident} />
-        </>
-      ),
-    },
-    {
-      id: 'rapports', entete: 'Rapports', priorite: 'detail',
-      rendu: (incident) => (
-        <>
-            {(() => {
-              const reportsCount = incident?.reports_count || 0;
-              return (
-                <button
-                  type="button"
-                  className="rapport-count-btn"
-                  onClick={(e) => { e.stopPropagation(); handleOpenReports(incident); }}
-                  disabled={reportsCount === 0}
-                  title={reportsCount > 0 ? `Voir les ${reportsCount} rapport(s)` : 'Aucun rapport'}
-                >
-                  <DocumentText size={16} variant={reportsCount > 0 ? 'Bold' : 'Linear'} color={reportsCount > 0 ? '#3AA2DD' : '#9CA3AF'} />
-                  <span>{reportsCount}</span>
-                </button>
-              );
-            })()}
-        </>
-      ),
-    },
-    {
-      id: 'statut', entete: 'Statut', priorite: 'marquant',
-      rendu: (incident) => (
-        <>
-            <span className={`mes-interventions-badge-glow variant-${incident.badge.variant}`}
-              style={{ width: "max-content" }}
-            >
-              {incident.badge.label}
-            </span>
-        </>
-      ),
-    },
-  ];
+  // Les colonnes vivent dans ./colonnes : sorties d'ici, elles se testent,
+  // et ce fichier redescend sous les 400 lignes.
+  const colonnes = creerColonnesInterventions({
+    onOuvrirRapports: handleOpenReports,
+    RenduEquipe: IncidentAgentsStack,
+  });
 
   const actionsDe = (incident) => (
     <>
@@ -487,6 +352,7 @@ const MesInterventionsContent = () => {
                 cleDe={(i) => i.id}
                 actions={actionsDe}
                 onLigneClick={handleRowClick}
+                media={mediaIntervention}
                 chargement={isLoading}
                 classeLigne={() => 'mes-interventions-row-clickable'}
                 classeTable="mes-interventions-table"

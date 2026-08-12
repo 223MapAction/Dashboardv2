@@ -85,7 +85,7 @@ describe('rendu en tableau', () => {
     // groupes plutot qu'un espace ordinaire — et on refuse explicitement la
     // forme collee, qu'une expression avec `\s?` laisserait passer.
     expect(document.body.textContent).not.toContain('1234');
-    expect(document.body.textContent).toMatch(/1[\s  ]234/);
+    expect(document.body.textContent).toMatch(/1[\s\u202f\u00a0]234/);
   });
 });
 

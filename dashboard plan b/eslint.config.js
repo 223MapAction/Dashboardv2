@@ -23,7 +23,16 @@ export default defineConfig([
       },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      // eslint-plugin-react n'est pas installe, donc l'usage d'un identifiant
+      // dans du JSX n'est pas suivi : `<Truc />` ne compte pas comme une
+      // utilisation de `Truc`. D'ou la convention « majuscule = composant, on
+      // ignore ». `varsIgnorePattern` la portait deja pour les variables ;
+      // `argsIgnorePattern` l'etend aux parametres, sans quoi un composant
+      // recu en parametre et rendu en JSX etait signale a tort.
+      'no-unused-vars': [
+        'error',
+        { varsIgnorePattern: '^[A-Z_]', argsIgnorePattern: '^[A-Z_]' },
+      ],
     },
   },
 ])
