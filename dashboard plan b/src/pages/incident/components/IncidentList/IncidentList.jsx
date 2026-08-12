@@ -39,9 +39,22 @@ export const IncidentList = ({
   const myOrgId = user?.organisation_member;
   const myOrgName = user?.organisation_name || 'Mon Organisation';
 
+  // /MapApi/collaboration/ met 7 a 16 secondes : la route n'est pas paginee et
+  // renvoie toute la table, alors qu'on n'en tire qu'un badge par ligne. On ne
+  // peut pas supprimer l'appel depuis le front — la reponse de /incident/ ne
+  // porte aucune information de collaboration — mais on peut cesser de le
+  // refaire a chaque visite. Une fois par session suffit : ces demandes ne
+  // changent pas d'une minute a l'autre, et le badge n'est pas critique.
+  // Le correctif propre appartient a l'API (pagination + filtre par signalement).
   const { data: collaborations } = useSWR(
     'collaborations',
-    getCollaborationsService
+    getCollaborationsService,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      revalidateIfStale: false,
+      dedupingInterval: 30 * 60 * 1000,
+    }
   );
 
   // Le filtre par statut est desormais applique par le serveur (parametre

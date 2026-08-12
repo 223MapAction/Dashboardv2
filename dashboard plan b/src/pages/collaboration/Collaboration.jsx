@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { FiltersBar } from '../../components/molecules/FiltersBar';
 import { useRechercheDebouncee } from '../../hooks/useRechercheDebouncee';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -191,27 +191,30 @@ export const Collaboration = () => {
   // Utiliser useSWR pour charger les collaborations
   const { data: swrData, error: swrError, isLoading, mutate } = useSWR(
     ['collaborations', page, search, roleFilter, statusFilter, incidentFilter, dateFrom, dateTo, localStatusFilter],
-    () => getCollaborationsService(buildParams(page))
+    () => getCollaborationsService(buildParams(page)),
+    // Cette route met 8 a 10 secondes. Les revalidations automatiques de SWR —
+    // au focus de la fenetre, a la reconnexion, ou parce que la donnee est
+    // jugee perimee — relancent donc un appel de 10 secondes sans que
+    // l'utilisateur ait rien demande. Mesure : un second appel identique
+    // partait exactement a la fin du premier. Le rafraichissement reste
+    // possible, mais seulement quand on revient sur l'onglet.
+    { revalidateOnFocus: false, revalidateOnReconnect: false, revalidateIfStale: false }
   );
 
-  // Précharger la page suivante dès que la page courante est affichée : le clic
-  // sur « suivant » lit alors le cache au lieu d'attendre le réseau.
-  const totalCount = swrData?.count || 0;
-  const hasNextPage = page * pageSize < totalCount;
-  useSWR(
-    hasNextPage
-      ? ['collaborations', page + 1, search, roleFilter, statusFilter, incidentFilter, dateFrom, dateTo, localStatusFilter]
-      : null,
-    () => getCollaborationsService(buildParams(page + 1)),
-    { revalidateIfStale: false, revalidateOnMount: true }
-  );
+  // Le prechargement de la page suivante est suspendu. Il avait du sens sur une
+  // route rapide ; mesuree entre 7 et 12 secondes, elle fait payer a chacun un
+  // appel lent pour un clic sur « suivant » qui n'arrivera peut-etre jamais.
+  // A remettre quand /MapApi/collaborations/dashboard/ aura ete profile.
 
-  // Revalider en fond au retour sur l'onglet, sans vider le cache : les cartes
-  // restent affichées pendant le rafraîchissement.
+  // Revalider en fond au RETOUR sur l'onglet. La version precedente testait la
+  // valeur de l'onglet et non son changement : elle se declenchait donc aussi
+  // au premier montage, redemandant ce que SWR venait tout juste de demander.
+  // Sur une route a 7-12 secondes, cela doublait le chargement de la page.
+  const ongletPrecedent = useRef(activeTab);
   useEffect(() => {
-    if (activeTab === 'collaborations') {
-      mutate();
-    }
+    const revient = ongletPrecedent.current !== 'collaborations' && activeTab === 'collaborations';
+    ongletPrecedent.current = activeTab;
+    if (revient) mutate();
   }, [activeTab, mutate]);
 
   let shimmerColor = "#acb7c6"

@@ -26,8 +26,7 @@ import './agents-roster.css';
 
 const EMPTY_ARRAY = [];
 
-const fetcher = async ([, organisationsList, search, role, status]) => {
-  if (!organisationsList || organisationsList.length === 0) return [];
+const fetcher = async ([, search, role, status]) => {
   const allMembers = [];
 
   const getIndexFromId = (id) => {
@@ -49,9 +48,6 @@ const fetcher = async ([, organisationsList, search, role, status]) => {
       if (m.org_role === 'bureau_agent') parsedRole = 'bureau';
 
       const orgId = m.organisation_member || m.organisation;
-      const org = (organisationsList || []).find(
-        (o) => String(o.id) === String(orgId)
-      );
 
       allMembers.push({
         id: m.id,
@@ -64,8 +60,7 @@ const fetcher = async ([, organisationsList, search, role, status]) => {
         address: m.address || '',
         role: parsedRole,
         organisationId: orgId || '',
-        organisationName: m.organisation_name || org?.name || 'Organisation inconnue',
-        organisationLogo: org?.avatar || '',
+        organisationName: m.organisation_name || 'Organisation inconnue',
         avatar: m.avatar || '',
         status: m.is_active ? 'active' : 'inactive',
         avatarColor: AVATAR_COLORS[getIndexFromId(m.id) % AVATAR_COLORS.length] || '#3AA2DD',
@@ -109,7 +104,9 @@ export const Agents = () => {
   }, [debouncedSetSearch]);
 
   // ── Chargement des données ────────────────────────────────────
-  const { data: rawOrgs, isLoading: loadingOrgs } = useSWR(
+  // Le squelette de la liste ne depend plus de ce chargement : les organisations
+  // ne servent qu'au formulaire de creation.
+  const { data: rawOrgs } = useSWR(
     'organisation_list',
     getOrganisationsService
   );
@@ -126,11 +123,22 @@ export const Agents = () => {
     isLoading: loadingMembers,
     mutate: mutateAgents,
   } = useSWR(
-    organisationsList.length > 0 ? ['agents_list', organisationsList, search, roleFilter, statusFilter] : null,
+    // organisationsList ne figure NI dans la cle NI dans le fetcher.
+    //
+    // Elle y etait, et c'etait doublement couteux. En verrou (`length > 0 ? ...
+    // : null`) elle serialisait deux appels qui pouvaient partir ensemble. Mais
+    // la simple retirer du verrou en la laissant dans la cle etait pire : la
+    // liste passe de vide a remplie, la cle change, et SWR refait la requete —
+    // mesure a deux appels de /agents/ au lieu d'un.
+    //
+    // Elle ne servait qu'a deux replis : `organisationLogo`, qui n'est lu nulle
+    // part, et `organisationName`, dont le formulaire de creation fait deja sa
+    // propre recherche. Le payload des membres porte `organisation_name`.
+    ['agents_list', search, roleFilter, statusFilter],
     fetcher
   );
 
-  const isDataLoading = loadingOrgs || (organisationsList.length > 0 && loadingMembers);
+  const isDataLoading = loadingMembers;
   const agents = fetchedAgents || EMPTY_ARRAY;
 
   // ── Modal form ────────────────────────────────────────────────
