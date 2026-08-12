@@ -104,6 +104,11 @@ export const Organisations = () => {
       sector: o.activity_sector || '',
       type: o.organisation_type || '',
       country: o.intervention_country || '',
+      // ATTENTION — ce n'est pas une ville. L'API ne renvoie aucun champ de
+      // localite ; `subdomain` a ete branche ici comme bouche-trou. La colonne
+      // « Localisation » affiche donc un identifiant technique du genre
+      // « direction_régionale_de_l'hydraulique_(ménaka) » a cote du pays.
+      // A remplacer des qu'un vrai champ ville existe cote backend.
       city: o.subdomain || '',
       phone: o.phone || '',
       email: o.email || '',
