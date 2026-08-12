@@ -58,16 +58,11 @@
 }
 
 .trash-title {
-  font-size: var(--font-size-h2);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
   margin: 0 0 var(--spacing-1) 0;
   letter-spacing: var(--tracking-tight);
 }
 
 .trash-subtitle {
-  font-size: var(--font-size-body-small);
-  color: var(--color-text-secondary);
   margin: 0;
   line-height: 1.5;
 }
@@ -730,7 +725,7 @@
 }
 
 .trash-modal-confirm:hover {
-  background-color: #DC2626;
+  background-color: var(--color-danger-text);
 }
 
 /* ── Toast ───────────────────────────────── */

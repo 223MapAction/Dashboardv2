@@ -1341,7 +1341,7 @@ export const Collaboration = () => {
 
                   {myTasks.length === 0 ? (
                     <div className="my-tasks-empty">
-                      <TaskSquare size={32} variant="Linear" color="#9CA3AF" />
+                      <TaskSquare size={32} variant="Linear" color="var(--color-text-muted)" />
                       <p>Vous n'avez encore ajouté aucune tâche.</p>
                     </div>
                   ) : (
@@ -1666,7 +1666,7 @@ export const Collaboration = () => {
                       <div className="suggest-search-results">
                         {filteredOrgs.filter(o => !suggestedOrgs.find(s => s.id === o.id)).length === 0 ? (
                           <div className="suggest-search-empty">
-                            <Buildings2 size={20} variant="Linear" color="#9CA3AF" />
+                            <Buildings2 size={20} variant="Linear" color="var(--color-text-muted)" />
                             <span>Aucune organisation trouvée</span>
                           </div>
                         ) : (
@@ -1704,7 +1704,7 @@ export const Collaboration = () => {
 
                   {suggestedOrgs.length === 0 ? (
                     <div className="suggest-empty">
-                      <People size={28} variant="Linear" color="#9CA3AF" />
+                      <People size={28} variant="Linear" color="var(--color-text-muted)" />
                       <p>Aucune organisation sélectionnée pour le moment.</p>
                     </div>
                   ) : (

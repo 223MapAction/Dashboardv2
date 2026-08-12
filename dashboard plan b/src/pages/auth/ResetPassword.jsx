@@ -106,7 +106,7 @@ export const ResetPassword = () => {
                 {error && (
                   <div className="login-error" style={{
                     backgroundColor: '#FEE2E2',
-                    color: '#DC2626',
+                    color: 'var(--color-danger-text)',
                     padding: '12px 16px',
                     borderRadius: '8px',
                     marginBottom: '16px',

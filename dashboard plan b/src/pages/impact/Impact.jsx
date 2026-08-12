@@ -707,7 +707,7 @@ export const Impact = () => {
 
                   {filteredIncidents.length === 0 ? (
                     <div className="impact-empty">
-                      <Award size={48} variant="Linear" color="#9CA3AF" />
+                      <Award size={48} variant="Linear" color="var(--color-text-muted)" />
                       <p>Aucun signalement ne correspond à vos critères et filtres actuels.</p>
                     </div>
                   ) : (

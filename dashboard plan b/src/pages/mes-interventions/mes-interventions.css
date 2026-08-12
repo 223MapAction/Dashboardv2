@@ -38,16 +38,11 @@
 }
 
 .mes-interventions-title {
-  font-size: var(--font-size-h2);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
   margin: 0 0 var(--spacing-1) 0;
   letter-spacing: var(--tracking-tight);
 }
 
 .mes-interventions-subtitle {
-  font-size: var(--font-size-body-small);
-  color: var(--color-text-secondary);
   margin: 0;
   line-height: 1.5;
 }

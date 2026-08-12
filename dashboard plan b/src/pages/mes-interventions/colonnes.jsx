@@ -146,7 +146,7 @@ export const creerColonnesInterventions = ({ onOuvrirRapports, RenduEquipe }) =>
                 disabled={reportsCount === 0}
                 title={reportsCount > 0 ? `Voir les ${reportsCount} rapport(s)` : 'Aucun rapport'}
               >
-                <DocumentText size={16} variant={reportsCount > 0 ? 'Bold' : 'Linear'} color={reportsCount > 0 ? '#3AA2DD' : '#9CA3AF'} />
+                <DocumentText size={16} variant={reportsCount > 0 ? 'Bold' : 'Linear'} color={reportsCount > 0 ? '#3AA2DD' : 'var(--color-text-muted)'} />
                 <span>{reportsCount}</span>
               </button>
             );

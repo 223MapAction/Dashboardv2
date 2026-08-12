@@ -148,7 +148,7 @@ export const IncidentReportsModal = () => {
             </div>
           ) : displayedReports.length === 0 ? (
             <div className="d-flex flex-column align-items-center justify-content-center p-5 border rounded bg-light text-center" style={{ gap: '12px', borderStyle: 'dashed' }}>
-              <DocumentText size={48} variant="Linear" color="#9CA3AF" />
+              <DocumentText size={48} variant="Linear" color="var(--color-text-muted)" />
               <div>
                 <span className="fw-semibold d-block" style={{ fontSize: '14px', color: 'var(--color-text-primary)' }}>
                   Aucun rapport disponible

@@ -907,7 +907,7 @@ export const MapContainer = () => {
                                 <div
                                   className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
                                   style={{
-                                    backgroundColor: '#9CA3AF',
+                                    backgroundColor: 'var(--color-text-muted)',
                                     width: '40px',
                                     height: '40px',
                                     fontSize: '0.85rem'

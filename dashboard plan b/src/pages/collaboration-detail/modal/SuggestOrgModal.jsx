@@ -252,7 +252,7 @@ export const SuggestOrgModal = () => {
                       </div>
                     ) : selectableOrgs.length === 0 ? (
                       <div className="suggest-search-empty">
-                        <Buildings2 size={20} variant="Linear" color="#9CA3AF" />
+                        <Buildings2 size={20} variant="Linear" color="var(--color-text-muted)" />
                         <span>Aucune organisation disponible</span>
                       </div>
                     ) : (
@@ -327,7 +327,7 @@ export const SuggestOrgModal = () => {
 
             {suggestedOrgs.length === 0 ? (
               <div className="suggest-empty">
-                <People size={28} variant="Linear" color="#9CA3AF" />
+                <People size={28} variant="Linear" color="var(--color-text-muted)" />
                 <p>Aucune organisation sélectionnée pour le moment.</p>
               </div>
             ) : (

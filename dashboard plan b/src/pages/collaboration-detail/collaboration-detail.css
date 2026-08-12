@@ -934,7 +934,7 @@
 }
 
 .collab-task-failure-confirm:hover:not(:disabled) {
-  background-color: #DC2626;
+  background-color: var(--color-danger-text);
 }
 
 .collab-task-failure-confirm:disabled {
@@ -1803,7 +1803,7 @@
 
 .my-task-status.failed {
   background-color: rgba(239, 68, 68, 0.1);
-  color: #DC2626;
+  color: var(--color-danger-text);
 }
 
 .my-task-status.pending {

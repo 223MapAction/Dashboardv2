@@ -1465,8 +1465,8 @@
 }
 
 .decision-choice.is-reject.is-selected {
-  background-color: #EF4444;
-  border-color: #EF4444;
+  background-color: var(--color-danger-text);
+  border-color: var(--color-danger-text);
   color: #fff;
 }
 
@@ -1530,7 +1530,7 @@
 }
 
 .decision-btn-primary.is-reject {
-  background-color: #EF4444;
+  background-color: var(--color-danger-text);
 }
 
 /* Spinner mini */

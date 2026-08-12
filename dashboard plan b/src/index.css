@@ -48,14 +48,21 @@
   --color-danger: #EF4444;
   --color-info: #3AA2DD;
 
-  /* ── Variantes destinées au TEXTE ───────────────────────────────────────────
+  /* ── Variantes lisibles face au blanc ───────────────────────────────────────
      Les couleurs de marque ci-dessus restent inchangées : elles portent
-     l'identité visuelle sur les fonds, bordures, icônes et marqueurs de carte.
-     Mais posées comme couleur de texte sur blanc, aucune n'atteint le seuil
-     WCAG AA de 4.5:1 — la primaire plafonne à 2.84:1.
+     l'identité visuelle sur les fonds pâles, les bordures, les icônes et les
+     marqueurs de carte. Mais aucune ne tient face au blanc — la primaire
+     plafonne à 2.84:1, le succès à 2.28:1, l'alerte à 2.15:1.
 
      Ces variantes sont les mêmes teintes, assombries au strict minimum pour
-     franchir 4.5:1. À utiliser en `color:`, jamais en fond. */
+     franchir 4.5:1 face au blanc.
+
+     Le contraste est SYMÉTRIQUE : une couleur à 4.5:1 du blanc est lisible
+     aussi bien en texte SUR blanc qu'en fond SOUS du texte blanc. Ces jetons
+     servent donc les deux — un libellé coloré comme un bouton plein. (Une
+     version antérieure de ce commentaire disait « jamais en fond », ce qui
+     était faux et avait conduit à réintroduire un second rouge, #DC2626, pour
+     les boutons.) */
   --color-primary-text: #1E78AC;
   --color-success-text: #17833F;
   --color-warning-text: #9E6606;
@@ -1258,4 +1265,45 @@ p {
     background-image: none !important;
     animation: none !important;
   }
+}
+
+/* ============================================================================
+   EN-TETE DE PAGE
+   ============================================================================
+   Les huit pages declaraient chacune leur titre et leur sous-titre, avec des
+   noms de classes differents mais exactement les memes quatre proprietes.
+   Huit copies, donc huit occasions de deriver — et elles avaient derive :
+   trois pages affichaient leur titre en 32px et cinq en 24px ; trois
+   sous-titres sur huit avaient une autre taille et une autre couleur.
+
+   24px plutot que 32 : ce sont des ecrans de travail denses, pas des pages
+   d'accueil. Un titre de 32px au-dessus d'une liste de vingt signalements
+   prend la place de deux lignes de donnees sans rien apprendre a personne.
+
+   Les marges restent dans les feuilles de page : elles dependent de la mise
+   en page autour, pas de la typographie.
+   ============================================================================ */
+.collab-title,
+.project-list-title,
+.mes-interventions-title,
+.orgs-title,
+.agents-title,
+.impact-title,
+.profile-title,
+.trash-title {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.collab-subtitle,
+.project-list-subtitle,
+.mes-interventions-subtitle,
+.orgs-subtitle,
+.agents-subtitle,
+.impact-subtitle,
+.profile-subtitle,
+.trash-subtitle {
+  font-size: var(--font-size-body);
+  color: var(--color-text-muted);
 }

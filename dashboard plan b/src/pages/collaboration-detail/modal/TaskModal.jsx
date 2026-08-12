@@ -221,7 +221,7 @@ export const TaskModal = () => {
 
             {currentTasks.filter(t => t.createdBy === 'me').length === 0 ? (
               <div className="my-tasks-empty">
-                <TaskSquare size={32} variant="Linear" color="#9CA3AF" />
+                <TaskSquare size={32} variant="Linear" color="var(--color-text-muted)" />
                 <p>Vous n'avez encore ajouté aucune tâche.</p>
               </div>
             ) : (

@@ -3545,7 +3545,7 @@ export const CollaborationDetail = () => {
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.transform = 'scale(1.1)';
-                        e.currentTarget.style.backgroundColor = '#DC2626';
+                        e.currentTarget.style.backgroundColor = 'var(--color-danger-text)';
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.transform = 'scale(1)';

@@ -101,16 +101,11 @@
 }
 
 .collab-title {
-  font-size: var(--font-size-h1);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
   margin: 0 0 4px 0;
   letter-spacing: var(--tracking-tight);
 }
 
 .collab-subtitle {
-  font-size: var(--font-size-body);
-  color: var(--color-text-muted);
   margin: 0;
   max-width: 540px;
   line-height: 1.5;
@@ -413,7 +408,7 @@
 .collab-datepicker .react-datepicker__day--range-start:hover,
 .collab-datepicker .react-datepicker__day--range-end:hover,
 .collab-datepicker .react-datepicker__day--selected:hover {
-  background-color: var(--color-primary-dark, #2C8DC2) !important;
+  background-color: var(--color-primary-dark, var(--color-primary-dark)) !important;
 }
 
 /* Same start/end */
@@ -785,7 +780,7 @@
 }
 
 .collab-tasks-btn:hover {
-  background-color: var(--color-primary-dark, #2C8DC2);
+  background-color: var(--color-primary-dark, var(--color-primary-dark));
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(58, 162, 221, 0.3);
 }
@@ -1115,7 +1110,7 @@
 }
 
 .tasks-update-progress-btn:hover {
-  background-color: var(--color-primary-dark, #2C8DC2);
+  background-color: var(--color-primary-dark, var(--color-primary-dark));
   animation: none;
 }
 
@@ -1606,7 +1601,7 @@
 }
 
 .centered-modal-confirm:hover:not(:disabled) {
-  background-color: var(--color-primary-dark, #2C8DC2);
+  background-color: var(--color-primary-dark, var(--color-primary-dark));
 }
 
 .centered-modal-confirm:disabled {
@@ -2072,7 +2067,7 @@
 
 .my-task-status.failed {
   background-color: rgba(239, 68, 68, 0.1);
-  color: #DC2626;
+  color: var(--color-danger-text);
 }
 
 .my-task-status.pending {
@@ -2186,7 +2181,7 @@
 }
 
 .tasks-add-btn:hover {
-  background-color: var(--color-primary-dark, #2C8DC2);
+  background-color: var(--color-primary-dark, var(--color-primary-dark));
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(58, 162, 221, 0.3);
 }
@@ -2300,7 +2295,7 @@
 }
 
 .tasks-add-confirm:hover:not(:disabled) {
-  background-color: var(--color-primary-dark, #2C8DC2);
+  background-color: var(--color-primary-dark, var(--color-primary-dark));
 }
 
 .tasks-add-confirm:disabled {
@@ -2477,7 +2472,7 @@
   align-items: center;
   gap: 4px;
   padding: 4px 8px;
-  background-color: #EF4444;
+  background-color: var(--color-danger-text);
   color: #fff;
   border-radius: var(--radius-sm);
   font-size: var(--font-size-caption);
@@ -2633,14 +2628,14 @@
 }
 
 .failure-form-confirm {
-  background-color: #EF4444;
+  background-color: var(--color-danger-text);
   color: #fff;
-  border: 1px solid #EF4444;
+  border: 1px solid var(--color-danger-text);
 }
 
 .failure-form-confirm:hover:not(:disabled) {
-  background-color: #DC2626;
-  border-color: #DC2626;
+  background-color: var(--color-danger-text);
+  border-color: var(--color-danger-text);
 }
 
 .failure-form-confirm:disabled {

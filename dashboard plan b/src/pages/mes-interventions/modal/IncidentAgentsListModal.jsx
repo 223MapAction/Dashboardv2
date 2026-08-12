@@ -124,7 +124,7 @@ export const IncidentAgentsListModal = () => {
             </div>
           ) : assignedAgents.length === 0 ? (
             <div className="d-flex flex-column align-items-center justify-content-center p-5 border rounded bg-light text-center" style={{ gap: '12px' }}>
-              <Profile size={48} variant="Linear" color="#9CA3AF" />
+              <Profile size={48} variant="Linear" color="var(--color-text-muted)" />
               <div>
                 <span className="fw-semibold d-block" style={{ fontSize: '14px', color: '#4B5563' }}>
                   Aucun agent sur le terrain

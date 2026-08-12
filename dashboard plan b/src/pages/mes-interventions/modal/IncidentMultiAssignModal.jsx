@@ -139,7 +139,7 @@ export const IncidentMultiAssignModal = () => {
 
             {filteredAgents.length === 0 ? (
               <div className="d-flex flex-column align-items-center justify-content-center p-4 border rounded bg-light text-center">
-                <Profile size={32} variant="Linear" color="#9CA3AF" />
+                <Profile size={32} variant="Linear" color="var(--color-text-muted)" />
                 <span className="fw-medium mt-2" style={{ fontSize: '13px', color: '#6B7280' }}>Aucun agent trouvé</span>
               </div>
             ) : (

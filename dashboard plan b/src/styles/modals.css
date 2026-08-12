@@ -522,8 +522,8 @@
 }
 
 .am-btn--danger:hover:not(:disabled) {
-  background-color: #DC2626;
-  border-color: #DC2626;
+  background-color: var(--color-danger-text);
+  border-color: var(--color-danger-text);
   box-shadow: var(--shadow-md);
 }
 

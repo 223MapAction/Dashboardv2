@@ -454,7 +454,7 @@ export const InviteOrgModal = () => {
                         </div>
                       ) : selectableOrgs.length === 0 ? (
                         <div className="invite-orgs-empty">
-                          <Buildings2 size={20} variant="Linear" color="#9CA3AF" />
+                          <Buildings2 size={20} variant="Linear" color="var(--color-text-muted)" />
                           <span>Aucune organisation disponible</span>
                         </div>
                       ) : (

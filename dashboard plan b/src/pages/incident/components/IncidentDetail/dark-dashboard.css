@@ -308,7 +308,7 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark, #2C8DC2));
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark, var(--color-primary-dark)));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -356,7 +356,7 @@
 
 .chatbot-header {
   padding: 16px 20px;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark, #2C8DC2));
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark, var(--color-primary-dark)));
   color: #FFF;
   display: flex;
   align-items: center;
@@ -519,7 +519,7 @@
 }
 
 .chatbot-send-btn:hover:not(:disabled) {
-  background-color: var(--color-primary-dark, #2C8DC2);
+  background-color: var(--color-primary-dark, var(--color-primary-dark));
 }
 
 .chatbot-send-btn:active:not(:disabled) {

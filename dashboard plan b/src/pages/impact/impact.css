@@ -50,7 +50,7 @@
   width: 56px;
   height: 56px;
   border-radius: var(--radius-lg);
-  background: linear-gradient(135deg, var(--color-primary), #2C8DC2);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -59,16 +59,11 @@
 
 .impact-title {
   margin: 0 0 4px 0;
-  font-size: var(--font-size-h1);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
   letter-spacing: var(--tracking-tight);
 }
 
 .impact-subtitle {
   margin: 0;
-  font-size: var(--font-size-body-large);
-  color: var(--color-text-secondary);
 }
 
 /* --- Filters Section --- */
