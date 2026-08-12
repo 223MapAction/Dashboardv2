@@ -134,7 +134,7 @@
   text-align: left;
   width: 100%;
   font-family: var(--font-family);
-  font-size: 14px;
+  font-size: var(--font-size-body);
   font-weight: 500;
   position: relative;
 }

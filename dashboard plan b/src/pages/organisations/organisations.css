@@ -128,7 +128,7 @@
 }
 
 .orgs-stat-value {
-  font-size: 24px;
+  font-size: var(--font-size-h2);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   line-height: 1.1;
@@ -342,7 +342,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-bold);
   color: #fff;
   flex-shrink: 0;
@@ -353,7 +353,7 @@
   width: 56px;
   height: 56px;
   border-radius: var(--radius-lg);
-  font-size: 18px;
+  font-size: var(--font-size-h3);
 }
 
 .orgs-table-org-name {
@@ -503,7 +503,7 @@
   justify-content: center;
   gap: 4px;
   color: #fff;
-  font-size: 10px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-semibold);
   letter-spacing: 0.03em;
   text-align: center;

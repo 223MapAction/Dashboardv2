@@ -277,7 +277,7 @@
   align-items: center;
   padding: 4px var(--spacing-2);
   border-radius: var(--radius-sm);
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
   letter-spacing: 0.05em;
 }
@@ -450,7 +450,7 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-semibold);
   letter-spacing: 0.05em;
   color: var(--color-text-muted);
@@ -582,7 +582,7 @@
   align-items: center;
   justify-content: center;
   color: #FFFFFF;
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
   flex-shrink: 0;
 }
@@ -610,7 +610,7 @@
 }
 
 .map-legend-title {
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
   letter-spacing: 0.1em;
   color: rgba(255, 255, 255, 0.75);
@@ -627,7 +627,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
+  font-size: var(--font-size-caption);
   color: #FFFFFF;
   font-weight: var(--font-weight-medium);
 }
@@ -661,7 +661,7 @@
   background: transparent;
   border: none;
   padding: 6px 12px;
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -725,7 +725,7 @@
 }
 
 .map-title-overlay-label {
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
   letter-spacing: 0.12em;
   color: #FFFFFF;
@@ -741,7 +741,7 @@
   border-radius: 999px;
   background: #EF4444;
   color: #FFFFFF;
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
   box-shadow: 0 0 12px rgba(239, 68, 68, 0.6);
 }
@@ -766,7 +766,7 @@
   }
 
   .incident-modal-status-step {
-    font-size: 9px;
+    font-size: var(--font-size-micro);
     letter-spacing: 0.03em;
   }
 
@@ -780,7 +780,7 @@
 
   .map-style-btn {
     padding: 5px 8px;
-    font-size: 10px;
+    font-size: var(--font-size-micro);
   }
 
   .map-legend-modern {
@@ -816,7 +816,7 @@
 .map-loading-spinner p {
   color: #3AA2DD;
   font-weight: 500;
-  font-size: 14px;
+  font-size: var(--font-size-body);
   margin: 0;
 }
 
@@ -948,7 +948,7 @@
   }
 
   .modal-title {
-    font-size: 1.1rem;
+    font-size: var(--font-size-h3);
   }
 
   .modal-body {
@@ -970,25 +970,25 @@
 
   /* Badges plus grands */
   .modal-body .badge {
-    font-size: 0.8rem;
+    font-size: var(--font-size-body-small);
     padding: 0.5rem 0.75rem;
   }
 
   /* Texte description */
   .modal-body p {
-    font-size: 0.95rem;
+    font-size: var(--font-size-body-large);
     line-height: 1.6;
   }
 
   /* Liste méta-données */
   .modal-body .list-group-item {
     padding: 0.75rem 0;
-    font-size: 0.95rem;
+    font-size: var(--font-size-body-large);
   }
 
   /* Titres de section */
   .modal-body h6 {
-    font-size: 0.9rem;
+    font-size: var(--font-size-body);
     margin-bottom: 0.75rem !important;
   }
 
@@ -1011,7 +1011,7 @@
   .modal-body .rounded-circle {
     width: 36px !important;
     height: 36px !important;
-    font-size: 0.8rem !important;
+    font-size: var(--font-size-body-small) !important;
   }
 
   /* Espacement des sections */
@@ -1025,7 +1025,7 @@
 
   /* Boutons footer */
   .modal-footer .btn {
-    font-size: 0.95rem;
+    font-size: var(--font-size-body-large);
     padding: 0.625rem 1rem;
     flex: 1;
   }
@@ -1036,22 +1036,22 @@
   }
 
   .incident-modal-status-step {
-    font-size: 0.75rem;
+    font-size: var(--font-size-caption);
   }
 
   .incident-modal-status-step span:last-child {
-    font-size: 0.7rem;
+    font-size: var(--font-size-micro);
   }
 
   /* Agrandir les organisations */
   .incident-modal-org-avatar {
     width: 42px;
     height: 42px;
-    font-size: 0.9rem;
+    font-size: var(--font-size-body);
   }
 
   .incident-modal-org-name {
-    font-size: 0.95rem;
+    font-size: var(--font-size-body-large);
   }
 }
 
@@ -1105,7 +1105,7 @@
    un ici pour le contrer. */
 @media (pointer: coarse) {
   .map-filter-select {
-    font-size: 16px !important;
+    font-size: var(--font-size-body-large) !important;
     min-height: 44px;
   }
 }
@@ -1120,7 +1120,7 @@
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 6px 4px;
-  font-size: 10px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.7);
@@ -1214,7 +1214,7 @@
   border: 2px solid #FFFFFF;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
   color: #FFFFFF;
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   font-weight: 700;
   line-height: 14px;
   text-align: center;
@@ -1230,7 +1230,7 @@
 
 .incident-group-title {
   margin: 0 0 8px;
-  font-size: 12px;
+  font-size: var(--font-size-caption);
   font-weight: 700;
   color: #6C7278;
   text-transform: uppercase;
@@ -1281,7 +1281,7 @@
 
 .incident-group-label {
   flex: 1 1 auto;
-  font-size: 13px;
+  font-size: var(--font-size-body-small);
   color: #1F2937;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1290,7 +1290,7 @@
 
 .incident-group-etat {
   flex: 0 0 auto;
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   color: #6C7278;
 }
 
@@ -1316,7 +1316,7 @@
   backdrop-filter: blur(8px);
   padding: 8px 16px;
   border-radius: 20px;
-  font-size: 13px;
+  font-size: var(--font-size-body-small);
   font-weight: 600;
   color: #374151;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -1334,6 +1334,6 @@
 
   .map-incidents-count {
     padding: 6px 12px;
-    font-size: 12px;
+    font-size: var(--font-size-caption);
   }
 }

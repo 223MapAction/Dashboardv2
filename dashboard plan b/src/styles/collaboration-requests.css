@@ -220,7 +220,7 @@
   padding: 0 6px;
   border-radius: var(--radius-full);
   background-color: rgba(0, 0, 0, 0.08);
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
 }
 
@@ -368,7 +368,7 @@
 }
 
 .incident-group-title {
-  font-size: 15px;
+  font-size: var(--font-size-body-large);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   margin: 0;
@@ -390,7 +390,7 @@
   gap: 4px;
   padding: 3px 8px;
   border-radius: var(--radius-full);
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-semibold);
   color: #92400E;
   background-color: rgba(245, 158, 11, 0.1);
@@ -415,7 +415,7 @@
   gap: 4px;
   padding: 3px 8px;
   border-radius: var(--radius-full);
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-semibold);
   border: 1px solid;
 }
@@ -432,7 +432,7 @@
   align-items: center;
   padding: 3px 10px;
   border-radius: var(--radius-full);
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-semibold);
   color: #fff;
   white-space: nowrap;
@@ -497,7 +497,7 @@
 }
 
 .detail-section-title {
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -521,7 +521,7 @@
 }
 
 .my-collab-motif {
-  font-size: 13px;
+  font-size: var(--font-size-body-small);
   line-height: 1.5;
   color: var(--color-text-secondary);
   margin: 0 0 10px 0;
@@ -536,7 +536,7 @@
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  font-size: 13px;
+  font-size: var(--font-size-body-small);
   line-height: 1.5;
   margin: 0;
 }
@@ -554,7 +554,7 @@
 }
 
 .fine-note {
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   color: var(--color-text-muted);
   font-style: italic;
   display: block;
@@ -564,7 +564,7 @@
 .no-participation-text,
 .no-collabs-text,
 .no-actions-text {
-  font-size: 13px;
+  font-size: var(--font-size-body-small);
   color: var(--color-text-muted);
   font-style: italic;
   margin: 0;
@@ -595,7 +595,7 @@
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
   flex-shrink: 0;
 }
@@ -607,7 +607,7 @@
 }
 
 .collab-name {
-  font-size: 13px;
+  font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   white-space: nowrap;
@@ -616,7 +616,7 @@
 }
 
 .collab-role {
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -643,11 +643,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 13px;
+  font-size: var(--font-size-body-small);
 }
 
 .contribution-pill {
-  font-size: 10px;
+  font-size: var(--font-size-micro);
   padding: 2px 7px;
   border-radius: var(--radius-full);
   background-color: rgba(58, 162, 221, 0.1);
@@ -659,7 +659,7 @@
 
 .leader-action-motif {
   margin: 0;
-  font-size: 12px;
+  font-size: var(--font-size-caption);
   color: var(--color-text-muted);
   font-style: italic;
 }
@@ -667,7 +667,7 @@
 .btn-action-accept {
   width: 100%;
   padding: 7px;
-  font-size: 12px;
+  font-size: var(--font-size-caption);
   font-weight: var(--font-weight-semibold);
   background-color: var(--color-primary);
   color: #fff;
@@ -703,19 +703,19 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 13px;
+  font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
 }
 
 .sug-count {
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   color: var(--color-text-muted);
 }
 
 .sug-justification {
   margin: 0;
-  font-size: 12px;
+  font-size: var(--font-size-caption);
   color: var(--color-text-muted);
   font-style: italic;
 }
@@ -723,7 +723,7 @@
 .sug-action-btn {
   width: 100%;
   padding: 7px;
-  font-size: 12px;
+  font-size: var(--font-size-caption);
   font-weight: var(--font-weight-semibold);
   background-color: transparent;
   color: var(--color-primary-text);
@@ -791,7 +791,7 @@
 }
 
 .incident-group-title {
-  font-size: 16px;
+  font-size: var(--font-size-body-large);
   font-weight: 700;
   color: var(--color-text-primary);
   margin: 0;
@@ -816,7 +816,7 @@
   gap: 5px;
   padding: 3px 10px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   font-weight: 700;
   color: #92400E;
   background-color: rgba(245, 158, 11, 0.08);
@@ -845,7 +845,7 @@
   gap: 5px;
   padding: 3px 10px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   font-weight: 700;
   border: 1px solid;
   white-space: nowrap;
@@ -865,7 +865,7 @@
   gap: 5px;
   padding: 4px 12px;
   border-radius: 999px;
-  font-size: 10.5px;
+  font-size: var(--font-size-micro);
   font-weight: 700;
   letter-spacing: 0.05em;
   color: #fff;
@@ -937,7 +937,7 @@
 
 /* Section titles */
 .detail-section-title {
-  font-size: 10.5px;
+  font-size: var(--font-size-micro);
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -962,7 +962,7 @@
 }
 
 .my-collab-motif {
-  font-size: 13px;
+  font-size: var(--font-size-body-small);
   line-height: 1.6;
   color: var(--color-text-primary);
   margin: 0 0 var(--spacing-3) 0;
@@ -1004,7 +1004,7 @@
 }
 
 .fine-note {
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   color: var(--color-text-secondary);
   font-style: italic;
   display: inline-block;
@@ -1056,7 +1056,7 @@
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   font-weight: 800;
   flex-shrink: 0;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
@@ -1069,7 +1069,7 @@
 }
 
 .collab-name {
-  font-size: 13px;
+  font-size: var(--font-size-body-small);
   font-weight: 700;
   color: var(--color-text-primary);
   white-space: nowrap;
@@ -1078,7 +1078,7 @@
 }
 
 .collab-role {
-  font-size: 10px;
+  font-size: var(--font-size-micro);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -1119,12 +1119,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 13px;
+  font-size: var(--font-size-body-small);
   font-weight: 600;
 }
 
 .contribution-pill {
-  font-size: 9px;
+  font-size: var(--font-size-micro);
   padding: 2px 8px;
   border-radius: 999px;
   background-color: rgba(58, 162, 221, 0.08);
@@ -1137,7 +1137,7 @@
 
 .leader-action-motif {
   margin: 0;
-  font-size: 12px;
+  font-size: var(--font-size-caption);
   color: var(--color-text-secondary);
   font-style: italic;
   line-height: 1.4;
@@ -1146,7 +1146,7 @@
 .btn-action-accept {
   width: 100%;
   padding: 7px var(--spacing-3);
-  font-size: 12px;
+  font-size: var(--font-size-caption);
   font-weight: 700;
   background: linear-gradient(135deg, var(--color-primary), #2D8CBE);
   color: #fff;
@@ -1184,20 +1184,20 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 13px;
+  font-size: var(--font-size-body-small);
   font-weight: 700;
   color: var(--color-text-primary);
 }
 
 .sug-count {
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   font-weight: 600;
   color: var(--color-text-muted);
 }
 
 .sug-justification {
   margin: 0;
-  font-size: 12px;
+  font-size: var(--font-size-caption);
   color: var(--color-text-secondary);
   font-style: italic;
   line-height: 1.5;
@@ -1207,7 +1207,7 @@
   margin-top: 2px;
   width: 100%;
   padding: 7px;
-  font-size: 12px;
+  font-size: var(--font-size-caption);
   font-weight: 700;
   background-color: transparent;
   color: var(--color-primary-text);
@@ -1279,14 +1279,14 @@
 }
 
 .decision-modal-title {
-  font-size: 18px;
+  font-size: var(--font-size-h3);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   margin: 0;
 }
 
 .decision-modal-subtitle {
-  font-size: 13px;
+  font-size: var(--font-size-body-small);
   color: var(--color-text-secondary);
   margin: 2px 0 0 0;
 }
@@ -1344,14 +1344,14 @@
 
 .decision-summary-org {
   display: block;
-  font-size: 15px;
+  font-size: var(--font-size-body-large);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
 }
 
 .decision-summary-role {
   display: block;
-  font-size: 12px;
+  font-size: var(--font-size-caption);
   color: var(--color-text-secondary);
 }
 
@@ -1363,7 +1363,7 @@
 }
 
 .decision-block-label {
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -1372,7 +1372,7 @@
 }
 
 .decision-motif-text {
-  font-size: 13px;
+  font-size: var(--font-size-body-small);
   line-height: 1.5;
   color: var(--color-text-primary);
   margin: 0;
@@ -1405,7 +1405,7 @@
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-size: 10px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
 }
 
@@ -1415,20 +1415,20 @@
 }
 
 .proposed-collab-name {
-  font-size: 12.5px;
+  font-size: var(--font-size-caption);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
 }
 
 .proposed-collab-role {
-  font-size: 10px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
 }
 
 .proposed-collab-comment {
   margin: 8px 0 0 0;
-  font-size: 11.5px;
+  font-size: var(--font-size-micro);
   color: var(--color-text-secondary);
 }
 
@@ -1478,7 +1478,7 @@
 }
 
 .decision-optional {
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   color: var(--color-text-muted);
 }
 
@@ -1488,7 +1488,7 @@
   background-color: var(--color-background);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  font-size: 13px;
+  font-size: var(--font-size-body-small);
   font-family: var(--font-family);
   color: var(--color-text-primary);
   resize: none;
@@ -1507,7 +1507,7 @@
 .decision-btn-primary {
   flex: 1;
   padding: var(--spacing-3);
-  font-size: 13.5px;
+  font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-bold);
   border-radius: var(--radius-md);
   cursor: pointer;
@@ -1643,7 +1643,7 @@
 
 .incident-detail-modal-title {
   margin: 0;
-  font-size: 20px;
+  font-size: var(--font-size-title);
   font-weight: 700;
   color: var(--color-text-primary);
 }
@@ -1681,7 +1681,7 @@
 }
 
 .incident-detail-section-title {
-  font-size: 15px;
+  font-size: var(--font-size-body-large);
   font-weight: 600;
   color: var(--color-text-secondary);
   border-bottom: 1px solid var(--color-border);
@@ -1705,13 +1705,13 @@
 }
 
 .incident-detail-info-label {
-  font-size: 12px;
+  font-size: var(--font-size-caption);
   color: var(--color-text-secondary);
   margin-bottom: 4px;
 }
 
 .incident-detail-info-value {
-  font-size: 14px;
+  font-size: var(--font-size-body);
   font-weight: 500;
   color: var(--color-text-primary);
 }
@@ -1743,7 +1743,7 @@
   align-items: center;
   padding: 4px 10px;
   border-radius: 8px;
-  font-size: 12px;
+  font-size: var(--font-size-caption);
   font-weight: 600;
   text-transform: uppercase;
 }
@@ -1766,7 +1766,7 @@
   padding: 16px;
   border-radius: 14px;
   color: var(--color-text-primary);
-  font-size: 14px;
+  font-size: var(--font-size-body);
   line-height: 1.6;
 }
 

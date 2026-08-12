@@ -135,7 +135,7 @@
 }
 
 .activity-emoji {
-  font-size: 20px;
+  font-size: var(--font-size-title);
 }
 
 .activity-item.activity-success .activity-icon-wrapper {

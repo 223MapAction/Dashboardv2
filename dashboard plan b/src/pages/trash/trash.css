@@ -473,7 +473,7 @@
 .trash-badge {
   display: inline-flex;
   align-items: center;
-  font-size: 10px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
   letter-spacing: 0.05em;
   padding: 3px 8px;
@@ -508,7 +508,7 @@
 }
 
 .trash-card-title {
-  font-size: 15px;
+  font-size: var(--font-size-body-large);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   margin: 0;

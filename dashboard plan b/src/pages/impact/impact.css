@@ -172,7 +172,7 @@
 
 .impact-kpi-primary-glow .impact-kpi-value {
   color: #FFFFFF;
-  font-size: 34px;
+  font-size: var(--font-size-display);
 }
 
 .impact-kpi-primary-glow .impact-kpi-label {
@@ -222,7 +222,7 @@
 }
 
 .impact-kpi-value {
-  font-size: 28px;
+  font-size: var(--font-size-h1);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   line-height: 1.1;
@@ -326,7 +326,7 @@
   background-color: var(--color-background);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);
   cursor: pointer;
@@ -408,7 +408,7 @@
 }
 
 .perf-val {
-  font-size: 20px;
+  font-size: var(--font-size-title);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
 }
@@ -440,13 +440,13 @@
 }
 
 .actor-num {
-  font-size: 18px;
+  font-size: var(--font-size-h3);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
 }
 
 .actor-lbl {
-  font-size: 10px;
+  font-size: var(--font-size-micro);
   color: var(--color-text-secondary);
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
@@ -504,7 +504,7 @@
 }
 
 .citizen-number {
-  font-size: 24px;
+  font-size: var(--font-size-h2);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
 }
@@ -599,7 +599,7 @@
   position: absolute;
   top: 6px;
   left: 6px;
-  font-size: 9px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
   color: #FFFFFF;
   padding: 3px 6px;
@@ -684,7 +684,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   color: var(--color-text-muted);
   font-weight: var(--font-weight-medium);
 }
@@ -892,7 +892,7 @@
   background-color: var(--color-background);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-full);
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   box-shadow: var(--shadow-sm);
@@ -1006,7 +1006,7 @@
 }
 
 .task-badge {
-  font-size: 9px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
   padding: 2px 6px;
   border-radius: var(--radius-sm);
@@ -1041,7 +1041,7 @@
 }
 
 .task-date-text {
-  font-size: 10px;
+  font-size: var(--font-size-micro);
   color: var(--color-text-muted);
 }
 

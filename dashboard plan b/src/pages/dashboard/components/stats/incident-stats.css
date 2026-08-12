@@ -18,7 +18,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  font-size: 1.25rem;
+  font-size: var(--font-size-title);
   font-weight: 700;
   color: var(--color-text-primary);
   margin-bottom: 1.5rem;
@@ -106,14 +106,14 @@
 }
 
 .status-stat-card .stat-value {
-  font-size: 2rem;
+  font-size: var(--font-size-h1);
   font-weight: 700;
   color: var(--color-text-primary);
   line-height: 1;
 }
 
 .status-stat-card .stat-label {
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
   color: var(--color-text-secondary);
   font-weight: 500;
 }
@@ -148,20 +148,20 @@
   background: var(--color-primary);
   color: white;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: var(--font-size-body-large);
   border-radius: 8px;
   flex-shrink: 0;
 }
 
 .location-name {
   flex: 1;
-  font-size: 1rem;
+  font-size: var(--font-size-body-large);
   font-weight: 600;
   color: var(--color-text-primary);
 }
 
 .location-count {
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
   font-weight: 600;
   color: var(--color-primary-text);
   padding: 0.375rem 0.75rem;
@@ -189,13 +189,13 @@
 }
 
 .incident-name {
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
   font-weight: 600;
   color: var(--color-text-primary);
 }
 
 .incident-stats {
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
   font-weight: 700;
   color: var(--color-primary-text);
 }
@@ -267,13 +267,13 @@
 }
 
 .severity-label {
-  font-size: 1rem;
+  font-size: var(--font-size-body-large);
   font-weight: 700;
   color: var(--color-text-primary);
 }
 
 .severity-percentage {
-  font-size: 1.25rem;
+  font-size: var(--font-size-title);
   font-weight: 700;
 }
 
@@ -290,7 +290,7 @@
 }
 
 .severity-count {
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
   color: var(--color-text-secondary);
   font-weight: 500;
 }
@@ -340,7 +340,7 @@
   }
 
   .stats-section-title {
-    font-size: 1.125rem;
+    font-size: var(--font-size-h3);
   }
 
   .status-stats-grid {
@@ -348,7 +348,7 @@
   }
 
   .status-stat-card .stat-value {
-    font-size: 1.5rem;
+    font-size: var(--font-size-h2);
   }
 
   .severity-stats-grid {

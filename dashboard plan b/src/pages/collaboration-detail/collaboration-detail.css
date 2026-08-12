@@ -258,7 +258,7 @@
 }
 
 .collab-detail-meta-label {
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   font-weight: 600;
   text-transform: uppercase;
   color: var(--color-text-muted);
@@ -312,7 +312,7 @@
 }
 
 .collab-detail-tag {
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-semibold);
   padding: 2px 8px;
   color: var(--color-primary-text);
@@ -512,7 +512,7 @@
 }
 
 .collab-message-file-icon {
-  font-size: 24px;
+  font-size: var(--font-size-h2);
   flex-shrink: 0;
 }
 
@@ -578,7 +578,7 @@
 }
 
 .collab-attached-file-icon {
-  font-size: 20px;
+  font-size: var(--font-size-title);
 }
 
 .collab-attached-file-name {
@@ -815,7 +815,7 @@
   background-color: var(--color-severity-high);
   color: var(--color-surface);
   border-radius: var(--radius-sm);
-  font-size: 10px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
   margin-left: var(--spacing-2);
 }
@@ -1069,7 +1069,7 @@
 }
 
 .collab-mobile-nav-item span {
-  font-size: 12px;
+  font-size: var(--font-size-caption);
   white-space: nowrap;
 }
 
@@ -1156,7 +1156,7 @@
 
   .collab-message-bubble {
     padding: var(--spacing-2) var(--spacing-3);
-    font-size: 0.95rem;
+    font-size: var(--font-size-body-large);
     max-width: 100%;
     word-break: break-word;
     overflow-wrap: break-word;
@@ -1165,15 +1165,15 @@
   .collab-message-avatar {
     width: 32px;
     height: 32px;
-    font-size: 0.75rem;
+    font-size: var(--font-size-caption);
   }
 
   .collab-message-sender {
-    font-size: 0.75rem;
+    font-size: var(--font-size-caption);
   }
 
   .collab-message-time {
-    font-size: 0.7rem;
+    font-size: var(--font-size-micro);
   }
 
   /* Input de discussion sur mobile */
@@ -1183,7 +1183,7 @@
 
   .collab-discussion-field {
     padding: var(--spacing-2) var(--spacing-3);
-    font-size: 0.95rem;
+    font-size: var(--font-size-body-large);
   }
 
   .collab-discussion-attach,
@@ -1315,11 +1315,11 @@
   }
 
   .collab-detail-title {
-    font-size: 1.1rem;
+    font-size: var(--font-size-h3);
   }
 
   .collab-detail-subtitle {
-    font-size: 0.85rem;
+    font-size: var(--font-size-body);
   }
 
   .collab-discussion-input {
@@ -1344,16 +1344,16 @@
   }
 
   .collab-detail-title {
-    font-size: 1rem;
+    font-size: var(--font-size-body-large);
   }
 
   .collab-detail-subtitle {
-    font-size: 0.8rem;
+    font-size: var(--font-size-body-small);
   }
 
   .collab-detail-back {
     padding: var(--spacing-1) var(--spacing-2);
-    font-size: 0.85rem;
+    font-size: var(--font-size-body);
   }
 
   /* Messages très compacts */
@@ -1367,13 +1367,13 @@
 
   .collab-message-bubble {
     padding: var(--spacing-2);
-    font-size: 0.9rem;
+    font-size: var(--font-size-body);
   }
 
   .collab-message-avatar {
     width: 28px;
     height: 28px;
-    font-size: 0.7rem;
+    font-size: var(--font-size-micro);
   }
 
   .collab-discussion-input {
@@ -1381,7 +1381,7 @@
   }
 
   .collab-discussion-field {
-    font-size: 0.9rem;
+    font-size: var(--font-size-body);
     padding: var(--spacing-2);
   }
 
@@ -1403,7 +1403,7 @@
 
   .collab-mobile-nav-item {
     padding: var(--spacing-1);
-    font-size: 0.7rem;
+    font-size: var(--font-size-micro);
   }
 }
 

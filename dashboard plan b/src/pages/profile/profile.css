@@ -123,7 +123,7 @@
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-size: 36px;
+  font-size: var(--font-size-display);
   font-weight: var(--font-weight-bold);
   letter-spacing: 0.05em;
   overflow: hidden;
@@ -164,7 +164,7 @@
 }
 
 .profile-banner-name {
-  font-size: 22px;
+  font-size: var(--font-size-title);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   margin: 0 0 2px 0;
@@ -308,7 +308,7 @@
 }
 
 .profile-section-title {
-  font-size: 18px;
+  font-size: var(--font-size-h3);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   margin: 0 0 var(--spacing-2) 0;
@@ -558,7 +558,7 @@
   .profile-avatar-large {
     width: 90px;
     height: 90px;
-    font-size: 30px;
+    font-size: var(--font-size-h1);
   }
 
   .profile-banner-info,
