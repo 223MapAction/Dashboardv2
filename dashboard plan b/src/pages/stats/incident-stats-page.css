@@ -80,7 +80,7 @@
 }
 
 .stats-error button:hover {
-  background: #2E8FBF;
+  background: var(--color-primary-dark);
 }
 
 @media (max-width: 767.98px) {

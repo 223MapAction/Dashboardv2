@@ -54,7 +54,7 @@
   margin: calc(var(--spacing-4) * -1) calc(var(--spacing-4) * -1) 0;
   margin-left: calc(var(--spacing-4) * -1);
   aspect-ratio: 16 / 7;
-  background-color: var(--color-bg-placeholder, #e2e8f0);
+  background-color: var(--color-border);
   overflow: hidden;
 }
 

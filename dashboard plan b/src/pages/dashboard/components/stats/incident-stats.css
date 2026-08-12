@@ -53,23 +53,23 @@
 }
 
 .status-stat-card.total {
-  background: linear-gradient(135deg, #E0F2FE 0%, #F0F9FF 100%);
+  background: linear-gradient(135deg, var(--color-primary-surface) 0%, var(--color-primary-surface) 100%);
   border-left-color: var(--color-primary);
 }
 
 .status-stat-card.resolved {
-  background: linear-gradient(135deg, #DCFCE7 0%, #F0FDF4 100%);
-  border-left-color: #22C55E;
+  background: linear-gradient(135deg, var(--color-success-surface) 0%, var(--color-success-surface) 100%);
+  border-left-color: var(--color-success);
 }
 
 .status-stat-card.in-progress {
-  background: linear-gradient(135deg, #FEF3C7 0%, #FFFBEB 100%);
-  border-left-color: #F59E0B;
+  background: linear-gradient(135deg, var(--color-warning-surface) 0%, var(--color-warning-surface) 100%);
+  border-left-color: var(--color-warning);
 }
 
 .status-stat-card.unresolved {
-  background: linear-gradient(135deg, #FEE2E2 0%, #FEF2F2 100%);
-  border-left-color: #EF4444;
+  background: linear-gradient(135deg, var(--color-danger-surface) 0%, var(--color-danger-surface) 100%);
+  border-left-color: var(--color-danger);
 }
 
 .status-stat-card .stat-icon {
@@ -88,15 +88,15 @@
 }
 
 .status-stat-card.resolved .stat-icon svg {
-  color: #22C55E;
+  color: var(--color-success-text);
 }
 
 .status-stat-card.in-progress .stat-icon svg {
-  color: #F59E0B;
+  color: var(--color-warning-text);
 }
 
 .status-stat-card.unresolved .stat-icon svg {
-  color: #EF4444;
+  color: var(--color-danger-text);
 }
 
 .status-stat-card .stat-content {
@@ -136,7 +136,7 @@
 }
 
 .location-stat-item:hover {
-  background: #F0F9FF;
+  background: var(--color-primary-surface);
 }
 
 .location-rank {
@@ -165,7 +165,7 @@
   font-weight: 600;
   color: var(--color-primary-text);
   padding: 0.375rem 0.75rem;
-  background: #E0F2FE;
+  background: var(--color-primary-surface);
   border-radius: 6px;
 }
 
@@ -209,7 +209,7 @@
 
 .incident-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--color-primary) 0%, #60B7E8 100%);
+  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary) 100%);
   border-radius: 4px;
   transition: width 0.3s ease;
 }
@@ -237,27 +237,27 @@
 }
 
 .severity-stat-card.high {
-  border-color: #FEE2E2;
+  border-color: var(--color-danger-surface);
 }
 
 .severity-stat-card.high:hover {
-  border-color: #EF4444;
+  border-color: var(--color-danger);
 }
 
 .severity-stat-card.medium {
-  border-color: #FEF3C7;
+  border-color: var(--color-warning-surface);
 }
 
 .severity-stat-card.medium:hover {
-  border-color: #F59E0B;
+  border-color: var(--color-warning);
 }
 
 .severity-stat-card.low {
-  border-color: #FEF9C3;
+  border-color: var(--color-warning-surface);
 }
 
 .severity-stat-card.low:hover {
-  border-color: #FACC15;
+  border-color: var(--color-warning);
 }
 
 .severity-header {
@@ -278,15 +278,15 @@
 }
 
 .severity-stat-card.high .severity-percentage {
-  color: #EF4444;
+  color: var(--color-danger-text);
 }
 
 .severity-stat-card.medium .severity-percentage {
-  color: #F59E0B;
+  color: var(--color-warning-text);
 }
 
 .severity-stat-card.low .severity-percentage {
-  color: #FACC15;
+  color: var(--color-warning-text);
 }
 
 .severity-count {
@@ -309,15 +309,15 @@
 }
 
 .severity-bar-fill.high {
-  background: linear-gradient(90deg, #EF4444 0%, #F87171 100%);
+  background: linear-gradient(90deg, var(--color-danger) 0%, var(--color-danger) 100%);
 }
 
 .severity-bar-fill.medium {
-  background: linear-gradient(90deg, #F59E0B 0%, #FBBF24 100%);
+  background: linear-gradient(90deg, var(--color-warning) 0%, var(--color-warning) 100%);
 }
 
 .severity-bar-fill.low {
-  background: linear-gradient(90deg, #FACC15 0%, #FDE047 100%);
+  background: linear-gradient(90deg, var(--color-warning) 0%, var(--color-warning) 100%);
 }
 
 /* Message "Aucune donnée" */

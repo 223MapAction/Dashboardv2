@@ -83,6 +83,27 @@
   --color-severity-medium-text: #9E6606;
   --color-severity-high-text: #E21313;
 
+  /* ── Fonds pâles de statut ──────────────────────────────────────────────────
+     Chaque couleur sémantique se décline en trois usages : un aplat vif
+     (--color-x) pour les pastilles et les boutons pleins, un texte sombre
+     (--color-x-text) lisible sur blanc, et un fond très pâle (--color-x-surface)
+     pour les badges. Ce troisième palier manquait, alors chaque page inventait
+     le sien — on trouvait #FEE2E2 ici, #FEF2F2 là, pour le même badge d'erreur. */
+  --color-primary-surface: #E0F2FE;
+  --color-success-surface: #DCFCE7;
+  --color-warning-surface: #FEF3C7;
+  --color-danger-surface: #FEE2E2;
+
+  /* ── Accent violet ──────────────────────────────────────────────────────────
+     Le violet porte les statuts qui ne sont ni un succès, ni une alerte, ni une
+     erreur : « planifié », « expertise requise ». Il était déjà utilisé sans
+     jamais avoir été nommé, donc décliné au hasard (#A78BFA, #7E22CE, #6D28D9,
+     #818CF8). Le #A78BFA servait de couleur de texte sur fond blanc, à 2.5:1 —
+     pratiquement invisible. --color-accent-text est le seul à franchir 4.5:1. */
+  --color-accent: #8B5CF6;
+  --color-accent-text: #6D28D9;
+  --color-accent-surface: #EDE9FE;
+
   --bs-btn-disabled-bg: rgba(58, 162, 221, 0.65) !important;
   --bs-btn-disabled-border-color: rgba(58, 162, 221, 0.65) !important;
 
@@ -883,12 +904,12 @@ h2,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--color-bg-placeholder, #e2e8f0);
+  background-color: var(--color-border);
 }
 
 /* Pas de photo : neutre et silencieux. C'est un fait, pas un probleme. */
 .blurry-image-vide {
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--color-text-muted);
 }
 
 /* Echec : lisiblement different du vide, et cliquable pour reessayer. */
@@ -1008,7 +1029,7 @@ h2,
 .sidebar-item:focus-visible,
 [class*="-accept"]:focus-visible,
 [class*="-danger"]:focus-visible {
-  outline-color: #FFFFFF !important;
+  outline-color: var(--color-surface) !important;
 }
 
 /* ── 2. Mouvement réduit ─────────────────────────────────────────────────────

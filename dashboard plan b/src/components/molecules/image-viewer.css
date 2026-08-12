@@ -83,7 +83,7 @@
   border: none;
   border-radius: var(--radius-full);
   background: transparent;
-  color: #FFFFFF;
+  color: var(--color-surface);
   cursor: pointer;
   transition: background-color 0.15s ease, opacity 0.15s ease;
 }
@@ -100,7 +100,7 @@
 .visionneuse-niveau {
   min-width: 58px;
   text-align: center;
-  color: #FFFFFF;
+  color: var(--color-surface);
   font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-semibold);
   font-variant-numeric: tabular-nums;
@@ -120,7 +120,7 @@
   border: none;
   border-radius: var(--radius-full);
   background-color: rgba(17, 24, 39, 0.6);
-  color: #FFFFFF;
+  color: var(--color-surface);
   cursor: pointer;
   transition: background-color 0.15s ease;
 }

@@ -225,13 +225,13 @@
 
 .collab-filter-pill:hover {
   background-color: var(--color-surface);
-  border-color: #cbd5e1;
+  border-color: var(--color-border);
 }
 
 .collab-filter-pill.is-active {
   background-color: var(--color-primary);
   border-color: var(--color-primary);
-  color: #fff;
+  color: var(--color-surface);
 }
 
 .collab-filter-count {
@@ -249,7 +249,7 @@
 
 .collab-filter-pill.is-active .collab-filter-count {
   background-color: rgba(255, 255, 255, 0.25);
-  color: #fff;
+  color: var(--color-surface);
 }
 
 /* --- Date range filter (react-datepicker) --- */
@@ -400,7 +400,7 @@
 .collab-datepicker .react-datepicker__day--selecting-range-end,
 .collab-datepicker .react-datepicker__day--selected {
   background-color: var(--color-primary) !important;
-  color: #fff !important;
+  color: var(--color-surface) !important;
   border-radius: 50%;
   font-weight: var(--font-weight-bold);
 }
@@ -582,7 +582,7 @@
   position: relative;
   width: 100%;
   height: 160px;
-  background-color: #e0e5ea;
+  background-color: var(--color-border);
   background-size: cover;
   background-position: center;
 }
@@ -602,17 +602,17 @@
   font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
   letter-spacing: 0.04em;
-  color: #fff;
+  color: var(--color-surface);
   backdrop-filter: blur(8px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .collab-status-in-progress {
-  background-color: #F59E0B;
+  background-color: var(--color-warning);
 }
 
 .collab-status-completed {
-  background-color: #22C55E;
+  background-color: var(--color-success);
 }
 
 .collab-card-body {
@@ -693,7 +693,7 @@
   align-items: center;
   gap: 8px;
   font-size: var(--font-size-caption);
-  color: var(--color-text-secondary, #4B5563);
+  color: var(--color-text-secondary, var(--color-text-secondary));
   font-weight: var(--font-weight-medium);
 }
 
@@ -735,11 +735,11 @@
 }
 
 .collab-progress-fill.collab-progress-in-progress {
-  background: linear-gradient(90deg, #F59E0B, #FBBF24);
+  background: linear-gradient(90deg, var(--color-warning), var(--color-warning));
 }
 
 .collab-progress-fill.collab-progress-completed {
-  background: linear-gradient(90deg, #22C55E, #4ADE80);
+  background: linear-gradient(90deg, var(--color-success), var(--color-success));
 }
 
 /* Badge clôturée sur la carte */
@@ -750,8 +750,8 @@
   gap: 6px;
   padding: 6px var(--spacing-3);
   margin-top: var(--spacing-3);
-  background: linear-gradient(90deg, #22C55E, #16A34A);
-  color: #fff;
+  background: linear-gradient(90deg, var(--color-success), var(--color-success));
+  color: var(--color-surface);
   border-radius: var(--radius-md);
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-semibold);
@@ -769,7 +769,7 @@
   padding: 10px var(--spacing-4);
   margin-top: var(--spacing-3);
   background-color: var(--color-primary);
-  color: #fff;
+  color: var(--color-surface);
   border: none;
   border-radius: var(--radius-md);
   font-size: var(--font-size-body-small);
@@ -955,7 +955,7 @@
   flex: 1;
   padding: 12px var(--spacing-4);
   background-color: var(--color-primary);
-  color: #fff;
+  color: var(--color-surface);
   border: none;
   border-radius: var(--radius-md);
   font-family: var(--font-family);
@@ -1025,13 +1025,13 @@
 }
 
 .tasks-close-confirm-btn {
-  background-color: #1A1C1E;
-  color: #fff;
-  border: 1px solid #1A1C1E;
+  background-color: var(--color-text-primary);
+  color: var(--color-surface);
+  border: 1px solid var(--color-text-primary);
 }
 
 .tasks-close-confirm-btn:hover {
-  background-color: #2D2F31;
+  background-color: var(--color-text-primary);
 }
 
 /* Progression globale */
@@ -1086,7 +1086,7 @@
   padding: 10px var(--spacing-4);
   margin-top: var(--spacing-3);
   background-color: var(--color-primary);
-  color: #fff;
+  color: var(--color-surface);
   border: none;
   border-radius: var(--radius-md);
   font-family: var(--font-family);
@@ -1323,7 +1323,7 @@
   background-color: rgba(34, 197, 94, 0.08);
   border: 1px solid rgba(34, 197, 94, 0.3);
   border-radius: var(--radius-md);
-  color: #16A34A;
+  color: var(--color-success-text);
   font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-semibold);
 }
@@ -1394,7 +1394,7 @@
 }
 
 .collab-action-suggest {
-  color: #F59E0B;
+  color: var(--color-warning-text);
   border-color: rgba(245, 158, 11, 0.4);
 }
 
@@ -1418,17 +1418,17 @@
 
 .collab-role-leader {
   background-color: rgba(245, 158, 11, 0.1);
-  color: #B45309;
+  color: var(--color-warning-text);
 }
 
 .collab-role-contributeur {
   background-color: rgba(58, 162, 221, 0.1);
-  color: #1E6FA0;
+  color: var(--color-primary-text);
 }
 
 .collab-role-observateur {
   background-color: rgba(108, 114, 120, 0.1);
-  color: #4B5563;
+  color: var(--color-text-secondary);
 }
 
 /* ============================================
@@ -1523,7 +1523,7 @@
   margin: 0 0 var(--spacing-2) 0;
   padding: var(--spacing-3);
   background-color: rgba(245, 158, 11, 0.08);
-  border-left: 3px solid #F59E0B;
+  border-left: 3px solid var(--color-warning);
   border-radius: var(--radius-sm);
   font-size: var(--font-size-body-small);
   color: var(--color-text-primary);
@@ -1538,7 +1538,7 @@
 }
 
 .centered-modal-label .required {
-  color: #EF4444;
+  color: var(--color-danger-text);
   margin-left: 2px;
 }
 
@@ -1596,7 +1596,7 @@
 
 .centered-modal-confirm {
   background-color: var(--color-primary);
-  color: #fff;
+  color: var(--color-surface);
   border: 1px solid var(--color-primary);
 }
 
@@ -1869,7 +1869,7 @@
 }
 
 .suggest-org-card.is-selected {
-  border-color: #22C55E;
+  border-color: var(--color-success);
   background-color: rgba(34, 197, 94, 0.08);
 }
 
@@ -1881,7 +1881,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: var(--color-surface);
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-bold);
 }
@@ -2062,7 +2062,7 @@
 
 .my-task-status.completed {
   background-color: rgba(34, 197, 94, 0.1);
-  color: #16A34A;
+  color: var(--color-success-text);
 }
 
 .my-task-status.failed {
@@ -2072,7 +2072,7 @@
 
 .my-task-status.pending {
   background-color: rgba(245, 158, 11, 0.1);
-  color: #B45309;
+  color: var(--color-warning-text);
 }
 
 .my-task-actions {
@@ -2142,7 +2142,7 @@
 
 .my-task-btn-save {
   background-color: var(--color-primary);
-  color: #fff;
+  color: var(--color-surface);
   border: 1px solid var(--color-primary);
 }
 
@@ -2170,7 +2170,7 @@
   width: 100%;
   padding: 12px var(--spacing-4);
   background-color: var(--color-primary);
-  color: #fff;
+  color: var(--color-surface);
   border: none;
   border-radius: var(--radius-md);
   font-family: var(--font-family);
@@ -2231,7 +2231,7 @@
 }
 
 .tasks-add-label .required {
-  color: #EF4444;
+  color: var(--color-danger-text);
   margin-left: 2px;
 }
 
@@ -2290,7 +2290,7 @@
 
 .tasks-add-confirm {
   background-color: var(--color-primary);
-  color: #fff;
+  color: var(--color-surface);
   border: 1px solid var(--color-primary);
 }
 
@@ -2312,7 +2312,7 @@
   background-color: rgba(34, 197, 94, 0.1);
   border: 1px solid rgba(34, 197, 94, 0.3);
   border-radius: var(--radius-md);
-  color: #16A34A;
+  color: var(--color-success-text);
   font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-semibold);
 }
@@ -2328,7 +2328,7 @@
 
 .tasks-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--color-primary), #5BB8E8);
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary));
   border-radius: var(--radius-full);
   transition: width 0.4s ease;
 }
@@ -2406,8 +2406,8 @@
 }
 
 .task-checkbox:checked+.task-checkmark {
-  background-color: #22C55E;
-  border-color: #22C55E;
+  background-color: var(--color-success);
+  border-color: var(--color-success);
 }
 
 .task-checkbox:not(:checked)+.task-checkmark svg {
@@ -2458,12 +2458,12 @@
 }
 
 .task-completed-date {
-  color: #22C55E;
+  color: var(--color-success-text);
   font-weight: var(--font-weight-medium);
 }
 
 .task-failed-date {
-  color: #EF4444;
+  color: var(--color-danger-text);
   font-weight: var(--font-weight-medium);
 }
 
@@ -2473,7 +2473,7 @@
   gap: 4px;
   padding: 4px 8px;
   background-color: var(--color-danger-text);
-  color: #fff;
+  color: var(--color-surface);
   border-radius: var(--radius-sm);
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-semibold);
@@ -2511,14 +2511,14 @@
   margin-top: var(--spacing-3);
   padding: var(--spacing-3);
   background-color: rgba(239, 68, 68, 0.05);
-  border-left: 3px solid #EF4444;
+  border-left: 3px solid var(--color-danger);
   border-radius: var(--radius-sm);
 }
 
 .task-failure-label {
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-semibold);
-  color: #EF4444;
+  color: var(--color-danger-text);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: var(--spacing-1);
@@ -2561,7 +2561,7 @@
 }
 
 .failure-form-label .required {
-  color: #EF4444;
+  color: var(--color-danger-text);
   margin-left: 2px;
 }
 
@@ -2588,7 +2588,7 @@
 
 .failure-form-textarea:focus {
   outline: none;
-  border-color: #EF4444;
+  border-color: var(--color-danger);
 }
 
 .failure-form-textarea::placeholder {
@@ -2629,7 +2629,7 @@
 
 .failure-form-confirm {
   background-color: var(--color-danger-text);
-  color: #fff;
+  color: var(--color-surface);
   border: 1px solid var(--color-danger-text);
 }
 

@@ -172,7 +172,7 @@
   background-color: rgba(34, 197, 94, 0.10);
   /* --color-success à 10% */
   border: 1px solid rgba(34, 197, 94, 0.28);
-  color: #16a34a;
+  color: var(--color-success-text);
 }
 
 .am-alert--danger {
@@ -604,7 +604,7 @@
 .agents-bootstrap-alert.alert-success {
   background-color: rgba(34, 197, 94, 0.10);
   border: 1px solid rgba(34, 197, 94, 0.28);
-  color: #16a34a;
+  color: var(--color-success-text);
 }
 
 .agents-bootstrap-alert.alert-success svg {
@@ -859,8 +859,8 @@
 
 .incidents-agent-item.is-disabled {
   opacity: 0.5;
-  background-color: #F8FAFC;
-  border: 1.5px dashed #E2E8F0;
+  background-color: var(--color-background);
+  border: 1.5px dashed var(--color-border);
   cursor: not-allowed;
   pointer-events: none;
 }
@@ -914,5 +914,5 @@
 }
 
 .am-offcanvas-header--danger .am-offcanvas-close {
-  color: #FFFFFF;
+  color: var(--color-surface);
 }

@@ -308,11 +308,11 @@
 }
 
 .agents-table tbody tr:hover td:first-child {
-  background-color: #F8FAFC;
+  background-color: var(--color-background);
 }
 
 .agents-table tbody tr:active td:first-child {
-  background-color: #F1F5F9;
+  background-color: var(--color-background);
 }
 
 /* Avatar & identité */
@@ -331,7 +331,7 @@
   justify-content: center;
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-bold);
-  color: #fff;
+  color: var(--color-surface);
   flex-shrink: 0;
   letter-spacing: 0.02em;
 }
@@ -811,7 +811,7 @@
   height: 16px;
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
-  border-top-color: #fff;
+  border-top-color: var(--color-surface);
   animation: agentsSpin 0.8s linear infinite;
   display: inline-block;
 }
@@ -836,21 +836,21 @@
 .agents-bootstrap-alert.alert-success {
   background-color: rgba(34, 197, 94, 0.12);
   border: 1px solid rgba(34, 197, 94, 0.3);
-  color: #4ade80;
+  color: var(--color-success-text);
 }
 
 .agents-bootstrap-alert.alert-success svg {
-  color: #22c55e;
+  color: var(--color-success-text);
 }
 
 .agents-bootstrap-alert.alert-danger {
   background-color: rgba(239, 68, 68, 0.12);
   border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #f87171;
+  color: var(--color-danger-text);
 }
 
 .agents-bootstrap-alert.alert-danger svg {
-  color: #ef4444;
+  color: var(--color-danger-text);
 }
 
 @keyframes agentsFadeIn {

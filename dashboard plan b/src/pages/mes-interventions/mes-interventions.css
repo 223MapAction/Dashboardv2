@@ -213,7 +213,7 @@
 }
 
 .mes-interventions-row-clickable:hover td:first-child {
-  background-color: #F8FAFC;
+  background-color: var(--color-background);
 }
 
 .mes-interventions-row-clickable:active {
@@ -221,7 +221,7 @@
 }
 
 .mes-interventions-row-clickable:active td:first-child {
-  background-color: #F1F5F9;
+  background-color: var(--color-background);
 }
 
 /* Cellule principale de l'incident */
@@ -343,16 +343,16 @@
 
 /* Declared (Déclaré) */
 .mes-interventions-badge-glow.variant-declared {
-  background-color: #F1F5F9;
-  color: #64748B;
+  background-color: var(--color-background);
+  color: var(--color-text-secondary);
 }
 .mes-interventions-badge-glow.variant-declared .badge-dot {
-  background-color: #64748B;
+  background-color: var(--color-text-secondary);
 }
 
 /* Taken (Pris en compte) */
 .mes-interventions-badge-glow.variant-taken {
-  background-color: #EFF6FF;
+  background-color: var(--color-primary-surface);
   color: var(--color-primary-text);
 }
 .mes-interventions-badge-glow.variant-taken .badge-dot {
@@ -361,7 +361,7 @@
 
 /* In Progress (En cours) */
 .mes-interventions-badge-glow.variant-in-progress {
-  background-color: #FFFBEB;
+  background-color: var(--color-warning-surface);
   color: var(--color-warning-text);
 }
 .mes-interventions-badge-glow.variant-in-progress .badge-dot {
@@ -370,7 +370,7 @@
 
 /* Resolved (Résolu) */
 .mes-interventions-badge-glow.variant-resolved {
-  background-color: #ECFDF5;
+  background-color: var(--color-success-surface);
   color: var(--color-success-text);
 }
 .mes-interventions-badge-glow.variant-resolved .badge-dot {

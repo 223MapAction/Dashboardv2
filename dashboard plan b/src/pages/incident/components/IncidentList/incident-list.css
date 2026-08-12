@@ -237,7 +237,7 @@
 }
 
 .incident-table tbody tr:hover td:first-child {
-  background-color: #F8FAFC;
+  background-color: var(--color-background);
 }
 
 .incident-table tbody tr.is-selected {
@@ -245,11 +245,11 @@
 }
 
 .incident-table tbody tr.is-selected td:first-child {
-  background-color: #EFF6FF;
+  background-color: var(--color-primary-surface);
 }
 
 .incident-table tbody tr:active td:first-child {
-  background-color: #F1F5F9;
+  background-color: var(--color-background);
 }
 
 /* Main Column: Image + Text */
@@ -361,7 +361,7 @@
   font-weight: var(--font-weight-bold);
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: #fff;
+  color: var(--color-surface);
   border: 1px solid rgba(0, 0, 0, 0.05);
 }
 

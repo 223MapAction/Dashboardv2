@@ -128,23 +128,23 @@
 }
 
 .project-detail .project-badge-in-progress {
-  background-color: #DBEAFE;
-  color: #1D4ED8;
+  background-color: var(--color-primary-surface);
+  color: var(--color-primary-text);
 }
 
 .project-detail .project-badge-critical {
-  background-color: #FEE2E2;
-  color: #B91C1C;
+  background-color: var(--color-danger-surface);
+  color: var(--color-danger-text);
 }
 
 .project-detail .project-badge-planned {
-  background-color: #EDE9FE;
-  color: #6D28D9;
+  background-color: var(--color-accent-surface);
+  color: var(--color-accent-text);
 }
 
 .project-detail .project-badge-expert-needed {
-  background-color: #DBEAFE;
-  color: #1E40AF;
+  background-color: var(--color-primary-surface);
+  color: var(--color-primary-text);
 }
 
 .project-detail .detail-meta {
@@ -158,7 +158,7 @@
   align-items: center;
   gap: var(--spacing-2);
   font-size: var(--font-size-body-small);
-  color: var(--color-text-secondary, #4B5563);
+  color: var(--color-text-secondary, var(--color-text-secondary));
 }
 
 /* --- Top scrollable zone --- */
@@ -193,7 +193,7 @@
   aspect-ratio: 16 / 10;
   background-size: cover;
   background-position: center;
-  background-color: #1f4b5e;
+  background-color: var(--color-primary-text);
   overflow: hidden;
 }
 
@@ -209,7 +209,7 @@
   position: absolute;
   left: var(--spacing-4);
   bottom: var(--spacing-4);
-  color: #fff;
+  color: var(--color-surface);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-1);
@@ -227,7 +227,7 @@
   font-size: var(--font-size-body-large);
   font-weight: var(--font-weight-bold);
   margin: 0;
-  color: #fff;
+  color: var(--color-surface);
 }
 
 .project-detail .map-overlay-tag {
@@ -443,12 +443,12 @@
   justify-content: center;
   font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
-  color: #fff;
+  color: var(--color-surface);
   flex-shrink: 0;
 }
 
 .project-detail .org-chip-extra {
-  background-color: #E5E7EB !important;
+  background-color: var(--color-border) !important;
   color: var(--color-text-primary);
 }
 
@@ -526,7 +526,7 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #c7d2fe, #818cf8);
+  background: linear-gradient(135deg, var(--color-accent-surface), var(--color-accent));
   flex-shrink: 0;
 }
 
@@ -710,7 +710,7 @@
     top: 0;
     background: white;
     z-index: 10;
-    border-bottom: 1px solid #dee2e6;
+    border-bottom: 1px solid var(--color-border);
   }
 
   .modal.join-modal-bootstrap .modal-footer {
@@ -718,7 +718,7 @@
     bottom: 0;
     background: white;
     z-index: 10;
-    border-top: 1px solid #dee2e6;
+    border-top: 1px solid var(--color-border);
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
   }
 }
@@ -984,7 +984,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: var(--color-surface);
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-bold);
 }
@@ -1055,7 +1055,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: var(--color-surface);
   font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-bold);
 }
@@ -1363,7 +1363,7 @@
   height: 38px;
   border-radius: 50%;
   border: none;
-  background: #3AA2DD;
+  background: var(--color-primary);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1372,7 +1372,7 @@
 }
 
 .project-detail .detail-audio-play-btn:hover {
-  background: #2B8BC2;
+  background: var(--color-primary-dark);
 }
 
 .project-detail .detail-audio-play-btn:active {
@@ -1398,7 +1398,7 @@
 
 .project-detail .detail-audio-progress-fill {
   height: 100%;
-  background: #3AA2DD;
+  background: var(--color-primary);
   border-radius: 999px;
   transition: width 0.1s linear;
 }
@@ -1445,11 +1445,11 @@
 }
 
 .project-detail .incident-status-segment.is-done {
-  background-color: #22C55E;
+  background-color: var(--color-success);
 }
 
 .project-detail .incident-status-segment.is-current {
-  background-color: #3AA2DD;
+  background-color: var(--color-primary);
 }
 
 .project-detail .incident-status-steps {
@@ -1468,11 +1468,11 @@
 }
 
 .project-detail .incident-status-step.is-done {
-  color: #22C55E;
+  color: var(--color-success-text);
 }
 
 .project-detail .incident-status-step.is-current {
-  color: #3AA2DD;
+  color: var(--color-primary-text);
 }
 
 .project-detail .incident-status-dot {
