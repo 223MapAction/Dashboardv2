@@ -30,7 +30,7 @@ const INTERVENTION = {
   image: '/photo.jpg',
   startDate: '12 juil. 2026',
   endDate: 'En cours',
-  progress: 60,
+  progressValue: 60,
   take_in_charge_mode: 'internal',
   reports_count: 2,
   badge: { label: 'PRIS EN COMPTE', variant: 'taken' },
@@ -107,6 +107,21 @@ describe('rendu en cartes', () => {
     const carte = document.querySelector('.rt-carte');
     expect(carte.textContent).toContain('Berge polluée');
     expect(carte.querySelector('.rt-carte-soustitre').textContent).toContain('Ségou');
+  });
+
+  it('ne montre pas la photo deux fois : bandeau OU vignette, pas les deux', () => {
+    compact = true;
+    rendre();
+    const carte = document.querySelector('.rt-carte');
+    // Le bandeau porte l'image ; le titre ne doit plus en porter une seconde.
+    expect(carte.querySelectorAll('img')).toHaveLength(1);
+    expect(carte.querySelector('.rt-carte-media img')).toBeTruthy();
+  });
+
+  it('affiche la progression chiffrée à côté de sa barre', () => {
+    compact = true;
+    rendre();
+    expect(document.querySelector('.rt-carte-marquants').textContent).toContain('60%');
   });
 
   it('pose la photo en bandeau, et rien s’il n’y en a pas', () => {

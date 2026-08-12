@@ -40,6 +40,19 @@ export const creerColonnesInterventions = ({ onOuvrirRapports, RenduEquipe }) =>
           </div>
       </>
     ),
+    renduCarte: (incident) => (
+      <>
+        <span className="mes-interventions-row-title">
+          {incident.title || 'Sans titre'}
+        </span>
+        {incident.description && (
+          <span className="mes-interventions-row-desc">
+            {incident.description.substring(0, 80)}
+            {incident.description.length > 80 ? '…' : ''}
+          </span>
+        )}
+      </>
+    ),
   },
   {
     id: 'localisation', entete: 'Localisation', priorite: 'sousTitre',
