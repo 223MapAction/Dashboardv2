@@ -4,7 +4,7 @@ import './activity-panel.css';
 
 export const ActivityPanel = ({ activities: propActivities, isLoading, nextUrl, onLoadMore, isLoadingMore }) => {
   // Fonction pour obtenir l'icône selon le type d'activité
-  const getActivityIcon = (type, severity) => {
+  const getActivityIcon = (type) => {
     const iconProps = { size: 20, variant: "Bold" };
 
     switch (type) {
@@ -120,7 +120,7 @@ export const ActivityPanel = ({ activities: propActivities, isLoading, nextUrl, 
                 className={`activity-item activity-${activity.severity} ${activity.unread ? 'unread' : ''}`}
               >
                 <div className="activity-icon-wrapper">
-                  {getActivityIcon(activity.type, activity.severity)}
+                  {getActivityIcon(activity.type)}
                 </div>
                 <div className="activity-content">
                   <p className="activity-text">

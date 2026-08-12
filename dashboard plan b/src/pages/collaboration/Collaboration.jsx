@@ -156,7 +156,6 @@ export const Collaboration = () => {
   const [suggestClosing, setSuggestClosing] = useState(false);
   const [suggestedOrgs, setSuggestedOrgs] = useState([]);
   const [suggestSearch, setSuggestSearch] = useState('');
-  const [suggestMessage, setSuggestMessage] = useState('');
 
   const [isMobile, setIsMobile] = useState(
     typeof window !== 'undefined' ? window.innerWidth < 768 : false
@@ -231,8 +230,6 @@ export const Collaboration = () => {
     ongletPrecedent.current = activeTab;
     if (revient) mutate();
   }, [activeTab, mutate]);
-
-  let shimmerColor = "#acb7c6"
 
   // Mapper les données API vers le format attendu par le composant
   const collaborations = useMemo(() => {
@@ -419,11 +416,6 @@ export const Collaboration = () => {
     }));
   };
 
-  // Bottom sheet mobile
-  const openMobileSheet = (collab) => {
-    setMobileSheet({ open: true, collabId: collab.id });
-  };
-
   const closeMobileSheet = () => {
     setMobileSheetClosing(true);
     setTimeout(() => {
@@ -444,7 +436,6 @@ export const Collaboration = () => {
       setSuggestClosing(false);
       setSuggestedOrgs([]);
       setSuggestSearch('');
-      setSuggestMessage('');
     }, 280);
   };
 

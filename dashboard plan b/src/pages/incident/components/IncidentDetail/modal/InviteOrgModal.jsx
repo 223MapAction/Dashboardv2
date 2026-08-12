@@ -43,7 +43,6 @@ export const InviteOrgModal = () => {
     setIsInvolvePrivate,
     workMode,
     setWorkMode,
-    takingOrg,
     hasAcceptedRole
   } = useIncidentDetail();
 

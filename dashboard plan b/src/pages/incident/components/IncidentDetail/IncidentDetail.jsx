@@ -1012,23 +1012,6 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
     }
   };
 
-  const getVisibilityBadge = () => {
-    return safeIncident.is_public
-      ? {
-        label: 'Public',
-        color: 'var(--color-success-text)',
-        bg: 'rgba(34, 197, 94, 0.12)',
-        border: 'rgba(34, 197, 94, 0.3)',
-        icon: <Eye size={14} variant="Bold" color="var(--color-success)" style={{ marginRight: '6px' }} />
-      }
-      : {
-        label: 'Privé',
-        color: 'var(--color-text-secondary)',
-        bg: 'rgba(107, 114, 128, 0.12)',
-        border: 'rgba(107, 114, 128, 0.3)',
-        icon: <EyeSlash size={14} variant="Bold" color="var(--color-text-secondary)" style={{ marginRight: '6px' }} />
-      };
-  };
 
   const getModeBadge = () => {
     if (!safeIncident?.take_in_charge_mode) return null;
@@ -1051,7 +1034,6 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
   };
 
   const currentStatus = getStatusBadge();
-  const visibilityBadge = getVisibilityBadge();
   const modeBadge = getModeBadge();
 
   const getUserRoleBadge = () => {
@@ -1126,7 +1108,6 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
 
   const takingOrg = getTakingOrg(safeIncident);
 
-  const isInternalMode = safeIncident?.take_in_charge_mode === 'internal' || safeIncident?.take_in_charge_mode === 'interne';
   const isCollaborativeMode = safeIncident?.take_in_charge_mode === 'collaborative' || safeIncident?.take_in_charge_mode === 'collaboratif';
 
   const collabList = Array.isArray(collaborations)

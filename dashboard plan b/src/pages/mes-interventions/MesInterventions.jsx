@@ -183,7 +183,6 @@ const MesInterventionsContent = () => {
 
   const {
     openAssignModal,
-    openAgentsModal,
     openReportsModal,
     setMutateIncidents
   } = useMesInterventionsModalContext();
@@ -212,7 +211,7 @@ const MesInterventionsContent = () => {
     return '';
   }, [statusFilter]);
 
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, isLoading, mutate } = useSWR(
     ['/MapApi/org-incidents', sourceFilter, mappedStatus, search, page],
     () => getOrgInternalIncidentsService({
       sourceFilter,

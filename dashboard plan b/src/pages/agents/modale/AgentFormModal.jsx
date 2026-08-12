@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Eye, EyeSlash, Magicpen, Copy, TickCircle, CloseCircle } from 'iconsax-react';
@@ -17,14 +17,6 @@ import {
 import { authService } from '../../auth/services/authService';
 
 import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
-// ── Helpers ───────────────────────────────────────────────────────
-const getInitials = (name = '') =>
-  name
-    .split(' ')
-    .slice(0, 2)
-    .map((n) => n[0]?.toUpperCase() || '')
-    .join('');
-
 const formatPhoneForInput = (phone) => {
   if (!phone) return '';
   return phone.startsWith('+223') ? phone.slice(4) : phone;
@@ -83,7 +75,6 @@ export const AgentFormModal = () => {
   const {
     register,
     handleSubmit,
-    control,
     watch,
     setValue,
     setError,
@@ -170,24 +161,7 @@ export const AgentFormModal = () => {
   }, [formModal.open, formModal.mode, formModal.agent?.id, isCreate, userOrgId]);
 
   // Valeurs observées
-  const watchedFirstName = watch('firstName', '');
-  const watchedLastName = watch('lastName', '');
-  const watchedAvatarColor = watch('avatarColor', '#3AA2DD');
   const watchedRole = watch('role', '');
-  const watchedPassword = watch('password', '');
-
-  // Étiquette du rôle actuel
-  const currentRoleConfig = ROLES.find((r) => r.id === watchedRole);
-
-  // ── Copier dans le presse-papier ─────────────────────
-  const [copied, setCopied] = React.useState(false);
-  const copyToClipboard = useCallback(() => {
-    if (!watchedPassword) return;
-    navigator.clipboard.writeText(watchedPassword).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
-  }, [watchedPassword]);
 
 
   // En mode création : auto-générer quand le rôle change

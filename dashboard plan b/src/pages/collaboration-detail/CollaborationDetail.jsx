@@ -596,8 +596,14 @@ export const CollaborationDetail = () => {
     }).filter(Boolean);
   }, [allMessages]);
 
-  const [savedProgress, setSavedProgress] = useState({});
-  const [closedCollabs, setClosedCollabs] = useState({});
+  // Ces deux tables sont lues (isCollabClosed, getCalculatedProgress) mais plus
+  // rien ne les alimente : la fonction qui appelait setSavedProgress avait deja
+  // ete detachee de l'interface, et aucun appelant ne fermait de collaboration.
+  // Resultat, isCollabClosed repond toujours faux et la progression retombe
+  // toujours sur celle du serveur. On l'ecrit en clair plutot que de le cacher
+  // derriere un useState qui donne l'illusion d'un etat vivant.
+  const savedProgress = {};
+  const closedCollabs = {};
 
   const [expandedFailureTask, setExpandedFailureTask] = useState(null);
   const [failureReason, setFailureReason] = useState('');
@@ -676,7 +682,6 @@ export const CollaborationDetail = () => {
   const [attachedAudio, setAttachedAudio] = useState(null);
   const [sendingMessage, setSendingMessage] = useState(false);
   const [downloadingMsgId, setDownloadingMsgId] = useState(null);
-  const [openingMsgId, setOpeningMsgId] = useState(null);
   const [activeAudioId, setActiveAudioId] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -1099,12 +1104,6 @@ export const CollaborationDetail = () => {
     return calculated !== saved;
   };
 
-  const saveProgress = () => {
-    setSavedProgress(prev => ({
-      ...prev,
-      [collaboration?.id]: getCalculatedProgress()
-    }));
-  };
 
   // Marquer une tâche comme terminée via API (avec preuve optionnelle)
   const toggleTask = async (taskId) => {
@@ -1525,16 +1524,6 @@ export const CollaborationDetail = () => {
     }
   };
 
-  const cancelRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      audioChunksRef.current = []; // Ignorer les données
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-      clearInterval(recordingTimerRef.current);
-      setRecordingTime(0);
-      setAttachedAudio(null);
-    }
-  };
 
   const formatRecordingTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -1573,24 +1562,6 @@ export const CollaborationDetail = () => {
       window.open(url, '_blank');
     } finally {
       setDownloadingMsgId(null);
-    }
-  };
-  const handleOpen = async (url, msgId) => {
-    try {
-      setOpeningMsgId(msgId);
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Erreur réseau');
-
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-      window.open(blobUrl, '_blank');
-      // On nettoie après un délai raisonnable
-      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 60000);
-    } catch (error) {
-      console.error('Erreur lors de l\'ouverture:', error);
-      window.open(url, '_blank');
-    } finally {
-      setOpeningMsgId(null);
     }
   };
 
@@ -2390,7 +2361,7 @@ export const CollaborationDetail = () => {
                               const canEditOrDelete = msg.isMe || isSuperAdmin;
                               const isEditing = editingMessageId === msg.id;
                               const isDeleting = deletingMessageId === msg.id;
-                              const renderAvatar = (isMe) => (
+                              const renderAvatar = () => (
                                 <div
                                   className="collab-message-avatar"
                                   style={msg.senderAvatar ? { backgroundColor: 'transparent', overflow: 'hidden' } : { backgroundColor: msg.senderColor }}
@@ -2416,7 +2387,7 @@ export const CollaborationDetail = () => {
                                 key={msg.id}
                                 className={`collab-message ${msg.isMe ? 'is-me' : ''}`}
                               >
-                                {!msg.isMe && renderAvatar(false)}
+                                {!msg.isMe && renderAvatar()}
                                 <div className="collab-message-content">
                                   {!msg.isMe && (
                                     <div className="collab-message-sender">
@@ -2594,7 +2565,7 @@ export const CollaborationDetail = () => {
                                     )}
                                   </div>
                                 </div>
-                                {msg.isMe && renderAvatar(true)}
+                                {msg.isMe && renderAvatar()}
                               </div>
                               );
                             })

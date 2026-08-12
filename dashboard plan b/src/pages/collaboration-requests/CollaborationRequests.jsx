@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { FiltersBar } from '../../components/molecules/FiltersBar';
 import { useRechercheDebouncee } from '../../hooks/useRechercheDebouncee';
 import useSWR, { mutate } from 'swr';
@@ -67,15 +67,6 @@ const ROLE_META = {
   observer: { label: 'Observateur', icon: Eye, color: 'var(--color-text-secondary)' }
 };
 
-const formatDate = (iso) => {
-  if (!iso) return '—';
-  const d = new Date(iso);
-  return d.toLocaleDateString('fr-FR', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric'
-  });
-};
 
 const getInitials = (name = '') =>
   name
@@ -124,43 +115,7 @@ export const CollaborationRequests = ({
 
   const [localRequests, setLocalRequests] = useState([]);
 
-  // Cache to stabilize signed image URLs and prevent reloading on SWR revalidations
-  const imageCacheRef = useRef({});
 
-  const getStableImageUrl = (key, rawUrl) => {
-    if (!rawUrl) return '';
-    const getBasePath = (url) => {
-      try {
-        const parsed = new URL(url);
-        return parsed.origin + parsed.pathname;
-      } catch {
-        return url;
-      }
-    };
-    const basePath = getBasePath(rawUrl);
-    const cached = imageCacheRef.current[key];
-    if (cached && getBasePath(cached.url) === basePath) {
-      const hasExpired = (Date.now() - cached.timestamp >= 600000);
-      if (hasExpired && rawUrl !== cached.url) {
-        // Le cache a expiré ET SWR a récupéré une nouvelle URL signée
-        imageCacheRef.current[key] = {
-          url: rawUrl,
-          timestamp: Date.now()
-        };
-        return rawUrl;
-      } else {
-        // Soit le cache n'a pas encore expiré, soit il a expiré mais SWR n'a pas encore mis à jour l'URL (on continue d'utiliser le cache sans réinitialiser le timestamp)
-        return cached.url;
-      }
-    } else {
-      // Premier chargement ou nouvelle image
-      imageCacheRef.current[key] = {
-        url: rawUrl,
-        timestamp: Date.now()
-      };
-      return rawUrl;
-    }
-  };
 
   // Détermine si le bouton Accepter/Refuser doit s'afficher pour une requête
   // Logique : l'utilisateur connecté est-il le leader de l'incident ?
@@ -202,7 +157,7 @@ export const CollaborationRequests = ({
     reinitialiser: reinitialiserRecherche,
   } = useRechercheDebouncee();
   const [statusFilter, setStatusFilter] = useState('all');
-  const [typeFilter, setTypeFilter] = useState('all');
+  const typeFilter = 'all';
   const [page, setPage] = useState(1);
   const pageSize = 20;
   
@@ -217,12 +172,9 @@ export const CollaborationRequests = ({
   // Modal de décision
   const [decisionRequest, setDecisionRequest] = useState(null);
   const [decisionAction, setDecisionAction] = useState(null); // 'accept' | 'reject' | null
-  const [suggestionsStatus, setSuggestionsStatus] = useState({}); // {orgName: 'accepted' | 'rejected'}
   const [isSubmittingDecision, setIsSubmittingDecision] = useState(false);
   const [decisionError, setDecisionError] = useState(null);
 
-  // Clé SWR pour la suggestion sélectionnée
-  const [selectedSuggestionKey, setSelectedSuggestionKey] = useState(null);
 
   // Demandes de collaborations reçues en temps réel par WebSocket
   const [wsRequests, setWsRequests] = useState([]);
@@ -413,18 +365,12 @@ export const CollaborationRequests = ({
     setDecisionRequest(request);
     setDecisionAction(action);
     setDecisionError(null);
-    if (request?.incidentId && (request?.apiId || request?.id)) {
-      setSelectedSuggestionKey([request.incidentId, request.apiId || request.id]);
-    } else {
-      setSelectedSuggestionKey(null);
-    }
   };
 
   const closeDecision = () => {
     setDecisionRequest(null);
     setDecisionAction(null);
     setDecisionError(null);
-    setSelectedSuggestionKey(null);
   };
 
   const handleConfirmDecision = async (action, text) => {
@@ -532,7 +478,6 @@ export const CollaborationRequests = ({
         };
       }),
       ...(activeCollabs?.results || []).map((item) => {
-        const orgName = item.organisation_name || item.leader_name || 'Organisation sans nom';
         const details = item.incident_details || item.incident_detail;
         const projTitle = details?.title || item.incident_title || (item.incident_id ? `Incident #${item.incident_id}` : 'Incident sans titre');
         const projImg = item?.incident_thumbnail || '';
@@ -595,7 +540,6 @@ export const CollaborationRequests = ({
         };
       }),
       ...(pendingInvitations || []).map((item) => {
-        const orgName = item.organisation_name || item.leader_name || 'Organisation sans nom';
         const details = item.incident_details || item.incident_detail;
         const projTitle = details?.title || item.incident_title || (item.incident_id ? `Incident #${item.incident_id}` : 'Incident sans titre');
         const projImg = item?.incident_thumbnail || '';
@@ -903,8 +847,6 @@ export const CollaborationRequests = ({
               (myCollab?.role?.toLowerCase() === 'contributeur' || myCollab?.role?.toLowerCase() === 'contributor') ? 'contributor' : 'observer';
             const myRoleMeta = myCollab ? ROLE_META[myRoleKey] : null;
 
-            // Find other accepted collaborators
-            const acceptedOthers = incident.otherCollabs.filter(c => c.status === 'accepted');
             const pendingOthers = incident.otherCollabs.filter(c => c.status === 'pending');
 
             const targetReq = incident.otherCollabs.find(oc => oc.status === 'pending' && shouldShowAcceptForReq(oc, myCollab))

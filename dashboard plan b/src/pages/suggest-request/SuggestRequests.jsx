@@ -305,8 +305,6 @@ export const SuggestRequests = ({ embedded = false }) => {
 
   /* ── Compile flat requests ── */
   const compiledRequests = useMemo(() => {
-    const currUser = authService.getCurrentUser();
-    const myOrgId = currUser?.organisation_member || currUser?.organisation_id || '';
 
     // Suggestions + Invitations reçues (l'API /my-suggestions/received/ retourne maintenant les deux)
     // Une invitation est détectée par l'absence de suggested_partner_name (ou présence de is_invitation)
@@ -460,7 +458,7 @@ export const SuggestRequests = ({ embedded = false }) => {
     setDecisionError(null);
   };
 
-  const handleConfirmDecision = async (action, text) => {
+  const handleConfirmDecision = async (action) => {
     if (!decisionRequest || !action) return;
     setIsSubmittingDecision(true);
     setDecisionError(null);
@@ -496,26 +494,6 @@ export const SuggestRequests = ({ embedded = false }) => {
     return false;
   };
 
-  const renderStatusBadge = (status) => {
-    const meta = STATUS_META[status];
-    if (!meta) return null;
-    const Icon = meta.icon;
-    return (
-      <span
-        className={`request-status-badge ${meta.className}`}
-        style={{
-          display: 'inline-flex', alignItems: 'center', gap: '4px',
-          padding: '3px 10px', borderRadius: '4px',
-          fontSize: 'var(--font-size-micro)', fontWeight: 600,
-          color: meta.color,
-          backgroundColor: `color-mix(in srgb, ${meta.color} 12%, transparent)`
-        }}
-      >
-        <Icon size={13} variant="Bold" color="currentColor" style={{ color: meta.color }} />
-        {meta.label}
-      </span>
-    );
-  };
 
   const renderRoleBadge = (role) => {
     const meta = getRoleMeta(role);
@@ -640,7 +618,6 @@ export const SuggestRequests = ({ embedded = false }) => {
         <div className="incident-centric-list">
           {filtered.map((req) => {
             const meta = STATUS_META[req.status];
-            const roleMeta = getRoleMeta(req.role);
             const isSuggestion = req.type === 'suggestion';
             const showActions = canActOnRequest(req) && req.status === 'pending';
             const imgUrl = req.projectImage ? getStableImageUrl(req.apiId || req.id, req.projectImage) : '';
