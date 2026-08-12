@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import useSWR from 'swr';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText, ShimmerButton } from 'react-shimmer-effects';
@@ -524,10 +524,16 @@ export const CollaborationDetail = () => {
       tasksSocket?.close();
       tasksSocketRef.current = null;
     };
-  }, [incidentId]); // ← seulement incidentId
+    // mutateMessages et mutateTasks viennent de SWR : leur reference est
+    // stable, les lister ne provoque donc pas de reconnexion.
+  }, [incidentId, mutateMessages, mutateTasks]);
 
   // Fonction pour charger plus de messages (messages plus anciens)
-  const loadMoreMessages = async () => {
+  //
+  // Memoisee : l'ecouteur de defilement plus bas la capture. Sans useCallback,
+  // elle etait recreee a chaque rendu, l'effet se relancait donc en permanence
+  // et l'ecouteur etait detache puis rattache sur chaque frappe de l'utilisateur.
+  const loadMoreMessages = useCallback(async () => {
     if (!hasMoreMessages || isLoadingMoreMessages || !nextBeforeId || !incidentId) return;
 
     setIsLoadingMoreMessages(true);
@@ -556,7 +562,7 @@ export const CollaborationDetail = () => {
     } finally {
       setIsLoadingMoreMessages(false);
     }
-  };
+  }, [hasMoreMessages, isLoadingMoreMessages, nextBeforeId, incidentId]);
 
   // Détecter le scroll vers le haut pour charger plus de messages
   useEffect(() => {
@@ -582,7 +588,7 @@ export const CollaborationDetail = () => {
 
     container.addEventListener('scroll', handleScroll);
     return () => container.removeEventListener('scroll', handleScroll);
-  }, [hasMoreMessages, isLoadingMoreMessages, nextBeforeId, incidentId]);
+  }, [hasMoreMessages, isLoadingMoreMessages, loadMoreMessages]);
 
 
   // Formater les messages pour l'affichage
@@ -761,7 +767,11 @@ export const CollaborationDetail = () => {
   }, [closeAlert]);
 
   // Mapper les données API vers le format attendu par le composant
-  const collaboration = collaborationData ? {
+  //
+  // Memoise : cet objet est une dependance de currentTasks juste en dessous.
+  // Recree a chaque rendu, il rendait ce useMemo — et toute la chaine qui en
+  // decoule — parfaitement inutile.
+  const collaboration = useMemo(() => (collaborationData ? {
     id: collaborationData.id,
     userRole: collaborationData.role,
     title: collaborationData.incident_details?.title || collaborationData.incident_title || `Incident #${collaborationData.incident}`,
@@ -801,7 +811,7 @@ export const CollaborationDetail = () => {
     organisationId: collaborationData.organisation_id,
     incidentDetails: collaborationData.incident_details,
     predictionDetails: collaborationData.prediction_details
-  } : null;
+  } : null), [collaborationData]);
 
   // Utiliser les tâches de l'API en les formatant pour l'affichage
   const currentTasks = useMemo(() => {

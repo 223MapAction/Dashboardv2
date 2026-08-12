@@ -26,6 +26,8 @@ import Pagination from '../../components/molecules/Pagination';
 import './impact.css';
 import { useReinitialisationSurChangement } from '../../hooks/useReinitialisationSurChangement';
 
+const EMPTY_ARRAY = [];
+
 
 const STRUCTURE_LABELS = {
   schools: 'Écoles',
@@ -135,11 +137,15 @@ export const Impact = () => {
   );
 
   // Normaliser les incidents (gérer pagination API)
-  const incidentsList = impactIncidentsData
-    ? (Array.isArray(impactIncidentsData)
-      ? impactIncidentsData
-      : (impactIncidentsData.results || []))
-    : [];
+  // Memoise : sans cela, chaque rendu produisait un tableau neuf et les useMemo
+  // qui en dependent recalculaient tout a chaque fois.
+  const incidentsList = useMemo(() => (
+    impactIncidentsData
+      ? (Array.isArray(impactIncidentsData)
+        ? impactIncidentsData
+        : (impactIncidentsData.results || []))
+      : EMPTY_ARRAY
+  ), [impactIncidentsData]);
 
   const totalIncidentsCount = impactIncidentsData?.count || 0;
 

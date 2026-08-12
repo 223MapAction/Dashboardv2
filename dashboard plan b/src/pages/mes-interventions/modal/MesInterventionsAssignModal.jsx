@@ -4,12 +4,18 @@ import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { CloseCircle, TickCircle, SearchNormal1, UserTick, Profile } from 'iconsax-react';
-import { useMesInterventionsModalContext } from '../MesInterventionsModalContext';
+import { useMesInterventionsModalContext } from '../mesInterventionsModalContexte';
 import { assignIncidentToAgentService, getIncidentAssignmentsService } from '../../incident/service/incident_service';
 import { getOrganisationMembersService } from '../../agents/service/members_service';
 import { authService } from '../../auth/services/authService';
 
 import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
+
+// `fetchedAgents || []` fabriquait un tableau neuf a chaque rendu tant que la
+// requete n'avait pas repondu. Les useMemo qui en dependent ne memoisaient donc
+// jamais rien. Une constante partagee garde la meme reference d'un rendu a
+// l'autre. Meme procede que dans Agents.jsx.
+const EMPTY_ARRAY = [];
 const schema = yup.object().shape({
   agent: yup.string().required('Veuillez sélectionner un agent.'),
   deadline: yup.string().nullable().optional()
@@ -124,7 +130,7 @@ export const MesInterventionsAssignModal = () => {
     }
   );
 
-  const agents = fetchedAgents || [];
+  const agents = fetchedAgents || EMPTY_ARRAY;
 
   // 3. Charger les assignations existantes de cet incident
   const { data: existingAssignments, mutate: mutateAssignments } = useSWR(

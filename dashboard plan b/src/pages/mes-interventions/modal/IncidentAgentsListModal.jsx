@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import useSWR from 'swr';
-import { useMesInterventionsModalContext } from '../MesInterventionsModalContext';
+import { useMesInterventionsModalContext } from '../mesInterventionsModalContexte';
 import { CloseCircle, Profile, Edit2 } from 'iconsax-react';
 import { getIncidentAssignmentsService } from '../../incident/service/incident_service';
 

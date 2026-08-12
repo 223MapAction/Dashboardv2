@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { useCollaborationDetail } from '../context/CollaborationDetailContext';
+import { useCollaborationDetail } from '../context/collaborationDetailContexte';
 import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
 import {
   CloseSquare,

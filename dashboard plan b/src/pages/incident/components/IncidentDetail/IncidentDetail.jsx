@@ -699,24 +699,6 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
       org.name.toLowerCase().includes(orgSearch.toLowerCase())
   );
 
-  // Debug: Afficher le résultat du filtrage
-  useEffect(() => {
-    if (orgSearch) {
-      console.log('========================================');
-      console.log('🔍 RECHERCHE D\'ORGANISATIONS');
-      console.log('========================================');
-      console.log('🔎 Texte recherché:', `"${orgSearch}"`);
-      console.log('📋 Total organisations disponibles:', availableOrgs.length);
-      console.log('✅ Organisations filtrées:', filteredOrgs.length);
-      if (filteredOrgs.length > 0) {
-        console.log('📌 Résultats:', filteredOrgs.map(o => ({ id: o.id, name: o.name, initials: o.initials })));
-      } else {
-        console.log('❌ Aucun résultat trouvé');
-        console.log('💡 Exemple de noms disponibles:', availableOrgs.slice(0, 5).map(o => o.name));
-      }
-      console.log('========================================');
-    }
-  }, [orgSearch]);
 
   const handleJoinSubmit = async (e) => {
     e.preventDefault();

@@ -10,6 +10,12 @@ import { getOrganisationMembersService } from '../../agents/service/members_serv
 import { authService } from '../../auth/services/authService';
 
 import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
+
+// `fetchedAgents || []` fabriquait un tableau neuf a chaque rendu tant que la
+// requete n'avait pas repondu. Les useMemo qui en dependent ne memoisaient donc
+// jamais rien. Une constante partagee garde la meme reference d'un rendu a
+// l'autre. Meme procede que dans Agents.jsx.
+const EMPTY_ARRAY = [];
 const schema = yup.object().shape({
   agent: yup.string().required('Veuillez sélectionner un agent.'),
   deadline: yup.string().nullable().optional()
@@ -124,7 +130,7 @@ export const IncidentAssignModal = () => {
     }
   );
 
-  const agents = fetchedAgents || [];
+  const agents = fetchedAgents || EMPTY_ARRAY;
 
   // 3. Charger les assignations existantes de cet incident
   const { data: existingAssignments, mutate: mutateAssignments } = useSWR(
@@ -168,7 +174,7 @@ export const IncidentAssignModal = () => {
         deadline: assignModal.incident.deadline ? formatDatetimeLocal(assignModal.incident.deadline) : ''
       });
     }
-  }, [assignModal.open, assignModal.incident, reset, mutateAgents]);
+  }, [assignModal.open, assignModal.incident, reset, mutateAgents, setAssignAlert]);
 
   const handleSelectAgent = (agent) => {
     if (selectedAgentId === String(agent.id)) {

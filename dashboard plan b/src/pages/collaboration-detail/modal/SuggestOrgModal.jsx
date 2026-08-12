@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import useSWRInfinite from 'swr/infinite';
 import debounce from 'lodash.debounce';
-import { useCollaborationDetail } from '../context/CollaborationDetailContext';
+import { useCollaborationDetail } from '../context/collaborationDetailContexte';
 import {
   CloseCircle,
   Crown1,
