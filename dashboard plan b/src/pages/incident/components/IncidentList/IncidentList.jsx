@@ -15,41 +15,6 @@ import './incident-list.css';
 
 import { TableActionsMenu } from '../../../../components/molecules/TableActionsMenu';
 // Composant shimmer pour le chargement (version table)
-const IncidentTableSkeleton = () => (
-  <div className="incident-table-wrap">
-    <table className="incident-table has-sticky-actions">
-      <thead>
-        <tr>
-          <th>Signalement</th>
-          <th>Localisation</th>
-          <th>Période</th>
-          <th>État</th>
-          <th>Prise en charge & Collaboration</th>
-          <th className="incident-th-actions">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {[...Array(5)].map((_, idx) => (
-          <tr key={idx}>
-            <td>
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                <ShimmerThumbnail height={40} width={40} rounded />
-                <div>
-                  <ShimmerTitle line={1} gap={4} width={150} />
-                </div>
-              </div>
-            </td>
-            <td><ShimmerText line={2} width={100} /></td>
-            <td><ShimmerText line={1} width={140} /></td>
-            <td><ShimmerThumbnail height={24} width={90} rounded /></td>
-            <td><ShimmerText line={2} width={120} /></td>
-            <td><ShimmerCircularImage size={32} /></td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-);
 
 export const IncidentList = ({
   incidents = [],
@@ -110,6 +75,24 @@ export const IncidentList = ({
   const colonnes = [
     {
       id: 'signalement', entete: 'Signalement', priorite: 'titre',
+      // Sur la carte, le titre se passe de la vignette : la photo est passee
+      // en bandeau au-dessus. La description est omise quand elle repete le
+      // titre, ce qui est le cas courant dans les donnees.
+      renduCarte: (incident) => (
+        <>
+          <span className="incident-table-title">
+            {incident.title || 'Sans titre'}
+            {incident.isOwner ? (
+              <span className="incident-owner-tag" style={{ marginLeft: '8px', fontSize: '10px', padding: '2px 6px', background: 'var(--color-primary)', color: 'white', borderRadius: '4px' }}>Moi</span>
+            ) : incident.takenBy ? (
+              <span className="incident-owner-tag" style={{ marginLeft: '8px', fontSize: '10px', padding: '2px 6px', background: '#9CA3AF', color: 'white', borderRadius: '4px' }}>Autre</span>
+            ) : null}
+          </span>
+          {incident.description
+            && !incident.description.startsWith(incident.title || '\u0000')
+            && <span className="incident-table-subtitle">{incident.description.substring(0, 80)}</span>}
+        </>
+      ),
       rendu: (incident) => (
                             <div className="incident-table-main-col">
                               <BlurryImage
@@ -164,6 +147,18 @@ export const IncidentList = ({
     },
     {
       id: 'etat', entete: 'État', priorite: 'marquant',
+      // .incident-etat est en colonne — un choix fait pour une cellule etroite.
+      // Sur une carte de 390px les deux badges tiennent cote a cote.
+      renduCarte: (incident) => (
+        <>
+          {incident.badges?.map((b, idx) => (
+            <span key={idx} className={`incident-badge-glow variant-${b.variant}`}>{b.label}</span>
+          ))}
+          {incident.severity === 'high' && <span className="incident-badge-glow" style={{ background: 'rgba(239, 68, 68, 0.12)', color: 'var(--color-danger-text)', borderColor: 'rgba(239, 68, 68, 0.3)' }}>Gravité élevée</span>}
+          {incident.severity === 'medium' && <span className="incident-badge-glow" style={{ background: 'rgba(245, 158, 11, 0.12)', color: 'var(--color-warning-text)', borderColor: 'rgba(245, 158, 11, 0.3)' }}>Gravité moyenne</span>}
+          {!['high', 'medium'].includes(incident.severity) && <span className="incident-badge-glow" style={{ background: 'rgba(34, 197, 94, 0.12)', color: 'var(--color-success-text)', borderColor: 'rgba(34, 197, 94, 0.3)' }}>Gravité faible</span>}
+        </>
+      ),
       rendu: (incident) => (
                             <div className="incident-etat">
                               <div className="incident-table-badges">
@@ -188,7 +183,8 @@ export const IncidentList = ({
       ),
     },
     {
-      id: 'prise-en-charge', entete: 'Prise en charge & Collaboration', priorite: 'bloc',
+      id: 'prise-en-charge', entete: 'Prise en charge & Collaboration',
+      enteteCarte: 'Prise en charge', priorite: 'bloc',
       rendu: (incident) => (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                               {incident._takingOrg ? (
@@ -343,6 +339,12 @@ export const IncidentList = ({
       : incident.severity === 'medium' ? 'var(--color-severity-medium)'
         : 'var(--color-severity-low)';
 
+  // Le bandeau de la carte. Sur un signalement environnemental, la photo dit
+  // ce qui se passe mieux qu'aucun badge.
+  const mediaDe = (incident) => (
+    <BlurryImage src={incident.thumbnail || ''} alt={incident.title || 'Photo du signalement'} />
+  );
+
   const actionsDe = (incident) => (
     <div onClick={(e) => e.stopPropagation()}>
                             <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
@@ -410,9 +412,7 @@ export const IncidentList = ({
 
       {/* Table */}
       <div style={{ padding: '0 var(--spacing-5) var(--spacing-5)' }}>
-        {isLoading ? (
-          <IncidentTableSkeleton />
-        ) : filtered.length === 0 ? (
+        {!isLoading && filtered.length === 0 ? (
           <div className='d-flex flex-column align-items-center'>
             <div className='mb-2'>
               <SearchNormal1 size={48} variant="Linear" color="var(--color-text-muted)" />
@@ -425,7 +425,9 @@ export const IncidentList = ({
             donnees={lignes}
             cleDe={(i) => i.id}
             actions={actionsDe}
+            media={mediaDe}
             accentDe={accentDe}
+            chargement={isLoading}
             onLigneClick={onSelectIncident}
             classeLigne={(i) => (i.id === selectedId ? 'is-selected' : '')}
             libelleListe="Signalements"

@@ -43,6 +43,44 @@
   background-color: var(--rt-accent, transparent);
 }
 
+/* ── Bandeau photo ─────────────────────────────────────────────────────────
+   Sur un signalement environnemental, la photo dit ce qui se passe mieux
+   qu'aucun badge. Dans un tableau elle n'etait qu'un repere de 48px ; sur une
+   carte elle devient ce qu'on regarde en premier. */
+.rt-carte-media {
+  position: relative;
+  /* La carte a un padding : le bandeau doit le franchir pour toucher les
+     bords, sans recouvrir le lisere de gravite a gauche. */
+  margin: calc(var(--spacing-4) * -1) calc(var(--spacing-4) * -1) 0;
+  margin-left: calc(var(--spacing-4) * -1);
+  aspect-ratio: 16 / 7;
+  background-color: var(--color-bg-placeholder, #e2e8f0);
+  overflow: hidden;
+}
+
+.rt-carte-media > * {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.rt-carte-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Le menu repose sur la photo : un fond opaque et une ombre courte le
+   detachent quelle que soit l'image dessous. */
+.rt-carte-actions--sur-media {
+  position: absolute;
+  top: var(--spacing-2);
+  right: var(--spacing-2);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.25);
+}
+
 /* ── Tete : identite a gauche, menu a droite ───────────────────────────────── */
 .rt-carte-tete {
   display: flex;
@@ -174,5 +212,50 @@
 @media (prefers-reduced-motion: reduce) {
   .rt-carte-lien {
     transition: none;
+  }
+}
+
+/* ── Squelettes de chargement ────────────────────────────────────────────────
+   Ils reprennent les jetons du systeme (--shimmer-base, am-shimmer), donc un
+   bloc qui charge scintille pareil partout dans l'application. Leur geometrie
+   copie celle du contenu reel : rien ne se deplace quand les donnees
+   arrivent. */
+.rt-sq {
+  border-radius: var(--radius-sm);
+  background-color: var(--shimmer-base);
+  background-image: linear-gradient(
+    90deg,
+    var(--shimmer-base) 0%,
+    var(--shimmer-eclat) 50%,
+    var(--shimmer-base) 100%
+  );
+  background-size: 200% 100%;
+  animation: am-shimmer var(--shimmer-duree) linear infinite;
+}
+
+.rt-squelette {
+  /* Pas de lisere : la gravite n'est pas encore connue, et en inventer une
+     couleur ferait clignoter la liste au moment du remplacement. */
+  --rt-accent: transparent;
+}
+
+.rt-sq-media {
+  margin: calc(var(--spacing-4) * -1) calc(var(--spacing-4) * -1) 0;
+  aspect-ratio: 16 / 7;
+  border-radius: 0;
+}
+
+.rt-sq-titre { height: 16px; width: 62%; }
+.rt-sq-soustitre { height: 12px; width: 40%; }
+.rt-sq-badge { height: 22px; width: 96px; border-radius: var(--radius-full); }
+.rt-sq-dt { height: 11px; width: 72px; }
+.rt-sq-dd { height: 13px; width: 108px; }
+.rt-sq-cellule { height: 14px; width: 80%; min-width: 60px; }
+.rt-sq-menu { height: 32px; width: 32px; border-radius: var(--radius-md); margin-left: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rt-sq {
+    animation: none;
+    background-image: none;
   }
 }

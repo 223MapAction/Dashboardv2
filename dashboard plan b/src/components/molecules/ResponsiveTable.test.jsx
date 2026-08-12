@@ -204,6 +204,89 @@ describe('changement de largeur', () => {
   });
 });
 
+describe('bandeau photo', () => {
+  beforeEach(() => { compact = true; });
+
+  it('pose le media en tête de carte et y place le menu', () => {
+    rendre({
+      media: (d) => <img alt={`Photo de ${d.nom}`} src="x.jpg" />,
+      actions: (d) => <button>Menu {d.id}</button>,
+    });
+    const carte = document.querySelectorAll('.rt-carte')[0];
+    const bandeau = carte.querySelector('.rt-carte-media');
+    expect(bandeau).toBeTruthy();
+    expect(within(bandeau).getByAltText('Photo de Eaux très sales')).toBeTruthy();
+    // Le menu vit sur le bandeau, et nulle part ailleurs : deux menus sur la
+    // meme carte seraient deux cibles pour une seule action.
+    expect(bandeau.querySelector('.rt-carte-actions')).toBeTruthy();
+    expect(carte.querySelectorAll('.rt-carte-actions')).toHaveLength(1);
+  });
+
+  it('sans media, le menu revient dans la tête de carte', () => {
+    rendre({ actions: (d) => <button>Menu {d.id}</button> });
+    const carte = document.querySelectorAll('.rt-carte')[0];
+    expect(carte.querySelector('.rt-carte-media')).toBeNull();
+    expect(carte.querySelector('.rt-carte-tete .rt-carte-actions')).toBeTruthy();
+  });
+
+  it("n'ajoute aucun bandeau au tableau", () => {
+    compact = false;
+    rendre({ media: () => <img alt="x" src="x.jpg" /> });
+    expect(document.querySelector('.rt-carte-media')).toBeNull();
+  });
+});
+
+describe('rendus propres à la carte', () => {
+  const AVEC_SURCHARGE = COLONNES.map((c) =>
+    c.id === 'periode'
+      ? { ...c, enteteCarte: 'Dates', renduCarte: (d) => <span>carte:{d.periode}</span> }
+      : c
+  );
+
+  it('utilise renduCarte et enteteCarte sur la carte seulement', () => {
+    compact = true;
+    rendre({ colonnes: AVEC_SURCHARGE });
+    const paire = document.querySelector('.rt-paire');
+    expect(paire.querySelector('dt').textContent).toBe('Dates');
+    expect(paire.querySelector('dd').textContent).toBe('carte:11 août 2026 → En cours');
+
+    cleanup();
+    compact = false;
+    rendre({ colonnes: AVEC_SURCHARGE });
+    expect(screen.getAllByRole('columnheader').map((t) => t.textContent)).toContain('Période');
+    expect(document.body.textContent).toContain('11 août 2026 → En cours');
+    expect(document.body.textContent).not.toContain('carte:');
+  });
+});
+
+describe('chargement', () => {
+  it('rend un squelette en forme de cartes sous le point de rupture', () => {
+    compact = true;
+    rendre({ chargement: true, lignesSquelette: 3, media: () => <img alt="x" src="x.jpg" /> });
+    expect(document.querySelectorAll('.rt-squelette')).toHaveLength(3);
+    expect(document.querySelector('table')).toBeNull();
+    // Le bandeau est esquisse lui aussi, sinon la carte grandirait d'un coup
+    // au moment ou la photo arrive.
+    expect(document.querySelector('.rt-sq-media')).toBeTruthy();
+    expect(screen.getByRole('list')).toHaveProperty('ariaBusy', 'true');
+  });
+
+  it('rend un squelette en forme de tableau au-dessus du point de rupture', () => {
+    compact = false;
+    rendre({ chargement: true, lignesSquelette: 4 });
+    expect(document.querySelectorAll('tbody tr')).toHaveLength(4);
+    expect(document.querySelectorAll('.rt-carte')).toHaveLength(0);
+    // Les en-tetes restent : elles ne dependent pas des donnees.
+    expect(screen.getAllByRole('columnheader')).toHaveLength(5);
+  });
+
+  it("n'affiche aucune donnée pendant le chargement", () => {
+    compact = true;
+    rendre({ chargement: true });
+    expect(document.body.textContent).not.toContain('Eaux très sales');
+  });
+});
+
 describe('liste vide', () => {
   it('ne rend ni ligne ni carte, mais garde les en-têtes du tableau', () => {
     rendre({ donnees: [] });

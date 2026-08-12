@@ -24,13 +24,22 @@ import './responsive-table.css';
  *
  * Une colonne sans `priorite` est traitee comme un detail.
  *
- * @param {Array}    colonnes  [{ id, entete, priorite, rendu, classeEntete }]
+ * Trois reglages permettent a une colonne de differer sur la carte, quand la
+ * forme change vraiment de nature : `renduCarte`, `enteteCarte`, et la prop
+ * `media` ci-dessous. Une vignette de 48px dans un tableau et un bandeau photo
+ * pleine largeur ne sont pas le meme objet — les confondre serait pire que de
+ * les declarer separement.
+ *
+ * @param {Array}    colonnes  [{ id, entete, enteteCarte, priorite, rendu, renduCarte, classeEntete }]
  * @param {Array}    donnees
  * @param {Function} cleDe     (item) => string — la cle React
  * @param {Function} [actions] (item) => node — menu place a droite
+ * @param {Function} [media]   (item) => node — bandeau en tete de carte (photo)
  * @param {Function} [onLigneClick]
  * @param {Function} [classeLigne]  (item) => string
  * @param {Function} [accentDe] (item) => string | null — couleur du lisere de carte
+ * @param {boolean}  [chargement] affiche un squelette a la forme de la vue
+ * @param {number}   [lignesSquelette]
  * @param {string}   [libelleListe] nom de la liste pour les lecteurs d'ecran
  */
 export const ResponsiveTable = ({
@@ -38,9 +47,12 @@ export const ResponsiveTable = ({
   donnees = [],
   cleDe,
   actions,
+  media,
   onLigneClick,
   classeLigne,
   accentDe,
+  chargement = false,
+  lignesSquelette = 5,
   libelleListe,
   // Chaque page garde ses propres styles de tableau. Sans ca, une seule
   // feuille de style s'appliquerait aux trois listes et les toucherait
@@ -51,6 +63,16 @@ export const ResponsiveTable = ({
 }) => {
   const compacte = useListeCompacte();
 
+  // Le squelette suit la meme bascule que le contenu. Le laisser aux pages
+  // aurait duplique la media query et, surtout, laisse la table charger en
+  // forme de table pendant qu'on attend des cartes : la mise en page sautait.
+  if (chargement) {
+    return compacte
+      ? <SqueletteCartes nombre={lignesSquelette} avecMedia={Boolean(media)} />
+      : <SqueletteTable colonnes={colonnes} avecActions={Boolean(actions)}
+          nombre={lignesSquelette} classeTable={classeTable} classeWrap={classeWrap} />;
+  }
+
   if (compacte) {
     return (
       <ul className={`rt-cartes ${className}`} aria-label={libelleListe}>
@@ -60,6 +82,7 @@ export const ResponsiveTable = ({
             item={item}
             colonnes={colonnes}
             actions={actions}
+            media={media}
             onClick={onLigneClick}
             classeLigne={classeLigne}
             accent={accentDe?.(item)}
@@ -99,7 +122,12 @@ export const ResponsiveTable = ({
   );
 };
 
-const CarteLigne = ({ item, colonnes, actions, onClick, classeLigne, accent }) => {
+const CarteLigne = ({ item, colonnes, actions, media, onClick, classeLigne, accent }) => {
+  // Sur la carte, une colonne peut fournir son propre rendu et son propre
+  // libelle. `rendu` et `entete` restent la valeur par defaut.
+  const rendreCarte = (c) => (c.renduCarte || c.rendu)(item);
+  const libelle = (c) => c.enteteCarte || c.entete;
+  const bandeau = media?.(item);
   const par = (p) => colonnes.filter((c) => (c.priorite || 'detail') === p);
   const titres = par('titre');
   const sousTitres = par('sousTitre');
@@ -112,6 +140,13 @@ const CarteLigne = ({ item, colonnes, actions, onClick, classeLigne, accent }) =
       className={`rt-carte ${classeLigne?.(item) || ''}`}
       style={accent ? { '--rt-accent': accent } : undefined}
     >
+      {bandeau && (
+        <div className="rt-carte-media">
+          {bandeau}
+          {actions && <div className="rt-carte-actions rt-carte-actions--sur-media">{actions(item)}</div>}
+        </div>
+      )}
+
       <div className="rt-carte-tete">
         {/* Le titre est cliquable, pas la carte entiere : sur une carte qui
             contient deja un menu et parfois un lien telephonique, un clic
@@ -119,22 +154,24 @@ const CarteLigne = ({ item, colonnes, actions, onClick, classeLigne, accent }) =
         <div className="rt-carte-identite">
           {onClick ? (
             <button type="button" className="rt-carte-lien" onClick={() => onClick(item)}>
-              {titres.map((c) => <span key={c.id}>{c.rendu(item)}</span>)}
+              {titres.map((c) => <span key={c.id}>{rendreCarte(c)}</span>)}
             </button>
           ) : (
-            titres.map((c) => <span key={c.id}>{c.rendu(item)}</span>)
+            titres.map((c) => <span key={c.id}>{rendreCarte(c)}</span>)
           )}
           {sousTitres.map((c) => (
-            <div key={c.id} className="rt-carte-soustitre">{c.rendu(item)}</div>
+            <div key={c.id} className="rt-carte-soustitre">{rendreCarte(c)}</div>
           ))}
         </div>
 
-        {actions && <div className="rt-carte-actions">{actions(item)}</div>}
+        {/* Le menu passe sur le bandeau quand il y en a un : deux menus sur la
+            meme carte seraient deux cibles pour une seule action. */}
+        {actions && !bandeau && <div className="rt-carte-actions">{actions(item)}</div>}
       </div>
 
       {marquants.length > 0 && (
         <div className="rt-carte-marquants">
-          {marquants.map((c) => <div key={c.id}>{c.rendu(item)}</div>)}
+          {marquants.map((c) => <div key={c.id}>{rendreCarte(c)}</div>)}
         </div>
       )}
 
@@ -145,8 +182,8 @@ const CarteLigne = ({ item, colonnes, actions, onClick, classeLigne, accent }) =
         <dl className="rt-carte-details">
           {details.map((c) => (
             <div key={c.id} className="rt-paire">
-              <dt>{c.entete}</dt>
-              <dd>{c.rendu(item)}</dd>
+              <dt>{libelle(c)}</dt>
+              <dd>{rendreCarte(c)}</dd>
             </div>
           ))}
         </dl>
@@ -154,12 +191,61 @@ const CarteLigne = ({ item, colonnes, actions, onClick, classeLigne, accent }) =
 
       {blocs.map((c) => (
         <section key={c.id} className="rt-carte-bloc">
-          <h3 className="rt-carte-bloc-titre">{c.entete}</h3>
-          {c.rendu(item)}
+          <h3 className="rt-carte-bloc-titre">{libelle(c)}</h3>
+          {rendreCarte(c)}
         </section>
       ))}
     </li>
   );
 };
+
+/* ── Squelettes ──────────────────────────────────────────────────────────────
+   Ils reprennent la geometrie du contenu reel — bandeau, titre, badges, paires
+   — pour qu'aucun bloc ne se deplace au moment ou les donnees arrivent. */
+
+const SqueletteCartes = ({ nombre, avecMedia }) => (
+  <ul className="rt-cartes" aria-busy="true" aria-label="Chargement de la liste">
+    {Array.from({ length: nombre }, (_, i) => (
+      <li className="rt-carte rt-squelette" key={i}>
+        {avecMedia && <div className="rt-sq rt-sq-media" />}
+        <div className="rt-carte-tete">
+          <div className="rt-carte-identite">
+            <div className="rt-sq rt-sq-titre" />
+            <div className="rt-sq rt-sq-soustitre" />
+          </div>
+        </div>
+        <div className="rt-carte-marquants">
+          <div className="rt-sq rt-sq-badge" />
+          <div className="rt-sq rt-sq-badge" />
+        </div>
+        <div className="rt-carte-details">
+          <div className="rt-paire"><div className="rt-sq rt-sq-dt" /><div className="rt-sq rt-sq-dd" /></div>
+          <div className="rt-paire"><div className="rt-sq rt-sq-dt" /><div className="rt-sq rt-sq-dd" /></div>
+        </div>
+      </li>
+    ))}
+  </ul>
+);
+
+const SqueletteTable = ({ colonnes, avecActions, nombre, classeTable, classeWrap }) => (
+  <div className={classeWrap}>
+    <table className={`${classeTable} has-sticky-actions`} aria-busy="true">
+      <thead>
+        <tr>
+          {colonnes.map((c) => <th key={c.id} className={c.classeEntete}>{c.entete}</th>)}
+          {avecActions && <th className="incident-th-actions">Actions</th>}
+        </tr>
+      </thead>
+      <tbody>
+        {Array.from({ length: nombre }, (_, i) => (
+          <tr key={i}>
+            {colonnes.map((c) => <td key={c.id}><div className="rt-sq rt-sq-cellule" /></td>)}
+            {avecActions && <td><div className="rt-sq rt-sq-menu" /></td>}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+);
 
 export default ResponsiveTable;

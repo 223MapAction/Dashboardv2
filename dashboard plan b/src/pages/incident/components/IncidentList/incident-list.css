@@ -38,6 +38,14 @@
 .project-filtres-zone {
   margin: 0 var(--spacing-5) var(--spacing-4) var(--spacing-5);
   padding: var(--spacing-3) var(--spacing-4);
+  /* Collee sous l'en-tete, qui fait 64px. Cette regle vivait sur
+     `.project-filters` ; elle a ete perdue au passage sur FiltersBar. Sans
+     elle, la recherche disparait des qu'on defile la liste — le geste le plus
+     frequent sur telephone, ou la liste est longue. */
+  position: sticky;
+  top: 64px;
+  z-index: 4;
+  flex-shrink: 0;
   background-color: rgba(255, 255, 255, 0.7);
   backdrop-filter: saturate(180%) blur(16px);
   -webkit-backdrop-filter: saturate(180%) blur(16px);

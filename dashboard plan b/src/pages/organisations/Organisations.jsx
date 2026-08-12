@@ -570,46 +570,7 @@ export const Organisations = () => {
               />
 
               {/* ── Tableau ── */}
-              {swrLoading ? (
-                <div className="orgs-table-wrap">
-                  <table className="orgs-table has-sticky-actions">
-                    <thead>
-                      <tr>
-                        <th>Organisation</th>
-                        <th>Secteur</th>
-                        <th>Localisation</th>
-                        <th>Signalements prise en compte</th>
-                        <th>Membres</th>
-                        <th>Statut</th>
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {[1, 2, 3, 4, 5].map((i) => (
-                        <tr key={i}>
-                          <td>
-                            <div className="orgs-table-org" style={{ opacity: 0.5 }}>
-                              <div className="orgs-avatar" style={{ backgroundColor: 'var(--color-border)', width: '36px', height: '36px', borderRadius: '50%', color: 'transparent' }}>
-                                --
-                              </div>
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                <div style={{ width: '120px', height: '12px', borderRadius: '4px', backgroundColor: 'var(--color-border)', animation: 'pulse 1.8s infinite' }} />
-                                <div style={{ width: '70px', height: '8px', borderRadius: '3px', backgroundColor: 'var(--color-border)', animation: 'pulse 1.8s infinite' }} />
-                              </div>
-                            </div>
-                          </td>
-                          <td><div style={{ width: '90px', height: '10px', borderRadius: '4px', backgroundColor: 'var(--color-border)', opacity: 0.5, animation: 'pulse 1.8s infinite' }} /></td>
-                          <td><div style={{ width: '80px', height: '10px', borderRadius: '4px', backgroundColor: 'var(--color-border)', opacity: 0.5, animation: 'pulse 1.8s infinite' }} /></td>
-                          <td><div style={{ width: '30px', height: '10px', borderRadius: '4px', backgroundColor: 'var(--color-border)', margin: '0 auto', opacity: 0.5, animation: 'pulse 1.8s infinite' }} /></td>
-                          <td><div style={{ width: '40px', height: '10px', borderRadius: '4px', backgroundColor: 'var(--color-border)', margin: '0 auto', opacity: 0.5, animation: 'pulse 1.8s infinite' }} /></td>
-                          <td><div style={{ width: '60px', height: '16px', borderRadius: '12px', backgroundColor: 'var(--color-border)', opacity: 0.5, animation: 'pulse 1.8s infinite' }} /></td>
-                          <td><div style={{ width: '40px', height: '24px', borderRadius: '4px', backgroundColor: 'var(--color-border)', opacity: 0.5, animation: 'pulse 1.8s infinite' }} /></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : filtered.length === 0 ? (
+              {filtered.length === 0 && !swrLoading ? (
                 <div className="orgs-empty">
                   <div className="orgs-empty-icon">
                     <Buildings2 size={48} variant="Linear" color="var(--color-border)" />
@@ -622,6 +583,7 @@ export const Organisations = () => {
                   donnees={filtered}
                   cleDe={(o) => o.id}
                   actions={actionsDe}
+                  chargement={swrLoading}
                   classeTable="orgs-table"
                   classeWrap="orgs-table-wrap"
                   libelleListe="Organisations"

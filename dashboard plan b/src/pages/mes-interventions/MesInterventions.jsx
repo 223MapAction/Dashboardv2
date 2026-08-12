@@ -55,52 +55,6 @@ const adaptIncidentData = (incident) => {
   };
 };
 
-const TableSkeleton = () => (
-  <div className="mes-interventions-table-wrap">
-    <table className="mes-interventions-table has-sticky-actions">
-      <thead>
-        <tr>
-          <th>Signalement</th>
-          <th>Localisation</th>
-          <th>Mode</th>
-          <th>Date de déclaration</th>
-          <th>Date de résolution</th>
-          <th>Progression</th>
-          <th>Équipe terrain</th>
-          <th>Statut</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {[...Array(4)].map((_, idx) => (
-          <tr key={idx}>
-            <td>
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                <ShimmerThumbnail height={40} width={40} rounded />
-                <div>
-                  <ShimmerTitle line={1} gap={4} width={150} />
-                </div>
-              </div>
-            </td>
-            <td><ShimmerText line={1} width={100} /></td>
-            <td><ShimmerThumbnail height={20} width={80} rounded /></td>
-            <td><ShimmerText line={1} width={80} /></td>
-            <td><ShimmerText line={1} width={80} /></td>
-            <td><ShimmerThumbnail height={8} width={60} rounded /></td>
-            <td>
-              <div style={{ display: 'flex', gap: '4px' }}>
-                <ShimmerCircularImage size={24} />
-                <ShimmerCircularImage size={24} />
-              </div>
-            </td>
-            <td><ShimmerThumbnail height={24} width={80} rounded /></td>
-            <td><ShimmerCircularImage size={32} /></td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-);
 
 const AVATAR_COLORS = [
   '#EF4444', '#F97316', '#F59E0B', '#22C55E',
@@ -520,9 +474,7 @@ const MesInterventionsContent = () => {
           />
 
           {/* Affichage des données / Chargement */}
-          {isLoading ? (
-            <TableSkeleton />
-          ) : incidents.length === 0 ? (
+          {!isLoading && incidents.length === 0 ? (
             <div className="mes-interventions-empty">
               <p className="h1 mb-p pb-0">Aucun signalement</p>
               <p className="mt-2">Aucun signalement assigné ne correspond à vos critères.</p>
@@ -535,6 +487,7 @@ const MesInterventionsContent = () => {
                 cleDe={(i) => i.id}
                 actions={actionsDe}
                 onLigneClick={handleRowClick}
+                chargement={isLoading}
                 classeLigne={() => 'mes-interventions-row-clickable'}
                 classeTable="mes-interventions-table"
                 classeWrap="mes-interventions-table-wrap"
