@@ -23,8 +23,17 @@ export const AVATAR_COLORS = [
 /** Couleur de repli quand aucun identifiant n'est exploitable. */
 export const AVATAR_COULEUR_DEFAUT = '#3AA2DD';
 
-/** Pastille stable pour un identifiant donne. */
+/**
+ * Pastille stable pour un identifiant donne.
+ *
+ * Deux pieges que Number() tend ici : Number(null) et Number('') valent tous
+ * deux 0, donc un identifiant absent recevrait silencieusement la premiere
+ * couleur de la palette au lieu du repli — et toutes les personnes sans
+ * identifiant se ressembleraient. On ecarte donc explicitement le vide avant
+ * la conversion.
+ */
 export const couleurAvatarPour = (id) => {
+  if (id === null || id === undefined || id === '') return AVATAR_COULEUR_DEFAUT;
   const n = Number(id);
   if (!Number.isFinite(n)) return AVATAR_COULEUR_DEFAUT;
   return AVATAR_COLORS[Math.abs(Math.trunc(n)) % AVATAR_COLORS.length];

@@ -39,28 +39,40 @@ export const formatDateTime = (dateStr) => {
   }
 };
 
+// Les quatre etats que l'API attribue a un signalement sont declared,
+// taken_into_account, in_progress et resolved. Deux d'entre eux manquaient ici
+// et tombaient dans le cas par defaut : l'agent lisait « Declared » et
+// « In_progress » en anglais, sur une interface entierement francaise. Le cas
+// 'pending' present a la place ne correspond a aucun etat de signalement — il
+// vient des statuts de collaboration, traites par formatStatus.
 export const formatEtat = (etat) => {
   if (!etat) return 'Inconnu';
   switch (etat) {
+    case 'declared':
+      return 'Déclaré';
     case 'taken_into_account':
       return 'Pris en compte';
+    case 'in_progress':
+      return 'En cours';
     case 'resolved':
       return 'Résolu';
-    case 'pending':
-      return 'En attente';
     default:
+      // Un etat ajoute cote serveur reste lisible plutot que de laisser un
+      // blanc dans l'interface.
       return etat.charAt(0).toUpperCase() + etat.slice(1);
   }
 };
 
 export const getEtatBadgeClass = (etat) => {
   switch (etat) {
+    case 'declared':
+      return 'badge-info';
     case 'taken_into_account':
       return 'badge-primary';
+    case 'in_progress':
+      return 'badge-warning';
     case 'resolved':
       return 'badge-success';
-    case 'pending':
-      return 'badge-warning';
     default:
       return 'badge-info';
   }
