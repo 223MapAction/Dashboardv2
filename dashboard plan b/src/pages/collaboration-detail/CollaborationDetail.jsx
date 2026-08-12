@@ -40,7 +40,6 @@ import {
   People,
   Crown1,
   Eye,
-  Lock1,
   TickCircle,
   Clock,
   Danger,
@@ -363,14 +362,6 @@ export const CollaborationDetail = () => {
     }).filter(Boolean);
   }, [allMessages]);
 
-  // Ces deux tables sont lues (isCollabClosed, getCalculatedProgress) mais plus
-  // rien ne les alimente : la fonction qui appelait setSavedProgress avait deja
-  // ete detachee de l'interface, et aucun appelant ne fermait de collaboration.
-  // Resultat, isCollabClosed repond toujours faux et la progression retombe
-  // toujours sur celle du serveur. On l'ecrit en clair plutot que de le cacher
-  // derriere un useState qui donne l'illusion d'un etat vivant.
-  const savedProgress = {};
-  const closedCollabs = {};
 
   const [expandedFailureTask, setExpandedFailureTask] = useState(null);
   const [failureReason, setFailureReason] = useState('');
@@ -857,17 +848,19 @@ export const CollaborationDetail = () => {
     );
   }
 
-  const isCollabClosed = (collabId) => closedCollabs[collabId] === true;
-
+  // Progression recalculee a partir des taches affichees, ici et maintenant.
   const getCalculatedProgress = () => {
     if (!currentTasks.length) return 0;
     const completed = currentTasks.filter(t => t.completed || t.status === 'completed').length;
     return Math.round((completed / currentTasks.length) * 100);
   };
 
-  const getSavedProgress = () => {
-    return savedProgress[collaboration?.id] ?? collaboration?.progress ?? 0;
-  };
+  // Progression telle que le serveur l'a enregistree. Une table locale
+  // s'intercalait ici pour retenir une valeur « sauvegardee » cote client, mais
+  // rien ne l'alimentait — et c'etait tant mieux : toute mutation de tache
+  // relance mutateTasks/mutateCollaboration, donc le serveur reste la seule
+  // source de verite. On le lit directement.
+  const getSavedProgress = () => collaboration?.progress ?? 0;
 
   const hasPendingChanges = () => {
     const calculated = getCalculatedProgress();
@@ -1747,11 +1740,6 @@ export const CollaborationDetail = () => {
                     <TickCircle size={16} variant="Bold" color="var(--color-surface)" />
                     Incident Résolu
                   </div>
-                ) : isCollabClosed(collaboration?.id) ? (
-                  <div className="collab-detail-closed-badge">
-                    <Lock1 size={16} variant="Bold" color="var(--color-surface)" />
-                    Clôturée
-                  </div>
                 ) : collaboration?.userRole === 'leader' && (
                   <button
                     type="button"
@@ -2344,7 +2332,7 @@ export const CollaborationDetail = () => {
                           <div ref={messagesEndRef} />
                         </div>
 
-                        {!isCollabClosed(collaboration?.id) && !isIncidentResolved && (
+                        {!isIncidentResolved && (
                           <div className="collab-discussion-input">
                             <div className="collab-discussion-input-wrapper">
                               {attachedFile && (
@@ -2484,7 +2472,7 @@ export const CollaborationDetail = () => {
                     <div className="collab-detail-section">
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-4)' }}>
                         <h3 className="collab-detail-section-title" style={{ margin: 0 }}>Tâches</h3>
-                        {!isCollabClosed(collaboration?.id) && !isIncidentResolved && (
+                        {!isIncidentResolved && (
                           <button
                             type="button"
                             className="collab-task-create-btn"
@@ -2534,7 +2522,7 @@ export const CollaborationDetail = () => {
                                       }
                                     }}
                                     className="collab-task-checkbox"
-                                    disabled={task.failed || isCollabClosed(collaboration?.id)}
+                                    disabled={task.failed || isIncidentResolved}
                                   />
                                   <span className="collab-task-checkmark">
                                     <TickCircle size={18} variant="Bold" color="var(--color-surface)" />
@@ -2544,14 +2532,14 @@ export const CollaborationDetail = () => {
                                 <div
                                   className="collab-task-content"
                                   onClick={() => {
-                                    if (!task.completed && !task.failed && !isCollabClosed(collaboration?.id)) {
+                                    if (!task.completed && !task.failed && !isIncidentResolved) {
                                       setExpandedProofTask(prev => prev === task.id ? null : task.id);
                                       setExpandedFailureTask(null);
                                       setFailureReason('');
                                     }
                                   }}
                                   style={{
-                                    cursor: (!task.completed && !task.failed && !isCollabClosed(collaboration?.id)) ? 'pointer' : 'default',
+                                    cursor: (!task.completed && !task.failed && !isIncidentResolved) ? 'pointer' : 'default',
                                     flex: 1
                                   }}
                                 >
@@ -2616,7 +2604,7 @@ export const CollaborationDetail = () => {
                                   </div>
                                 </div>
 
-                                {!task.completed && !task.failed && !isCollabClosed(collaboration?.id) && (
+                                {!task.completed && !task.failed && !isIncidentResolved && (
                                   <button
                                     type="button"
                                     className="collab-task-fail-btn"
@@ -2641,7 +2629,7 @@ export const CollaborationDetail = () => {
                                   </button>
                                 )}
 
-                                {task.failed && !isCollabClosed(collaboration?.id) && (
+                                {task.failed && !isIncidentResolved && (
                                   <button
                                     type="button"
                                     className="collab-task-reset-btn"
@@ -2652,7 +2640,7 @@ export const CollaborationDetail = () => {
                                   </button>
                                 )}
 
-                                {!isCollabClosed(collaboration?.id) && (
+                                {!isIncidentResolved && (
                                   <button
                                     type="button"
                                     className="collab-task-delete-btn"
@@ -3143,7 +3131,7 @@ export const CollaborationDetail = () => {
                                         </div>
                                       )}
                                     </>
-                                  ) : !isCollabClosed(collaboration?.id) && (
+                                  ) : !isIncidentResolved && (
                                     <label className="collab-task-proof-btn" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: 'var(--font-size-caption)' }}>
                                       <DocumentUpload size={14} variant="Bold" color="var(--color-primary-text)" />
                                       Ajouter une preuve
