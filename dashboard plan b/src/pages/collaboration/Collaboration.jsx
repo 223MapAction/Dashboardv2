@@ -101,13 +101,28 @@ export const Collaboration = () => {
     setPage(1);
   }, [search, roleFilter, statusFilter, incidentFilter, dateFrom, dateTo, localStatusFilter]);
 
-  // Charger les incidents pour le filtre dropdown.
-  // La liste bouge peu : on la garde en cache 5 min pour éviter un appel à
-  // chaque montage de la page.
+  // Les cent signalements qui remplissent la liste déroulante du filtre.
+  //
+  // Mesuré à 9,7 s : c'est cher pour un menu, et cela partait jusqu'ici en même
+  // temps que les collaborations elles-mêmes, sur une API qui rend déjà la main
+  // lentement. On attend donc que le navigateur soit inoccupé — le contenu
+  // principal est affiché à ce moment-là, et la liste est prête bien avant
+  // qu'on ouvre le filtre.
+  //
+  // Différer plutôt que réduire : couper à vingt entrées rendrait le filtre
+  // menteur, puisqu'il ne proposerait plus tous les signalements existants.
+  const [filtreChargeable, setFiltreChargeable] = useState(false);
+  useEffect(() => {
+    const differer = window.requestIdleCallback || ((cb) => setTimeout(cb, 1200));
+    const annuler = window.cancelIdleCallback || clearTimeout;
+    const id = differer(() => setFiltreChargeable(true), { timeout: 4000 });
+    return () => annuler(id);
+  }, []);
+
   const { data: rawIncidents } = useSWR(
-    'incidents_dropdown_list',
+    filtreChargeable ? 'incidents_dropdown_list' : null,
     () => getIncidentsService(1, 100),
-    { dedupingInterval: 300000, revalidateIfStale: false }
+    { dedupingInterval: 300000, revalidateIfStale: false, revalidateOnFocus: false }
   );
   const incidentsList = useMemo(() => {
     return rawIncidents?.results || (Array.isArray(rawIncidents) ? rawIncidents : []);
