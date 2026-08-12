@@ -7,19 +7,18 @@ import { Header, Sidebar } from '../../components/layout';
 import { CollaborationDetailProvider } from './context/CollaborationDetailContext';
 import { useDiscussion } from './useDiscussion';
 import { useTaches } from './useTaches';
+import { useSuggestionsOrganisations } from './useSuggestionsOrganisations';
+import { useClotureIncident } from './useClotureIncident';
 import { TaskModal } from './modal/TaskModal';
 import { SuggestOrgModal } from './modal/SuggestOrgModal';
 import { DeleteTaskModal } from './modal/DeleteTaskModal';
 import { AgentReportsModal } from './modal/AgentReportsModal';
 import { NotFound } from '../not-found';
 import { getCollaborationService } from '../collaboration/service/collaboration_service';
-import { getOrganisationsService, formatOrganisation } from '../organisations/service/organisation_service';
 import { BlurryImage } from '../../components/atoms/BlurryImage';
 import { API_URL_BASE } from '../../config/api_url_base';
 import { authService } from '../auth/services/authService';
-import { createSuggestionService } from '../suggest-request/service/suggest_service';
 import { getTasksService, deleteTaskService } from '../incident/service/task_service';
-import { closeIncidentService } from '../incident/service/incident_service';
 import {
   ArrowLeft2,
   Location,
@@ -137,49 +136,11 @@ export const CollaborationDetail = () => {
 
 
 
-  // États pour le modal de suggestion d'organisations
-  const [showSuggestModal, setShowSuggestModal] = useState(false);
-  const [showReportsModal, setShowReportsModal] = useState(false);
-  const [suggestModalClosing, setSuggestModalClosing] = useState(false);
-  const [suggestModalShowing, setSuggestModalShowing] = useState(false);
-  const [suggestSearch, setSuggestSearch] = useState('');
-  const [suggestedOrgs, setSuggestedOrgs] = useState([]);
-  const [suggestAlert, setSuggestAlert] = useState(null);
-  const [suggestSubmitting, setSuggestSubmitting] = useState(false);
-
-  // États pour le modal de clôture d'incident
-  const [showCloseModal, setShowCloseModal] = useState(false);
-  const [closeModalShowing, setCloseModalShowing] = useState(false);
-  const [resolutionStartDate, setResolutionStartDate] = useState('');
-  const [resolutionEndDate, setResolutionEndDate] = useState('');
-  const [resolutionFile, setResolutionFile] = useState(null);
-  const [closeAlert, setCloseAlert] = useState(null);
-  const [isClosing, setIsClosing] = useState(false);
 
 
 
 
-  // Charger toutes les organisations depuis l'API
-  const { data: orgsData } = useSWR(
-    'organisations-list',
-    async () => {
-      try {
-        const rawOrgs = await getOrganisationsService();
-        return (rawOrgs || []).map(org => formatOrganisation(org)).filter(Boolean);
-      } catch (err) {
-        console.error('[CollaborationDetail] Erreur chargement organisations list:', err);
-        return [];
-      }
-    },
-    {
-      revalidateOnFocus: false
-    }
-  );
 
-  // Données pour les organisations disponibles
-  const AVAILABLE_ORGS = useMemo(() => {
-    return orgsData || [];
-  }, [orgsData]);
 
   // Détecter le mobile
   useEffect(() => {
@@ -287,6 +248,33 @@ export const CollaborationDetail = () => {
     editTaskStartDate, setEditTaskStartDate, editTaskDeadline, setEditTaskDeadline,
     editTaskSaving, startEditTask, cancelEditTask, saveEditTask,
   } = useTaches({ incidentId, collaboration, tasksData, mutateTasks });
+
+  // Suggerer des organisations partenaires, et cloturer le signalement : deux
+  // parcours complets, chacun avec ses etats de modale, ses champs et son envoi.
+  const {
+    showSuggestModal, setShowSuggestModal,
+    showReportsModal, setShowReportsModal,
+    suggestModalClosing,
+    suggestModalShowing, setSuggestModalShowing,
+    closeSuggestModal,
+    suggestSearch, setSuggestSearch,
+    suggestedOrgs, toggleSuggestedOrg, updateSuggestedRole, updateSuggestedComment,
+    suggestAlert, setSuggestAlert,
+    suggestSubmitting, handleSuggestSubmit,
+    AVAILABLE_ORGS,
+    ROLE_OPTIONS,
+  } = useSuggestionsOrganisations(collaboration);
+
+  const {
+    showCloseModal,
+    closeModalShowing,
+    openCloseModal, closeCloseModal, handleCloseIncident,
+    resolutionStartDate, setResolutionStartDate,
+    resolutionEndDate, setResolutionEndDate,
+    resolutionFile, setResolutionFile,
+    closeAlert,
+    isClosing,
+  } = useClotureIncident(collaboration, mutateCollaboration);
 
 
   // Gestion des états de chargement et d'erreur
@@ -545,199 +533,9 @@ export const CollaborationDetail = () => {
 
 
 
-  // Fermeture du modal de suggestion avec animation
-  const closeSuggestModal = () => {
-    setSuggestModalShowing(false);
-    setSuggestModalClosing(true);
-    setTimeout(() => {
-      setShowSuggestModal(false);
-      setSuggestModalClosing(false);
-      setSuggestSearch('');
-      setSuggestedOrgs([]);
-      setSuggestAlert(null);
-    }, 300);
-  };
-
-  // Ouvrir le modal de clôture d'incident
-  const openCloseModal = () => {
-    setShowCloseModal(true);
-    setResolutionStartDate('');
-    setResolutionEndDate('');
-    setResolutionFile(null);
-    setCloseAlert(null);
-    setTimeout(() => {
-      setCloseModalShowing(true);
-    }, 10);
-  };
-
-  // Fermer le modal de clôture d'incident
-  const closeCloseModal = () => {
-    setCloseModalShowing(false);
-    setTimeout(() => {
-      setShowCloseModal(false);
-      setResolutionStartDate('');
-      setResolutionEndDate('');
-      setResolutionFile(null);
-      setCloseAlert(null);
-    }, 300);
-  };
-
-  // Clôturer l'incident
-  const handleCloseIncident = async () => {
-    if (!resolutionStartDate || !resolutionEndDate) {
-      setCloseAlert({ type: 'danger', message: 'Veuillez renseigner les deux dates.' });
-      return;
-    }
-
-    if (new Date(resolutionStartDate) > new Date(resolutionEndDate)) {
-      setCloseAlert({ type: 'danger', message: 'La date de début doit être antérieure à la date de fin.' });
-      return;
-    }
-
-    setIsClosing(true);
-    setCloseAlert(null);
-
-    try {
-      await closeIncidentService(collaboration.incidentId, {
-        resolution_start_date: resolutionStartDate,
-        resolution_end_date: resolutionEndDate,
-        resolution_file: resolutionFile
-      });
-      setCloseAlert({ type: 'success', message: 'Signalement résolu avec succès !' });
-      setTimeout(() => {
-        closeCloseModal();
-        mutateCollaboration(); // Recharger uniquement les données SWR au lieu de la page entière
-      }, 2000);
-    } catch (err) {
-      console.error('[CloseIncident] Erreur:', err);
-      const errorMsg = err?.detail || err?.message || 'Erreur lors de la résolution de l\'incident.';
-      setCloseAlert({ type: 'danger', message: errorMsg });
-    } finally {
-      setIsClosing(false);
-    }
-  };
-
-  // Envoi des suggestions d'organisations partenaires
-  const handleSuggestSubmit = async () => {
-    if (!suggestedOrgs.length || !collaboration?.id) return;
-    setSuggestSubmitting(true);
-    setSuggestAlert(null);
-    const errors = [];
-    const successes = [];
 
 
 
-    const results = await Promise.allSettled(
-      suggestedOrgs.map(org =>
-        createSuggestionService(collaboration.incidentId, {
-          incident: collaboration.incidentId,
-          suggested_organisation: org.id,
-          suggested_role: org.role === 'observateur' ? 'observer' : 'contributor',
-          justification: org.comment || ''
-        }).then(() => ({ ok: true, name: org.name }))
-          .catch(err => {
-            const data = err?.response?.data;
-            let errorDetail = 'Erreur inconnue';
-            if (data) {
-              if (data.non_field_errors && Array.isArray(data.non_field_errors)) {
-                const msg = data.non_field_errors[0];
-                errorDetail = msg.includes('unique set')
-                  ? 'déjà invitée ou suggérée pour cet incident'
-                  : msg;
-              } else if (data.detail) {
-                errorDetail = data.detail;
-              } else if (data.message) {
-                errorDetail = data.message;
-              } else {
-                const keys = Object.keys(data);
-                if (keys.length > 0) {
-                  const val = data[keys[0]];
-                  const msg = Array.isArray(val) ? val[0] : String(val);
-                  errorDetail = msg.includes('unique set')
-                    ? 'déjà invitée ou suggérée pour cet incident'
-                    : msg;
-                } else {
-                  errorDetail = err?.message || 'Erreur inconnue';
-                }
-              }
-            } else {
-              errorDetail = err?.message || 'Erreur inconnue';
-            }
-            return {
-              ok: false,
-              name: org.name,
-              detail: errorDetail
-            };
-          })
-      )
-    );
-
-    for (const result of results) {
-      if (result.status === 'fulfilled') {
-        if (result.value.ok) successes.push(result.value.name);
-        else errors.push(`${result.value.name} : ${result.value.detail}`);
-      }
-    }
-
-    setSuggestSubmitting(false);
-    if (errors.length === 0) {
-      setSuggestAlert({ type: 'success', message: `Suggestion(s) envoyée(s) avec succès pour : ${successes.join(', ')}.` });
-      setSuggestedOrgs([]);
-      // Fermer le modal après un court délai pour que l'utilisateur voie le message de succès
-      setTimeout(() => {
-        closeSuggestModal();
-      }, 1500);
-    } else if (successes.length > 0) {
-      setSuggestAlert({ type: 'warning', message: `Succès : ${successes.join(', ')}. Erreurs : ${errors.join(' | ')}` });
-    } else {
-      setSuggestAlert({ type: 'danger', message: errors.join(' | ') });
-    }
-  };
-
-  // Gestion des organisations suggérées
-  const toggleSuggestedOrg = (org) => {
-
-
-    setSuggestedOrgs(prev => {
-      const exists = prev.find(o => o.id === org.id);
-      if (exists) {
-        return prev.filter(o => o.id !== org.id);
-      } else {
-        return [...prev, { ...org, role: 'contributeur', comment: '' }];
-      }
-    });
-  };
-
-  const updateSuggestedRole = (orgId, roleId) => {
-    setSuggestedOrgs(prev =>
-      prev.map(org => org.id === orgId ? { ...org, role: roleId } : org)
-    );
-  };
-
-  const updateSuggestedComment = (orgId, comment) => {
-    setSuggestedOrgs(prev =>
-      prev.map(org => org.id === orgId ? { ...org, comment } : org)
-    );
-  };
-
-  // Options de rôles
-  const ROLE_OPTIONS = [
-
-    {
-      id: 'contributeur',
-      label: 'Contributeur',
-      icon: People,
-      color: 'var(--color-primary-text)',
-      description: 'Peut participer activement et créer des tâches'
-    },
-    {
-      id: 'observateur',
-      label: 'Observateur',
-      icon: Eye,
-      color: 'var(--color-text-secondary)',
-      description: 'Peut uniquement consulter les informations'
-    }
-  ];
 
   const contextValue = {
     collaboration,
