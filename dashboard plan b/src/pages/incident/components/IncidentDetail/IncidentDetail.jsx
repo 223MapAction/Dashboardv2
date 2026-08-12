@@ -61,7 +61,7 @@ const formatMessageTime = (dateStr) => {
   try {
     const date = new Date(dateStr);
     return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-  } catch (e) {
+  } catch {
     return '';
   }
 };
@@ -1989,7 +1989,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                               } else {
                                 vectorsArray = rawVectors.split(',').map(v => v.trim()).filter(Boolean);
                               }
-                            } catch (e) {
+                            } catch {
                               vectorsArray = rawVectors.split(',').map(v => v.trim()).filter(Boolean);
                             }
                           }
@@ -2020,7 +2020,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                               } else {
                                 tagsArray = rawTags.split(',').map(t => t.trim()).filter(Boolean);
                               }
-                            } catch (e) {
+                            } catch {
                               tagsArray = rawTags.split(',').map(t => t.trim()).filter(Boolean);
                             }
                           }

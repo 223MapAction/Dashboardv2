@@ -204,7 +204,7 @@ export const MapContainer = () => {
   }, [ownershipFilter, statusFilter, countryFilter]);
 
   // Charger une page d'incidents
-  const { data: currentPageData, isLoading: isLoadingPage } = useSWR(
+  const { isLoading: isLoadingPage } = useSWR(
     ownershipFilter === 'mine'
       ? (currentPage === 1 ? '/org-incidents' : null) // Pour "mine", utiliser l'ancien endpoint
       : `/map-incidents-${scope}-${countryFilter || 'all'}-page-${currentPage}`,

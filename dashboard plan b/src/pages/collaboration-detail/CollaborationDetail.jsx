@@ -78,7 +78,7 @@ const formatFailureReason = (reason) => {
       }
     }
     return reason;
-  } catch (e) {
+  } catch {
     let clean = reason.replace(/\{'failure_reason':\s*'/g, '').replace(/'\}/g, '');
     clean = clean.replace(/\{"failure_reason":\s*"/g, '').replace(/"\}/g, '');
     return clean;
@@ -93,7 +93,7 @@ const formatDateTime = (dateStr) => {
     const dayAndMonth = date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
     const time = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
     return `${dayAndMonth} à ${time}`;
-  } catch (e) {
+  } catch {
     return dateStr;
   }
 };
@@ -354,7 +354,7 @@ export const CollaborationDetail = () => {
   const isIncidentResolved = collaborationData?.incident_details?.etat === 'resolved';
 
   // Utiliser useSWR pour charger les tâches de l'incident (sans polling, géré par WebSockets)
-  const { data: tasksData, error: tasksError, isLoading: tasksLoading, mutate: mutateTasks } = useSWR(
+  const { data: tasksData, isLoading: tasksLoading, mutate: mutateTasks } = useSWR(
     incidentId ? `tasks-${incidentId}` : null,
     () => getTasksService(incidentId),
     {
@@ -389,7 +389,7 @@ export const CollaborationDetail = () => {
   }, [incidentId]);
 
   // Charger les messages initiaux (10 plus récents) via SWR
-  const { data: rawMessagesData, error: messagesError, mutate: mutateMessages } = useSWR(
+  const { data: rawMessagesData, mutate: mutateMessages } = useSWR(
     incidentId ? `discussion-${incidentId}` : null,
     () => getDiscussionMessagesService(incidentId, { limit: 10 }),
     {
@@ -596,7 +596,6 @@ export const CollaborationDetail = () => {
     }).filter(Boolean);
   }, [allMessages]);
 
-  const [collabTasks, setCollabTasks] = useState({});
   const [savedProgress, setSavedProgress] = useState({});
   const [closedCollabs, setClosedCollabs] = useState({});
 
@@ -604,7 +603,6 @@ export const CollaborationDetail = () => {
   const [failureReason, setFailureReason] = useState('');
   const [failureAlert, setFailureAlert] = useState(null);
   const [failureSaving, setFailureSaving] = useState(false);
-  const [confirmClose, setConfirmClose] = useState(false);
 
   // États pour la navigation mobile
   const [isMobile, setIsMobile] = useState(false);
@@ -1624,7 +1622,11 @@ export const CollaborationDetail = () => {
       try {
         const audio = new Audio(sendMessageSound);
         audio.play().catch(() => {});
-      } catch (e) {}
+      } catch {
+        // Meme raison qu'ailleurs : le son de confirmation est un confort. Le
+        // message est deja parti, une politique d'autoplay ne doit pas donner
+        // l'impression du contraire.
+      }
 
       setNewMessage('');
       setAttachedFile(null);
@@ -2194,7 +2196,7 @@ export const CollaborationDetail = () => {
                                   } else {
                                     tagsArray = rawTags.split(',').map(t => t.trim()).filter(Boolean);
                                   }
-                                } catch (e) {
+                                } catch {
                                   tagsArray = rawTags.split(',').map(t => t.trim()).filter(Boolean);
                                 }
                               }
@@ -3480,7 +3482,7 @@ export const CollaborationDetail = () => {
                   try {
                     await deleteTaskService(collaborationData?.incident, taskId);
                     notifyTaskChange('delete', taskId);
-                  } catch (e) {
+                  } catch {
                     await mutateTasks(); // Restaurer la liste en cas d'erreur
                   }
                   setTaskToDelete(null);

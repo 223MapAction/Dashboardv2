@@ -133,7 +133,7 @@ export const CollaborationRequests = ({
       try {
         const parsed = new URL(url);
         return parsed.origin + parsed.pathname;
-      } catch (e) {
+      } catch {
         return url;
       }
     };
@@ -217,8 +217,6 @@ export const CollaborationRequests = ({
   // Modal de décision
   const [decisionRequest, setDecisionRequest] = useState(null);
   const [decisionAction, setDecisionAction] = useState(null); // 'accept' | 'reject' | null
-  const [decisionClosing, setDecisionClosing] = useState(false);
-  const [responseText, setResponseText] = useState('');
   const [suggestionsStatus, setSuggestionsStatus] = useState({}); // {orgName: 'accepted' | 'rejected'}
   const [isSubmittingDecision, setIsSubmittingDecision] = useState(false);
   const [decisionError, setDecisionError] = useState(null);

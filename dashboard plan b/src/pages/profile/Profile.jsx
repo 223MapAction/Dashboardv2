@@ -68,7 +68,7 @@ export const Profile = () => {
 
   const userId = sessionStorage.getItem('user_id');
 
-  const { data: userProfile, error: swrError, isLoading: swrLoading, mutate } = useSWR(
+  const { data: userProfile, mutate } = useSWR(
     userId ? `/MapApi/user/${userId}/` : null,
     () => getUserProfileService(userId),
     {

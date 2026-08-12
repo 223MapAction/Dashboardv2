@@ -116,7 +116,6 @@ export const Incident = () => {
   // Charger la liste des incidents avec useSWR
   const {
     data: rawIncidents,
-    error: incidentsError,
     isLoading: isLoadingIncidents,
     mutate: mutateIncidents
   } = useSWR(

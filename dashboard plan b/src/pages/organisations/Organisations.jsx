@@ -79,7 +79,7 @@ export const Organisations = () => {
     setPage(1);
   }, [search, sectorFilter, statusFilter, typeFilter]);
 
-  const { data: rawOrgs, error: swrError, isLoading: swrLoading, mutate: mutateOrgs } = useSWR(
+  const { data: rawOrgs, isLoading: swrLoading, mutate: mutateOrgs } = useSWR(
     ['organisation_list', page, search, sectorFilter, statusFilter, typeFilter],
     () => getOrganisationsService(page, pageSize, true, search, sectorFilter, statusFilter, typeFilter)
   );
@@ -130,7 +130,6 @@ export const Organisations = () => {
   const [deleteModal, setDeleteModal] = useState({ open: false, org: null });
 
   // Toast
-  const [toast, setToast] = useState(null);
 
   // Alertes pour les modals
   const [modalAlert, setModalAlert] = useState({ type: null, message: null });

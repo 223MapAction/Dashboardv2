@@ -12,7 +12,6 @@ import './header.css';
 export const Header = ({ onMenuToggle, user }) => {
   const navigate = useNavigate();
   const currentUser = user || authService.getCurrentUser();
-  const [activeLanguage, setActiveLanguage] = useState('Français');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [nextNotificationsUrl, setNextNotificationsUrl] = useState(null);
@@ -74,7 +73,11 @@ export const Header = ({ onMenuToggle, user }) => {
             try {
               const audio = new Audio(notifSound);
               audio.play().catch(() => {});
-            } catch (e) {}
+            } catch {
+              // Le son de notification est un confort, pas une fonctionnalite :
+              // le navigateur peut le refuser tant que l'utilisateur n'a pas
+              // interagi avec la page. Echouer ici ne doit rien interrompre.
+            }
 
             const newNotification = {
               id: data.id || `notif-${Date.now()}`,
@@ -188,7 +191,7 @@ export const Header = ({ onMenuToggle, user }) => {
         try {
           const parsed = JSON.parse(notification.link);
           targetUrl = parsed.url;
-        } catch (e) {
+        } catch {
           if (notification.link.startsWith('/')) {
             targetUrl = notification.link;
           }

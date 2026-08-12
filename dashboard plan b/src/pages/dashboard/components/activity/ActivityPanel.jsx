@@ -45,7 +45,7 @@ export const ActivityPanel = ({ activities: propActivities, isLoading, nextUrl, 
       const diffHours = Math.floor(diffMins / 60);
       if (diffHours < 24) return `Il y a ${diffHours}h`;
       return date.toLocaleDateString('fr-FR');
-    } catch (e) {
+    } catch {
       return '';
     }
   };
