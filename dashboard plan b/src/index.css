@@ -1388,3 +1388,103 @@ p {
   font-size: var(--font-size-body);
   color: var(--color-text-muted);
 }
+
+/* ── 15. Chargement et echec de chargement d'une page ────────────────────────
+   Les pages arrivent a la demande. Ces deux ecrans couvrent le temps
+   d'attente, et le cas ou le code de la page n'arrive jamais. */
+.chargement-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-4);
+  min-height: 100vh;
+  min-height: 100dvh;
+  color: var(--color-text-muted);
+}
+
+.chargement-page-anneau {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: var(--radius-full);
+  animation: rotationChargement 0.8s linear infinite;
+}
+
+/* Le libelle n'apparait qu'au bout d'une demi-seconde. Sur une connexion
+   correcte la page arrive avant : faire clignoter « Chargement… » pour deux
+   dixiemes de seconde donne l'impression d'une application poussive. */
+.chargement-page-texte {
+  font-size: var(--font-size-body-small);
+  opacity: 0;
+  animation: apparitionRetardee 0.3s ease 0.5s forwards;
+}
+
+@keyframes rotationChargement {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes apparitionRetardee {
+  to { opacity: 1; }
+}
+
+/* Une animation qui tourne sans fin peut declencher gene ou nausee chez les
+   personnes sensibles au mouvement. On respecte leur reglage systeme. */
+@media (prefers-reduced-motion: reduce) {
+  .chargement-page-anneau {
+    animation: none;
+    border-top-color: var(--color-border);
+  }
+
+  .chargement-page-texte {
+    opacity: 1;
+    animation: none;
+  }
+}
+
+.frontiere-chargement {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-4);
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: var(--spacing-6);
+  text-align: center;
+}
+
+.frontiere-chargement-titre {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.frontiere-chargement-texte {
+  max-width: 42ch;
+  font-size: var(--font-size-body-large);
+  color: var(--color-text-secondary);
+}
+
+.frontiere-chargement-action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  /* 44px : cible tactile minimale. C'est le seul bouton de l'ecran, et il est
+     souvent appuye sur un telephone dont la connexion vient de flancher. */
+  min-height: 44px;
+  padding: var(--spacing-3) var(--spacing-5);
+  background-color: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--color-surface);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.frontiere-chargement-action:hover {
+  background-color: var(--color-primary-dark);
+}
