@@ -3283,12 +3283,17 @@ export const CollaborationDetail = () => {
                                             const isImage = lowerUrl.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg|tiff|heic|heif)$/);
                                             if (!isImage) return null;
                                             return (
-                                            <div
+                                            <button
+                                              type="button"
+                                              aria-label="Agrandir la photo de preuve"
                                               onClick={() => {
                                                 setActiveProofPreview({ type: 'image', url: proofUrl });
                                               }}
                                               style={{
                                                 cursor: 'pointer',
+                                                padding: 0,
+                                                border: 'none',
+                                                display: 'block',
                                                 backgroundColor: '#000',
                                                 maxHeight: '400px',
                                                 position: 'relative',
@@ -3311,17 +3316,19 @@ export const CollaborationDetail = () => {
                                               }}>
                                                 <span>🔍 Cliquer pour agrandir</span>
                                               </div>
-                                            </div>
+                                            </button>
                                             );
                                           })()}
 
                                           {/* Vidéo */}
                                           {(task.proof_video || (task.proof?.type === 'video' && task.proof.url)) && (
-                                            <div
+                                            <button
+                                              type="button"
+                                              aria-label="Lire la video de preuve"
                                               onClick={() => {
                                                 setActiveProofPreview({ type: 'video', url: task.proof_video || task.proof.url });
                                               }}
-                                              style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', cursor: 'pointer' }}
+                                              style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', cursor: 'pointer', padding: 0, border: 'none', background: 'none', display: 'block' }}
                                               className="proof-hover-container"
                                             >
                                               <video
@@ -3345,7 +3352,7 @@ export const CollaborationDetail = () => {
                                                 </div>
                                                 <span style={{ fontWeight: '500' }}>Lire la vidéo</span>
                                               </div>
-                                            </div>
+                                            </button>
                                           )}
 
                                           {/* Document (PDF, Word, Excel, etc.) */}

@@ -599,6 +599,22 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
     audio.currentTime = Math.max(0, Math.min(duration, ratio * duration));
   };
 
+  // La barre s'annoncait comme un curseur (role="slider") mais n'ecoutait que
+  // la souris : au clavier, elle prenait le focus puis ne repondait a rien.
+  // Les fleches deplacent de 5 s, Debut/Fin sautent aux extremites.
+  const seekAudioClavier = (e) => {
+    const audio = audioRef.current;
+    if (!audio || !duration) return;
+    const pas = { ArrowLeft: -5, ArrowRight: 5, ArrowDown: -5, ArrowUp: 5 };
+    let cible = null;
+    if (e.key in pas) cible = audio.currentTime + pas[e.key];
+    else if (e.key === 'Home') cible = 0;
+    else if (e.key === 'End') cible = duration;
+    if (cible === null) return;
+    e.preventDefault();
+    audio.currentTime = Math.max(0, Math.min(duration, cible));
+  };
+
   // Reset l'audio quand le projet change
   useEffect(() => {
     if (audioRef.current) {
@@ -1544,7 +1560,18 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                       )}
                     </button>
                     <div className="detail-audio-track">
-                      <div className="detail-audio-progress" onClick={seekAudio} role="slider" tabIndex={0} aria-label="Progression audio">
+                      <div
+                        className="detail-audio-progress"
+                        onClick={seekAudio}
+                        onKeyDown={seekAudioClavier}
+                        role="slider"
+                        tabIndex={0}
+                        aria-label="Progression audio"
+                        aria-valuemin={0}
+                        aria-valuemax={Math.round(duration)}
+                        aria-valuenow={Math.round(currentTime)}
+                        aria-valuetext={`${formatTime(currentTime)} sur ${formatTime(duration)}`}
+                      >
                         <div className="detail-audio-progress-fill" style={{ width: `${progressPercent}%` }} />
                       </div>
                       <div className="detail-audio-times">

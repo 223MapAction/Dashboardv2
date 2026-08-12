@@ -978,6 +978,7 @@ export const Collaboration = () => {
               <button
                 type="button"
                 className="tasks-modal-close"
+                aria-label="Fermer la liste des tâches"
                 onClick={closeTasksModal}
               >
                 <CloseCircle size={24} variant="Linear" color="var(--color-text-primary)" />
@@ -1300,6 +1301,7 @@ export const Collaboration = () => {
                 <button
                   type="button"
                   className="tasks-modal-close"
+                  aria-label="Fermer le formulaire de tâche"
                   onClick={closeAddTaskModal}
                 >
                   <CloseCircle size={24} variant="Linear" color="var(--color-text-primary)" />
@@ -1637,6 +1639,7 @@ export const Collaboration = () => {
                 <button
                   type="button"
                   className="tasks-modal-close"
+                  aria-label="Fermer la suggestion d’organisation"
                   onClick={closeSuggestOrgModal}
                 >
                   <CloseCircle size={24} variant="Linear" color="var(--color-text-primary)" />

@@ -129,8 +129,17 @@ export const BlurryImage = ({
     );
   }
 
+  // Une image cliquable est un bouton, pas un div : sinon elle est invisible au
+  // clavier et pour un lecteur d'ecran. Le cas d'echec juste au-dessus le
+  // faisait deja ; le cas normal l'avait oublie. Sans onClick, l'image reste un
+  // simple div — un bouton qui ne fait rien serait un piege au clavier.
+  const Conteneur = onClick ? 'button' : 'div';
+  const propsConteneur = onClick
+    ? { type: 'button', onClick, 'aria-label': alt ? `Agrandir : ${alt}` : 'Agrandir la photo' }
+    : {};
+
   return (
-    <div className={`blurry-image-container ${className}`} style={wrapperStyles} onClick={onClick}>
+    <Conteneur className={`blurry-image-container ${className}`} style={wrapperStyles} {...propsConteneur}>
       {etat !== 'charge' && <div className="blurry-image-placeholder" aria-hidden="true" />}
       <img
         ref={attacherImage}
@@ -146,7 +155,7 @@ export const BlurryImage = ({
         onError={handleError}
         style={imgStyles}
       />
-    </div>
+    </Conteneur>
   );
 };
 
