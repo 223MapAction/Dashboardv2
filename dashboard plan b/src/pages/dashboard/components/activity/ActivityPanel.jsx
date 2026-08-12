@@ -9,27 +9,27 @@ export const ActivityPanel = ({ activities: propActivities, isLoading, nextUrl, 
 
     switch (type) {
       case 'incident-taken':
-        return <DocumentText {...iconProps} color="#3AA2DD" />;
+        return <DocumentText {...iconProps} color="var(--color-primary-text)" />;
       case 'incident-resolved':
-        return <TickCircle {...iconProps} color="#22C55E" />;
+        return <TickCircle {...iconProps} color="var(--color-success-text)" />;
       case 'collaboration':
-        return <People {...iconProps} color="#F59E0B" />;
+        return <People {...iconProps} color="var(--color-warning-text)" />;
       case 'report':
-        return <Camera {...iconProps} color="#3AA2DD" />;
+        return <Camera {...iconProps} color="var(--color-primary-text)" />;
       case 'alert':
-        return <Danger {...iconProps} color="#EF4444" />;
+        return <Danger {...iconProps} color="var(--color-danger-text)" />;
       case 'warning':
-        return <Warning2 {...iconProps} color="#F59E0B" />;
+        return <Warning2 {...iconProps} color="var(--color-warning-text)" />;
       case 'info':
-        return <InfoCircle {...iconProps} color="#6C7278" />;
+        return <InfoCircle {...iconProps} color="var(--color-text-secondary)" />;
       case 'message':
-        return <MessageText {...iconProps} color="#3AA2DD" />;
+        return <MessageText {...iconProps} color="var(--color-primary-text)" />;
       case 'task':
-        return <Task {...iconProps} color="#22C55E" />;
+        return <Task {...iconProps} color="var(--color-success-text)" />;
       case 'archive':
-        return <Archive {...iconProps} color="#6C7278" />;
+        return <Archive {...iconProps} color="var(--color-text-secondary)" />;
       default:
-        return <InfoCircle {...iconProps} color="#6C7278" />;
+        return <InfoCircle {...iconProps} color="var(--color-text-secondary)" />;
     }
   };
 
@@ -106,10 +106,10 @@ export const ActivityPanel = ({ activities: propActivities, isLoading, nextUrl, 
         {isLoading ? (
           <div className="d-flex flex-column align-items-center justify-content-center p-4 text-center">
             <div className="spinner-border text-primary spinner-border-sm" role="status" />
-            <span className="text-muted mt-2" style={{ fontSize: '11px' }}>Chargement du flux...</span>
+            <span className="text-muted mt-2" style={{ fontSize: 'var(--font-size-micro)' }}>Chargement du flux...</span>
           </div>
         ) : activities.length === 0 ? (
-          <div className="text-center p-4 text-muted" style={{ fontSize: '12px' }}>
+          <div className="text-center p-4 text-muted" style={{ fontSize: 'var(--font-size-caption)' }}>
             Aucune activité récente.
           </div>
         ) : (

@@ -335,7 +335,7 @@ export const Agents = () => {
                   <p className="agents-subtitle">Gérez les agents et leurs accès à Map Action.</p>
                 </div>
                 <button className="agents-add-btn" onClick={openCreate}>
-                  <Add size={18} color="#fff" />
+                  <Add size={18} color="var(--color-surface)" />
                   Nouvel agent
                 </button>
               </div>
@@ -397,7 +397,7 @@ export const Agents = () => {
                         Modifiez votre recherche, ou invitez un nouvel agent dans l’équipe.
                       </p>
                       <button type="button" className="agents-add-btn" onClick={openCreate}>
-                        <Add size={18} color="#fff" />
+                        <Add size={18} color="var(--color-surface)" />
                         Nouvel agent
                       </button>
                     </div>

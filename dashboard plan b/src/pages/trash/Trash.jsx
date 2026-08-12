@@ -439,11 +439,11 @@ export const TrashPage = () => {
                   {selected.size > 0 && (
                     <div className="trash-batch-actions" style={{ display: 'flex', gap: 'var(--spacing-2)' }}>
                       <button className="trash-btn-restore-all" onClick={handleRestoreSelected}>
-                        <RotateLeft size={16} variant="Linear" color="#FFFFFF" />
+                        <RotateLeft size={16} variant="Linear" color="var(--color-surface)" />
                         Restaurer ({selected.size})
                       </button>
                       <button className="trash-btn-delete-all" onClick={() => setConfirmId('batch')} style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--spacing-2)', padding: 'var(--spacing-3) var(--spacing-5)', backgroundColor: 'var(--color-danger)', color: 'var(--color-surface)', border: 'none', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-body)', fontWeight: 'var(--font-weight-semibold)', fontFamily: 'var(--font-family)', cursor: 'pointer', transition: 'background-color 0.2s ease, transform 0.1s ease', whiteSpace: 'nowrap' }}>
-                        <Trash size={16} variant="Linear" color="#FFFFFF" />
+                        <Trash size={16} variant="Linear" color="var(--color-surface)" />
                         Supprimer ({selected.size})
                       </button>
                     </div>
@@ -592,7 +592,7 @@ export const TrashPage = () => {
       {/* ── Toast ── */}
       {toast && (
         <div className="trash-toast">
-          <RotateLeft size={16} variant="Linear" color="#FFFFFF" />
+          <RotateLeft size={16} variant="Linear" color="var(--color-surface)" />
           {toast.message}
         </div>
       )}

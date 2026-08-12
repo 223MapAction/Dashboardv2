@@ -96,9 +96,9 @@ export const IncidentList = ({
           <span className="incident-table-title">
             {incident.title || 'Sans titre'}
             {incident.isOwner ? (
-              <span className="incident-owner-tag" style={{ marginLeft: '8px', fontSize: '10px', padding: '2px 6px', background: 'var(--color-primary-text)', color: 'white', borderRadius: '4px' }}>Moi</span>
+              <span className="incident-owner-tag" style={{ marginLeft: '8px', fontSize: 'var(--font-size-micro)', padding: '2px 6px', background: 'var(--color-primary-text)', color: 'white', borderRadius: '4px' }}>Moi</span>
             ) : incident.takenBy ? (
-              <span className="incident-owner-tag" style={{ marginLeft: '8px', fontSize: '10px', padding: '2px 6px', background: 'var(--color-text-muted)', color: 'white', borderRadius: '4px' }}>Autre</span>
+              <span className="incident-owner-tag" style={{ marginLeft: '8px', fontSize: 'var(--font-size-micro)', padding: '2px 6px', background: 'var(--color-text-muted)', color: 'white', borderRadius: '4px' }}>Autre</span>
             ) : null}
           </span>
           {incident.description
@@ -117,9 +117,9 @@ export const IncidentList = ({
                                 <span className="incident-table-title">
                                   {incident.title || 'Sans titre'}
                                   {incident.isOwner ? (
-                                    <span className="incident-owner-tag" style={{ marginLeft: '8px', fontSize: '10px', padding: '2px 6px', background: 'var(--color-primary-text)', color: 'white', borderRadius: '4px' }}>Moi</span>
+                                    <span className="incident-owner-tag" style={{ marginLeft: '8px', fontSize: 'var(--font-size-micro)', padding: '2px 6px', background: 'var(--color-primary-text)', color: 'white', borderRadius: '4px' }}>Moi</span>
                                   ) : incident.takenBy ? (
-                                    <span className="incident-owner-tag" style={{ marginLeft: '8px', fontSize: '10px', padding: '2px 6px', background: 'var(--color-text-muted)', color: 'white', borderRadius: '4px' }}>Autre</span>
+                                    <span className="incident-owner-tag" style={{ marginLeft: '8px', fontSize: 'var(--font-size-micro)', padding: '2px 6px', background: 'var(--color-text-muted)', color: 'white', borderRadius: '4px' }}>Autre</span>
                                   ) : null}
                                 </span>
                                 <span className="incident-table-subtitle">{incident.description?.substring(0, 50)}...</span>
@@ -133,7 +133,7 @@ export const IncidentList = ({
         <span className="incident-table-cell-text">
                             {incident.location || 'Inconnue'}
                             {incident.coordinates && (
-                              <div style={{ fontSize: '11px', color: 'var(--color-text-muted)', marginTop: '2px' }}>
+                              <div style={{ fontSize: 'var(--font-size-micro)', color: 'var(--color-text-muted)', marginTop: '2px' }}>
                                 {incident.coordinates.lat.toFixed(3)}, {incident.coordinates.lng.toFixed(3)}
                               </div>
                             )}
@@ -215,7 +215,7 @@ export const IncidentList = ({
                                         border: '1px solid rgba(34, 197, 94, 0.3)',
                                         padding: '2px 8px',
                                         borderRadius: '12px',
-                                        fontSize: '11px',
+                                        fontSize: 'var(--font-size-micro)',
                                         fontWeight: '600'
                                       }}>
                                         Moi
@@ -229,7 +229,7 @@ export const IncidentList = ({
                                         border: '1px solid rgba(108, 114, 120, 0.3)',
                                         padding: '2px 8px',
                                         borderRadius: '12px',
-                                        fontSize: '11px',
+                                        fontSize: 'var(--font-size-micro)',
                                         fontWeight: '600'
                                       }}>
                                         Autre
@@ -237,7 +237,7 @@ export const IncidentList = ({
                                     )}
                                   </div>
                                   <div style={{
-                                    fontSize: '12px',
+                                    fontSize: 'var(--font-size-caption)',
                                     color: 'var(--color-text-secondary)',
                                     marginTop: '4px',
                                     fontStyle: 'italic',
@@ -264,7 +264,7 @@ export const IncidentList = ({
                                   </div>
                                 </div>
                               ) : (
-                                <span style={{ color: 'var(--color-text-muted)', fontSize: '13px', fontStyle: 'italic' }}>
+                                <span style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-body-small)', fontStyle: 'italic' }}>
                                   Disponible
                                 </span>
                               )}
@@ -320,7 +320,7 @@ export const IncidentList = ({
                                         gap: '6px',
                                         padding: '4px 10px',
                                         borderRadius: '6px',
-                                        fontSize: '11px',
+                                        fontSize: 'var(--font-size-micro)',
                                         fontWeight: '600',
                                         color: badgeColor,
                                         backgroundColor: badgeBg,

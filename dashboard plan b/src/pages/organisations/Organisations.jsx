@@ -38,7 +38,7 @@ const COLOR_PALETTE = [
 const EMPTY_FORM = {
   name: '',
   acronym: '',
-  color: '#3AA2DD',
+  color: 'var(--color-primary-text)',
   sector: '',
   type: '',
   country: '',

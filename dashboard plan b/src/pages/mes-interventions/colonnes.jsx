@@ -72,7 +72,7 @@ export const creerColonnesInterventions = ({ onOuvrirRapports, RenduEquipe }) =>
               alignItems: 'center',
               padding: '4px 10px',
               borderRadius: '12px',
-              fontSize: '11px',
+              fontSize: 'var(--font-size-micro)',
               fontWeight: '600',
               backgroundColor: (incident.take_in_charge_mode === 'internal' || incident.take_in_charge_mode === 'interne') ? 'rgba(58, 162, 221, 0.12)' : 'rgba(168, 85, 247, 0.12)',
               color: (incident.take_in_charge_mode === 'internal' || incident.take_in_charge_mode === 'interne') ? 'var(--color-primary)' : '#A855F7',

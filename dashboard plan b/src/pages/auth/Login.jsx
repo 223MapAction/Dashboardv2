@@ -62,12 +62,12 @@ export const Login = ({ onLogin }) => {
           <form onSubmit={handleSubmit} className="login-form">
             {error && (
               <div className="login-error" style={{
-                backgroundColor: '#FEE2E2',
+                backgroundColor: 'var(--color-danger-surface)',
                 color: 'var(--color-danger-text)',
                 padding: '12px 16px',
                 borderRadius: '8px',
                 marginBottom: '16px',
-                fontSize: '14px'
+                fontSize: 'var(--font-size-body)'
               }}>
                 {error}
               </div>
@@ -82,7 +82,7 @@ export const Login = ({ onLogin }) => {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
-                <Sms size={20} variant="Linear" color="#6C7278" />
+                <Sms size={20} variant="Linear" color="var(--color-text-secondary)" />
               </div>
             </div>
 
@@ -103,9 +103,9 @@ export const Login = ({ onLogin }) => {
                   aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
                 >
                   {showPassword ? (
-                    <EyeSlash size={20} variant="Linear" color="#6C7278" />
+                    <EyeSlash size={20} variant="Linear" color="var(--color-text-secondary)" />
                   ) : (
-                    <Eye size={20} variant="Linear" color="#6C7278" />
+                    <Eye size={20} variant="Linear" color="var(--color-text-secondary)" />
                   )}
                 </button>
               </div>

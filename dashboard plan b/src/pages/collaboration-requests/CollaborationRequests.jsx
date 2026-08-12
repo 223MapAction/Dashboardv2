@@ -937,7 +937,7 @@ export const CollaborationRequests = ({
                         padding: '3px 8px',
                         color: 'var(--color-surface)',
                         borderRadius: '4px',
-                        fontSize: '9px',
+                        fontSize: 'var(--font-size-micro)',
                         fontWeight: 'bold',
                         textTransform: 'uppercase',
                         backgroundColor: meta.color,
@@ -949,8 +949,8 @@ export const CollaborationRequests = ({
                   </div>
 
                   <div className="incident-group-title-section">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', fontSize: '12px' }}>
-                      <span style={{ fontWeight: 600, color: '#1A1C1E', fontSize: '13px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', fontSize: 'var(--font-size-caption)' }}>
+                      <span style={{ fontWeight: 600, color: 'var(--color-text-primary)', fontSize: 'var(--font-size-body-small)' }}>
                         {incident.userCollab?.direction === 'sent' ? (
                           <>
                             Vous avez envoyé une demande de collaboration à <strong style={{ fontWeight: 800 }}>{incident.leader?.org || incident.organisation}</strong>
@@ -968,13 +968,13 @@ export const CollaborationRequests = ({
                       </span>
                     </div>
 
-                    <h3 className="incident-group-title" style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>
+                    <h3 className="incident-group-title" style={{ margin: 0, fontSize: 'var(--font-size-body-large)', fontWeight: 700 }}>
                       {incident.projectTitle}
                     </h3>
 
                     <p style={{
                       margin: 0,
-                      fontSize: '13px',
+                      fontSize: 'var(--font-size-body-small)',
                       color: 'var(--color-text-secondary)',
                       lineHeight: '1.5',
                       display: '-webkit-box',
@@ -995,7 +995,7 @@ export const CollaborationRequests = ({
                           gap: '4px',
                           padding: '3px 8px',
                           borderRadius: '4px',
-                          fontSize: '11px',
+                          fontSize: 'var(--font-size-micro)',
                           fontWeight: '600',
                           color: myRoleMeta.color,
                           borderColor: 'transparent',
@@ -1017,7 +1017,7 @@ export const CollaborationRequests = ({
                           gap: '4px',
                           padding: '3px 8px',
                           borderRadius: '4px',
-                          fontSize: '11px',
+                          fontSize: 'var(--font-size-micro)',
                           fontWeight: '600',
                           color: 'var(--color-warning-text)',
                           backgroundColor: 'rgba(245, 158, 11, 0.12)',
@@ -1047,7 +1047,7 @@ export const CollaborationRequests = ({
                             gap: '4px',
                             padding: '3px 8px',
                             borderRadius: '4px',
-                            fontSize: '11px',
+                            fontSize: 'var(--font-size-micro)',
                             fontWeight: '600',
                             color: 'var(--color-text-secondary)',
                             borderColor: 'transparent',
@@ -1079,7 +1079,7 @@ export const CollaborationRequests = ({
                             border: 'none',
                             fontWeight: 600,
                             cursor: 'pointer',
-                            fontSize: '12px'
+                            fontSize: 'var(--font-size-caption)'
                           }}
                           onClick={() => openDecision(pendingReqToAction, 'accept')}
                         >
@@ -1100,7 +1100,7 @@ export const CollaborationRequests = ({
                             border: 'none',
                             fontWeight: 600,
                             cursor: 'pointer',
-                            fontSize: '12px'
+                            fontSize: 'var(--font-size-caption)'
                           }}
                           onClick={() => openDecision(pendingReqToAction, 'reject')}
                         >
@@ -1116,7 +1116,7 @@ export const CollaborationRequests = ({
                       onClick={() => setExpandedIncident(isExpanded ? null : incident.id)}
                       aria-label={isExpanded ? 'Réduire' : 'Développer'}
                     >
-                      <ArrowRight2 size={18} variant="Linear" color="#6C7278" />
+                      <ArrowRight2 size={18} variant="Linear" color="var(--color-text-secondary)" />
 
                     </button>
                   </div>

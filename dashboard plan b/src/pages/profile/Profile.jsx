@@ -260,7 +260,7 @@ export const Profile = () => {
               </div>
               {savedFlash && (
                 <div className="profile-flash">
-                  <TickCircle size={18} variant="Bold" color="#22C55E" />
+                  <TickCircle size={18} variant="Bold" color="var(--color-success-text)" />
                   Modifications enregistrées
                 </div>
               )}
@@ -284,7 +284,7 @@ export const Profile = () => {
                     onClick={() => fileInputRef.current?.click()}
                     aria-label="Changer la photo de profil"
                   >
-                    <Camera size={16} variant="Bold" color="#FFFFFF" />
+                    <Camera size={16} variant="Bold" color="var(--color-surface)" />
                   </button>
                   <input
                     ref={fileInputRef}
@@ -304,15 +304,15 @@ export const Profile = () => {
                   </p>
                   <div className="profile-banner-meta">
                     <span>
-                      <Sms size={14} variant="Bold" color="#6C7278" />
+                      <Sms size={14} variant="Bold" color="var(--color-text-secondary)" />
                       {profile.email}
                     </span>
                     <span>
-                      <Location size={14} variant="Bold" color="#6C7278" />
+                      <Location size={14} variant="Bold" color="var(--color-text-secondary)" />
                       {profile.address || '—'}
                     </span>
                     <span>
-                      <Calendar size={14} variant="Bold" color="#6C7278" />
+                      <Calendar size={14} variant="Bold" color="var(--color-text-secondary)" />
                       Membre depuis {formatDate(profile.date_joined)}
                     </span>
                   </div>
@@ -324,7 +324,7 @@ export const Profile = () => {
                     className="profile-btn profile-btn-primary"
                     onClick={() => setIsEditing(true)}
                   >
-                    <Edit2 size={16} variant="Bold" color="#FFFFFF" />
+                    <Edit2 size={16} variant="Bold" color="var(--color-surface)" />
                     Modifier
                   </button>
                 ) : (
@@ -346,7 +346,7 @@ export const Profile = () => {
                       <TickCircle
                         size={16}
                         variant="Bold"
-                        color="#FFFFFF"
+                        color="var(--color-surface)"
                       />
                       {isSaving ? 'Enregistrement...' : 'Enregistrer'}
                     </button>
@@ -513,13 +513,13 @@ export const Profile = () => {
                           <TickCircle
                             size={18}
                             variant="Bold"
-                            color="#22C55E"
+                            color="var(--color-success-text)"
                           />
                         ) : (
                           <CloseCircle
                             size={18}
                             variant="Bold"
-                            color="#EF4444"
+                            color="var(--color-danger-text)"
                           />
                         )}
                         {pwdMessage.text}
@@ -568,13 +568,13 @@ export const Profile = () => {
                                 <EyeSlash
                                   size={18}
                                   variant="Linear"
-                                  color="#6C7278"
+                                  color="var(--color-text-secondary)"
                                 />
                               ) : (
                                 <Eye
                                   size={18}
                                   variant="Linear"
-                                  color="#6C7278"
+                                  color="var(--color-text-secondary)"
                                 />
                               )}
                             </button>
@@ -589,7 +589,7 @@ export const Profile = () => {
                         className="profile-btn profile-btn-primary"
                         disabled={isChangingPwd}
                       >
-                        <Lock1 size={16} variant="Bold" color="#FFFFFF" />
+                        <Lock1 size={16} variant="Bold" color="var(--color-surface)" />
                         {isChangingPwd ? 'Mise à jour...' : 'Mettre à jour le mot de passe'}
                       </button>
                     </div>

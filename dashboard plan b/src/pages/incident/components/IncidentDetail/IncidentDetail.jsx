@@ -1248,7 +1248,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                 alignItems: 'center',
                 padding: '4px 12px',
                 borderRadius: '20px',
-                fontSize: '12px',
+                fontSize: 'var(--font-size-caption)',
                 fontWeight: '600',
                 backgroundColor: currentStatus.bg,
                 color: currentStatus.color,
@@ -1266,7 +1266,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                   alignItems: 'center',
                   padding: '4px 12px',
                   borderRadius: '20px',
-                  fontSize: '12px',
+                  fontSize: 'var(--font-size-caption)',
                   fontWeight: '600',
                   backgroundColor: modeBadge.bg,
                   color: modeBadge.color,
@@ -1286,7 +1286,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                   alignItems: 'center',
                   padding: '4px 12px',
                   borderRadius: '20px',
-                  fontSize: '12px',
+                  fontSize: 'var(--font-size-caption)',
                   fontWeight: '600',
                   backgroundColor: userRoleBadge.bg,
                   color: userRoleBadge.color,
@@ -1306,7 +1306,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                   alignItems: 'center',
                   padding: '4px 12px',
                   borderRadius: '20px',
-                  fontSize: '12px',
+                  fontSize: 'var(--font-size-caption)',
                   fontWeight: '600',
                   backgroundColor: (() => {
                     if (safeIncident.severity === 'high') return 'rgba(239, 68, 68, 0.12)';
@@ -1341,7 +1341,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                   alignItems: 'center',
                   padding: '4px 12px',
                   borderRadius: '20px',
-                  fontSize: '12px',
+                  fontSize: 'var(--font-size-caption)',
                   fontWeight: '600',
                   backgroundColor: getCollabBadgeStyle(collabRequest.status).bg,
                   color: getCollabBadgeStyle(collabRequest.status).color,
@@ -1378,7 +1378,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                   color: hasPendingRequest ? 'var(--color-warning)' : 'var(--color-surface)',
                   border: hasPendingRequest ? '1px solid rgba(245, 158, 11, 0.3)' : 'none',
                   borderRadius: '8px',
-                  fontSize: '14px',
+                  fontSize: 'var(--font-size-body)',
                   fontWeight: '600',
                   cursor: hasPendingRequest ? 'not-allowed' : 'pointer',
                   transition: 'all 0.2s ease',
@@ -1386,7 +1386,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                 }}
                 onMouseEnter={(e) => {
                   if (!hasPendingRequest) {
-                    e.currentTarget.style.backgroundColor = '#2E8BC0';
+                    e.currentTarget.style.backgroundColor = 'var(--color-primary-dark)';
                   }
                 }}
                 onMouseLeave={(e) => {
@@ -1450,7 +1450,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
               boxShadow: '0 4px 20px rgba(0, 0, 0, 0.02)'
             }}>
               <People size={20} variant="Bold" color="var(--color-warning)" />
-              <div style={{ fontSize: '14px', fontWeight: '500' }}>
+              <div style={{ fontSize: 'var(--font-size-body)', fontWeight: '500' }}>
                 <span>
                   <strong>Signalement ouvert à la collaboration :</strong> Des organisations se mobilisent déjà pour intervenir, mais aucun leader n'est encore désigné pour coordonner les actions. Prenez le leadership ou rejoignez l'effort !
                 </span>
@@ -1477,7 +1477,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                 boxShadow: '0 4px 20px rgba(0, 0, 0, 0.02)'
               }}>
                 <Briefcase size={20} variant="Bold" color={takingOrg.isMe ? 'var(--color-success)' : 'var(--color-primary)'} />
-                <div style={{ fontSize: '14px', fontWeight: '500' }}>
+                <div style={{ fontSize: 'var(--font-size-body)', fontWeight: '500' }}>
                   {takingOrg.isMe ? (
                     <span>
                       <strong>Signalement géré en interne :</strong> Votre organisation travaille actuellement sur cet incident en interne avec ses propres équipes.
@@ -1629,7 +1629,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                         onClick={() => setDetailMapStyle('satellite')}
                         style={{
                           padding: '4px 10px',
-                          fontSize: '11px',
+                          fontSize: 'var(--font-size-micro)',
                           fontWeight: '600',
                           borderRadius: '4px',
                           border: 'none',
@@ -1646,7 +1646,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                         onClick={() => setDetailMapStyle('streets')}
                         style={{
                           padding: '4px 10px',
-                          fontSize: '11px',
+                          fontSize: 'var(--font-size-micro)',
                           fontWeight: '600',
                           borderRadius: '4px',
                           border: 'none',
@@ -1662,7 +1662,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                   </div>
                 </>
               ) : (
-                <p style={{ color: 'var(--color-text-muted)', fontSize: '14px' }}>Coordonnées non disponibles</p>
+                <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-body)' }}>Coordonnées non disponibles</p>
               )}
             </div>
 
@@ -1673,7 +1673,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
               <div className="dark-card-title">
                 DESCRIPTION
               </div>
-              <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: '1.6', margin: 0 }}>
+              <p style={{ fontSize: 'var(--font-size-body)', color: 'var(--color-text-secondary)', lineHeight: '1.6', margin: 0 }}>
                 {safeIncident.description && safeIncident.description.trim()
                   ? safeIncident.description
                   : 'Aucune description disponible pour cet incident.'}
@@ -1689,7 +1689,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {(safeIncident.taken_by_organisation || safeIncident.taken_by_name) && (
                     <div>
-                      <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', fontWeight: '600', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+                      <span style={{ fontSize: 'var(--font-size-micro)', color: 'var(--color-text-muted)', fontWeight: '600', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
                         Prise en charge par
                       </span>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1703,11 +1703,11 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                           backgroundColor: 'rgba(58, 162, 221, 0.1)',
                           color: 'var(--color-primary-text)',
                           fontWeight: 'bold',
-                          fontSize: '12px'
+                          fontSize: 'var(--font-size-caption)'
                         }}>
                           {(safeIncident.taken_by_organisation?.name || safeIncident.taken_by_name || 'O')[0].toUpperCase()}
                         </span>
-                        <span style={{ fontSize: '14px', fontWeight: '500', color: 'var(--color-text-primary)' }}>
+                        <span style={{ fontSize: 'var(--font-size-body)', fontWeight: '500', color: 'var(--color-text-primary)' }}>
                           {safeIncident.taken_by_organisation?.name || safeIncident.taken_by_name}
                         </span>
                       </div>
@@ -1716,7 +1716,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
 
                   {safeIncident.acting_organisations && safeIncident.acting_organisations.length > 0 && (
                     <div>
-                      <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', fontWeight: '600', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
+                      <span style={{ fontSize: 'var(--font-size-micro)', color: 'var(--color-text-muted)', fontWeight: '600', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
                         Organisations actives sur le terrain ({safeIncident.acting_organisations.length})
                       </span>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -1770,7 +1770,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                   borderRadius: '8px',
                   border: '1px dashed var(--color-border)',
                   color: 'var(--color-text-muted)',
-                  fontSize: '14px'
+                  fontSize: 'var(--font-size-body)'
                 }}>
                   <span>Aucune vidéo disponible pour cet signalement</span>
                 </div>
@@ -1839,7 +1839,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                     {/* Score d'impact global */}
                     <div className="kpi-card" style={{ margin: 0 }}>
                       <Danger size={32} variant="Bold" color="var(--color-warning)" />
-                      <div className="kpi-value" style={{ fontSize: '28px', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-warning-text)' }}>
+                      <div className="kpi-value" style={{ fontSize: 'var(--font-size-h1)', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-warning-text)' }}>
                         {pred.global_impact_score}
                       </div>
                       <div className="kpi-label">SCORE D'IMPACT GLOBAL</div>
@@ -1904,7 +1904,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                       border: '1px solid var(--color-border)',
                       marginBottom: 'var(--spacing-4)'
                     }}>
-                      <div style={{ fontSize: '10px', fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-text-muted)', marginBottom: 'var(--spacing-1)', textTransform: 'uppercase' }}>
+                      <div style={{ fontSize: 'var(--font-size-micro)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-text-muted)', marginBottom: 'var(--spacing-1)', textTransform: 'uppercase' }}>
                         Géolocalisation Estimée
                       </div>
                       <div style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-text-primary)', fontWeight: 'var(--font-weight-semibold)', marginBottom: 'var(--spacing-1)', lineHeight: '1.4' }}>
@@ -2048,7 +2048,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
 
                       <div style={{ marginBottom: 'var(--spacing-3)' }}>
                         <div style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-text-muted)', marginBottom: 'var(--spacing-1)' }}>PERSONNES EXPOSÉES</div>
-                        <div style={{ fontSize: '20px', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-primary-text)' }}>
+                        <div style={{ fontSize: 'var(--font-size-title)', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-primary-text)' }}>
                           {pred.total_population_exposed}
                         </div>
                       </div>
@@ -2080,7 +2080,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-1)' }}>
                           <span style={{ fontSize: 'var(--font-size-body-large)', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-primary-text)' }}>{pred.social_vulnerability_score}/10</span>
                           {pred.is_social_probabilistic && (
-                            <span style={{ fontSize: '9px', backgroundColor: 'var(--color-background)', border: '1px solid var(--color-primary)', color: 'var(--color-primary-text)', padding: '2px 4px', borderRadius: 'var(--radius-sm)', fontWeight: 'var(--font-weight-semibold)' }}>PROB</span>
+                            <span style={{ fontSize: 'var(--font-size-micro)', backgroundColor: 'var(--color-background)', border: '1px solid var(--color-primary)', color: 'var(--color-primary-text)', padding: '2px 4px', borderRadius: 'var(--radius-sm)', fontWeight: 'var(--font-weight-semibold)' }}>PROB</span>
                           )}
                         </div>
                       </div>
@@ -2117,7 +2117,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
 
                       <div style={{ marginBottom: 'var(--spacing-3)' }}>
                         <div style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-text-muted)', marginBottom: 'var(--spacing-1)' }}>TEMPÉRATURE</div>
-                        <div style={{ fontSize: '20px', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-success-text)' }}>
+                        <div style={{ fontSize: 'var(--font-size-title)', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-success-text)' }}>
                           {pred.topography?.temperature_celsius ?? 40.5}°C
                         </div>
                       </div>
@@ -2183,7 +2183,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
 
                       <div style={{ marginBottom: 'var(--spacing-3)' }}>
                         <div style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-text-muted)', marginBottom: 'var(--spacing-1)' }}>ÉCOLES</div>
-                        <div style={{ fontSize: '20px', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-warning-text)' }}>
+                        <div style={{ fontSize: 'var(--font-size-title)', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-warning-text)' }}>
                           {pred.schools ?? pred.social_data?.schools ?? 0}
                         </div>
                       </div>
@@ -2286,7 +2286,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
 
         {/* Floating Chatbot Button */}
         <button className="floating-chatbot" onClick={() => setChatOpen(!chatOpen)} aria-label="Ouvrir l'assistant de chat">
-          {chatOpen ? <CloseCircle size={28} variant="Bold" color="#FFFFFF" /> : <Message size={28} variant="Bold" color="#FFFFFF" />}
+          {chatOpen ? <CloseCircle size={28} variant="Bold" color="var(--color-surface)" /> : <Message size={28} variant="Bold" color="var(--color-surface)" />}
         </button>
 
         {/* Chatbot Panel */}
@@ -2296,8 +2296,8 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
               <div className="chatbot-header-title">
                 Assistant IA Map Action
               </div>
-              <button type="button" onClick={() => setChatOpen(false)} style={{ background: 'transparent', border: 'none', color: '#FFFFFF', cursor: 'pointer', display: 'flex', alignItems: 'center' }} aria-label="Fermer l'assistant de chat">
-                <CloseCircle size={20} variant="Linear" color='#ffffff' />
+              <button type="button" onClick={() => setChatOpen(false)} style={{ background: 'transparent', border: 'none', color: 'var(--color-surface)', cursor: 'pointer', display: 'flex', alignItems: 'center' }} aria-label="Fermer l'assistant de chat">
+                <CloseCircle size={20} variant="Linear" color='var(--color-surface)' />
               </button>
             </div>
 
@@ -2327,7 +2327,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                 <h4 style={{ fontWeight: 'var(--font-weight-bold)', color: 'var(--color-text-primary)', marginBottom: '8px' }}>
                   Chat indisponible
                 </h4>
-                <p style={{ fontSize: '13px', lineHeight: '1.6' }}>
+                <p style={{ fontSize: 'var(--font-size-body-small)', lineHeight: '1.6' }}>
                   Le chat n'est pas disponible pour cet incident car aucune prédiction/analyse n'a encore été générée.
                 </p>
               </div>
@@ -2354,7 +2354,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                       </div>
                       {msg.time && (
                         <span style={{
-                          fontSize: '10px',
+                          fontSize: 'var(--font-size-micro)',
                           color: 'var(--color-text-secondary)',
                           marginTop: '4px',
                           alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start',
@@ -2377,7 +2377,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
 
                 {chatError && (
                   <div className="chatbot-error-message">
-                    <CloseCircle size={16} variant="Bold" color="#EF4444" />
+                    <CloseCircle size={16} variant="Bold" color="var(--color-danger-text)" />
                     <span>{chatError}</span>
                   </div>
                 )}
@@ -2401,7 +2401,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                     {isTyping ? (
                       <span className="chatbot-btn-spinner" />
                     ) : (
-                      <Send2 size={18} variant="Bold" color='#ffffff' />
+                      <Send2 size={18} variant="Bold" color='var(--color-surface)' />
                     )}
                   </button>
                 </form>

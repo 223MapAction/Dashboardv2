@@ -16,13 +16,13 @@ const getStatusLabel = (etat) => {
 const getStatusStyle = (etat) => {
   switch (etat) {
     case 'resolved':
-      return { backgroundColor: 'rgba(34, 197, 94, 0.1)', color: '#22C55E' };
+      return { backgroundColor: 'rgba(34, 197, 94, 0.1)', color: 'var(--color-success-text)' };
     case 'taken_into_account':
     case 'in_progress':
-      return { backgroundColor: 'rgba(245, 158, 11, 0.1)', color: '#F59E0B' };
+      return { backgroundColor: 'rgba(245, 158, 11, 0.1)', color: 'var(--color-warning-text)' };
     case 'declared':
     default:
-      return { backgroundColor: 'rgba(107, 114, 128, 0.1)', color: '#6B7280' };
+      return { backgroundColor: 'rgba(107, 114, 128, 0.1)', color: 'var(--color-text-secondary)' };
   }
 };
 
@@ -53,24 +53,24 @@ export const StatsWidgets = ({ stats }) => {
         {
           label: 'Élevée',
           percentage: high,
-          color: '#EF4444'
+          color: 'var(--color-danger-text)'
         },
         {
           label: 'Moyenne',
           percentage: medium,
-          color: '#F97316'
+          color: 'var(--color-warning-text)'
         },
         {
           label: 'Faible',
           percentage: low,
-          color: '#FACC15'
+          color: 'var(--color-warning-text)'
         }
       ];
     }
     return [
-      { label: 'Élevée', percentage: 0, color: '#EF4444' },
-      { label: 'Moyenne', percentage: 0, color: '#F97316' },
-      { label: 'Faible', percentage: 0, color: '#FACC15' }
+      { label: 'Élevée', percentage: 0, color: 'var(--color-danger-text)' },
+      { label: 'Moyenne', percentage: 0, color: 'var(--color-warning-text)' },
+      { label: 'Faible', percentage: 0, color: 'var(--color-warning-text)' }
     ];
   }, [stats]);
 
@@ -137,7 +137,7 @@ export const StatsWidgets = ({ stats }) => {
                   </span>
                 </div>
                 <span style={{
-                  fontSize: '9px',
+                  fontSize: 'var(--font-size-micro)',
                   padding: '3px 8px',
                   borderRadius: '12px',
                   fontWeight: '600',
@@ -150,7 +150,7 @@ export const StatsWidgets = ({ stats }) => {
               </div>
             ))
           ) : (
-            <div className="text-center p-3 text-muted" style={{ fontSize: '11px' }}>
+            <div className="text-center p-3 text-muted" style={{ fontSize: 'var(--font-size-micro)' }}>
               Aucune activité récente.
             </div>
           )}
@@ -186,7 +186,7 @@ export const StatsWidgets = ({ stats }) => {
                     backgroundColor: 'var(--color-bg-primary, #ffffff)',
                     border: '1px solid var(--color-border, #e5e7eb)',
                     borderRadius: '8px',
-                    fontSize: '12px',
+                    fontSize: 'var(--font-size-caption)',
                     color: 'var(--color-text-primary)'
                   }}
                 />

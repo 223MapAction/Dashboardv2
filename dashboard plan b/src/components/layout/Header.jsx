@@ -225,13 +225,13 @@ export const Header = ({ onMenuToggle, user }) => {
       case 'leader':
       case 'co-leader':
       case 'collaborator':
-        return <People {...iconProps} color="#3AA2DD" />;
+        return <People {...iconProps} color="var(--color-primary-text)" />;
       case 'danger':
       case 'alert':
       case 'incident':
-        return <Danger {...iconProps} color="#EF4444" />;
+        return <Danger {...iconProps} color="var(--color-danger-text)" />;
       default:
-        return <InfoCircle {...iconProps} color="#F59E0B" />;
+        return <InfoCircle {...iconProps} color="var(--color-warning-text)" />;
     }
   };
 
@@ -277,11 +277,11 @@ export const Header = ({ onMenuToggle, user }) => {
 
               <div className="notification-list">
                 {isLoadingNotifications ? (
-                  <div style={{ padding: '20px', textAlign: 'center', color: '#6C7278' }}>
+                  <div style={{ padding: '20px', textAlign: 'center', color: 'var(--color-text-secondary)' }}>
                     Chargement...
                   </div>
                 ) : notifications.length === 0 ? (
-                  <div style={{ padding: '20px', textAlign: 'center', color: '#6C7278' }}>
+                  <div style={{ padding: '20px', textAlign: 'center', color: 'var(--color-text-secondary)' }}>
                     Aucune notification
                   </div>
                 ) : (
@@ -300,7 +300,7 @@ export const Header = ({ onMenuToggle, user }) => {
                         <div className="notification-message">
                           {formatNotificationMessage(notification.message)}
                           {notification.incident_title && (
-                            <span className="notification-incident-tag" style={{ display: 'block', fontSize: '10px', color: '#6C7278', marginTop: '2px', fontStyle: 'italic' }}>
+                            <span className="notification-incident-tag" style={{ display: 'block', fontSize: 'var(--font-size-micro)', color: 'var(--color-text-secondary)', marginTop: '2px', fontStyle: 'italic' }}>
                               Incident : {notification.incident_title}
                             </span>
                           )}
@@ -365,7 +365,7 @@ export const Header = ({ onMenuToggle, user }) => {
                   <div className="profile-name">{currentUser?.first_name || 'Utilisateur'}</div>
                   <div className="profile-email">{currentUser?.email}</div>
                   {currentUser?.organisation_name && (
-                    <div className="profile-org" style={{ fontSize: '13px', color: 'var(--color-primary-text)', marginTop: '4px', fontWeight: '500' }}>
+                    <div className="profile-org" style={{ fontSize: 'var(--font-size-body-small)', color: 'var(--color-primary-text)', marginTop: '4px', fontWeight: '500' }}>
                       {currentUser.organisation_name}
                     </div>
                   )}

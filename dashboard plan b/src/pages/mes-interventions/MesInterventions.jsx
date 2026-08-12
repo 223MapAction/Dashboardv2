@@ -108,7 +108,7 @@ const IncidentAgentsStack = ({ incident }) => {
 
   if (incidentAgents.length === 0) {
     return (
-      <span style={{ fontSize: '12px', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
+      <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
         Aucun agent
       </span>
     );
@@ -137,7 +137,7 @@ const IncidentAgentsStack = ({ incident }) => {
             alignItems: 'center',
             justifyContent: 'center',
             fontWeight: '600',
-            fontSize: '11px',
+            fontSize: 'var(--font-size-micro)',
             border: '2px solid white',
             marginLeft: index > 0 ? '-8px' : '0',
 
@@ -153,13 +153,13 @@ const IncidentAgentsStack = ({ incident }) => {
             width: '28px',
             height: '28px',
             borderRadius: '50%',
-            backgroundColor: '#E2E8F0',
-            color: '#475569',
+            backgroundColor: 'var(--color-border)',
+            color: 'var(--color-text-secondary)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontWeight: '600',
-            fontSize: '10px',
+            fontSize: 'var(--font-size-micro)',
             border: '2px solid white',
             marginLeft: '-8px',
             zIndex: 1

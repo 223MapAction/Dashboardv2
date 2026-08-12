@@ -224,13 +224,13 @@ export const InviteOrgModal = () => {
                     >
                       <EyeSlash size={24} variant={workMode === 'interne' ? "Bold" : "Linear"} color={workMode === 'interne' ? "var(--color-primary)" : "#6C7278"} />
                       <div style={{
-                        fontSize: '14px',
+                        fontSize: 'var(--font-size-body)',
                         fontWeight: 'var(--font-weight-bold)',
                         color: workMode === 'interne' ? 'var(--color-primary)' : 'var(--color-text-primary)'
                       }}>
                         Agir en interne
                       </div>
-                      <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)', textAlign: 'center', lineHeight: '1.3' }}>
+                      <div style={{ fontSize: 'var(--font-size-micro)', color: 'var(--color-text-secondary)', textAlign: 'center', lineHeight: '1.3' }}>
                         Je vais le gérer avec mes équipes en interne simplement
                       </div>
                     </button>
@@ -262,13 +262,13 @@ export const InviteOrgModal = () => {
                     >
                       <People size={24} variant={workMode === 'collaboration' ? "Bold" : "Linear"} color={workMode === 'collaboration' ? "var(--color-primary)" : "#6C7278"} />
                       <div style={{
-                        fontSize: '14px',
+                        fontSize: 'var(--font-size-body)',
                         fontWeight: 'var(--font-weight-bold)',
                         color: workMode === 'collaboration' ? 'var(--color-primary)' : 'var(--color-text-primary)'
                       }}>
                         Travailler en collaboration
                       </div>
-                      <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)', textAlign: 'center', lineHeight: '1.3' }}>
+                      <div style={{ fontSize: 'var(--font-size-micro)', color: 'var(--color-text-secondary)', textAlign: 'center', lineHeight: '1.3' }}>
                         Public et visible par tous
                       </div>
                     </button>
@@ -308,7 +308,7 @@ export const InviteOrgModal = () => {
                           <RoleIcon
                             size={14}
                             variant={isSelected ? 'Bold' : 'Linear'}
-                            color={isSelected ? role.color : '#6C7278'}
+                            color={isSelected ? role.color : 'var(--color-text-secondary)'}
                           />
                           {role.label}
                         </button>
@@ -449,7 +449,7 @@ export const InviteOrgModal = () => {
                         </div>
                       ) : orgsError ? (
                         <div className="invite-orgs-empty">
-                          <Buildings2 size={20} variant="Linear" color="#EF4444" />
+                          <Buildings2 size={20} variant="Linear" color="var(--color-danger-text)" />
                           <span>Erreur de chargement</span>
                         </div>
                       ) : selectableOrgs.length === 0 ? (
@@ -566,7 +566,7 @@ export const InviteOrgModal = () => {
                                   <RoleIcon
                                     size={14}
                                     variant={isSelected ? 'Bold' : 'Linear'}
-                                    color={isSelected ? role.color : '#6C7278'}
+                                    color={isSelected ? role.color : 'var(--color-text-secondary)'}
                                   />
                                   {role.label}
                                 </button>
@@ -576,11 +576,11 @@ export const InviteOrgModal = () => {
                         </div>
 
                         <div className="invited-org-comment" style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                          <span className="invited-org-role-label" style={{ fontSize: '12px', color: 'var(--color-text-secondary)', fontWeight: '500' }}>Motif de l'invitation / Justification :</span>
+                          <span className="invited-org-role-label" style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-text-secondary)', fontWeight: '500' }}>Motif de l'invitation / Justification :</span>
                           <input
                             type="text"
                             className="invite-orgs-search-input"
-                            style={{ width: '100%', fontSize: '13px', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-background)', color: 'var(--color-text-primary)' }}
+                            style={{ width: '100%', fontSize: 'var(--font-size-body-small)', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-background)', color: 'var(--color-text-primary)' }}
                             placeholder="Ex: Expert en biodiversité pour aider sur la zone A..."
                             value={org.comment || ''}
                             onChange={(e) => updateOrgComment(org.id, e.target.value)}

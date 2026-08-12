@@ -59,12 +59,12 @@ export const ForgotPassword = () => {
               <form onSubmit={handleSubmit} className="login-form">
                 {error && (
                   <div className="login-error" style={{
-                    backgroundColor: '#FEE2E2',
+                    backgroundColor: 'var(--color-danger-surface)',
                     color: 'var(--color-danger-text)',
                     padding: '12px 16px',
                     borderRadius: '8px',
                     marginBottom: '16px',
-                    fontSize: '14px'
+                    fontSize: 'var(--font-size-body)'
                   }}>
                     {error}
                   </div>
@@ -81,7 +81,7 @@ export const ForgotPassword = () => {
                       required
                       autoFocus
                     />
-                    <Sms size={20} variant="Linear" color="#6C7278" />
+                    <Sms size={20} variant="Linear" color="var(--color-text-secondary)" />
                   </div>
                 </div>
 

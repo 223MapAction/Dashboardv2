@@ -194,7 +194,7 @@ export const SuggestOrgModal = () => {
           )}
           {/* Bandeau d'info */}
           <div className="suggest-info-banner">
-            <Crown1 size={18} variant="Bold" color="#F59E0B" />
+            <Crown1 size={18} variant="Bold" color="var(--color-warning-text)" />
             <span>
               En tant que <strong>{collaboration.role == "leader" ? "Leader" : "Contributeur"}</strong>, vous pouvez
               {collaboration?.role == "leader" ? "inviter des organisations" : "suggérer des organisations"}
@@ -210,7 +210,7 @@ export const SuggestOrgModal = () => {
             </label>
             <div className="suggest-search-wrapper" ref={searchWrapperRef}>
               <div className="suggest-search">
-                <SearchNormal1 size={16} variant="Linear" color="#6C7278" />
+                <SearchNormal1 size={16} variant="Linear" color="var(--color-text-secondary)" />
                 <input
                   type="text"
                   className="suggest-search-input"
@@ -225,7 +225,7 @@ export const SuggestOrgModal = () => {
                     className="suggest-search-clear"
                     onClick={() => { setSuggestSearch(''); setShowDropdown(false); }}
                   >
-                    <CloseCircle size={16} variant="Linear" color="#6C7278" />
+                    <CloseCircle size={16} variant="Linear" color="var(--color-text-secondary)" />
                   </button>
                 )}
               </div>
@@ -247,7 +247,7 @@ export const SuggestOrgModal = () => {
                       </div>
                     ) : orgsError ? (
                       <div className="suggest-search-empty">
-                        <Buildings2 size={20} variant="Linear" color="#EF4444" />
+                        <Buildings2 size={20} variant="Linear" color="var(--color-danger-text)" />
                         <span>Erreur de chargement</span>
                       </div>
                     ) : selectableOrgs.length === 0 ? (
@@ -321,7 +321,7 @@ export const SuggestOrgModal = () => {
           {/* Organisations sélectionnées */}
           <div className="suggest-section">
             <label className="suggest-section-label">
-              <People size={16} variant="Bold" color="#3AA2DD" />
+              <People size={16} variant="Bold" color="var(--color-primary-text)" />
               Sélectionnées ({suggestedOrgs.length})
             </label>
 
@@ -352,7 +352,7 @@ export const SuggestOrgModal = () => {
                           onClick={() => toggleSuggestedOrg(org)}
                           title="Retirer"
                         >
-                          <CloseCircle size={18} variant="Linear" color="#EF4444" />
+                          <CloseCircle size={18} variant="Linear" color="var(--color-danger-text)" />
                         </button>
                       </div>
 
@@ -377,7 +377,7 @@ export const SuggestOrgModal = () => {
                                 <RoleIcon
                                   size={12}
                                   variant={isRoleSel ? 'Bold' : 'Linear'}
-                                  color={isRoleSel ? role.color : '#6C7278'}
+                                  color={isRoleSel ? role.color : 'var(--color-text-secondary)'}
                                 />
                                 {role.label}
                               </button>

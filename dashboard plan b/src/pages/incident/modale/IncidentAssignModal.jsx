@@ -338,7 +338,7 @@ export const IncidentAssignModal = () => {
               <SearchNormal1
                 size={16}
                 variant="Linear"
-                color="#6C7278"
+                color="var(--color-text-secondary)"
                 style={{ position: 'absolute', left: '12px' }}
               />
               <input
@@ -362,13 +362,13 @@ export const IncidentAssignModal = () => {
             {loadingAgents ? (
               <div className="d-flex flex-column align-items-center justify-content-center p-4 border rounded bg-light">
                 <div className="spinner-border text-primary" role="status" style={{ width: '1.5rem', height: '1.5rem' }} />
-                <span className="text-muted mt-2" style={{ fontSize: '12px' }}>Chargement des agents...</span>
+                <span className="text-muted mt-2" style={{ fontSize: 'var(--font-size-caption)' }}>Chargement des agents...</span>
               </div>
             ) : filteredAgents.length === 0 ? (
               <div className="d-flex flex-column align-items-center justify-content-center p-4 border rounded bg-light text-center">
                 <Profile size={32} variant="Linear" color="var(--color-text-muted)" />
-                <span className="fw-medium mt-2" style={{ fontSize: '13px', color: '#6B7280' }}>Aucun agent trouvé</span>
-                <span className="text-muted" style={{ fontSize: '11px' }}>Assurez-vous que des agents sont enregistrés.</span>
+                <span className="fw-medium mt-2" style={{ fontSize: 'var(--font-size-body-small)', color: 'var(--color-text-secondary)' }}>Aucun agent trouvé</span>
+                <span className="text-muted" style={{ fontSize: 'var(--font-size-micro)' }}>Assurez-vous que des agents sont enregistrés.</span>
               </div>
             ) : (
               <div className="incidents-agents-list">
@@ -397,13 +397,13 @@ export const IncidentAssignModal = () => {
                               width: '36px',
                               height: '36px',
                               borderRadius: '50%',
-                              backgroundColor: isAlreadyAssigned ? '#94A3B8' : agent.avatarColor,
+                              backgroundColor: isAlreadyAssigned ? 'var(--color-text-muted)' : agent.avatarColor,
                               color: 'white',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
                               fontWeight: '600',
-                              fontSize: '13px',
+                              fontSize: 'var(--font-size-body-small)',
                               marginRight: '12px',
                               flexShrink: 0
                             }}
@@ -411,27 +411,27 @@ export const IncidentAssignModal = () => {
                             {getInitials(agent.fullName)}
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: '14px', fontWeight: '600', color: isAlreadyAssigned ? '#64748B' : 'var(--color-text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            <div style={{ fontSize: 'var(--font-size-body)', fontWeight: '600', color: isAlreadyAssigned ? 'var(--color-text-secondary)' : 'var(--color-text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                               {agent.fullName}
                               {isAlreadyAssigned && (
-                                <span style={{ marginLeft: '8px', fontSize: '9px', padding: '2px 8px', background: '#F1F5F9', color: '#475569', borderRadius: '12px', border: '1px solid #CBD5E1', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                <span style={{ marginLeft: '8px', fontSize: 'var(--font-size-micro)', padding: '2px 8px', background: 'var(--color-background)', color: 'var(--color-text-secondary)', borderRadius: '12px', border: '1px solid #CBD5E1', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                                   ✓ Assigné
                                 </span>
                               )}
                             </div>
-                            <div style={{ fontSize: '12px', color: isAlreadyAssigned ? '#94A3B8' : 'var(--color-text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            <div style={{ fontSize: 'var(--font-size-caption)', color: isAlreadyAssigned ? 'var(--color-text-muted)' : 'var(--color-text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                               {agent.role} &bull; {agent.email}
                             </div>
                           </div>
                           {isAlreadyAssigned ? (
-                            <span style={{ fontSize: '10px', color: '#475569', fontWeight: 'bold', marginLeft: 'auto', flexShrink: 0, textTransform: 'uppercase', letterSpacing: '0.5px', background: '#E2E8F0', padding: '4px 8px', borderRadius: '4px' }}>
+                            <span style={{ fontSize: 'var(--font-size-micro)', color: 'var(--color-text-secondary)', fontWeight: 'bold', marginLeft: 'auto', flexShrink: 0, textTransform: 'uppercase', letterSpacing: '0.5px', background: 'var(--color-border)', padding: '4px 8px', borderRadius: '4px' }}>
                               En service
                             </span>
                           ) : isSelected && (
                             <UserTick
                               size={18}
                               variant="Bold"
-                              color="#3AA2DD"
+                              color="var(--color-primary-text)"
                               style={{ marginLeft: '12px', flexShrink: 0 }}
                             />
                           )}
@@ -443,7 +443,7 @@ export const IncidentAssignModal = () => {
               </div>
             )}
             {errors.agent && (
-              <span className="text-danger" style={{ display: 'block', marginTop: '6px', fontSize: '12px' }}>
+              <span className="text-danger" style={{ display: 'block', marginTop: '6px', fontSize: 'var(--font-size-caption)' }}>
                 {errors.agent.message}
               </span>
             )}
@@ -470,7 +470,7 @@ export const IncidentAssignModal = () => {
                 }}
               />
               {errors.deadline && (
-                <span className="text-danger" style={{ display: 'block', marginTop: '6px', fontSize: '12px' }}>
+                <span className="text-danger" style={{ display: 'block', marginTop: '6px', fontSize: 'var(--font-size-caption)' }}>
                   {errors.deadline.message}
                 </span>
               )}

@@ -506,7 +506,7 @@ export const SuggestRequests = ({ embedded = false }) => {
         style={{
           display: 'inline-flex', alignItems: 'center', gap: '4px',
           padding: '3px 10px', borderRadius: '4px',
-          fontSize: '11px', fontWeight: 600,
+          fontSize: 'var(--font-size-micro)', fontWeight: 600,
           color: meta.color,
           backgroundColor: `color-mix(in srgb, ${meta.color} 12%, transparent)`
         }}
@@ -524,7 +524,7 @@ export const SuggestRequests = ({ embedded = false }) => {
       <span style={{
         display: 'inline-flex', alignItems: 'center', gap: '4px',
         padding: '3px 8px', borderRadius: '4px',
-        fontSize: '11px', fontWeight: 600,
+        fontSize: 'var(--font-size-micro)', fontWeight: 600,
         color: meta.color,
         backgroundColor: `color-mix(in srgb, ${meta.color} 10%, transparent)`
       }}>
@@ -657,7 +657,7 @@ export const SuggestRequests = ({ embedded = false }) => {
                       <span style={{
                         position: 'absolute', top: '8px', left: '8px',
                         padding: '3px 8px', borderRadius: '4px',
-                        fontSize: '9px', fontWeight: 'bold', textTransform: 'uppercase',
+                        fontSize: 'var(--font-size-micro)', fontWeight: 'bold', textTransform: 'uppercase',
                         color: 'var(--color-surface)', backgroundColor: meta.color,
                         boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
                       }}>
@@ -669,11 +669,11 @@ export const SuggestRequests = ({ embedded = false }) => {
                   {/* Content */}
                   <div className="incident-group-title-section">
                     {/* Type + date */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', fontSize: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', fontSize: 'var(--font-size-caption)' }}>
                       <span style={{
                         display: 'inline-flex', alignItems: 'center', gap: '4px',
                         padding: '2px 8px', borderRadius: '4px',
-                        fontSize: '11px', fontWeight: 600,
+                        fontSize: 'var(--font-size-micro)', fontWeight: 600,
                         color: isSuggestion ? 'var(--color-primary)' : 'var(--color-warning)',
                         backgroundColor: isSuggestion ? 'rgba(58,162,221,0.1)' : 'rgba(245,158,11,0.1)'
                       }}>
@@ -690,13 +690,13 @@ export const SuggestRequests = ({ embedded = false }) => {
                     </div>
 
                     {/* Title */}
-                    <h3 className="incident-group-title" style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>
+                    <h3 className="incident-group-title" style={{ margin: 0, fontSize: 'var(--font-size-body-large)', fontWeight: 700 }}>
                       {req.projectTitle}
                     </h3>
 
                     {/* Description line */}
                     <p style={{
-                      margin: 0, fontSize: '13px', color: 'var(--color-text-secondary)',
+                      margin: 0, fontSize: 'var(--font-size-body-small)', color: 'var(--color-text-secondary)',
                       lineHeight: 1.5, display: '-webkit-box',
                       WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden'
                     }}>
@@ -719,7 +719,7 @@ export const SuggestRequests = ({ embedded = false }) => {
                       <span style={{
                         display: 'inline-flex', alignItems: 'center', gap: '4px',
                         padding: '3px 8px', borderRadius: '4px',
-                        fontSize: '11px', fontWeight: 600,
+                        fontSize: 'var(--font-size-micro)', fontWeight: 600,
                         color: 'var(--color-text-secondary)',
                         backgroundColor: 'rgba(108,114,120,0.08)'
                       }}>
@@ -731,7 +731,7 @@ export const SuggestRequests = ({ embedded = false }) => {
                         <span style={{
                           display: 'inline-flex', alignItems: 'center', gap: '4px',
                           padding: '3px 8px', borderRadius: '4px',
-                          fontSize: '11px', fontWeight: 600,
+                          fontSize: 'var(--font-size-micro)', fontWeight: 600,
                           color: 'var(--color-text-secondary)',
                           backgroundColor: 'rgba(108,114,120,0.08)'
                         }}>
@@ -752,7 +752,7 @@ export const SuggestRequests = ({ embedded = false }) => {
                             display: 'flex', alignItems: 'center', gap: '6px',
                             padding: '6px 12px', borderRadius: '6px',
                             backgroundColor: 'var(--color-success)', color: 'var(--color-surface)',
-                            border: 'none', fontWeight: 600, cursor: 'pointer', fontSize: '12px'
+                            border: 'none', fontWeight: 600, cursor: 'pointer', fontSize: 'var(--font-size-caption)'
                           }}
                           onClick={(e) => { e.stopPropagation(); openDecision(req, 'accept'); }}
                         >
@@ -765,7 +765,7 @@ export const SuggestRequests = ({ embedded = false }) => {
                             display: 'flex', alignItems: 'center', gap: '6px',
                             padding: '6px 12px', borderRadius: '6px',
                             backgroundColor: 'var(--color-danger)', color: 'var(--color-surface)',
-                            border: 'none', fontWeight: 600, cursor: 'pointer', fontSize: '12px'
+                            border: 'none', fontWeight: 600, cursor: 'pointer', fontSize: 'var(--font-size-caption)'
                           }}
                           onClick={(e) => { e.stopPropagation(); openDecision(req, 'reject'); }}
                         >
@@ -782,7 +782,7 @@ export const SuggestRequests = ({ embedded = false }) => {
                       aria-label="Voir détails"
                       title="Voir l'incident"
                     >
-                      <ArrowRight2 size={18} variant="Linear" color="#6C7278" />
+                      <ArrowRight2 size={18} variant="Linear" color="var(--color-text-secondary)" />
                     </button>
                   </div>
                 </header>

@@ -408,7 +408,7 @@ export const Impact = () => {
               </div>
             ) : error ? (
               <div className="impact-empty">
-                <Award size={48} variant="Linear" color="#EF4444" />
+                <Award size={48} variant="Linear" color="var(--color-danger-text)" />
                 <p>Une erreur est survenue lors de la récupération des statistiques d'impact.</p>
               </div>
             ) : (
@@ -420,7 +420,7 @@ export const Impact = () => {
                   <div className="impact-kpi impact-kpi-primary-glow">
                     <div className="impact-kpi-top-row">
                       <div className="impact-kpi-icon-glow">
-                        <Tree size={24} variant="Bold" color="#FFFFFF" />
+                        <Tree size={24} variant="Bold" color="var(--color-surface)" />
                       </div>
                       <div>
                         <span className="impact-kpi-label">Superficie Protégée</span>
@@ -437,7 +437,7 @@ export const Impact = () => {
                   <div className="impact-kpi">
                     <div className="impact-kpi-top-row">
                       <div className="impact-kpi-icon-glow">
-                        <People size={24} variant="Bold" color="#3AA2DD" />
+                        <People size={24} variant="Bold" color="var(--color-primary-text)" />
                       </div>
                       <div>
                         <span className="impact-kpi-label">Bénéficiaires Directs</span>
@@ -476,7 +476,7 @@ export const Impact = () => {
                   <div className="impact-kpi">
                     <div className="impact-kpi-top-row">
                       <div className="impact-kpi-icon-glow">
-                        <Profile2User size={24} variant="Bold" color="#8B5CF6" />
+                        <Profile2User size={24} variant="Bold" color="var(--color-accent-text)" />
                       </div>
                       <div>
                         <span className="impact-kpi-label">Bénéficiaires Indirects</span>
@@ -515,7 +515,7 @@ export const Impact = () => {
                   <div className="impact-kpi">
                     <div className="impact-kpi-top-row">
                       <div className="impact-kpi-icon-glow">
-                        <Building size={24} variant="Bold" color="#F59E0B" />
+                        <Building size={24} variant="Bold" color="var(--color-warning-text)" />
                       </div>
                       <div>
                         <span className="impact-kpi-label">Structures Sensibles</span>
@@ -589,7 +589,7 @@ export const Impact = () => {
                       <div className="performance-row-inner">
                         <div className="perf-item-value">
                           <div className="perf-circle">
-                            <Clock size={28} variant="Bold" color="#3AA2DD" />
+                            <Clock size={28} variant="Bold" color="var(--color-primary-text)" />
                           </div>
                           <div className="perf-stats">
                             <span className="perf-val">
@@ -603,7 +603,7 @@ export const Impact = () => {
 
                         <div className="perf-item-value">
                           <div className="perf-circle">
-                            <Chart2 size={28} variant="Bold" color="#22C55E" />
+                            <Chart2 size={28} variant="Bold" color="var(--color-success-text)" />
                           </div>
                           <div className="perf-stats">
                             <span className="perf-val">
@@ -620,19 +620,19 @@ export const Impact = () => {
                       <h3 className="section-subtitle-impact">Mobilisation des acteurs</h3>
                       <div className="actor-stats-grid">
                         <div className="actor-badge">
-                          <Briefcase size={20} variant="Bold" color="#8B5CF6" />
+                          <Briefcase size={20} variant="Bold" color="var(--color-accent-text)" />
                           <span className="actor-num">{globals.mobilization.organisationsCount}</span>
                           <span className="actor-lbl">Organisations impliquées</span>
                         </div>
 
                         <div className="actor-badge">
-                          <Profile2User size={20} variant="Bold" color="#F59E0B" />
+                          <Profile2User size={20} variant="Bold" color="var(--color-warning-text)" />
                           <span className="actor-num">{globals.mobilization.agentsCount}</span>
                           <span className="actor-lbl">Agents de terrain</span>
                         </div>
 
                         <div className="actor-badge">
-                          <People size={20} variant="Bold" color="#3AA2DD" />
+                          <People size={20} variant="Bold" color="var(--color-primary-text)" />
                           <span className="actor-num">{globals.mobilization.collaborationsCount}</span>
                           <span className="actor-lbl">Collaborations créées</span>
                         </div>
@@ -658,25 +658,25 @@ export const Impact = () => {
                     <h3 className="section-subtitle-impact">Contribution citoyenne</h3>
                     <div className="citizen-grid">
                       <div className="citizen-card">
-                        <Activity size={24} variant="Bold" color="#3AA2DD" />
+                        <Activity size={24} variant="Bold" color="var(--color-primary-text)" />
                         <span className="citizen-number">{globals.citizen.received}</span>
                         <span className="citizen-lbl">Signalements reçus</span>
                       </div>
 
                       <div className="citizen-card">
-                        <TickCircle size={24} variant="Bold" color="#22C55E" />
+                        <TickCircle size={24} variant="Bold" color="var(--color-success-text)" />
                         <span className="citizen-number">{globals.citizen.verified}</span>
                         <span className="citizen-lbl">Signalements vérifiés</span>
                       </div>
 
                       <div className="citizen-card">
-                        <Award size={24} variant="Bold" color="#F59E0B" />
+                        <Award size={24} variant="Bold" color="var(--color-warning-text)" />
                         <span className="citizen-number">{globals.citizen.withAction}</span>
                         <span className="citizen-lbl">Ayant conduit à une action</span>
                       </div>
 
                       <div className="citizen-card">
-                        <Profile2User size={24} variant="Bold" color="#8B5CF6" />
+                        <Profile2User size={24} variant="Bold" color="var(--color-accent-text)" />
                         <span className="citizen-number">{globals.citizen.contributorsCount}</span>
                         <span className="citizen-lbl">Citoyens contributeurs actifs</span>
                       </div>
@@ -695,7 +695,7 @@ export const Impact = () => {
                   {/* Search incident input */}
                   <div className="impact-toolbar">
                     <div className="impact-search">
-                      <SearchNormal1 size={18} variant="Linear" color="#6C7278" />
+                      <SearchNormal1 size={18} variant="Linear" color="var(--color-text-secondary)" />
                       <input
                         type="text"
                         placeholder="Rechercher un signalement par titre, description, zone…"
@@ -770,7 +770,7 @@ export const Impact = () => {
                                   <span className="impact-card-type">{inc.zone || 'Zone non spécifiée'}</span>
                                   <span className="impact-card-dot">•</span>
                                   <span className="impact-card-region">
-                                    <Location size={12} variant="Bold" color="#6C7278" />
+                                    <Location size={12} variant="Bold" color="var(--color-text-secondary)" />
                                     {inc.lattitude && inc.longitude
                                       ? `${parseFloat(inc.lattitude).toFixed(4)}°N, ${parseFloat(
                                         inc.longitude
@@ -789,7 +789,7 @@ export const Impact = () => {
                                   {pred && (
                                     <>
                                       <div className="impact-card-metric text-primary">
-                                        <People size={13} variant="Bold" color="#3AA2DD" />
+                                        <People size={13} variant="Bold" color="var(--color-primary-text)" />
                                         <strong>
                                           {(pred.direct?.total_population_exposed || pred.total_population_exposed || 0).toLocaleString('fr-FR')}
                                         </strong>
@@ -797,7 +797,7 @@ export const Impact = () => {
                                       </div>
 
                                       <div className="impact-card-metric text-purple">
-                                        <Profile2User size={13} variant="Bold" color="#8B5CF6" />
+                                        <Profile2User size={13} variant="Bold" color="var(--color-accent-text)" />
                                         <strong>
                                           {(pred.indirect?.total_population_exposed || pred.potential_risk?.stats?.total_pop || 0).toLocaleString('fr-FR')}
                                         </strong>
@@ -806,7 +806,7 @@ export const Impact = () => {
 
                                       {areaHa > 0 && (
                                         <div className="impact-card-metric text-success">
-                                          <Tree size={13} variant="Bold" color="#22C55E" />
+                                          <Tree size={13} variant="Bold" color="var(--color-success-text)" />
                                           <strong>{areaHa.toFixed(1)}</strong>
                                           <span>ha impactés</span>
                                         </div>
@@ -817,7 +817,7 @@ export const Impact = () => {
 
                                 <div className="impact-card-meta">
                                   <div className="impact-meta-row">
-                                    <Calendar size={13} variant="Bold" color="#6C7278" />
+                                    <Calendar size={13} variant="Bold" color="var(--color-text-secondary)" />
                                     <span>
                                       Créé le {formatDate(inc.created_at)}
                                       {inc.resolution_end_date &&
@@ -832,7 +832,7 @@ export const Impact = () => {
                                 className={`impact-toggle ${isOpen ? 'is-open' : ''}`}
                                 aria-label={isOpen ? 'Réduire' : 'Voir le détail'}
                               >
-                                <ArrowRight2 size={18} variant="Linear" color="#6C7278" />
+                                <ArrowRight2 size={18} variant="Linear" color="var(--color-text-secondary)" />
                               </button>
                             </div>
 
@@ -955,7 +955,7 @@ export const Impact = () => {
                                             const relationLabel = org.relation === 'leader' ? 'Leader' : (org.relation === 'assigned' ? 'Assignée' : 'Collaborateur');
                                             return (
                                               <span key={idx} className="impact-org-chip">
-                                                {org.name} <strong style={{ marginLeft: '4px', fontSize: '10px', opacity: 0.8 }}>({relationLabel})</strong>
+                                                {org.name} <strong style={{ marginLeft: '4px', fontSize: 'var(--font-size-micro)', opacity: 0.8 }}>({relationLabel})</strong>
                                               </span>
                                             );
                                           });

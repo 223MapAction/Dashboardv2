@@ -209,7 +209,7 @@ const CustomAudioPlayer = ({ id, src, activeAudioId, setActiveAudioId }) => {
         onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 6px 14px rgba(0,0,0,0.2)'; }}
         onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 10px rgba(0,0,0,0.15)'; }}
       >
-        {isPlaying ? <Pause size={20} variant="Bold" color="#FFF" /> : <Play size={20} variant="Bold" color="#FFF" style={{ marginLeft: '2px' }} />}
+        {isPlaying ? <Pause size={20} variant="Bold" color="var(--color-surface)" /> : <Play size={20} variant="Bold" color="var(--color-surface)" style={{ marginLeft: '2px' }} />}
       </button>
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -227,7 +227,7 @@ const CustomAudioPlayer = ({ id, src, activeAudioId, setActiveAudioId }) => {
             }}
           />
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--color-text-muted)', fontWeight: '600', fontFamily: 'monospace' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--font-size-micro)', color: 'var(--color-text-muted)', fontWeight: '600', fontFamily: 'monospace' }}>
           <span>{formatTime(currentTime)}</span>
           <span>{formatTime(duration)}</span>
         </div>
@@ -1892,14 +1892,14 @@ export const CollaborationDetail = () => {
       id: 'contributeur',
       label: 'Contributeur',
       icon: People,
-      color: '#3AA2DD',
+      color: 'var(--color-primary-text)',
       description: 'Peut participer activement et créer des tâches'
     },
     {
       id: 'observateur',
       label: 'Observateur',
       icon: Eye,
-      color: '#6C7278',
+      color: 'var(--color-text-secondary)',
       description: 'Peut uniquement consulter les informations'
     }
   ];
@@ -1999,13 +1999,13 @@ export const CollaborationDetail = () => {
                   </p>
                 </div>
                 {isIncidentResolved ? (
-                  <div className="collab-detail-closed-badge" style={{ backgroundColor: 'var(--color-success)', color: '#FFFFFF' }}>
-                    <TickCircle size={16} variant="Bold" color="#FFFFFF" />
+                  <div className="collab-detail-closed-badge" style={{ backgroundColor: 'var(--color-success)', color: 'var(--color-surface)' }}>
+                    <TickCircle size={16} variant="Bold" color="var(--color-surface)" />
                     Incident Résolu
                   </div>
                 ) : isCollabClosed(collaboration?.id) ? (
                   <div className="collab-detail-closed-badge">
-                    <Lock1 size={16} variant="Bold" color="#FFFFFF" />
+                    <Lock1 size={16} variant="Bold" color="var(--color-surface)" />
                     Clôturée
                   </div>
                 ) : collaboration?.userRole === 'leader' && (
@@ -2136,7 +2136,7 @@ export const CollaborationDetail = () => {
                             {collaboration.predictionDetails.recommendation && (
                               <div className="collab-detail-meta-row">
                                 <span className="collab-detail-meta-label">Recommandation</span>
-                                <span className="collab-detail-meta-val text-highlight" style={{ fontSize: '13px' }}>
+                                <span className="collab-detail-meta-val text-highlight" style={{ fontSize: 'var(--font-size-body-small)' }}>
                                   {collaboration.predictionDetails.recommendation}
                                 </span>
                               </div>
@@ -2151,7 +2151,7 @@ export const CollaborationDetail = () => {
                                 {(collaboration.predictionDetails.children_exposed !== undefined ||
                                   collaboration.predictionDetails.adult_men_exposed !== undefined ||
                                   collaboration.predictionDetails.adult_women_exposed !== undefined) && (
-                                    <span className="collab-detail-meta-val" style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>
+                                    <span className="collab-detail-meta-val" style={{ fontSize: 'var(--font-size-micro)', color: 'var(--color-text-secondary)' }}>
                                       (Enfants : {collaboration.predictionDetails.children_exposed || 0}, Hommes : {collaboration.predictionDetails.adult_men_exposed || 0}, Femmes : {collaboration.predictionDetails.adult_women_exposed || 0})
                                     </span>
                                   )}
@@ -2176,7 +2176,7 @@ export const CollaborationDetail = () => {
                             {collaboration.predictionDetails.potential_risk?.message && (
                               <div className="collab-detail-meta-row">
                                 <span className="collab-detail-meta-label">Vecteur de propagation</span>
-                                <span className="collab-detail-meta-val" style={{ fontSize: '13px' }}>
+                                <span className="collab-detail-meta-val" style={{ fontSize: 'var(--font-size-body-small)' }}>
                                   {collaboration.predictionDetails.potential_risk.message}
                                 </span>
                               </div>
@@ -2212,7 +2212,7 @@ export const CollaborationDetail = () => {
                             })()}
                           </div>
                         ) : (
-                          <div className="collab-detail-meta-val" style={{ color: 'var(--color-text-muted)', fontSize: '13px', fontStyle: 'italic' }}>
+                          <div className="collab-detail-meta-val" style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-body-small)', fontStyle: 'italic' }}>
                             Aucune prédiction IA disponible pour cet incident.
                           </div>
                         )}
@@ -2333,7 +2333,7 @@ export const CollaborationDetail = () => {
                               justifyContent: 'center',
                               padding: '12px',
                               color: 'var(--color-text-secondary)',
-                              fontSize: '13px',
+                              fontSize: 'var(--font-size-body-small)',
                               gap: '8px',
                               alignItems: 'center'
                             }}>
@@ -2364,7 +2364,7 @@ export const CollaborationDetail = () => {
                                   border: '1px solid var(--color-border)',
                                   borderRadius: '16px',
                                   padding: '6px 16px',
-                                  fontSize: '12px',
+                                  fontSize: 'var(--font-size-caption)',
                                   color: 'var(--color-primary-text)',
                                   cursor: 'pointer',
                                   fontWeight: '500'
@@ -2420,13 +2420,13 @@ export const CollaborationDetail = () => {
                                     <div className="collab-message-sender">
                                       <span style={{ fontWeight: 'var(--font-weight-semibold)' }}>{msg.senderName}</span>
                                       {msg.senderOrgName && (
-                                        <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', marginLeft: '4px' }}>• {msg.senderOrgName}</span>
+                                        <span style={{ fontSize: 'var(--font-size-micro)', color: 'var(--color-text-muted)', marginLeft: '4px' }}>• {msg.senderOrgName}</span>
                                       )}
                                     </div>
                                   )}
                                   {msg.isMe && msg.senderOrgName && (
                                     <div className="collab-message-sender" style={{ textAlign: 'right' }}>
-                                      <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', marginRight: '4px' }}>{msg.senderOrgName} •</span>
+                                      <span style={{ fontSize: 'var(--font-size-micro)', color: 'var(--color-text-muted)', marginRight: '4px' }}>{msg.senderOrgName} •</span>
                                       <span style={{ fontWeight: 'var(--font-weight-semibold)' }}>{msg.senderName}</span>
                                     </div>
                                   )}
@@ -2454,7 +2454,7 @@ export const CollaborationDetail = () => {
                                             disabled={savingEdit}
                                             style={{
                                               padding: '4px 12px', borderRadius: '6px', border: '1px solid var(--color-border)',
-                                              background: 'var(--color-surface)', fontSize: '12px', cursor: 'pointer'
+                                              background: 'var(--color-surface)', fontSize: 'var(--font-size-caption)', cursor: 'pointer'
                                             }}
                                           >
                                             Annuler
@@ -2465,7 +2465,7 @@ export const CollaborationDetail = () => {
                                             disabled={savingEdit || !editingMessageText.trim()}
                                             style={{
                                               padding: '4px 12px', borderRadius: '6px', border: 'none',
-                                              background: 'var(--color-primary)', color: '#fff', fontSize: '12px',
+                                              background: 'var(--color-primary)', color: 'var(--color-surface)', fontSize: 'var(--font-size-caption)',
                                               cursor: savingEdit ? 'not-allowed' : 'pointer', opacity: savingEdit ? 0.7 : 1
                                             }}
                                           >
@@ -2490,7 +2490,7 @@ export const CollaborationDetail = () => {
                                             textAlign: 'left',
                                             minWidth: '240px'
                                           }}>
-                                            <span className="collab-message-file-icon" style={{ display: 'flex', alignItems: 'center', fontSize: '24px' }}>
+                                            <span className="collab-message-file-icon" style={{ display: 'flex', alignItems: 'center', fontSize: 'var(--font-size-h2)' }}>
                                               {getFileIcon(msg.file.name)}
                                             </span>
                                             <div className="collab-message-file-info" style={{ flex: 1 }}>
@@ -2502,7 +2502,7 @@ export const CollaborationDetail = () => {
                                                   type="button"
                                                   onClick={() => handleDownload(msg.file.url, msg.file.name, msg.id)}
                                                   disabled={downloadingMsgId === msg.id}
-                                                  style={{ background: 'none', border: 'none', padding: 0, fontSize: '11px', fontWeight: '500', color: 'var(--color-primary-text)', textDecoration: 'none', cursor: downloadingMsgId === msg.id ? 'not-allowed' : 'pointer', opacity: downloadingMsgId === msg.id ? 0.7 : 1, display: 'flex', alignItems: 'center', gap: '4px' }}
+                                                  style={{ background: 'none', border: 'none', padding: 0, fontSize: 'var(--font-size-micro)', fontWeight: '500', color: 'var(--color-primary-text)', textDecoration: 'none', cursor: downloadingMsgId === msg.id ? 'not-allowed' : 'pointer', opacity: downloadingMsgId === msg.id ? 0.7 : 1, display: 'flex', alignItems: 'center', gap: '4px' }}
                                                 >
                                                   {downloadingMsgId === msg.id ? (
                                                     <>
@@ -2518,8 +2518,8 @@ export const CollaborationDetail = () => {
                                                 </button>
                                                 {msg.file.size > 0 && (
                                                   <>
-                                                    <span style={{ fontSize: '10px', color: 'var(--color-text-muted)' }}>•</span>
-                                                    <span className="collab-message-file-size" style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>
+                                                    <span style={{ fontSize: 'var(--font-size-micro)', color: 'var(--color-text-muted)' }}>•</span>
+                                                    <span className="collab-message-file-size" style={{ fontSize: 'var(--font-size-micro)', color: 'var(--color-text-muted)' }}>
                                                       {(msg.file.size / 1024).toFixed(2)} KB
                                                     </span>
                                                   </>
@@ -2614,7 +2614,7 @@ export const CollaborationDetail = () => {
                                     title="Supprimer le fichier"
                                     disabled={sendingMessage}
                                   >
-                                    <CloseSquare size={16} variant="Bold" color="#EF4444" />
+                                    <CloseSquare size={16} variant="Bold" color="var(--color-danger-text)" />
                                   </button>
                                 </div>
                               )}
@@ -2629,7 +2629,7 @@ export const CollaborationDetail = () => {
                                     title="Supprimer l'audio"
                                     disabled={sendingMessage}
                                   >
-                                    <CloseSquare size={16} variant="Bold" color="#EF4444" />
+                                    <CloseSquare size={16} variant="Bold" color="var(--color-danger-text)" />
                                   </button>
                                 </div>
                               )}
@@ -2703,7 +2703,7 @@ export const CollaborationDetail = () => {
                                       title="Enregistrer un message vocal"
                                       style={{ opacity: sendingMessage ? 0.6 : 1, cursor: sendingMessage ? 'not-allowed' : 'pointer', backgroundColor: 'var(--color-primary)' }}
                                     >
-                                      <Microphone size={20} variant="Bold" color="#FFFFFF" />
+                                      <Microphone size={20} variant="Bold" color="var(--color-surface)" />
                                     </button>
                                   ) : (
                                     <button
@@ -2715,12 +2715,12 @@ export const CollaborationDetail = () => {
                                       style={{ opacity: sendingMessage ? 0.6 : 1, cursor: sendingMessage ? 'not-allowed' : 'pointer' }}
                                     >
                                       {sendingMessage ? (
-                                        <svg style={{ animation: 'spin 1s linear infinite', width: '20px', height: '20px', color: '#FFFFFF' }} viewBox="0 0 24 24" fill="none">
+                                        <svg style={{ animation: 'spin 1s linear infinite', width: '20px', height: '20px', color: 'var(--color-surface)' }} viewBox="0 0 24 24" fill="none">
                                           <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" style={{ opacity: 0.25 }}></circle>
                                           <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" style={{ opacity: 0.75 }}></path>
                                         </svg>
                                       ) : (
-                                        <Send2 size={20} variant="Bold" color="#FFFFFF" />
+                                        <Send2 size={20} variant="Bold" color="var(--color-surface)" />
                                       )}
                                     </button>
                                   )}
@@ -2747,7 +2747,7 @@ export const CollaborationDetail = () => {
                             onClick={openTaskModal}
                             title="Créer une nouvelle tâche"
                           >
-                            <Add size={20} color="#fff" />
+                            <Add size={20} color="var(--color-surface)" />
                             <span>Nouvelle tâche</span>
                           </button>
                         )}
@@ -2793,7 +2793,7 @@ export const CollaborationDetail = () => {
                                     disabled={task.failed || isCollabClosed(collaboration?.id)}
                                   />
                                   <span className="collab-task-checkmark">
-                                    <TickCircle size={18} variant="Bold" color="#FFFFFF" />
+                                    <TickCircle size={18} variant="Bold" color="var(--color-surface)" />
                                   </span>
                                 </label>
 
@@ -2833,8 +2833,8 @@ export const CollaborationDetail = () => {
                                       color: 'var(--color-text-secondary)'
                                     }}>
                                     {task.failed && (
-                                      <span className="collab-task-failed-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', backgroundColor: '#EF4444', color: '#FFFFFF', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold' }}>
-                                        <Danger size={10} variant="Bold" color="#FFFFFF" />
+                                      <span className="collab-task-failed-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', backgroundColor: 'var(--color-danger)', color: 'var(--color-surface)', padding: '2px 6px', borderRadius: '4px', fontSize: 'var(--font-size-micro)', fontWeight: 'bold' }}>
+                                        <Danger size={10} variant="Bold" color="var(--color-surface)" />
                                         Échouée
                                       </span>
                                     )}
@@ -2864,7 +2864,7 @@ export const CollaborationDetail = () => {
                                     {task.failed && task.updated_at && (
                                       <>
                                         <span>•</span>
-                                        <span className="failed-date" style={{ color: '#EF4444', fontWeight: '500' }}>
+                                        <span className="failed-date" style={{ color: 'var(--color-danger-text)', fontWeight: '500' }}>
                                           Échouée le {formatDateTime(task.updated_at)}
                                         </span>
                                       </>
@@ -2893,7 +2893,7 @@ export const CollaborationDetail = () => {
                                     }}
                                     title="Marquer comme échouée"
                                   >
-                                    <Danger size={18} variant="Bold" color="#EF4444" />
+                                    <Danger size={18} variant="Bold" color="var(--color-danger-text)" />
                                   </button>
                                 )}
 
@@ -2904,7 +2904,7 @@ export const CollaborationDetail = () => {
                                     onClick={() => resetTaskStatus(task.id)}
                                     title="Réinitialiser"
                                   >
-                                    <Add size={18} variant="Bold" color="#6C7278" />
+                                    <Add size={18} variant="Bold" color="var(--color-text-secondary)" />
                                   </button>
                                 )}
 
@@ -2917,9 +2917,9 @@ export const CollaborationDetail = () => {
                                     title="Supprimer la tâche"
                                   >
                                     {deletingTaskIds.includes(task.id) ? (
-                                      <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" style={{ width: '12px', height: '12px', border: '2px solid transparent', borderTopColor: '#EF4444', borderRightColor: '#EF4444', borderRadius: '50%', animation: 'spin 0.75s linear infinite' }}></span>
+                                      <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" style={{ width: '12px', height: '12px', border: '2px solid transparent', borderTopColor: 'var(--color-danger)', borderRightColor: 'var(--color-danger)', borderRadius: '50%', animation: 'spin 0.75s linear infinite' }}></span>
                                     ) : (
-                                      <Trash size={18} variant="Bold" color="#EF4444" />
+                                      <Trash size={18} variant="Bold" color="var(--color-danger-text)" />
                                     )}
                                   </button>
                                 )}
@@ -2933,7 +2933,7 @@ export const CollaborationDetail = () => {
                                   borderRadius: 'var(--radius-sm)',
                                   borderLeft: '3px solid #EF4444'
                                 }}>
-                                  <div className="collab-task-failure-label" style={{ fontSize: 'var(--font-size-caption)', fontWeight: 'bold', color: '#EF4444' }}>Raison :</div>
+                                  <div className="collab-task-failure-label" style={{ fontSize: 'var(--font-size-caption)', fontWeight: 'bold', color: 'var(--color-danger-text)' }}>Raison :</div>
                                   <div className="collab-task-failure-reason" style={{ fontSize: 'var(--font-size-body-small)', color: 'var(--color-text-secondary)' }}>
                                     {formatFailureReason(task.failure_reason || task.failureReason)}
                                   </div>
@@ -2981,12 +2981,12 @@ export const CollaborationDetail = () => {
                                     >
                                       {failureSaving ? (
                                         <>
-                                          <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" style={{ width: '12px', height: '12px', border: '2px solid transparent', borderTopColor: '#ffffff', borderRightColor: '#ffffff', borderRadius: '50%', animation: 'spin 0.75s linear infinite' }}></span>
+                                          <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" style={{ width: '12px', height: '12px', border: '2px solid transparent', borderTopColor: 'var(--color-surface)', borderRightColor: 'var(--color-surface)', borderRadius: '50%', animation: 'spin 0.75s linear infinite' }}></span>
                                           <span>Envoi...</span>
                                         </>
                                       ) : (
                                         <>
-                                          <Danger size={14} variant="Bold" color="#FFFFFF" />
+                                          <Danger size={14} variant="Bold" color="var(--color-surface)" />
                                           Confirmer
                                         </>
                                       )}
@@ -3041,7 +3041,7 @@ export const CollaborationDetail = () => {
                                               top: '4px',
                                               right: '4px',
                                               backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                                              color: '#fff',
+                                              color: 'var(--color-surface)',
                                               border: 'none',
                                               borderRadius: '50%',
                                               width: '24px',
@@ -3050,7 +3050,7 @@ export const CollaborationDetail = () => {
                                               alignItems: 'center',
                                               justifyContent: 'center',
                                               cursor: 'pointer',
-                                              fontSize: '14px',
+                                              fontSize: 'var(--font-size-body)',
                                               zIndex: 10
                                             }}
                                           >
@@ -3073,7 +3073,7 @@ export const CollaborationDetail = () => {
                                               top: '4px',
                                               right: '4px',
                                               backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                                              color: '#fff',
+                                              color: 'var(--color-surface)',
                                               border: 'none',
                                               borderRadius: '50%',
                                               width: '24px',
@@ -3082,7 +3082,7 @@ export const CollaborationDetail = () => {
                                               alignItems: 'center',
                                               justifyContent: 'center',
                                               cursor: 'pointer',
-                                              fontSize: '14px',
+                                              fontSize: 'var(--font-size-body)',
                                               zIndex: 10
                                             }}
                                           >
@@ -3135,7 +3135,7 @@ export const CollaborationDetail = () => {
                                               alignItems: 'center',
                                               justifyContent: 'center',
                                               cursor: 'pointer',
-                                              fontSize: '18px',
+                                              fontSize: 'var(--font-size-h3)',
                                               fontWeight: 'bold',
                                               transition: 'background-color 0.2s ease',
                                               minWidth: '40px'
@@ -3206,12 +3206,12 @@ export const CollaborationDetail = () => {
                                     >
                                       {uploadingProofTask === task.id ? (
                                         <>
-                                          <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" style={{ width: '12px', height: '12px', border: '2px solid transparent', borderTopColor: '#ffffff', borderRightColor: '#ffffff', borderRadius: '50%', animation: 'spin 0.75s linear infinite' }}></span>
+                                          <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" style={{ width: '12px', height: '12px', border: '2px solid transparent', borderTopColor: 'var(--color-surface)', borderRightColor: 'var(--color-surface)', borderRadius: '50%', animation: 'spin 0.75s linear infinite' }}></span>
                                           <span>Envoi...</span>
                                         </>
                                       ) : (
                                         <>
-                                          <TickCircle size={14} variant="Bold" color="#FFFFFF" />
+                                          <TickCircle size={14} variant="Bold" color="var(--color-surface)" />
                                           <span>Confirmer</span>
                                         </>
                                       )}
@@ -3307,7 +3307,7 @@ export const CollaborationDetail = () => {
                                               <div className="proof-hover-overlay" style={{
                                                 position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
                                                 background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                opacity: 0, transition: 'opacity 0.3s ease', color: '#fff', gap: '8px', fontSize: '13px', fontWeight: '500'
+                                                opacity: 0, transition: 'opacity 0.3s ease', color: 'var(--color-surface)', gap: '8px', fontSize: 'var(--font-size-body-small)', fontWeight: '500'
                                               }}>
                                                 <span>🔍 Cliquer pour agrandir</span>
                                               </div>
@@ -3332,7 +3332,7 @@ export const CollaborationDetail = () => {
                                               <div style={{
                                                 position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
                                                 background: 'rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                                                color: '#fff', gap: '6px', fontSize: '12px'
+                                                color: 'var(--color-surface)', gap: '6px', fontSize: 'var(--font-size-caption)'
                                               }}>
                                                 <div style={{
                                                   width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.2)',
@@ -3385,7 +3385,7 @@ export const CollaborationDetail = () => {
                                                   Cliquer pour ouvrir ou télécharger
                                                 </div>
                                               </div>
-                                              <div style={{ fontSize: '20px', color: 'var(--color-primary-text)' }}>→</div>
+                                              <div style={{ fontSize: 'var(--font-size-title)', color: 'var(--color-primary-text)' }}>→</div>
                                             </a>
                                             );
                                           })()}
@@ -3394,7 +3394,7 @@ export const CollaborationDetail = () => {
                                     </>
                                   ) : !isCollabClosed(collaboration?.id) && (
                                     <label className="collab-task-proof-btn" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: 'var(--font-size-caption)' }}>
-                                      <DocumentUpload size={14} variant="Bold" color="#3AA2DD" />
+                                      <DocumentUpload size={14} variant="Bold" color="var(--color-primary-text)" />
                                       Ajouter une preuve
                                       <input
                                         type="file"
@@ -3530,14 +3530,14 @@ export const CollaborationDetail = () => {
                         width: '36px',
                         height: '36px',
                         borderRadius: '50%',
-                        backgroundColor: '#EF4444',
-                        color: '#FFFFFF',
+                        backgroundColor: 'var(--color-danger)',
+                        color: 'var(--color-surface)',
                         border: 'none',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         cursor: 'pointer',
-                        fontSize: '18px',
+                        fontSize: 'var(--font-size-h3)',
                         fontWeight: 'bold',
                         boxShadow: '0 4px 6px -1px rgba(0,0,0,0.2)',
                         transition: 'transform 0.2s ease, background-color 0.2s ease',
@@ -3549,7 +3549,7 @@ export const CollaborationDetail = () => {
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.transform = 'scale(1)';
-                        e.currentTarget.style.backgroundColor = '#EF4444';
+                        e.currentTarget.style.backgroundColor = 'var(--color-danger)';
                       }}
                     >
                       ×
@@ -3586,7 +3586,7 @@ export const CollaborationDetail = () => {
                       )}
                     </div>
 
-                    <div style={{ marginTop: '12px', color: 'rgba(255, 255, 255, 0.7)', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{ marginTop: '12px', color: 'rgba(255, 255, 255, 0.7)', fontSize: 'var(--font-size-body-small)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span>Preuve de complétion</span>
 
                     </div>

@@ -138,10 +138,10 @@ export const IncidentReportsModal = () => {
             <div className="d-flex flex-column align-items-center justify-content-center p-5 border rounded bg-light text-center" style={{ gap: '12px' }}>
               <CloseSquare size={48} variant="Linear" color="var(--color-danger)" />
               <div>
-                <span className="fw-semibold d-block" style={{ fontSize: '14px', color: '#4B5563' }}>
+                <span className="fw-semibold d-block" style={{ fontSize: 'var(--font-size-body)', color: 'var(--color-text-secondary)' }}>
                   Erreur de chargement
                 </span>
-                <span className="text-muted d-block mt-1" style={{ fontSize: '12px' }}>
+                <span className="text-muted d-block mt-1" style={{ fontSize: 'var(--font-size-caption)' }}>
                   Une erreur est survenue lors de la récupération des rapports de terrain.
                 </span>
               </div>
@@ -150,10 +150,10 @@ export const IncidentReportsModal = () => {
             <div className="d-flex flex-column align-items-center justify-content-center p-5 border rounded bg-light text-center" style={{ gap: '12px', borderStyle: 'dashed' }}>
               <DocumentText size={48} variant="Linear" color="var(--color-text-muted)" />
               <div>
-                <span className="fw-semibold d-block" style={{ fontSize: '14px', color: 'var(--color-text-primary)' }}>
+                <span className="fw-semibold d-block" style={{ fontSize: 'var(--font-size-body)', color: 'var(--color-text-primary)' }}>
                   Aucun rapport disponible
                 </span>
-                <span className="text-muted d-block mt-1" style={{ fontSize: '12px' }}>
+                <span className="text-muted d-block mt-1" style={{ fontSize: 'var(--font-size-caption)' }}>
                   Aucun rapport de terrain n'a encore été remonté pour cet incident.
                 </span>
               </div>
@@ -161,7 +161,7 @@ export const IncidentReportsModal = () => {
           ) : (
             <div className="incidents-reports-list" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--color-text-secondary)' }}>
+                <span style={{ fontSize: 'var(--font-size-body-small)', fontWeight: '600', color: 'var(--color-text-secondary)' }}>
                   {displayedReports.length} rapport(s) de terrain trouvé(s)
                 </span>
               </div>
@@ -186,10 +186,10 @@ export const IncidentReportsModal = () => {
                     <div style={{ display: 'flex', alignItems: 'center' }}>
 
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: '15px', fontWeight: '600', color: 'var(--color-text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        <div style={{ fontSize: 'var(--font-size-body-large)', fontWeight: '600', color: 'var(--color-text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {report.agent_name || 'Agent de terrain'}
                         </div>
-                        <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        <div style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {formatDate(report.visited_at || report.created_at)}
                         </div>
                       </div>
@@ -202,7 +202,7 @@ export const IncidentReportsModal = () => {
                         backgroundColor: 'var(--color-background)',
                         borderRadius: '8px',
                         borderLeft: '3px solid var(--color-primary)',
-                        fontSize: '14px',
+                        fontSize: 'var(--font-size-body)',
                         color: 'var(--color-text-secondary)',
                         lineHeight: '1.6'
                       }}>
@@ -211,17 +211,17 @@ export const IncidentReportsModal = () => {
                     )}
 
                     {/* Metadata */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px dashed var(--color-border)', paddingTop: '10px', fontSize: '12px', color: 'var(--color-text-secondary)' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px dashed var(--color-border)', paddingTop: '10px', fontSize: 'var(--font-size-caption)', color: 'var(--color-text-secondary)' }}>
                       {report.incident_zone && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <Location size={14} variant="Bold" color="#6C7278" />
+                          <Location size={14} variant="Bold" color="var(--color-text-secondary)" />
                           <span style={{ fontWeight: '500' }}>Zone : {report.incident_zone}</span>
                         </div>
                       )}
 
                       {report.location_lat && report.location_lon && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <Location size={14} variant="Bold" color="#6C7278" />
+                          <Location size={14} variant="Bold" color="var(--color-text-secondary)" />
                           <span style={{ fontWeight: '500' }}>
                             Coordonnées : {parseFloat(report.location_lat).toFixed(4)}°, {parseFloat(report.location_lon).toFixed(4)}°
                           </span>
