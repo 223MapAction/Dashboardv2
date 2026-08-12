@@ -49,6 +49,11 @@ import {
 import './incident-detail.css';
 import { IncidentDetailSkeleton } from './SqueletteDetail';
 import { ROLE_OPTIONS, ORG_ROLE_OPTIONS } from './roles';
+import { useLecteurAudio } from './useLecteurAudio';
+import {
+  getStatusBadge, getModeBadge, getUserRoleBadge,
+  getCollabBadgeStyle, getRoleLabel, getStatusLabel,
+} from './badges';
 import './dark-dashboard.css';
 import { getOrganisationsService, formatOrganisation } from '../../../organisations/service/organisation_service';
 import { IncidentDetailContext } from './IncidentDetailContext';
@@ -136,6 +141,12 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
 
   // Récupérer l'ID de l'utilisateur connecté
   const currentUserId = sessionStorage.getItem('user_id');
+
+  const {
+    audioRef, isPlaying, setIsPlaying, currentTime, duration,
+    togglePlay, onAudioTimeUpdate, onAudioLoaded, onAudioEnded,
+    seekAudio, seekAudioClavier,
+  } = useLecteurAudio(incident?.id);
 
   // Valeurs par défaut pour les champs manquants
   const safeIncident = currentIncident ? {
@@ -316,8 +327,6 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
   const availableOrgs = rawOrganisations ? rawOrganisations?.map(formatOrganisation) : [];
 
 
-  const audioRef = useRef(null);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [loadingTimeout, setLoadingTimeout] = useState(false);
   const timeoutRef = useRef(null);
 
@@ -405,70 +414,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
     }
   };
 
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
 
-  const togglePlay = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    if (isPlaying) {
-      audio.pause();
-    } else {
-      audio.play();
-    }
-  };
-
-  const onAudioTimeUpdate = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    setCurrentTime(audio.currentTime);
-  };
-
-  const onAudioLoaded = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    setDuration(audio.duration);
-  };
-
-  const onAudioEnded = () => {
-    setIsPlaying(false);
-    setCurrentTime(0);
-  };
-
-  const seekAudio = (e) => {
-    const audio = audioRef.current;
-    if (!audio || !duration) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const ratio = (e.clientX - rect.left) / rect.width;
-    audio.currentTime = Math.max(0, Math.min(duration, ratio * duration));
-  };
-
-  // La barre s'annoncait comme un curseur (role="slider") mais n'ecoutait que
-  // la souris : au clavier, elle prenait le focus puis ne repondait a rien.
-  // Les fleches deplacent de 5 s, Debut/Fin sautent aux extremites.
-  const seekAudioClavier = (e) => {
-    const audio = audioRef.current;
-    if (!audio || !duration) return;
-    const pas = { ArrowLeft: -5, ArrowRight: 5, ArrowDown: -5, ArrowUp: 5 };
-    let cible = null;
-    if (e.key in pas) cible = audio.currentTime + pas[e.key];
-    else if (e.key === 'Home') cible = 0;
-    else if (e.key === 'End') cible = duration;
-    if (cible === null) return;
-    e.preventDefault();
-    audio.currentTime = Math.max(0, Math.min(duration, cible));
-  };
-
-  // Reset l'audio quand le projet change
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-    setIsPlaying(false);
-    setCurrentTime(0);
-    setDuration(0);
-  }, [safeIncident?.id]);
 
   // Bloquer le scroll du body quand le modal est ouvert
   useEffect(() => {
@@ -792,112 +738,12 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
     );
   }
 
-  const getStatusBadge = () => {
-    switch (safeIncident.etat) {
-      case 'resolved':
-        return safeIncident.isOwner
-          ? {
-            label: 'Résolu (Moi)',
-            color: 'var(--color-success-text)',
-            bg: 'rgba(var(--rgb-success), 0.12)',
-            border: 'rgba(var(--rgb-success), 0.3)',
-            icon: <ShieldTick size={14} variant="Bold" color="var(--color-success)" style={{ marginRight: '6px' }} />
-          }
-          : {
-            label: 'Résolu (Autre)',
-            color: 'var(--color-text-secondary)',
-            bg: 'rgba(var(--rgb-text-muted), 0.12)',
-            border: 'rgba(var(--rgb-text-muted), 0.3)',
-            icon: <ShieldTick size={14} variant="Bold" color="var(--color-text-secondary)" style={{ marginRight: '6px' }} />
-          };
-      case 'taken_into_account':
-        return safeIncident.isOwner
-          ? {
-            label: 'Pris en compte (Moi)',
-            color: 'var(--color-primary-text)',
-            bg: 'rgba(var(--rgb-primary), 0.12)',
-            border: 'rgba(var(--rgb-primary), 0.3)',
-            icon: <ClipboardTick size={14} variant="Bold" color="var(--color-primary)" style={{ marginRight: '6px' }} />
-          }
-          : {
-            label: 'Pris en compte (Autre)',
-            color: 'var(--color-warning-text)',
-            bg: 'rgba(var(--rgb-warning), 0.12)',
-            border: 'rgba(var(--rgb-warning), 0.3)',
-            icon: <ClipboardTick size={14} variant="Bold" color="var(--color-warning)" style={{ marginRight: '6px' }} />
-          };
-      case 'declared':
-      default:
-        return {
-          label: 'Déclaré',
-          color: 'var(--color-danger-text)',
-          bg: 'rgba(var(--rgb-danger), 0.12)',
-          border: 'rgba(var(--rgb-danger), 0.3)',
-          icon: <Danger size={14} variant="Bold" color="var(--color-danger)" style={{ marginRight: '6px' }} />
-        };
-    }
-  };
+
+  const currentStatus = getStatusBadge(safeIncident);
+  const modeBadge = getModeBadge(safeIncident);
 
 
-  const getModeBadge = () => {
-    if (!safeIncident?.take_in_charge_mode) return null;
-    const isInternal = safeIncident.take_in_charge_mode === 'internal' || safeIncident.take_in_charge_mode === 'interne';
-    return isInternal
-      ? {
-        label: 'Interne',
-        color: 'var(--color-danger-text)',
-        bg: 'rgba(var(--rgb-danger), 0.12)',
-        border: 'rgba(var(--rgb-danger), 0.3)',
-        icon: <Briefcase size={14} variant="Bold" color="var(--color-danger)" style={{ marginRight: '6px' }} />
-      }
-      : {
-        label: 'Collaboratif',
-        color: 'var(--color-primary-text)',
-        bg: 'rgba(var(--rgb-primary), 0.12)',
-        border: 'rgba(var(--rgb-primary), 0.3)',
-        icon: <People size={14} variant="Bold" color="var(--color-primary)" style={{ marginRight: '6px' }} />
-      };
-  };
-
-  const currentStatus = getStatusBadge();
-  const modeBadge = getModeBadge();
-
-  const getUserRoleBadge = () => {
-    const roleVal = safeIncident?.role || safeIncident?.userRole;
-    if (!roleVal) return null;
-
-    const normalizedRole = roleVal.toLowerCase();
-    if (normalizedRole === 'observer' || normalizedRole === 'observateur') {
-      return {
-        label: 'Observateur',
-        color: 'var(--color-text-secondary)',
-        bg: 'rgba(var(--rgb-text-secondary), 0.12)',
-        border: 'rgba(var(--rgb-text-secondary), 0.3)',
-        icon: <Eye size={14} variant="Bold" color="var(--color-text-secondary)" style={{ marginRight: '6px' }} />
-      };
-    }
-    if (normalizedRole === 'contributor' || normalizedRole === 'contributeur') {
-      return {
-        label: 'Contributeur',
-        color: 'var(--color-primary-text)',
-        bg: 'rgba(var(--rgb-primary), 0.12)',
-        border: 'rgba(var(--rgb-primary), 0.3)',
-        icon: <People size={14} variant="Bold" color="var(--color-primary)" style={{ marginRight: '6px' }} />
-      };
-    }
-    if (normalizedRole === 'leader') {
-      return {
-        label: 'Leader',
-        color: 'var(--color-warning-text)',
-        bg: 'rgba(var(--rgb-warning), 0.12)',
-        border: 'rgba(var(--rgb-warning), 0.3)',
-        icon: <Crown1 size={14} variant="Bold" color="var(--color-warning)" style={{ marginRight: '6px' }} />
-      };
-    }
-    return null;
-  };
-
-  const userRoleBadge = getUserRoleBadge();
+  const userRoleBadge = getUserRoleBadge(safeIncident);
   const userRoleVal = safeIncident?.role || safeIncident?.userRole;
   const hasParticipantRole = userRoleVal && (
     userRoleVal.toLowerCase() === 'observer' ||
@@ -957,55 +803,6 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
     )
   );
 
-  const getCollabBadgeStyle = (status) => {
-    const norm = status?.toLowerCase();
-    const isAccepted = norm === 'accepted' || norm === 'in-progress';
-    const isPending = norm === 'pending';
-    const isRejected = norm === 'rejected' || norm === 'refused';
-
-    if (isAccepted) {
-      return {
-        color: 'var(--color-success-text)',
-        bg: 'rgba(var(--rgb-success), 0.12)',
-        border: 'rgba(var(--rgb-success), 0.3)'
-      };
-    } else if (isPending) {
-      return {
-        color: 'var(--color-warning-text)',
-        bg: 'rgba(var(--rgb-warning), 0.12)',
-        border: 'rgba(var(--rgb-warning), 0.3)'
-      };
-    } else if (isRejected) {
-      return {
-        color: 'var(--color-danger-text)',
-        bg: 'rgba(var(--rgb-danger), 0.12)',
-        border: 'rgba(var(--rgb-danger), 0.3)'
-      };
-    }
-    return {
-      color: 'var(--color-text-secondary)',
-      bg: 'rgba(var(--rgb-text-secondary), 0.12)',
-      border: 'rgba(var(--rgb-text-secondary), 0.3)'
-    };
-  };
-
-  const getRoleLabel = (r) => {
-    if (!r) return '';
-    const norm = r.toLowerCase();
-    if (norm === 'leader') return 'Leader';
-    if (norm === 'contributor' || norm === 'contributeur') return 'Contributeur';
-    if (norm === 'observer' || norm === 'observateur') return 'Observateur';
-    return r;
-  };
-
-  const getStatusLabel = (s) => {
-    if (!s) return '';
-    const norm = s.toLowerCase();
-    if (norm === 'accepted' || norm === 'in-progress') return 'Acceptée';
-    if (norm === 'pending') return 'En attente';
-    if (norm === 'rejected' || norm === 'refused') return 'Refusée';
-    return s;
-  };
 
   const contextValue = {
     joinOpen,

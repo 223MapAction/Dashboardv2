@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
+import { ShimmerThumbnail, ShimmerTitle, ShimmerText, ShimmerCircularImage } from 'react-shimmer-effects';
 
 // Composant shimmer pour le détail d'incident
 export const IncidentDetailSkeleton = () => (
