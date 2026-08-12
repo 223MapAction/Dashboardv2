@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Gallery, GallerySlash } from 'iconsax-react';
 
 /**
@@ -32,17 +32,33 @@ export const BlurryImage = ({
   style: styleParent,
   ...props
 }) => {
-  // Demarre directement sur `src` : passer par un useEffect faisait perdre un
-  // cycle de rendu avant meme que le telechargement ne commence.
-  const [currentSrc, setCurrentSrc] = useState(src || '');
   const [etat, setEtat] = useState('chargement');
   const [essai, setEssai] = useState(0);
 
-  useEffect(() => {
-    setCurrentSrc(src || '');
+  // Reinitialisation quand la source change, faite pendant le rendu plutot
+  // que dans un effet. Un effet se serait declenche aussi au montage, et
+  // aurait donc annule l'etat calcule juste avant par le rappel de ref
+  // ci-dessous. Ce couplage a l'ordre des effets etait invisible dans le
+  // navigateur — il se rattrapait au rendu suivant — mais bien reel.
+  const [srcPrecedente, setSrcPrecedente] = useState(src);
+  if (src !== srcPrecedente) {
+    setSrcPrecedente(src);
     setEtat('chargement');
     setEssai(0);
-  }, [src]);
+  }
+
+  // Une image deja en cache peut finir de charger AVANT que React n'attache
+  // son gestionnaire : l'evenement `load` passe alors inapercu et l'image
+  // reste indefiniment a opacite zero, derriere son scintillement. C'est ce
+  // qui faisait que certaines vignettes s'affichaient et d'autres non, sans
+  // logique apparente — les seules a echouer etaient celles deja vues.
+  // `complete` est la seule facon de rattraper un chargement deja termine ;
+  // on le lit au moment ou React nous donne l'element.
+  const attacherImage = useCallback((img) => {
+    if (img && img.complete) {
+      setEtat(img.naturalWidth > 0 ? 'charge' : 'echec');
+    }
+  }, []);
 
   const handleLoad = (e) => {
     setEtat('charge');
@@ -117,8 +133,9 @@ export const BlurryImage = ({
     <div className={`blurry-image-container ${className}`} style={wrapperStyles} onClick={onClick}>
       {etat !== 'charge' && <div className="blurry-image-placeholder" aria-hidden="true" />}
       <img
+        ref={attacherImage}
         {...props}
-        src={essai > 0 ? `${currentSrc}${currentSrc.includes('?') ? '&' : '?'}r=${essai}` : currentSrc}
+        src={essai > 0 ? `${src}${src.includes('?') ? '&' : '?'}r=${essai}` : src}
         alt={alt}
         // Les vignettes hors ecran se disputaient les connexions avec celles
         // que l'utilisateur regarde. Elles attendent maintenant leur tour.

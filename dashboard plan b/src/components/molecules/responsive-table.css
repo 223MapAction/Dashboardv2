@@ -58,7 +58,10 @@
   overflow: hidden;
 }
 
-.rt-carte-media > * {
+/* `:not(.rt-carte-actions)` n'est pas un detail : sans lui, la regle etirait
+   aussi le menu pose sur la photo a 100% de largeur, et son `right` ne
+   servait plus a rien — le bouton se retrouvait colle a gauche. */
+.rt-carte-media > *:not(.rt-carte-actions) {
   width: 100%;
   height: 100%;
   display: block;
