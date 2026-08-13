@@ -5,19 +5,14 @@
 /* Container map - vignette d'alerte */
 .map-container {
   position: relative;
-  /* `pan-y` et non `none`.
-     `none` cedait TOUS les gestes tactiles a Mapbox — y compris le glisser a
-     un doigt, qui deplacait donc la carte au lieu de faire defiler la page. Sur
-     le tableau de bord, ou la carte occupe 77% de la hauteur visible, on se
-     retrouvait bloque : plus moyen de descendre.
-
-     `pan-y` laisse au navigateur le defilement vertical a un doigt, et ne lui
-     donne rien d'autre : le pincement a deux doigts n'est pas capte par lui et
-     parvient donc bien a Mapbox, qui le traite via `touchZoomRotate`.
-
-     A lire avec `dragPan={!estTactile}` dans MapContainer : les deux vont de
-     pair, l'un ecarte le doigt cote Mapbox, l'autre le rend au navigateur. */
-  touch-action: pan-y;
+  /* La carte vit dans une page qui defile verticalement. Sans cette regle, le
+     navigateur peut arbitrer un geste tactile qui commence sur la carte (le
+     revendiquer pour son propre defilement/zoom de page) avant meme que
+     Mapbox ne le recoive — le pincement a deux doigts en est la victime la
+     plus frequente. `touch-action: none` cede TOUS les gestes tactiles a
+     Mapbox, qui gere deja lui-meme le glisser (dragPan) et le pincement
+     (touchZoomRotate) ; le navigateur n'a plus besoin d'intervenir ici. */
+  touch-action: none;
 }
 
 .map-container::after {
