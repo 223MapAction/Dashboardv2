@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Map, { Marker, NavigationControl, FullscreenControl } from 'react-map-gl/mapbox';
+import { activerGestesCooperatifs } from '../../../../utils/gestesCarte';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import useSWR from 'swr';
 import {
@@ -92,6 +93,22 @@ const formatTime = (seconds) => {
 
 
 export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
+  // Voir utils/gestesCarte : sur ecran tactile, un doigt fait defiler la fiche
+  // et deux doigts pilotent la carte. On passe par la reference et non par
+  // `onLoad`, qui ne se declenche pas de facon fiable avec react-map-gl v8.
+  const carteDetailRef = useRef(null);
+  useEffect(() => {
+    let annule = false;
+    const essayer = () => {
+      if (annule) return;
+      const carte = carteDetailRef.current?.getMap?.();
+      if (carte) { activerGestesCooperatifs(carte); return; }
+      setTimeout(essayer, 300);
+    };
+    essayer();
+    return () => { annule = true; };
+  }, []);
+
   // Utiliser useSWR pour rafraîchir les données automatiquement
   const { data: swrIncident, mutate, isLoading: isSwrLoading, error: swrError } = useSWR(
     incident?.id ? `/incidents/${incident.id}` : null,
@@ -1218,6 +1235,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                   {/* Mini-carte détaillée */}
                   <div className="detail-geo-map" style={{ marginTop: '12px', height: '320px', borderRadius: '8px', overflow: 'hidden', position: 'relative' }}>
                     <Map
+                      ref={carteDetailRef}
                       initialViewState={{
                         longitude: safeIncident.coordinates.lng,
                         latitude: safeIncident.coordinates.lat,

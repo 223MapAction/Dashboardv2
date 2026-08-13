@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useSWR from 'swr';
+import { activerGestesCooperatifs } from '../../../../utils/gestesCarte';
 import Map, { Marker, Popup } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
@@ -186,6 +187,22 @@ export const MapContainer = () => {
   const [hasMorePages, setHasMorePages] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const loadedPagesRef = useRef(new Set());
+  const carteRef = useRef(null);
+
+  // On passe par la reference et non par `onLoad` : cet evenement ne se
+  // declenche pas de facon fiable ici — verifie, la carte s'affiche sans qu'il
+  // parte jamais. La reference, elle, est posee des le montage.
+  useEffect(() => {
+    let annule = false;
+    const essayer = () => {
+      if (annule) return;
+      const carte = carteRef.current?.getMap?.();
+      if (carte) { activerGestesCooperatifs(carte); return; }
+      setTimeout(essayer, 300);
+    };
+    essayer();
+    return () => { annule = true; };
+  }, []);
 
   // Déterminer le scope en fonction des filtres
   const getScope = () => {
@@ -443,6 +460,7 @@ export const MapContainer = () => {
         )}
 
         <Map
+          ref={carteRef}
           initialViewState={{
             longitude: center.lng,
             latitude: center.lat,
