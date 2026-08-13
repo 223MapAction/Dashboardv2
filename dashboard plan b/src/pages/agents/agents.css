@@ -792,8 +792,14 @@
   .agents-toolbar {
     flex-direction: column;
     align-items: stretch;
-    margin: 0;
-    padding: var(--spacing-3) var(--spacing-4);
+  }
+
+  /* En colonne, la base de `flex: 1 1 240px` s'applique a la HAUTEUR et non
+     plus a la largeur : le champ de recherche se retrouvait haut de 240px.
+     Empiles, les controles gardent simplement leur hauteur naturelle. */
+  .agents-search,
+  .agents-select-wrap {
+    flex: 0 0 auto;
   }
 
   .agents-count-label {
