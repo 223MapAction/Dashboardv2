@@ -155,25 +155,6 @@ export const CollaborationDetail = () => {
   }, []);
 
 
-  // Bloquer le scroll du body quand un modal est ouvert
-  useEffect(() => {
-    if (showTaskModal || showSuggestModal || showCloseModal || taskToDelete !== null || showReportsModal) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [showTaskModal, showSuggestModal, showCloseModal, taskToDelete, showReportsModal]);
-
-  // Scroll to top of close modal body when an alert is set
-  useEffect(() => {
-    if (closeAlert && closeModalBodyRef.current) {
-      closeModalBodyRef.current.scrollTop = 0;
-    }
-  }, [closeAlert]);
-
   // Mapper les données API vers le format attendu par le composant
   //
   // Memoise : cet objet est une dependance de currentTasks juste en dessous.
@@ -275,6 +256,29 @@ export const CollaborationDetail = () => {
     closeAlert,
     isClosing,
   } = useClotureIncident(collaboration, mutateCollaboration);
+
+  // Ces deux effets lisent des valeurs fournies par les hooks ci-dessus, ils
+  // doivent donc etre declares APRES eux. Leurs tableaux de dependances sont
+  // evalues pendant le rendu : places plus haut, ils lisaient des `const` qui
+  // n'existaient pas encore, et la page entiere refusait de se rendre.
+  // Bloquer le scroll du body quand un modal est ouvert
+  useEffect(() => {
+    if (showTaskModal || showSuggestModal || showCloseModal || taskToDelete !== null || showReportsModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showTaskModal, showSuggestModal, showCloseModal, taskToDelete, showReportsModal]);
+
+  // Scroll to top of close modal body when an alert is set
+  useEffect(() => {
+    if (closeAlert && closeModalBodyRef.current) {
+      closeModalBodyRef.current.scrollTop = 0;
+    }
+  }, [closeAlert]);
 
 
   // Gestion des états de chargement et d'erreur

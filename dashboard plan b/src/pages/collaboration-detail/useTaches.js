@@ -20,6 +20,16 @@ export function useTaches({ incidentId, collaboration, tasksData, mutateTasks })
   // La socket des taches sert aussi a emettre vers les autres participants :
   // on garde une reference dessus, pas seulement un abonnement.
   const tasksSocketRef = useRef(null);
+  // Declaree avant les etats : l'un d'eux l'appelle pour sa valeur initiale,
+  // et un `const` n'existe pas avant sa ligne.
+  const getTodayStr = () => {
+    const date = new Date();
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  };
+
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editTaskTitle, setEditTaskTitle] = useState('');
   const [editTaskDeadline, setEditTaskDeadline] = useState('');
@@ -55,14 +65,6 @@ export function useTaches({ incidentId, collaboration, tasksData, mutateTasks })
   const [expandedCompletedProofs, setExpandedCompletedProofs] = useState([]);
 
   const [taskToDelete, setTaskToDelete] = useState(null);
-
-  const getTodayStr = () => {
-    const date = new Date();
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    const d = String(date.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
-  };
 
   // Temps reel des taches. La connexion, la reconnexion a delai croissant et les
   // codes sur lesquels il ne faut pas insister vivent dans useSocketIncident :
