@@ -1320,18 +1320,13 @@
     font-size: var(--font-size-body);
   }
 
-  .collab-discussion-input {
-    position: fixed;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    bottom: 70px;
-    padding-bottom: 30px;
-  }
-
-  .collab-discussion-messages {
-    padding-bottom: 85px;
-  }
+  /* Pas de position:fixed ici : .collab-discussion est deja borne a
+     calc(100dvh - 220px), qui exclut l'en-tete et la nav mobile — dvh reagit
+     au clavier virtuel, contrairement a vh. En sortant du flux flex pour
+     s'ancrer au bas BRUT de l'ecran, la barre de saisie perdait ce calage et
+     se retrouvait masquee par le clavier au lieu de remonter avec lui. La
+     regle de base (position: sticky; bottom: 0), dernier enfant de cette
+     colonne deja contrainte, suffit. */
 }
 
 @media (max-width: 479.98px) {
