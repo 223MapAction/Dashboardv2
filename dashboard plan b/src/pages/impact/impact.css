@@ -4,8 +4,10 @@
 
 .impact-layout {
   display: flex;
-  min-height: 100vh;
-  min-height: 100dvh;
+  /* height, pas min-height : voir dashboard.css pour l'explication complète.
+     Même piège, même correctif. */
+  height: 100vh;
+  height: 100dvh;
   background-color: var(--color-background);
 }
 
@@ -14,11 +16,17 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  /* Même piège flexbox qu'ailleurs dans l'app (dashboard.css a le même
+     correctif) : sans ce 0, .impact-content grandit pour englober tout son
+     contenu au lieu de se limiter à l'écran, et overflow-y:auto ne se
+     déclenche jamais. */
+  min-height: 0;
 }
 
 .impact-content {
   margin-top: 65px;
   flex: 1;
+  min-height: 0;
   padding: var(--spacing-6);
   overflow-y: auto;
 }

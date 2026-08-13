@@ -1,7 +1,12 @@
 .stats-page-layout {
   display: flex;
-  min-height: 100vh;
-  min-height: 100dvh;
+  /* height, pas min-height : voir dashboard.css pour l'explication complète.
+     Même piège, même correctif — trouvé en comparant systématiquement toutes
+     les pages de l'app entre celles qui défilent et celles qui ne défilent
+     pas. Cette page-ci n'avait pas été signalée, mais portait exactement la
+     même erreur. */
+  height: 100vh;
+  height: 100dvh;
   background-color: var(--color-background);
 }
 
@@ -9,6 +14,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-height: 0;
   transition: margin-left 0.3s ease;
   margin-left: 260px;
 }
@@ -19,6 +25,7 @@
 
 .stats-page-content {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding: 2rem;
 }
