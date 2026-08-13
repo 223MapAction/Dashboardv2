@@ -1217,12 +1217,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                   </div>
                   {/* Mini-carte détaillée */}
                   <div className="detail-geo-map" style={{ marginTop: '12px', height: '320px', borderRadius: '8px', overflow: 'hidden', position: 'relative' }}>
-                    {/* Meme correctif que sur le tableau de bord :
-                        `cooperativeGestures` est ignore par react-map-gl v8, donc
-                        la carte avalait la molette et bloquait le defilement de
-                        la fiche. Le zoom passe par les boutons. */}
                     <Map
-                      scrollZoom={false}
                       initialViewState={{
                         longitude: safeIncident.coordinates.lng,
                         latitude: safeIncident.coordinates.lat,

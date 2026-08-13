@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useSWR from 'swr';
-import Map, { Marker, Popup, NavigationControl } from 'react-map-gl/mapbox';
+import Map, { Marker, Popup } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
 import { getIncidentService } from '../../../incident/service/incident_service';
@@ -438,15 +438,6 @@ export const MapContainer = () => {
           </div>
         )}
 
-        {/* scrollZoom={false} : la carte occupe 77% de la hauteur visible, donc
-            elle interceptait la molette et on ne pouvait plus faire defiler le
-            tableau de bord.
-
-            `cooperativeGestures` etait bien passe ici, mais react-map-gl v8 ne
-            le transmet pas a Mapbox — verifie a l'execution, ni la classe ni le
-            voile que Mapbox ajoute dans ce mode n'apparaissaient. Couper le zoom
-            a la molette et donner des boutons explicites produit le meme
-            resultat, sans dependre d'une option ignoree. */}
         <Map
           initialViewState={{
             longitude: center.lng,
@@ -456,7 +447,6 @@ export const MapContainer = () => {
           mapboxAccessToken={MAPBOX_TOKEN}
           style={{ width: '100%', height: '100%' }}
           mapStyle={MAP_STYLES[activeStyle].style}
-          scrollZoom={false}
           touchZoomRotate={true}
           touchPitch={true}
           minZoom={2}
@@ -468,10 +458,6 @@ export const MapContainer = () => {
             }
           }}
         >
-          {/* Le zoom passe par ces boutons, la molette etant rendue au
-              defilement de la page. Le pincement et le double-clic marchent
-              toujours. */}
-          <NavigationControl position="top-right" showCompass={false} />
 
           {/* Markers d'incidents — un par position, pas un par incident */}
           {!isMapLoading && incidentGroups.map((groupe) => {
