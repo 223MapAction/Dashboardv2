@@ -682,7 +682,7 @@ export const MapContainer = () => {
                   alignItems: 'center',
                   gap: '8px',
                   padding: '8px 16px',
-                  fontSize: '13px',
+                  fontSize: 'var(--font-size-body-small)',
                   fontWeight: '600',
                   borderRadius: '20px',
                   boxShadow: '0 2px 8px rgba(var(--rgb-ombre), 0.15)',
@@ -901,7 +901,7 @@ export const MapContainer = () => {
                                     backgroundColor: p.color,
                                     width: '40px',
                                     height: '40px',
-                                    fontSize: '0.85rem'
+                                    fontSize: 'var(--font-size-body-small)'
                                   }}
                                 >
                                   {p.initials}
@@ -917,7 +917,7 @@ export const MapContainer = () => {
                                     backgroundColor: 'var(--color-text-muted)',
                                     width: '40px',
                                     height: '40px',
-                                    fontSize: '0.85rem'
+                                    fontSize: 'var(--font-size-body-small)'
                                   }}
                                 >
                                   +{selectedIncident.extraParticipants}

@@ -1249,7 +1249,24 @@ p {
   --font-size-h3: clamp(16px, 1.4vw + 12px, 18px);
 }
 /* --font-size-micro n'est pas fluide : c'est le plancher de lisibilité, il ne
-   doit jamais descendre sous 11 px, donc il n'y a rien à interpoler. */
+   doit jamais descendre sous 11 px, donc il n'y a rien à interpoler.
+
+   En revanche le bas de l'échelle ne s'adaptait PAS du tout au téléphone : les
+   titres rétrécissaient avec la fenêtre pendant que les libellés, les légendes
+   et les compteurs restaient figés à 13, 12 et 11 px. Or c'est l'inverse qu'il
+   faut. Un titre se devine à moitié lu ; un libellé de filtre ou une date de
+   tâche, non — il faut le lire caractère par caractère, souvent à bout de bras
+   et en plein soleil. Sur téléphone on remonte donc le texte courant d'un
+   cran, sans toucher aux titres (déjà fluides ci-dessus) : la hiérarchie est
+   conservée, chaque niveau reste distinct de son voisin. */
+@media (max-width: 767.98px) {
+  :root {
+    --font-size-body: 15px;
+    --font-size-body-small: 14px;
+    --font-size-caption: 13px;
+    --font-size-micro: 12px;
+  }
+}
 
 /* ── 13. Gouttières adaptatives ──────────────────────────────────────────────
    Sur 320-360 px, 32 px de marge de chaque côté consomment 20 % de la largeur
@@ -1259,6 +1276,24 @@ p {
     --spacing-6: 16px;
     --spacing-7: 20px;
     --spacing-8: 24px;
+  }
+}
+
+/* ── 14. Zoom automatique d'iOS sur les champs de saisie ─────────────────────
+   Safari sur iPhone zoome la page dès qu'on touche un champ dont le texte fait
+   moins de 16 px : la mise en page saute, le champ visé se retrouve ailleurs,
+   et il faut ensuite dézoomer à la main. Nos champs héritaient de body-small,
+   caption ou body — 13 à 15 px selon l'écran, donc tous concernés.
+
+   Le seuil de 16 px est fixé par le navigateur : ce n'est pas une préférence,
+   on ne peut pas le negocier. `!important` est nécessaire parce que les règles
+   de page ciblent les champs par une classe (`.am-filtres-recherche input`),
+   qui l'emporte sur un sélecteur d'élément. */
+@media (max-width: 767.98px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+  select,
+  textarea {
+    font-size: 16px !important;
   }
 }
 
