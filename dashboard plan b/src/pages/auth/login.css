@@ -214,13 +214,20 @@
 /* ===== Colonne droite (image) ===== */
 .login-hero {
   flex: 1;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
   min-height: 100vh;
   min-height: 100dvh;
- 
   position: relative;
+  overflow: hidden;
+}
+
+.login-hero-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
 }
 
 .login-hero::after {
