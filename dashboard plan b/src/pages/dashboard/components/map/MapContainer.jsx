@@ -207,7 +207,7 @@ export const MapContainer = () => {
   });
 
   // Charger une page d'incidents
-  const { isLoading: isLoadingPage } = useSWR(
+  const { data: pageData, isLoading: isLoadingPage } = useSWR(
     ownershipFilter === 'mine'
       ? (currentPage === 1 ? '/org-incidents' : null) // Pour "mine", utiliser l'ancien endpoint
       : `/map-incidents-${scope}-${countryFilter || 'all'}-page-${currentPage}`,
@@ -226,47 +226,51 @@ export const MapContainer = () => {
       if (countryFilter) {
         params.country = countryFilter;
       }
-      console.log('[MAP] Chargement incidents avec params:', params);
       return getIncidentsFilteredService(params);
     },
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
-      onSuccess: (data) => {
-        if (!data) return;
-
-        // Créer une clé unique incluant scope, pays et page pour éviter les conflits
-        const pageKey = `${scope}-${countryFilter || 'all'}-${currentPage}`;
-
-        // Éviter de charger la même page deux fois
-        if (loadedPagesRef.current.has(pageKey)) return;
-        loadedPagesRef.current.add(pageKey);
-
-        const results = data.results || (Array.isArray(data) ? data : []);
-
-        setAllIncidents(prev => {
-          // Éviter les doublons basés sur l'ID
-          const existingIds = new Set(prev.map(inc => inc.id));
-          const newIncidents = results.filter(inc => !existingIds.has(inc.id));
-          return [...prev, ...newIncidents];
-        });
-
-        // Vérifier s'il y a plus de pages
-        if (ownershipFilter === 'mine') {
-          // Pour "mine", pas de pagination
-          setHasMorePages(false);
-        } else {
-          setHasMorePages(!!data.next);
-        }
-
-        setIsLoadingMore(false);
-      },
       onError: (err) => {
         console.error('[MAP] Erreur chargement incidents:', err);
         setIsLoadingMore(false);
       }
     }
   );
+
+  // L'accumulation se fait ici, à partir de `data`, et non plus dans le
+  // `onSuccess` de SWR.
+  //
+  // `onSuccess` ne se déclenche qu'au retour d'une requête réseau. Quand on
+  // quittait le tableau de bord puis qu'on y revenait, SWR servait sa valeur en
+  // cache sans refetch — donc sans `onSuccess` — tandis que `allIncidents`,
+  // qui est un état de composant, repartait à zéro au remontage. La carte
+  // restait vide alors que la donnée était là, dans le cache.
+  //
+  // Un effet sur `data` couvre les deux cas : réponse réseau ET valeur servie
+  // depuis le cache au montage.
+  /* eslint-disable react-hooks/set-state-in-effect --
+     On synchronise ici une source exterieure a React (le cache SWR) vers un
+     accumulateur local : c'est l'usage prevu d'un effet. Le garde-fou
+     `loadedPagesRef` empeche toute boucle, une page deja integree est ignoree. */
+  useEffect(() => {
+    if (!pageData) return;
+
+    const pageKey = `${scope}-${countryFilter || 'all'}-${currentPage}`;
+    if (loadedPagesRef.current.has(pageKey)) return;
+    loadedPagesRef.current.add(pageKey);
+
+    const results = pageData.results || (Array.isArray(pageData) ? pageData : []);
+
+    setAllIncidents((prev) => {
+      const dejaLa = new Set(prev.map((inc) => inc.id));
+      return [...prev, ...results.filter((inc) => !dejaLa.has(inc.id))];
+    });
+
+    setHasMorePages(ownershipFilter === 'mine' ? false : !!pageData.next);
+    setIsLoadingMore(false);
+  }, [pageData, scope, countryFilter, currentPage, ownershipFilter]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Fonction pour charger la page suivante
   const loadMoreIncidents = useCallback(() => {
