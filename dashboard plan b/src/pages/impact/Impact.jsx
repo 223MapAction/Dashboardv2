@@ -40,11 +40,20 @@ const STRUCTURE_LABELS = {
   nurseries: 'Crèches'
 };
 
+// Impact découpe la gravité en quatre paliers là où la carte en montre trois.
+// Les couleurs, elles, n'avaient rien à voir : « modérée » y était bleue et
+// « faible » verte, soit les deux teintes que la carte réserve aux incidents
+// résolus. Un même incident changeait donc de code couleur d'une page à
+// l'autre. Les trois premiers paliers reprennent l'échelle rouge → orange →
+// jaune ; le quatrième descend au gris, qui prolonge la décroissance sans
+// réintroduire une couleur déjà porteuse d'un autre sens.
+// Ce sont les variantes -text : le libellé s'affiche en blanc PAR-DESSUS cette
+// couleur, et le contraste étant symétrique, elles tiennent dans les deux rôles.
 const SEVERITY_META = {
-  critical: { label: 'Critique', color: 'var(--color-danger-text)' },
-  high: { label: 'Élevée', color: 'var(--color-warning-text)' },
-  medium: { label: 'Modérée', color: 'var(--color-primary-text)' },
-  low: { label: 'Faible', color: 'var(--color-success-text)' }
+  critical: { label: 'Critique', color: 'var(--color-severity-high-text)' },
+  high: { label: 'Élevée', color: 'var(--color-severity-medium-text)' },
+  medium: { label: 'Modérée', color: 'var(--color-severity-low-text)' },
+  low: { label: 'Faible', color: 'var(--color-text-secondary)' }
 };
 
 const getSeverity = (incident, prediction) => {

@@ -51,9 +51,25 @@
      dessous du seuil WCAG AA de 4.5:1. Illisible sur un écran de téléphone en
      plein soleil, le contexte des agents de terrain. */
   --color-text-muted: #697282;
-  --color-severity-low: #22C55E;
-  --color-severity-medium: #F59E0B;
+  /* ── Échelle de gravité ─────────────────────────────────────────────────────
+     Trois niveaux, donc trois teintes DISTINCTES. Cette règle avait été perdue :
+     « faible » valait #22C55E, le vert exact de --color-success, alors que sur
+     la carte le vert signifie déjà « résolu par moi » ; du coup le CSS des
+     marqueurs peignait « faible » en --color-warning, c'est-à-dire dans la même
+     couleur que « moyenne ». Deux gravités différentes, une seule couleur.
+
+     L'échelle est donc rouge → orange → jaune, sans vert ni bleu (réservés aux
+     états « résolu »). Les écarts perceptuels (CIE dE76) sont mesurés :
+     élevée↔moyenne 34.6, moyenne↔faible 42.4, élevée↔faible 71.9. Pour
+     comparaison, la paire #F59E0B/#EAB308 que j'avais d'abord envisagée tombait
+     à 16.4 — deux nuances qu'on ne sépare pas d'un coup d'œil sur une carte.
+
+     La gravité ne réutilise plus --color-danger / --color-warning : ce sont des
+     couleurs de STATUT. Les faire coïncider est ce qui avait permis à la dérive
+     de passer inaperçue. */
   --color-severity-high: #EF4444;
+  --color-severity-medium: #F97316;
+  --color-severity-low: #EAB308;
   --color-success: #22C55E;
   --color-warning: #F59E0B;
   --color-danger: #EF4444;
@@ -79,9 +95,12 @@
   --color-warning-text: #9E6606;
   --color-danger-text: #E21313;
   --color-info-text: #1E78AC;
-  --color-severity-low-text: #17833F;
-  --color-severity-medium-text: #9E6606;
+  /* Mêmes trois teintes, assombries au minimum pour franchir 4.5:1 face au
+     blanc : 4.53, 5.64 et 4.77. Le jaune vif ne plafonne qu'à 1.92:1 — il ne
+     peut donc jamais porter du texte, seulement une pastille. */
   --color-severity-high-text: #E21313;
+  --color-severity-medium-text: #B24408;
+  --color-severity-low-text: #8F6E00;
 
   /* ── Fonds pâles de statut ──────────────────────────────────────────────────
      Chaque couleur sémantique se décline en trois usages : un aplat vif
@@ -93,6 +112,13 @@
   --color-success-surface: #DCFCE7;
   --color-warning-surface: #FEF3C7;
   --color-danger-surface: #FEE2E2;
+
+  /* Troisième palier de l'échelle de gravité. Sans lui, les cartes « moyenne »
+     et « faible » des statistiques partageaient --color-warning-surface, ce qui
+     rejouait la collision au niveau des bordures. */
+  --color-severity-high-surface: #FEE2E2;
+  --color-severity-medium-surface: #FFEDD5;
+  --color-severity-low-surface: #FEF9C3;
 
   /* ── Accent violet ──────────────────────────────────────────────────────────
      Le violet porte les statuts qui ne sont ni un succès, ni une alerte, ni une
@@ -376,12 +402,16 @@ h2,
   font-weight: var(--font-weight-medium);
 }
 
+/* Une variation en hausse est un SUCCÈS, pas une gravité faible. Ces deux
+   règles empruntaient l'échelle de gravité parce qu'elle était verte et rouge —
+   un emprunt qui tenait par coïncidence, et qui aurait teint les hausses en
+   jaune dès que « faible » a cessé d'être vert. */
 .metric-delta.positive {
-  color: var(--color-severity-low-text);
+  color: var(--color-success-text);
 }
 
 .metric-delta.negative {
-  color: var(--color-severity-high-text);
+  color: var(--color-danger-text);
 }
 
 /* === CARDS (MOLECULES) === */

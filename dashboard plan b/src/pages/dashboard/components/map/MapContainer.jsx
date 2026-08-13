@@ -469,6 +469,7 @@ export const MapContainer = () => {
           mapboxAccessToken={MAPBOX_TOKEN}
           style={{ width: '100%', height: '100%' }}
           mapStyle={MAP_STYLES[activeStyle].style}
+          cooperativeGestures={true}
           touchZoomRotate={true}
           touchPitch={true}
           minZoom={2}
@@ -644,14 +645,14 @@ export const MapContainer = () => {
                 <div className="map-legend-item">
                   <span
                     className="map-legend-dot"
-                    style={{ backgroundColor: 'var(--color-warning)' }}
+                    style={{ backgroundColor: 'var(--color-severity-medium)' }}
                   />
                   Moyenne
                 </div>
                 <div className="map-legend-item">
                   <span
                     className="map-legend-dot"
-                    style={{ backgroundColor: 'var(--color-severity-medium)' }}
+                    style={{ backgroundColor: 'var(--color-severity-low)' }}
                   />
                   Faible
                 </div>
@@ -671,7 +672,7 @@ export const MapContainer = () => {
                 <div className="map-legend-item">
                   <span
                     className="map-legend-dot"
-                    style={{ backgroundColor: 'var(--color-severity-low)' }}
+                    style={{ backgroundColor: 'var(--color-success)' }}
                   />
                   Par moi
                 </div>
