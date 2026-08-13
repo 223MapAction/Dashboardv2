@@ -142,44 +142,44 @@
   top: 60px;
   z-index: 50;
   display: flex;
-  gap: var(--spacing-3);
+  gap: var(--spacing-2);
   flex-wrap: wrap;
   align-items: center;
-  background-color: rgba(var(--rgb-surface), 0.85);
-  backdrop-filter: saturate(180%) blur(12px);
-  -webkit-backdrop-filter: saturate(180%) blur(12px);
-  padding: var(--spacing-3) var(--spacing-4);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
-  margin: 0 calc(var(--spacing-2) * -1);
-  padding-left: calc(var(--spacing-4) + var(--spacing-2));
-  padding-right: calc(var(--spacing-4) + var(--spacing-2));
+  /* Meme carte "flottante" que les autres listes (am-filtres) : pas de
+     cadre ni de flou verre, juste un fond opaque pour couvrir le contenu
+     qui defile dessous. */
+  background-color: var(--color-background);
+  padding-top: var(--spacing-2);
+  margin-top: calc(-1 * var(--spacing-2));
+  padding-bottom: var(--spacing-2);
+  margin-bottom: calc(-1 * var(--spacing-2));
 }
 
 .agents-search {
-  flex: 1;
-  min-width: 220px;
+  flex: 1 1 240px;
+  min-width: 0;
+  min-height: 40px;
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: var(--spacing-3) var(--spacing-4);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  padding: 0 var(--spacing-3);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .agents-search:focus-within {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(var(--rgb-primary), 0.1);
 }
 
 .agents-search input {
   flex: 1;
+  min-width: 0;
   border: none;
   outline: none;
   background: transparent;
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-body-small);
   color: var(--color-text-primary);
   font-family: var(--font-family);
 }
@@ -192,10 +192,11 @@
   position: relative;
   display: flex;
   align-items: center;
+  min-height: 40px;
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  transition: border-color 0.2s ease;
+  transition: border-color 0.15s ease;
   cursor: pointer;
 }
 
@@ -208,12 +209,13 @@
   border: none;
   outline: none;
   background: transparent;
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-body-small);
   color: var(--color-text-primary);
   font-family: var(--font-family);
   appearance: none;
   cursor: pointer;
-  padding: var(--spacing-3) var(--spacing-8) var(--spacing-3) var(--spacing-4);
+  min-height: 40px;
+  padding: 0 var(--spacing-8) 0 var(--spacing-3);
 }
 
 .agents-select-wrap>svg {

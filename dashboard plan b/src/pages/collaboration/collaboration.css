@@ -43,7 +43,12 @@
    dessous se voit au travers. */
 .collab-filtres-fixes {
   position: sticky;
-  top: 0;
+  /* .app-header (position: fixed, 60px de haut, z-index: 100) recouvre le
+     haut de la page : coller ce bloc a top:0 le fait passer SOUS le header
+     fixe, qui masque alors sa premiere ligne (la recherche) sans toucher aux
+     lignes suivantes, plus basses — d'ou l'illusion que seuls les filtres
+     restent visibles au defilement. */
+  top: 60px;
   z-index: 20;
   background-color: var(--color-background);
   padding-top: var(--spacing-2);
