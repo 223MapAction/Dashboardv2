@@ -70,6 +70,29 @@
   border-color: var(--color-primary);
 }
 
+/* Le bouton retour de cette page porte la classe .detail-back-btn, dont le
+   style vit dans la feuille de la page Signalements. En arrivant directement
+   ici (lien partage, rechargement), cette feuille n'est jamais chargee et le
+   bouton s'affiche sans aucun style. On le definit donc la ou il sert. */
+.collab-detail-header .detail-back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.collab-detail-header .detail-back-btn:hover {
+  background-color: var(--color-surface);
+  border-color: var(--color-primary);
+}
+
 .collab-detail-header-info {
   flex: 1;
 }
@@ -1046,7 +1069,6 @@
   background-color: var(--color-surface);
   border-top: 1px solid var(--color-border);
   padding: var(--spacing-2) var(--spacing-4);
-  box-shadow: 0 -2px 10px rgba(var(--rgb-ombre), 0.1);
   z-index: 100;
   /* iOS reserve une zone au bas de l'ecran pour la barre d'accueil (le
      "home indicator") ; Android n'a pas cette contrainte. Sans cet ajout,
@@ -1142,12 +1164,45 @@
 }
 
 @media (max-width: 1023.98px) {
+  /* Trois elements se disputaient une seule ligne : le retour, le titre sur
+     deux lignes tronquees, et « Resoudre l'incident ». Le titre y perdait le
+     plus — c'est pourtant lui qui dit ou l'on est. On garde donc le retour et
+     le titre ensemble sur la premiere ligne, et l'action passe en dessous sur
+     toute la largeur, ou elle est aussi plus facile a viser au doigt. */
   .collab-detail-header {
     padding: var(--spacing-4);
+    height: auto;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-3);
+  }
+
+  .collab-detail-header-info {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .collab-detail-header>.btn,
+  .collab-detail-header>.collab-detail-closed-badge {
+    flex-basis: 100%;
+    justify-content: center;
+    text-align: center;
   }
 
   .collab-detail-title {
     font-size: var(--font-size-h3);
+    /* Deux lignes au plus : au-dela, le titre repousse tout le contenu de la
+       page vers le bas sur un ecran deja etroit. */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .collab-detail-subtitle {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .collab-detail-section {
