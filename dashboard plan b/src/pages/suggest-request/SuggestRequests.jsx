@@ -538,7 +538,8 @@ export const SuggestRequests = ({ embedded = false }) => {
         </div>
       )}
 
-      {/* Toolbar */}
+      {/* Toolbar — fixe au defilement : voir .requests-filtres-fixes. */}
+      <div className="requests-filtres-fixes">
       <FiltersBar
         recherche={searchInput}
         onRecherche={setSearchInput}
@@ -577,6 +578,7 @@ export const SuggestRequests = ({ embedded = false }) => {
           ))}
         </div>
       </FiltersBar>
+      </div>
 
 
       {/* Info banner */}

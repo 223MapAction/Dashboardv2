@@ -21,6 +21,22 @@
   transition: margin-left 0.3s ease;
 }
 
+/* Recherche et filtres restent visibles pendant le defilement de la liste :
+   .trash-content est le conteneur qui defile (overflow-y: auto). Le top est
+   a 60px, pas 0 : .app-header (position: fixed, 60px de haut, z-index: 100)
+   recouvre le haut de la page, donc coller ce bloc a top:0 le ferait passer
+   sous le header fixe, qui masquerait sa premiere ligne. */
+.trash-filtres-fixes {
+  position: sticky;
+  top: 60px;
+  z-index: 20;
+  background-color: var(--color-background);
+  padding-top: var(--spacing-2);
+  margin-top: calc(-1 * var(--spacing-2));
+  padding-bottom: var(--spacing-2);
+  margin-bottom: calc(-1 * var(--spacing-2));
+}
+
 .trash-content {
   flex: 1;
   padding: var(--spacing-6);

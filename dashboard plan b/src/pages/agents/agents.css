@@ -134,9 +134,12 @@
 }
 
 /* ── Toolbar sticky ────────────────── */
+/* .app-header (position: fixed, 60px de haut, z-index: 100) recouvre le
+   haut de la page : coller ce bloc trop haut (top: -4px) le faisait passer
+   sous le header fixe, qui masquait alors la recherche au defilement. */
 .agents-toolbar {
   position: sticky;
-  top: -4px;
+  top: 60px;
   z-index: 50;
   display: flex;
   gap: var(--spacing-3);
