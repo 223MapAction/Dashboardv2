@@ -1186,11 +1186,9 @@
     font-size: var(--font-size-body-large);
   }
 
-  .collab-discussion-attach,
-  .collab-discussion-send {
-    width: 40px;
-    height: 40px;
-  }
+  /* Pas de reduction ici : la regle de base (44px) reste la cible tactile
+     minimale. La retrecir sous 767px allait a l'inverse du besoin — c'est
+     precisement sur mobile qu'un bouton trop petit rate le doigt. */
 
   /* Fichiers dans les messages */
   .collab-message-file {
@@ -1385,11 +1383,8 @@
     padding: var(--spacing-2);
   }
 
-  .collab-discussion-attach,
-  .collab-discussion-send {
-    width: 36px;
-    height: 36px;
-  }
+  /* Meme raison qu'au palier precedent : la regle de base (44px) reste la
+     cible tactile minimale, y compris sur les plus petits ecrans. */
 
   .collab-discussion {
     height: calc(100vh - 200px) !important;
