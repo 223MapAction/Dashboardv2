@@ -187,6 +187,18 @@ export const MapContainer = () => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const loadedPagesRef = useRef(new Set());
 
+  // Sur ecran tactile, un doigt doit faire defiler la PAGE, pas deplacer la
+  // carte : sur le tableau de bord elle occupe 77% de la hauteur, on ne
+  // pourrait plus descendre. `dragPan` couvrant a la fois la souris et le
+  // doigt, on ne le coupe que sur pointeur grossier — le glisser a la souris
+  // reste intact sur ordinateur.
+  //
+  // Le pincement a deux doigts continue de zoomer via `touchZoomRotate`.
+  const estTactile = useMemo(
+    () => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches,
+    []
+  );
+
   // Déterminer le scope en fonction des filtres
   const getScope = () => {
     if (ownershipFilter === 'mine') return 'mine';
@@ -451,6 +463,7 @@ export const MapContainer = () => {
           mapboxAccessToken={MAPBOX_TOKEN}
           style={{ width: '100%', height: '100%' }}
           mapStyle={MAP_STYLES[activeStyle].style}
+          dragPan={!estTactile}
           touchZoomRotate={true}
           touchPitch={true}
           minZoom={2}

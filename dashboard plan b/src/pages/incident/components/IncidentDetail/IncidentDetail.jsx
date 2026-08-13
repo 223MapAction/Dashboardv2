@@ -1217,7 +1217,11 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                   </div>
                   {/* Mini-carte détaillée */}
                   <div className="detail-geo-map" style={{ marginTop: '12px', height: '320px', borderRadius: '8px', overflow: 'hidden', position: 'relative' }}>
+                    {/* Un doigt fait defiler la fiche, deux doigts zooment la
+                        carte. `dragPan` vaut pour la souris comme pour le
+                        doigt : on ne le coupe que sur pointeur grossier. */}
                     <Map
+                      dragPan={!window.matchMedia('(pointer: coarse)').matches}
                       initialViewState={{
                         longitude: safeIncident.coordinates.lng,
                         latitude: safeIncident.coordinates.lat,
