@@ -1077,6 +1077,18 @@ button.blurry-image-container {
   outline-color: var(--color-surface) !important;
 }
 
+/* Ces champs ont déjà leur propre indicateur de focus (bordure + halo
+   colorés sur le conteneur, au clic comme au clavier) : l'anneau générique
+   ci-dessus s'ajoutait par-dessus au lieu de le remplacer, doublant le
+   contour. Les navigateurs déclenchent :focus-visible sur un champ texte
+   même au clic souris (contrairement aux boutons/liens) — d'où le doublon
+   visible dès qu'on clique dans une recherche, pas seulement au clavier. */
+.am-filtres-recherche input:focus-visible,
+.agents-search input:focus-visible,
+.field-input input:focus-visible {
+  outline: none !important;
+}
+
 /* ── 2. Mouvement réduit ─────────────────────────────────────────────────────
    Respecte le réglage système des utilisateurs sensibles au mouvement
    (troubles vestibulaires, migraines). On ne supprime pas les transitions —
