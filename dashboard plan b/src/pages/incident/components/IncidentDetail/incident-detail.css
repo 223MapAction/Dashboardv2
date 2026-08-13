@@ -386,6 +386,11 @@
   border-radius: var(--radius-md);
   overflow: hidden;
   background-color: var(--color-background);
+  /* Meme raison que sur la carte du tableau de bord (map.css) : cette
+     mini-carte vit dans une fiche qui defile, et sans cette regle le
+     navigateur peut arbitrer le geste tactile a sa place, au detriment du
+     pincement a deux doigts. */
+  touch-action: none;
 }
 
 .project-detail .project-map-marker {
