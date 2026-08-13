@@ -36,6 +36,22 @@
   gap: var(--spacing-5);
 }
 
+/* Recherche et filtres restent visibles pendant le defilement de la liste :
+   .collaboration-content est le conteneur qui defile (overflow-y: auto), et
+   c'est par rapport a lui que le sticky s'ancre. Le fond opaque + le liseré
+   sont necessaires des qu'un element sticky, sinon le contenu qui defile
+   dessous se voit au travers. */
+.collab-filtres-fixes {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background-color: var(--color-background);
+  padding-top: var(--spacing-2);
+  margin-top: calc(-1 * var(--spacing-2));
+  padding-bottom: var(--spacing-2);
+  margin-bottom: calc(-1 * var(--spacing-2));
+}
+
 /* --- Header --- */
 .collab-page-header {
   display: flex;
@@ -250,6 +266,67 @@
 .collab-filter-pill.is-active .collab-filter-count {
   background-color: rgba(var(--rgb-surface), 0.25);
   color: var(--color-surface);
+}
+
+/* ── Filtres avances (role, signalement, acceptation, periode) ───────────────
+   Repliés par defaut : recherche et pastilles suffisent la plupart du temps,
+   le reste n'a besoin d'être visible que sur demande. Voir Collaboration.jsx
+   pour le detail des filtres qu'il contient. */
+.collab-filtres-avances-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: 8px 14px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body-small);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  font-family: var(--font-family);
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.collab-filtres-avances-toggle:hover {
+  border-color: var(--color-primary);
+  color: var(--color-text-primary);
+}
+
+/* Actif = le panneau est ouvert OU un filtre qu'il contient est actif : dans
+   les deux cas, l'utilisateur doit pouvoir le reperer d'un coup d'oeil. */
+.collab-filtres-avances-toggle.is-active {
+  border-color: var(--color-primary);
+  color: var(--color-primary-text);
+  background-color: var(--color-primary-surface);
+}
+
+.collab-filtres-avances-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary);
+  color: var(--color-surface);
+  font-size: var(--font-size-micro);
+  font-weight: var(--font-weight-bold);
+}
+
+/* flex-basis:100% force ce panneau sur sa propre ligne dans la barre de
+   filtres (qui est en flex-wrap), sous la recherche et les pastilles, plutot
+   que de s'inserer au milieu d'elles. */
+.collab-filtres-avances-panneau {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+  flex-basis: 100%;
+  padding-top: var(--spacing-2);
+  border-top: 1px solid var(--color-border);
+  margin-top: var(--spacing-1);
 }
 
 /* --- Date range filter (react-datepicker) --- */
