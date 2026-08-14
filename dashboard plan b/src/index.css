@@ -52,17 +52,20 @@
      plein soleil, le contexte des agents de terrain. */
   --color-text-muted: #697282;
   /* ── Échelle de gravité ─────────────────────────────────────────────────────
-     Trois niveaux, donc trois teintes DISTINCTES. Cette règle avait été perdue :
-     « faible » valait #22C55E, le vert exact de --color-success, alors que sur
-     la carte le vert signifie déjà « résolu par moi » ; du coup le CSS des
-     marqueurs peignait « faible » en --color-warning, c'est-à-dire dans la même
-     couleur que « moyenne ». Deux gravités différentes, une seule couleur.
+     TROIS niveaux — ceux que le serveur émet —, donc trois teintes DISTINCTES.
+     Les seuils et les libellés vivent dans src/utils/gravite.js ; ici, seules
+     les couleurs.
 
-     L'échelle est donc rouge → orange → jaune, sans vert ni bleu (réservés aux
-     états « résolu »). Les écarts perceptuels (CIE dE76) sont mesurés :
-     élevée↔moyenne 34.6, moyenne↔faible 42.4, élevée↔faible 71.9. Pour
-     comparaison, la paire #F59E0B/#EAB308 que j'avais d'abord envisagée tombait
-     à 16.4 — deux nuances qu'on ne sépare pas d'un coup d'œil sur une carte.
+     Cette règle avait été perdue : « faible » valait #22C55E, le vert exact de
+     --color-success, alors que sur la carte le vert signifie déjà « résolu par
+     moi » ; du coup le CSS des marqueurs peignait « faible » en --color-warning,
+     c'est-à-dire dans la même couleur que « moyenne ».
+
+     L'échelle est rouge → orange → jaune, sans vert ni bleu (réservés aux états
+     « résolu »). Les écarts perceptuels (CIE dE76) sont mesurés : élevée↔moyenne
+     34.6, moyenne↔faible 42.4, élevée↔faible 71.9. Une rampe a été écartée sur
+     ce critère : la paire #F59E0B/#EAB308 tombait à 16.4, deux nuances qu'on ne
+     sépare pas d'un coup d'œil sur une carte.
 
      La gravité ne réutilise plus --color-danger / --color-warning : ce sont des
      couleurs de STATUT. Les faire coïncider est ce qui avait permis à la dérive
@@ -95,9 +98,9 @@
   --color-warning-text: #9E6606;
   --color-danger-text: #E21313;
   --color-info-text: #1E78AC;
-  /* Mêmes trois teintes, assombries au minimum pour franchir 4.5:1 face au
-     blanc : 4.53, 5.64 et 4.77. Le jaune vif ne plafonne qu'à 1.92:1 — il ne
-     peut donc jamais porter du texte, seulement une pastille. */
+  /* Mêmes teintes, assombries au minimum pour franchir 4.5:1 face au blanc :
+     4.84, 5.64 et 4.77. Le jaune vif ne plafonne qu'à 1.92:1 — il ne peut donc
+     jamais porter du texte, seulement une pastille. */
   --color-severity-high-text: #E21313;
   --color-severity-medium-text: #B24408;
   --color-severity-low-text: #8F6E00;

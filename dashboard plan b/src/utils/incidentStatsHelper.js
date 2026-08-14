@@ -1,25 +1,20 @@
 /**
  * Utilitaires pour calculer les statistiques des incidents
  */
+import { CLES_GRAVITE, gravite, libelleGravite, repartitionGravite } from './gravite';
 
 /**
- * Détermine la sévérité d'un incident
- * @param {Object} incident - L'incident à analyser
- * @returns {string} 'high' | 'medium' | 'low'
+ * Détermine la gravité d'un incident.
+ *
+ * Ce module en hébergeait sa propre copie, avec ses propres seuils. Il ne fait
+ * plus que réexporter la définition commune : deux implémentations d'une même
+ * règle finissent toujours par diverger, et c'est exactement ce qui s'était
+ * produit ici (>= 4 pour « moyen », contre >= 3 sur la page Impact).
+ *
+ * @param {Object} incident
+ * @returns {'high'|'medium'|'low'}
  */
-export const getSeverity = (incident) => {
-  const baseSeverity = incident.base_severity ?? incident.incident_details?.prediction_details?.base_severity;
-  if (baseSeverity !== undefined && baseSeverity !== null) {
-    const val = parseFloat(baseSeverity);
-    if (val >= 7) return 'high';
-    if (val >= 4) return 'medium';
-    return 'low';
-  }
-  const badges = (incident.badges || []).map((b) => b.variant);
-  if (badges.includes('critical') || badges.includes('high') || badges.includes('expert-needed')) return 'high';
-  if (badges.includes('in-progress') || badges.includes('medium')) return 'medium';
-  return 'low';
-};
+export const getSeverity = gravite;
 
 /**
  * Normalise les incidents (gère les formats array ou objet avec results)
@@ -102,34 +97,10 @@ export const calculateTopIncidents = (incidents, limit = 5) => {
 /**
  * Calcule les statistiques par gravité
  * @param {Array} incidents - Liste des incidents
- * @returns {Object} { high: {count, percentage}, medium: {count, percentage}, low: {count, percentage} }
+ * @returns {Object} { high: {count, percentage}, medium: …, low: … }
  */
-export const calculateSeverityStats = (incidents) => {
-  const normalized = normalizeIncidents(incidents);
-  const severityMap = { high: 0, medium: 0, low: 0 };
-  
-  normalized.forEach(inc => {
-    const severity = getSeverity(inc);
-    severityMap[severity]++;
-  });
-  
-  const total = normalized.length || 1;
-  
-  return {
-    high: {
-      count: severityMap.high,
-      percentage: Math.round((severityMap.high / total) * 100)
-    },
-    medium: {
-      count: severityMap.medium,
-      percentage: Math.round((severityMap.medium / total) * 100)
-    },
-    low: {
-      count: severityMap.low,
-      percentage: Math.round((severityMap.low / total) * 100)
-    }
-  };
-};
+export const calculateSeverityStats = (incidents) =>
+  repartitionGravite(normalizeIncidents(incidents));
 
 /**
  * Calcule toutes les statistiques en une seule fois
@@ -175,9 +146,10 @@ export const logStats = (incidents) => {
   console.log('');
   
   console.log('⚠️  PAR GRAVITÉ:');
-  console.log(`   🔴 Critique: ${stats.severity.high.count} (${stats.severity.high.percentage}%)`);
-  console.log(`   🟠 Grave: ${stats.severity.medium.count} (${stats.severity.medium.percentage}%)`);
-  console.log(`   🟡 Modéré: ${stats.severity.low.count} (${stats.severity.low.percentage}%)`);
+  CLES_GRAVITE.forEach((cle) => {
+    const { count, percentage } = stats.severity[cle];
+    console.log(`   ${libelleGravite(cle)}: ${count} (${percentage}%)`);
+  });
   
   console.log('\n═══════════════════════════════════════════════════════\n');
   

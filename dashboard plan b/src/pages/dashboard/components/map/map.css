@@ -88,7 +88,7 @@
   }
 }
 
-/* Pulsation plus rapide pour les incidents de sévérité élevée */
+/* Pulsation plus rapide pour les incidents de gravité élevée */
 .incident-marker.severity-active-high .incident-marker-pulse {
   animation-duration: 1.2s;
 }

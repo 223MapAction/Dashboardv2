@@ -1,12 +1,7 @@
 import React, { useMemo } from 'react';
 import { TickCircle, CloseCircle, Activity, Location, Chart2, Warning2 } from 'iconsax-react';
 import './incident-stats.css';
-
-const NIVEAUX_GRAVITE = [
-  { cle: 'high', libelle: 'Élevée' },
-  { cle: 'medium', libelle: 'Moyenne' },
-  { cle: 'low', libelle: 'Faible' }
-];
+import { lireRepartitionApi } from '../../../../utils/gravite';
 
 export const IncidentStats = ({ stats }) => {
   // 1. Statistiques de statut
@@ -42,35 +37,12 @@ export const IncidentStats = ({ stats }) => {
 
   // 4. Statistiques par gravité
   //
-  // L'ordre du tableau est l'ordre d'affichage : du plus grave au moins grave,
-  // comme la légende de la carte. Les libellés sont d'ailleurs ceux de la carte.
-  // Cette section disait « Critique / Grave / Modéré » pour les mêmes trois
-  // niveaux que la carte appelle « Élevée / Moyenne / Faible » — et « Modéré »
-  // désigne sur la page Impact un palier INTERMÉDIAIRE, pas le plus bas. Trois
-  // vocabulaires pour un seul concept, dont un qui se contredisait.
-  const severityStats = useMemo(() => {
-    if (stats?.by_severity) {
-      return {
-        high: {
-          count: stats.by_severity.high?.count ?? 0,
-          percentage: stats.by_severity.high?.percentage ?? 0
-        },
-        medium: {
-          count: stats.by_severity.medium?.count ?? 0,
-          percentage: stats.by_severity.medium?.percentage ?? 0
-        },
-        low: {
-          count: stats.by_severity.low?.count ?? 0,
-          percentage: stats.by_severity.low?.percentage ?? 0
-        }
-      };
-    }
-    return {
-      high: { count: 0, percentage: 0 },
-      medium: { count: 0, percentage: 0 },
-      low: { count: 0, percentage: 0 }
-    };
-  }, [stats]);
+  // Les libellés, l'ordre et les couleurs viennent de utils/gravite.js, donc de
+  // la carte : c'est elle la référence, et cette section s'y aligne. Elle disait
+  // « Critique / Grave / Modéré » pour les trois niveaux que la carte nomme
+  // « Élevée / Moyenne / Faible », et les peignait avec les couleurs de statut
+  // — « moyenne » et « faible » partageaient d'ailleurs le même orange.
+  const niveaux = useMemo(() => lireRepartitionApi(stats?.by_severity), [stats]);
 
   return (
     <div className="incident-stats-container">
@@ -179,9 +151,10 @@ export const IncidentStats = ({ stats }) => {
           Répartition par Gravité
         </h2>
         <div className="severity-stats-grid">
-          {NIVEAUX_GRAVITE.map(({ cle, libelle }) => {
-            const { count, percentage } = severityStats[cle];
-            return (
+          {niveaux.length === 0 && (
+            <div className="no-data">Aucune donnée disponible</div>
+          )}
+          {niveaux.map(({ cle, libelle, count, percentage }) => (
               <div key={cle} className={`severity-stat-card ${cle}`}>
                 <div className="severity-header">
                   <span className="severity-label">
@@ -209,8 +182,7 @@ export const IncidentStats = ({ stats }) => {
                   />
                 </div>
               </div>
-            );
-          })}
+          ))}
         </div>
       </div>
     </div>

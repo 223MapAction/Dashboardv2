@@ -25,6 +25,7 @@ import { authService } from '../auth/services/authService';
 import Pagination from '../../components/molecules/Pagination';
 import './impact.css';
 import { useReinitialisationSurChangement } from '../../hooks/useReinitialisationSurChangement';
+import { gravite, libelleGravite, couleurTexteGravite } from '../../utils/gravite';
 
 const EMPTY_ARRAY = [];
 
@@ -40,33 +41,15 @@ const STRUCTURE_LABELS = {
   nurseries: 'Crèches'
 };
 
-// Impact découpe la gravité en quatre paliers là où la carte en montre trois.
-// Les couleurs, elles, n'avaient rien à voir : « modérée » y était bleue et
-// « faible » verte, soit les deux teintes que la carte réserve aux incidents
-// résolus. Un même incident changeait donc de code couleur d'une page à
-// l'autre. Les trois premiers paliers reprennent l'échelle rouge → orange →
-// jaune ; le quatrième descend au gris, qui prolonge la décroissance sans
-// réintroduire une couleur déjà porteuse d'un autre sens.
-// Ce sont les variantes -text : le libellé s'affiche en blanc PAR-DESSUS cette
-// couleur, et le contraste étant symétrique, elles tiennent dans les deux rôles.
-const SEVERITY_META = {
-  critical: { label: 'Critique', color: 'var(--color-severity-high-text)' },
-  high: { label: 'Élevée', color: 'var(--color-severity-medium-text)' },
-  medium: { label: 'Modérée', color: 'var(--color-severity-low-text)' },
-  low: { label: 'Faible', color: 'var(--color-text-secondary)' }
-};
-
-const getSeverity = (incident, prediction) => {
-  const baseSeverity = incident.base_severity ?? prediction?.base_severity;
-  if (baseSeverity !== undefined && baseSeverity !== null) {
-    const val = parseFloat(baseSeverity);
-    if (val >= 7) return 'critical';
-    if (val >= 5) return 'high';
-    if (val >= 3) return 'medium';
-    return 'low';
-  }
-  return 'medium';
-};
+// Les libelles, les seuils et les couleurs viennent maintenant de
+// utils/gravite.js. Cette page etait la seule a distinguer quatre paliers, mais
+// elle les peignait en rouge / orange / BLEU / VERT — soit, pour les deux
+// derniers, les teintes que la carte reserve aux incidents resolus. Un meme
+// incident changeait de code couleur d'une page a l'autre.
+//
+// On lit les variantes -text : le libelle s'affiche en blanc PAR-DESSUS cette
+// couleur, et le contraste etant symetrique, elles tiennent dans les deux roles.
+const getSeverity = (incident, prediction) => gravite(incident, prediction);
 
 const formatDate = (iso) => {
   if (!iso) return '—';
@@ -732,7 +715,6 @@ export const Impact = () => {
                         const pred = inc.prediction;
                         const incTasks = inc.tasks || [];
                         const severity = getSeverity(inc, pred);
-                        const sev = SEVERITY_META[severity];
                         const isOpen = expanded === inc.id;
 
                         // Extraire les agents de terrain uniques depuis les tâches de l'incident
@@ -775,9 +757,9 @@ export const Impact = () => {
                               >
                                 <span
                                   className="impact-severity-tag"
-                                  style={{ backgroundColor: sev.color }}
+                                  style={{ backgroundColor: couleurTexteGravite(severity) }}
                                 >
-                                  {sev.label}
+                                  {libelleGravite(severity)}
                                 </span>
                               </div>
 

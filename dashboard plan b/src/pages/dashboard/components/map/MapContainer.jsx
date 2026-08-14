@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom';
 import useSWR from 'swr';
 import { activerGestesCooperatifs } from '../../../../utils/gestesCarte';
+import { NIVEAUX_GRAVITE, gravite, couleurGravite } from '../../../../utils/gravite';
 import Map, { Marker, Popup } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
@@ -16,27 +17,6 @@ import { useReinitialisationSurChangement } from '../../../../hooks/useReinitial
 
 // Token Mapbox depuis les variables d'environnement
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
-
-// Détermine la sévérité d'un incident à partir de sa sévérité directe, base_severity (0 à 10) ou de ses badges
-const getSeverity = (project) => {
-  if (project.severity === 'high' || project.severity === 'medium' || project.severity === 'low') {
-    return project.severity;
-  }
-
-  const baseSeverity = project.base_severity ?? project.incident_details?.prediction_details?.base_severity;
-  if (baseSeverity !== undefined && baseSeverity !== null) {
-    const val = parseFloat(baseSeverity);
-    if (val >= 7) return 'high';
-    if (val >= 4) return 'medium';
-    return 'low';
-  }
-
-  // Repli sur les badges si base_severity est absent
-  const badges = (project.badges || []).map((b) => b.variant);
-  if (badges.includes('critical') || badges.includes('high') || badges.includes('expert-needed')) return 'high';
-  if (badges.includes('in-progress') || badges.includes('medium')) return 'medium';
-  return 'low';
-};
 
 // Calcule la classe de couleur du marqueur en fonction de son statut et de l'utilisateur connecté
 const getMarkerColorClass = (incident, currentUserId) => {
@@ -56,11 +36,11 @@ const getMarkerColorClass = (incident, currentUserId) => {
     return 'resolved-others'; // Bleu
   }
 
-  // Si l'incident est actif, sa couleur dépend de sa sévérité (sans bleu ni vert)
-  const severity = getSeverity(incident);
-  if (severity === 'high') return 'active-high'; // Rouge
-  if (severity === 'medium') return 'active-medium'; // Orange
-  return 'active-low'; // Jaune
+  // Si l'incident est actif, sa couleur dépend de sa gravité (sans bleu ni vert).
+  // Les niveaux viennent de utils/gravite.js, qui lit le champ `severity` decide
+  // par le serveur. La carte les recalculait avec ses propres seuils, si bien
+  // qu'un incident pouvait etre « moyen » ici et « eleve » sur la page Impact.
+  return `active-${gravite(incident)}`;
 };
 
 const INCIDENT_STATUS_STEPS = [
@@ -634,28 +614,20 @@ export const MapContainer = () => {
           {statusFilter === 'active' ? (
             <>
               <p className="map-legend-title">Gravité</p>
+              {/* Legende derivee de l'echelle, pas recopiee : c'est une liste
+                  ecrite a la main qui avait fini par afficher deux fois la meme
+                  pastille pour deux niveaux differents. La carte reste la
+                  reference — les autres vues s'alignent sur ces couleurs. */}
               <div className="map-legend-list">
-                <div className="map-legend-item">
-                  <span
-                    className="map-legend-dot"
-                    style={{ backgroundColor: 'var(--color-severity-high)' }}
-                  />
-                  Élevée
-                </div>
-                <div className="map-legend-item">
-                  <span
-                    className="map-legend-dot"
-                    style={{ backgroundColor: 'var(--color-severity-medium)' }}
-                  />
-                  Moyenne
-                </div>
-                <div className="map-legend-item">
-                  <span
-                    className="map-legend-dot"
-                    style={{ backgroundColor: 'var(--color-severity-low)' }}
-                  />
-                  Faible
-                </div>
+                {NIVEAUX_GRAVITE.map(({ cle, libelle }) => (
+                  <div className="map-legend-item" key={cle}>
+                    <span
+                      className="map-legend-dot"
+                      style={{ backgroundColor: couleurGravite(cle) }}
+                    />
+                    {libelle}
+                  </div>
+                ))}
               </div>
             </>
           ) : (
