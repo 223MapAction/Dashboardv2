@@ -485,12 +485,22 @@ h2,
 
 }
 
-.activity-item.severity-low {
-  border-left-color: var(--color-severity-low);
-}
-
+/* Les trois niveaux, pas deux : « moyenne » n'avait aucune regle et retombait
+   sur la bordure par defaut — or c'est aujourd'hui le seul niveau que le serveur
+   attribue. Ces classes ne servent que dans ActivityFeed, qui n'est monte nulle
+   part pour l'instant (le tableau de bord affiche ActivityPanel) ; la lacune
+   etait donc invisible, et le serait restee jusqu'au jour ou l'on branche ce
+   composant. */
 .activity-item.severity-high {
   border-left-color: var(--color-severity-high);
+}
+
+.activity-item.severity-medium {
+  border-left-color: var(--color-severity-medium);
+}
+
+.activity-item.severity-low {
+  border-left-color: var(--color-severity-low);
 }
 
 .activity-icon {

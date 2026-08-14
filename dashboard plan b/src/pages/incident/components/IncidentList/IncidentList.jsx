@@ -14,6 +14,8 @@ import { FiltersBar } from '../../../../components/molecules/FiltersBar';
 import './incident-list.css';
 
 import { TableActionsMenu } from '../../../../components/molecules/TableActionsMenu';
+import { BadgeGravite } from '../../../../components/atoms/BadgeGravite';
+import { gravite, couleurGravite } from '../../../../utils/gravite';
 // Composant shimmer pour le chargement (version table)
 
 export const IncidentList = ({
@@ -167,9 +169,7 @@ export const IncidentList = ({
           {incident.badges?.map((b, idx) => (
             <span key={idx} className={`incident-badge-glow variant-${b.variant}`}>{b.label}</span>
           ))}
-          {incident.severity === 'high' && <span className="incident-badge-glow" style={{ background: 'rgba(var(--rgb-danger), 0.12)', color: 'var(--color-danger-text)', borderColor: 'rgba(var(--rgb-danger), 0.3)' }}>Gravité élevée</span>}
-          {incident.severity === 'medium' && <span className="incident-badge-glow" style={{ background: 'rgba(var(--rgb-warning), 0.12)', color: 'var(--color-warning-text)', borderColor: 'rgba(var(--rgb-warning), 0.3)' }}>Gravité moyenne</span>}
-          {!['high', 'medium'].includes(incident.severity) && <span className="incident-badge-glow" style={{ background: 'rgba(var(--rgb-success), 0.12)', color: 'var(--color-success-text)', borderColor: 'rgba(var(--rgb-success), 0.3)' }}>Gravité faible</span>}
+          <BadgeGravite incident={incident} />
         </>
       ),
       rendu: (incident) => (
@@ -182,15 +182,7 @@ export const IncidentList = ({
                                 ))}
                               </div>
                               <div className="incident-table-badges">
-                                {(() => {
-                                  if (incident.severity === 'high') {
-                                    return <span className="incident-badge-glow" style={{ background: 'rgba(var(--rgb-danger), 0.12)', color: 'var(--color-danger-text)', borderColor: 'rgba(var(--rgb-danger), 0.3)' }}>Gravité élevée</span>;
-                                  }
-                                  if (incident.severity === 'medium') {
-                                    return <span className="incident-badge-glow" style={{ background: 'rgba(var(--rgb-warning), 0.12)', color: 'var(--color-warning-text)', borderColor: 'rgba(var(--rgb-warning), 0.3)' }}>Gravité moyenne</span>;
-                                  }
-                                  return <span className="incident-badge-glow" style={{ background: 'rgba(var(--rgb-success), 0.12)', color: 'var(--color-success-text)', borderColor: 'rgba(var(--rgb-success), 0.3)' }}>Gravité faible</span>;
-                                })()}
+                                <BadgeGravite incident={incident} />
                               </div>
                             </div>
       ),
@@ -348,9 +340,7 @@ export const IncidentList = ({
   // Le lisere colore du bord gauche de la carte double le badge de gravite,
   // il ne le remplace pas : la couleur seule ne doit jamais porter le sens.
   const accentDe = (incident) =>
-    incident.severity === 'high' ? 'var(--color-severity-high)'
-      : incident.severity === 'medium' ? 'var(--color-severity-medium)'
-        : 'var(--color-severity-low)';
+    couleurGravite(gravite(incident));
 
   // Le bandeau de la carte. Sur un signalement environnemental, la photo dit
   // ce qui se passe mieux qu'aucun badge.

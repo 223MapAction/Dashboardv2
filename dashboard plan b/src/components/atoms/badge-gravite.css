@@ -1,0 +1,63 @@
+/* Badge de gravité — voir BadgeGravite.jsx.
+
+   Trois niveaux, trois teintes, celles des marqueurs de la carte. Chaque niveau
+   combine son fond pâle et sa variante lisible : le duo est déjà mesuré à
+   4.5:1 face au blanc, donc le texte tient sur le fond pâle correspondant. */
+
+.badge-gravite {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: 4px var(--spacing-3);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.2;
+  border: 1px solid transparent;
+  /* Un badge ne se coupe jamais en deux lignes : « Gravité moyenne » sur deux
+     lignes casse l'alignement de toute la rangée de badges. */
+  white-space: nowrap;
+}
+
+/* Variante discrète : fond pâle, texte sombre. C'est celle des listes, où
+   plusieurs badges cohabitent et où un aplat vif crierait plus fort que le
+   titre du signalement. */
+.badge-gravite--discret.badge-gravite--high {
+  background-color: var(--color-severity-high-surface);
+  color: var(--color-severity-high-text);
+  border-color: var(--color-severity-high);
+}
+
+.badge-gravite--discret.badge-gravite--medium {
+  background-color: var(--color-severity-medium-surface);
+  color: var(--color-severity-medium-text);
+  border-color: var(--color-severity-medium);
+}
+
+.badge-gravite--discret.badge-gravite--low {
+  background-color: var(--color-severity-low-surface);
+  color: var(--color-severity-low-text);
+  border-color: var(--color-severity-low);
+}
+
+/* Variante pleine : aplat de la couleur lisible, texte blanc. Reservee au
+   detail d'un incident, ou le badge est seul et doit se voir.
+   On peint la variante -text et non l'aplat vif : le jaune vif ne tient que
+   1.92:1 face au blanc, du texte blanc y serait illisible. */
+.badge-gravite--plein {
+  color: var(--color-surface);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge-gravite--plein.badge-gravite--high {
+  background-color: var(--color-severity-high-text);
+}
+
+.badge-gravite--plein.badge-gravite--medium {
+  background-color: var(--color-severity-medium-text);
+}
+
+.badge-gravite--plein.badge-gravite--low {
+  background-color: var(--color-severity-low-text);
+}

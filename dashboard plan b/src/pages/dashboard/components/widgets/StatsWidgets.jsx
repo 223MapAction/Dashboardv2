@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Location, Chart2, Warning2, ArrowRight2, Clock } from 'iconsax-react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import './stats-widgets.css';
-import { NIVEAUX_GRAVITE, lireRepartitionApi, couleurTexteGravite } from '../../../../utils/gravite';
+import { NIVEAUX_GRAVITE, lireRepartitionApi, couleurGravite } from '../../../../utils/gravite';
 
 const getStatusLabel = (etat) => {
   switch (etat) {
@@ -46,8 +46,10 @@ export const StatsWidgets = ({ stats }) => {
 
   // Calculer les statistiques par gravité
   //
-  // Les niveaux, leur ordre et leurs couleurs viennent de utils/gravite.js,
-  // c'est-à-dire des mêmes teintes que les marqueurs de la carte. Ce widget
+  // Les niveaux, leur ordre et leurs couleurs viennent de utils/gravite.js.
+  // On prend les teintes VIVES, celles des marqueurs : une part de camembert
+  // est un aplat, exactement comme une pastille sur la carte. Les variantes
+  // assombries ne servent qu'au texte et aux fonds sous du blanc. Ce widget
   // rejouait la collision corrigée ailleurs : « Moyenne » et « Faible » y
   // étaient toutes deux en --color-warning-text, donc deux parts du même
   // camembert peintes de la même couleur.
@@ -57,7 +59,7 @@ export const StatsWidgets = ({ stats }) => {
       return niveaux.map(({ cle, libelle, percentage }) => ({
         label: libelle,
         percentage,
-        color: couleurTexteGravite(cle)
+        color: couleurGravite(cle)
       }));
     }
     // Sans données, on garde l'échelle complète à 0 : la légende reste lisible
@@ -65,7 +67,7 @@ export const StatsWidgets = ({ stats }) => {
     return NIVEAUX_GRAVITE.map(({ cle, libelle }) => ({
       label: libelle,
       percentage: 0,
-      color: couleurTexteGravite(cle)
+      color: couleurGravite(cle)
     }));
   }, [stats]);
 
