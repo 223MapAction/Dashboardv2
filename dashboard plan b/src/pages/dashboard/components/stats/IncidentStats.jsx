@@ -2,6 +2,12 @@ import React, { useMemo } from 'react';
 import { TickCircle, CloseCircle, Activity, Location, Chart2, Warning2 } from 'iconsax-react';
 import './incident-stats.css';
 
+const NIVEAUX_GRAVITE = [
+  { cle: 'high', libelle: 'Élevée' },
+  { cle: 'medium', libelle: 'Moyenne' },
+  { cle: 'low', libelle: 'Faible' }
+];
+
 export const IncidentStats = ({ stats }) => {
   // 1. Statistiques de statut
   const statusStats = useMemo(() => {
@@ -35,6 +41,13 @@ export const IncidentStats = ({ stats }) => {
   }, [stats]);
 
   // 4. Statistiques par gravité
+  //
+  // L'ordre du tableau est l'ordre d'affichage : du plus grave au moins grave,
+  // comme la légende de la carte. Les libellés sont d'ailleurs ceux de la carte.
+  // Cette section disait « Critique / Grave / Modéré » pour les mêmes trois
+  // niveaux que la carte appelle « Élevée / Moyenne / Faible » — et « Modéré »
+  // désigne sur la page Impact un palier INTERMÉDIAIRE, pas le plus bas. Trois
+  // vocabulaires pour un seul concept, dont un qui se contredisait.
   const severityStats = useMemo(() => {
     if (stats?.by_severity) {
       return {
@@ -166,47 +179,38 @@ export const IncidentStats = ({ stats }) => {
           Répartition par Gravité
         </h2>
         <div className="severity-stats-grid">
-          <div className="severity-stat-card high">
-            <div className="severity-header">
-              <span className="severity-label">Critique</span>
-              <span className="severity-percentage">{severityStats.high.percentage}%</span>
-            </div>
-            <div className="severity-count">{severityStats.high.count} incidents</div>
-            <div className="severity-bar">
-              <div
-                className="severity-bar-fill high"
-                style={{ width: `${severityStats.high.percentage}%` }}
-              />
-            </div>
-          </div>
-
-          <div className="severity-stat-card medium">
-            <div className="severity-header">
-              <span className="severity-label">Grave</span>
-              <span className="severity-percentage">{severityStats.medium.percentage}%</span>
-            </div>
-            <div className="severity-count">{severityStats.medium.count} incidents</div>
-            <div className="severity-bar">
-              <div
-                className="severity-bar-fill medium"
-                style={{ width: `${severityStats.medium.percentage}%` }}
-              />
-            </div>
-          </div>
-
-          <div className="severity-stat-card low">
-            <div className="severity-header">
-              <span className="severity-label">Modéré</span>
-              <span className="severity-percentage">{severityStats.low.percentage}%</span>
-            </div>
-            <div className="severity-count">{severityStats.low.count} incidents</div>
-            <div className="severity-bar">
-              <div
-                className="severity-bar-fill low"
-                style={{ width: `${severityStats.low.percentage}%` }}
-              />
-            </div>
-          </div>
+          {NIVEAUX_GRAVITE.map(({ cle, libelle }) => {
+            const { count, percentage } = severityStats[cle];
+            return (
+              <div key={cle} className={`severity-stat-card ${cle}`}>
+                <div className="severity-header">
+                  <span className="severity-label">
+                    {/* La pastille reprend la couleur du marqueur correspondant
+                        sur la carte. Sans elle, la couleur ne vivait que dans
+                        une bordure de 2px et une barre de progression : on
+                        pouvait lire toute la section sans jamais faire le lien
+                        avec ce qu'on voit sur la carte. */}
+                    <span className={`severity-puce ${cle}`} aria-hidden="true" />
+                    {libelle}
+                  </span>
+                  <span className="severity-percentage">{percentage}%</span>
+                </div>
+                <div className="severity-count">
+                  {count} incident{count > 1 ? 's' : ''}
+                </div>
+                <div
+                  className="severity-bar"
+                  role="img"
+                  aria-label={`Gravité ${libelle.toLowerCase()} : ${percentage}% des incidents`}
+                >
+                  <div
+                    className={`severity-bar-fill ${cle}`}
+                    style={{ width: `${percentage}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

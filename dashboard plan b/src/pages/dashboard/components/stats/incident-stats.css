@@ -269,10 +269,26 @@
 }
 
 .severity-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
   font-size: var(--font-size-body-large);
   font-weight: 700;
   color: var(--color-text-primary);
 }
+
+/* Meme forme et memes couleurs que les marqueurs de la carte : c'est ce qui
+   permet de passer de la statistique au terrain sans traduction. */
+.severity-puce {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+}
+
+.severity-puce.high { background: var(--color-severity-high); }
+.severity-puce.medium { background: var(--color-severity-medium); }
+.severity-puce.low { background: var(--color-severity-low); }
 
 .severity-percentage {
   font-size: var(--font-size-title);
