@@ -1,8 +1,8 @@
-import React, { useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Eye, EyeSlash, Magicpen, Copy, TickCircle, CloseCircle } from 'iconsax-react';
-import { ROLES, AVATAR_COLORS } from '../data/agents';
+import { ROLES } from '../data/agents';
 import { useAgentsContext } from './AgentsModalContext';
 import {
   createAgentSchema,
@@ -17,14 +17,7 @@ import {
 import { authService } from '../../auth/services/authService';
 
 import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
-// ── Helpers ───────────────────────────────────────────────────────
-const getInitials = (name = '') =>
-  name
-    .split(' ')
-    .slice(0, 2)
-    .map((n) => n[0]?.toUpperCase() || '')
-    .join('');
-
+import { AVATAR_COLORS, AVATAR_COULEUR_DEFAUT } from '../../../utils/couleursAvatar';
 const formatPhoneForInput = (phone) => {
   if (!phone) return '';
   return phone.startsWith('+223') ? phone.slice(4) : phone;
@@ -83,7 +76,6 @@ export const AgentFormModal = () => {
   const {
     register,
     handleSubmit,
-    control,
     watch,
     setValue,
     setError,
@@ -102,7 +94,7 @@ export const AgentFormModal = () => {
         role: '',
         organisationId: userOrgId || '',
         status: 'active',
-        avatarColor: '#3AA2DD',
+        avatarColor: AVATAR_COULEUR_DEFAUT,
       }
       : {
         firstName: formModal.agent?.firstName || '',
@@ -114,7 +106,7 @@ export const AgentFormModal = () => {
         role: formModal.agent?.role || '',
         organisationId: formModal.agent?.organisationId || '',
         status: formModal.agent?.status || 'active',
-        avatarColor: formModal.agent?.avatarColor || '#3AA2DD',
+        avatarColor: formModal.agent?.avatarColor || AVATAR_COULEUR_DEFAUT,
       },
   });
 
@@ -131,7 +123,7 @@ export const AgentFormModal = () => {
         role: '',
         organisationId: userOrgId || '',
         status: 'active',
-        avatarColor: '#3AA2DD',
+        avatarColor: AVATAR_COULEUR_DEFAUT,
       });
       setShowPassword(false);
       return;
@@ -148,7 +140,7 @@ export const AgentFormModal = () => {
         role: '',
         organisationId: userOrgId || '',
         status: 'active',
-        avatarColor: '#3AA2DD',
+        avatarColor: AVATAR_COULEUR_DEFAUT,
       });
       setShowPassword(false);
     } else if (formModal.agent) {
@@ -162,7 +154,7 @@ export const AgentFormModal = () => {
         role: formModal.agent.role || '',
         organisationId: formModal.agent.organisationId || '',
         status: formModal.agent.status || 'active',
-        avatarColor: formModal.agent.avatarColor || '#3AA2DD',
+        avatarColor: formModal.agent.avatarColor || AVATAR_COULEUR_DEFAUT,
       });
       setShowPassword(false);
     }
@@ -170,24 +162,7 @@ export const AgentFormModal = () => {
   }, [formModal.open, formModal.mode, formModal.agent?.id, isCreate, userOrgId]);
 
   // Valeurs observées
-  const watchedFirstName = watch('firstName', '');
-  const watchedLastName = watch('lastName', '');
-  const watchedAvatarColor = watch('avatarColor', '#3AA2DD');
   const watchedRole = watch('role', '');
-  const watchedPassword = watch('password', '');
-
-  // Étiquette du rôle actuel
-  const currentRoleConfig = ROLES.find((r) => r.id === watchedRole);
-
-  // ── Copier dans le presse-papier ─────────────────────
-  const [copied, setCopied] = React.useState(false);
-  const copyToClipboard = useCallback(() => {
-    if (!watchedPassword) return;
-    navigator.clipboard.writeText(watchedPassword).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
-  }, [watchedPassword]);
 
 
   // En mode création : auto-générer quand le rôle change
@@ -487,7 +462,7 @@ export const AgentFormModal = () => {
                     className="am-input"
                     value={isCreate ? userOrgName : (organisationsList.find(o => String(o.id) === String(formModal.agent?.organisationId))?.name || formModal.agent?.organisationName || '')}
                     disabled
-                    style={{ backgroundColor: 'rgba(108, 114, 120, 0.08)', cursor: 'not-allowed' }}
+                    style={{ backgroundColor: 'rgba(var(--rgb-text-secondary), 0.08)', cursor: 'not-allowed' }}
                     aria-readonly="true"
                   />
                   <input type="hidden" {...register('organisationId')} />

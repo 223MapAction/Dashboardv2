@@ -21,6 +21,22 @@
   transition: margin-left 0.3s ease;
 }
 
+/* Recherche et filtres restent visibles pendant le defilement de la liste :
+   .trash-content est le conteneur qui defile (overflow-y: auto). Le top est
+   a 60px, pas 0 : .app-header (position: fixed, 60px de haut, z-index: 100)
+   recouvre le haut de la page, donc coller ce bloc a top:0 le ferait passer
+   sous le header fixe, qui masquerait sa premiere ligne. */
+.trash-filtres-fixes {
+  position: sticky;
+  top: 60px;
+  z-index: 20;
+  background-color: var(--color-background);
+  padding-top: var(--spacing-2);
+  margin-top: calc(-1 * var(--spacing-2));
+  padding-bottom: var(--spacing-2);
+  margin-bottom: calc(-1 * var(--spacing-2));
+}
+
 .trash-content {
   flex: 1;
   padding: var(--spacing-6);
@@ -50,7 +66,7 @@
   width: 44px;
   height: 44px;
   border-radius: var(--radius-lg);
-  background-color: rgba(239, 68, 68, 0.08);
+  background-color: rgba(var(--rgb-danger), 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -149,8 +165,8 @@
   align-items: center;
   gap: var(--spacing-3);
   padding: var(--spacing-3) var(--spacing-4);
-  background-color: rgba(58, 162, 221, 0.06);
-  border: 1px solid rgba(58, 162, 221, 0.2);
+  background-color: rgba(var(--rgb-primary), 0.06);
+  border: 1px solid rgba(var(--rgb-primary), 0.2);
   border-radius: var(--radius-md);
   font-size: var(--font-size-body-small);
   color: var(--color-text-secondary);
@@ -166,7 +182,7 @@
   top: -4px;
   /* Adjust top to look perfect against the padding */
   z-index: 50;
-  background-color: rgba(255, 255, 255, 0.85);
+  background-color: rgba(var(--rgb-surface), 0.85);
   backdrop-filter: saturate(180%) blur(12px);
   -webkit-backdrop-filter: saturate(180%) blur(12px);
   padding: var(--spacing-3) var(--spacing-4);
@@ -193,7 +209,7 @@
 
 .trash-search:focus-within {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(58, 162, 221, 0.1);
+  box-shadow: 0 0 0 3px rgba(var(--rgb-primary), 0.1);
 }
 
 .trash-search input {
@@ -284,8 +300,8 @@
 
 .trash-row.is-selected {
   border-color: var(--color-primary);
-  background-color: rgba(58, 162, 221, 0.03);
-  box-shadow: 0 0 0 2px rgba(58, 162, 221, 0.15);
+  background-color: rgba(var(--rgb-primary), 0.03);
+  box-shadow: 0 0 0 2px rgba(var(--rgb-primary), 0.15);
 }
 
 .trash-row-checkbox {
@@ -377,11 +393,11 @@
 }
 
 .trash-row-actions .trash-btn-restore {
-  border-color: rgba(58, 162, 221, 0.3);
+  border-color: rgba(var(--rgb-primary), 0.3);
 }
 
 .trash-row-actions .trash-btn-delete {
-  border-color: rgba(239, 68, 68, 0.3);
+  border-color: rgba(var(--rgb-danger), 0.3);
 }
 
 /* ── Grille de cartes ────────────────────── */
@@ -412,7 +428,7 @@
 
 .trash-card.is-selected {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(58, 162, 221, 0.25);
+  box-shadow: 0 0 0 2px rgba(var(--rgb-primary), 0.25);
 }
 
 .trash-card-checkbox {
@@ -451,7 +467,7 @@
 .trash-card-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, transparent 40%, rgba(0, 0, 0, 0.25) 100%);
+  background: linear-gradient(to bottom, transparent 40%, rgba(var(--rgb-ombre), 0.25) 100%);
 }
 
 /* Body */
@@ -473,7 +489,7 @@
 .trash-badge {
   display: inline-flex;
   align-items: center;
-  font-size: 10px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
   letter-spacing: 0.05em;
   padding: 3px 8px;
@@ -482,22 +498,22 @@
 }
 
 .trash-badge-declared {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgba(var(--rgb-danger), 0.1);
   color: var(--color-danger-text);
 }
 
 .trash-badge-in-progress {
-  background-color: rgba(58, 162, 221, 0.1);
+  background-color: rgba(var(--rgb-primary), 0.1);
   color: var(--color-primary-text);
 }
 
 .trash-badge-taken {
-  background-color: rgba(245, 158, 11, 0.1);
+  background-color: rgba(var(--rgb-warning), 0.1);
   color: var(--color-warning-text);
 }
 
 .trash-badge-resolved {
-  background-color: rgba(34, 197, 94, 0.1);
+  background-color: rgba(var(--rgb-success), 0.1);
   color: var(--color-success-text);
 }
 
@@ -508,7 +524,7 @@
 }
 
 .trash-card-title {
-  font-size: 15px;
+  font-size: var(--font-size-body-large);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   margin: 0;
@@ -584,7 +600,7 @@
 }
 
 .trash-btn-restore:hover {
-  background-color: rgba(58, 162, 221, 0.06);
+  background-color: rgba(var(--rgb-primary), 0.06);
 }
 
 .trash-btn-delete {
@@ -592,7 +608,7 @@
 }
 
 .trash-btn-delete:hover {
-  background-color: rgba(239, 68, 68, 0.06);
+  background-color: rgba(var(--rgb-danger), 0.06);
 }
 
 /* ── État vide ───────────────────────────── */
@@ -630,7 +646,7 @@
 .trash-modal-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.45);
+  background-color: rgba(var(--rgb-ombre), 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -670,7 +686,7 @@
   width: 64px;
   height: 64px;
   border-radius: var(--radius-full);
-  background-color: rgba(239, 68, 68, 0.08);
+  background-color: rgba(var(--rgb-danger), 0.08);
   display: flex;
   align-items: center;
   justify-content: center;

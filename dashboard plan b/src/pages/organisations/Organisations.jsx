@@ -29,16 +29,12 @@ import Pagination from '../../components/molecules/Pagination';
 import { ResponsiveTable } from '../../components/molecules/ResponsiveTable';
 import { COLONNES_ORGANISATIONS, mediaOrganisation, libellePays } from './colonnes';
 import { TableActionsMenu } from '../../components/molecules/TableActionsMenu';
-const COLOR_PALETTE = [
-  '#EF4444', '#F97316', '#F59E0B', '#22C55E',
-  '#3AA2DD', '#1E40AF', '#A855F7', '#EC4899',
-  '#10B981', '#6366F1',
-];
-
+import { AVATAR_COLORS, AVATAR_COULEUR_DEFAUT } from '../../utils/couleursAvatar';
+import { BandeauErreur } from '../../components/molecules/BandeauErreur';
 const EMPTY_FORM = {
   name: '',
   acronym: '',
-  color: '#3AA2DD',
+  color: 'var(--color-primary-text)',
   sector: '',
   type: '',
   country: '',
@@ -79,7 +75,7 @@ export const Organisations = () => {
     setPage(1);
   }, [search, sectorFilter, statusFilter, typeFilter]);
 
-  const { data: rawOrgs, error: swrError, isLoading: swrLoading, mutate: mutateOrgs } = useSWR(
+  const { data: rawOrgs, error: erreurOrgs, isLoading: swrLoading, mutate: mutateOrgs } = useSWR(
     ['organisation_list', page, search, sectorFilter, statusFilter, typeFilter],
     () => getOrganisationsService(page, pageSize, true, search, sectorFilter, statusFilter, typeFilter)
   );
@@ -100,7 +96,7 @@ export const Organisations = () => {
       id: o.id,
       name: o.name,
       acronym: o.acronym || '',
-      color: o.primary_color || '#3AA2DD',
+      color: o.primary_color || AVATAR_COULEUR_DEFAUT,
       sector: o.activity_sector || '',
       type: o.organisation_type || '',
       country: o.intervention_country || '',
@@ -130,7 +126,6 @@ export const Organisations = () => {
   const [deleteModal, setDeleteModal] = useState({ open: false, org: null });
 
   // Toast
-  const [toast, setToast] = useState(null);
 
   // Alertes pour les modals
   const [modalAlert, setModalAlert] = useState({ type: null, message: null });
@@ -265,7 +260,7 @@ export const Organisations = () => {
       partner_status: formData.status || 'active',
       phone: formData.phone || null,
       website_url: formData.website || null,
-      primary_color: formData.color || '#3AA2DD',
+      primary_color: formData.color || AVATAR_COULEUR_DEFAUT,
       is_premium: true,
       members_count: 0,
       subdomain: subdomainVal,
@@ -423,6 +418,12 @@ export const Organisations = () => {
           <main className="orgs-content">
             <div className="orgs-page">
 
+              <BandeauErreur
+                erreur={erreurOrgs}
+                onReessayer={mutateOrgs}
+                message="Impossible de charger les organisations. La liste affichée peut ne plus être à jour."
+              />
+
               {/* ── En-tête ── */}
               <div className="orgs-page-header">
                 <div className="orgs-header-left">
@@ -466,7 +467,8 @@ export const Organisations = () => {
                 </div>
               </div>
 
-              {/* ── Toolbar ── */}
+              {/* ── Toolbar — fixe au defilement : voir .orgs-filtres-fixes. ── */}
+              <div className="orgs-filtres-fixes">
               <FiltersBar
                 recherche={searchInput}
                 onRecherche={setSearchInput}
@@ -489,6 +491,7 @@ export const Organisations = () => {
                 resultats={filtered.length}
                 nomResultat="organisation"
               />
+              </div>
 
               {/* ── Tableau ── */}
               {filtered.length === 0 && !swrLoading ? (

@@ -486,7 +486,6 @@ export const formatIncident = (incident) => {
     description: incident.description,
     etat: incident.etat,
     etatLabel: getEtatLabel(incident.etat),
-    etatColor: getEtatColor(incident.etat),
     progress: incident.progress || 0,
     isPublic: incident.is_public,
     isDeleted: incident.is_deleted,
@@ -516,21 +515,6 @@ const getEtatLabel = (etat) => {
     resolved: 'Résolu'
   };
   return labels[etat] || etat;
-};
-
-/**
- * Obtient la couleur associée à un état
- * @param {string} etat - État de l'incident
- * @returns {string} Code couleur
- */
-const getEtatColor = (etat) => {
-  const colors = {
-    declared: '#6C7278',      // gris
-    taken_into_account: '#3AA2DD',  // bleu (primary)
-    in_progress: '#F59E0B',   // orange (warning)
-    resolved: '#22C55E'       // vert (success)
-  };
-  return colors[etat] || '#6C7278';
 };
 
 export default {

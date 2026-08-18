@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { FiltersBar } from '../../components/molecules/FiltersBar';
 import { useRechercheDebouncee } from '../../hooks/useRechercheDebouncee';
 import useSWR, { mutate } from 'swr';
@@ -67,15 +67,6 @@ const ROLE_META = {
   observer: { label: 'Observateur', icon: Eye, color: 'var(--color-text-secondary)' }
 };
 
-const formatDate = (iso) => {
-  if (!iso) return '—';
-  const d = new Date(iso);
-  return d.toLocaleDateString('fr-FR', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric'
-  });
-};
 
 const getInitials = (name = '') =>
   name
@@ -124,43 +115,7 @@ export const CollaborationRequests = ({
 
   const [localRequests, setLocalRequests] = useState([]);
 
-  // Cache to stabilize signed image URLs and prevent reloading on SWR revalidations
-  const imageCacheRef = useRef({});
 
-  const getStableImageUrl = (key, rawUrl) => {
-    if (!rawUrl) return '';
-    const getBasePath = (url) => {
-      try {
-        const parsed = new URL(url);
-        return parsed.origin + parsed.pathname;
-      } catch (e) {
-        return url;
-      }
-    };
-    const basePath = getBasePath(rawUrl);
-    const cached = imageCacheRef.current[key];
-    if (cached && getBasePath(cached.url) === basePath) {
-      const hasExpired = (Date.now() - cached.timestamp >= 600000);
-      if (hasExpired && rawUrl !== cached.url) {
-        // Le cache a expiré ET SWR a récupéré une nouvelle URL signée
-        imageCacheRef.current[key] = {
-          url: rawUrl,
-          timestamp: Date.now()
-        };
-        return rawUrl;
-      } else {
-        // Soit le cache n'a pas encore expiré, soit il a expiré mais SWR n'a pas encore mis à jour l'URL (on continue d'utiliser le cache sans réinitialiser le timestamp)
-        return cached.url;
-      }
-    } else {
-      // Premier chargement ou nouvelle image
-      imageCacheRef.current[key] = {
-        url: rawUrl,
-        timestamp: Date.now()
-      };
-      return rawUrl;
-    }
-  };
 
   // Détermine si le bouton Accepter/Refuser doit s'afficher pour une requête
   // Logique : l'utilisateur connecté est-il le leader de l'incident ?
@@ -202,7 +157,7 @@ export const CollaborationRequests = ({
     reinitialiser: reinitialiserRecherche,
   } = useRechercheDebouncee();
   const [statusFilter, setStatusFilter] = useState('all');
-  const [typeFilter, setTypeFilter] = useState('all');
+  const typeFilter = 'all';
   const [page, setPage] = useState(1);
   const pageSize = 20;
   
@@ -217,14 +172,9 @@ export const CollaborationRequests = ({
   // Modal de décision
   const [decisionRequest, setDecisionRequest] = useState(null);
   const [decisionAction, setDecisionAction] = useState(null); // 'accept' | 'reject' | null
-  const [decisionClosing, setDecisionClosing] = useState(false);
-  const [responseText, setResponseText] = useState('');
-  const [suggestionsStatus, setSuggestionsStatus] = useState({}); // {orgName: 'accepted' | 'rejected'}
   const [isSubmittingDecision, setIsSubmittingDecision] = useState(false);
   const [decisionError, setDecisionError] = useState(null);
 
-  // Clé SWR pour la suggestion sélectionnée
-  const [selectedSuggestionKey, setSelectedSuggestionKey] = useState(null);
 
   // Demandes de collaborations reçues en temps réel par WebSocket
   const [wsRequests, setWsRequests] = useState([]);
@@ -415,18 +365,12 @@ export const CollaborationRequests = ({
     setDecisionRequest(request);
     setDecisionAction(action);
     setDecisionError(null);
-    if (request?.incidentId && (request?.apiId || request?.id)) {
-      setSelectedSuggestionKey([request.incidentId, request.apiId || request.id]);
-    } else {
-      setSelectedSuggestionKey(null);
-    }
   };
 
   const closeDecision = () => {
     setDecisionRequest(null);
     setDecisionAction(null);
     setDecisionError(null);
-    setSelectedSuggestionKey(null);
   };
 
   const handleConfirmDecision = async (action, text) => {
@@ -534,7 +478,6 @@ export const CollaborationRequests = ({
         };
       }),
       ...(activeCollabs?.results || []).map((item) => {
-        const orgName = item.organisation_name || item.leader_name || 'Organisation sans nom';
         const details = item.incident_details || item.incident_detail;
         const projTitle = details?.title || item.incident_title || (item.incident_id ? `Incident #${item.incident_id}` : 'Incident sans titre');
         const projImg = item?.incident_thumbnail || '';
@@ -597,7 +540,6 @@ export const CollaborationRequests = ({
         };
       }),
       ...(pendingInvitations || []).map((item) => {
-        const orgName = item.organisation_name || item.leader_name || 'Organisation sans nom';
         const details = item.incident_details || item.incident_detail;
         const projTitle = details?.title || item.incident_title || (item.incident_id ? `Incident #${item.incident_id}` : 'Incident sans titre');
         const projImg = item?.incident_thumbnail || '';
@@ -812,7 +754,8 @@ export const CollaborationRequests = ({
       )}
 
 
-      {/* Toolbar */}
+      {/* Toolbar — fixe au defilement : voir .requests-filtres-fixes. */}
+      <div className="requests-filtres-fixes">
       <FiltersBar
         recherche={searchInput}
         onRecherche={setSearchInput}
@@ -829,7 +772,7 @@ export const CollaborationRequests = ({
             onClick={() => setStatusFilter('all')}
           >
             Toutes
-            
+
           </button>
           <button
             type="button"
@@ -838,7 +781,7 @@ export const CollaborationRequests = ({
           >
             <Clock size={14} variant="Bold" color="currentColor" style={{ color: 'currentColor' }} />
             En attente
-            
+
           </button>
           <button
             type="button"
@@ -847,11 +790,12 @@ export const CollaborationRequests = ({
           >
             <CloseCircle size={14} variant="Bold" color="currentColor" style={{ color: 'currentColor' }} />
             Refusées
-            
+
           </button>
 
         </div>
       </FiltersBar>
+      </div>
 
 
       {/* Collapsible Info Banner (Scenarios 2 & 3 Explanation) */}
@@ -905,8 +849,6 @@ export const CollaborationRequests = ({
               (myCollab?.role?.toLowerCase() === 'contributeur' || myCollab?.role?.toLowerCase() === 'contributor') ? 'contributor' : 'observer';
             const myRoleMeta = myCollab ? ROLE_META[myRoleKey] : null;
 
-            // Find other accepted collaborators
-            const acceptedOthers = incident.otherCollabs.filter(c => c.status === 'accepted');
             const pendingOthers = incident.otherCollabs.filter(c => c.status === 'pending');
 
             const targetReq = incident.otherCollabs.find(oc => oc.status === 'pending' && shouldShowAcceptForReq(oc, myCollab))
@@ -937,11 +879,11 @@ export const CollaborationRequests = ({
                         padding: '3px 8px',
                         color: 'var(--color-surface)',
                         borderRadius: '4px',
-                        fontSize: '9px',
+                        fontSize: 'var(--font-size-micro)',
                         fontWeight: 'bold',
                         textTransform: 'uppercase',
                         backgroundColor: meta.color,
-                        boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
+                        boxShadow: '0 2px 6px rgba(var(--rgb-ombre),0.15)'
                       }}>
                         {meta.label}
                       </span>
@@ -949,8 +891,8 @@ export const CollaborationRequests = ({
                   </div>
 
                   <div className="incident-group-title-section">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', fontSize: '12px' }}>
-                      <span style={{ fontWeight: 600, color: '#1A1C1E', fontSize: '13px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', fontSize: 'var(--font-size-caption)' }}>
+                      <span style={{ fontWeight: 600, color: 'var(--color-text-primary)', fontSize: 'var(--font-size-body-small)' }}>
                         {incident.userCollab?.direction === 'sent' ? (
                           <>
                             Vous avez envoyé une demande de collaboration à <strong style={{ fontWeight: 800 }}>{incident.leader?.org || incident.organisation}</strong>
@@ -968,13 +910,13 @@ export const CollaborationRequests = ({
                       </span>
                     </div>
 
-                    <h3 className="incident-group-title" style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>
+                    <h3 className="incident-group-title" style={{ margin: 0, fontSize: 'var(--font-size-body-large)', fontWeight: 700 }}>
                       {incident.projectTitle}
                     </h3>
 
                     <p style={{
                       margin: 0,
-                      fontSize: '13px',
+                      fontSize: 'var(--font-size-body-small)',
                       color: 'var(--color-text-secondary)',
                       lineHeight: '1.5',
                       display: '-webkit-box',
@@ -995,7 +937,7 @@ export const CollaborationRequests = ({
                           gap: '4px',
                           padding: '3px 8px',
                           borderRadius: '4px',
-                          fontSize: '11px',
+                          fontSize: 'var(--font-size-micro)',
                           fontWeight: '600',
                           color: myRoleMeta.color,
                           borderColor: 'transparent',
@@ -1017,10 +959,10 @@ export const CollaborationRequests = ({
                           gap: '4px',
                           padding: '3px 8px',
                           borderRadius: '4px',
-                          fontSize: '11px',
+                          fontSize: 'var(--font-size-micro)',
                           fontWeight: '600',
                           color: 'var(--color-warning-text)',
-                          backgroundColor: 'rgba(245, 158, 11, 0.12)',
+                          backgroundColor: 'rgba(var(--rgb-warning), 0.12)',
                           border: 'none'
                         }}>
                           <Crown1 size={13} variant="Bold" color="currentColor" style={{ color: 'var(--color-warning-text)' }} />
@@ -1047,11 +989,11 @@ export const CollaborationRequests = ({
                             gap: '4px',
                             padding: '3px 8px',
                             borderRadius: '4px',
-                            fontSize: '11px',
+                            fontSize: 'var(--font-size-micro)',
                             fontWeight: '600',
                             color: 'var(--color-text-secondary)',
                             borderColor: 'transparent',
-                            backgroundColor: 'rgba(108, 114, 120, 0.08)'
+                            backgroundColor: 'rgba(var(--rgb-text-secondary), 0.08)'
                           }}>
                             <Building size={13} variant="Bold" color="currentColor" style={{ color: 'var(--color-text-secondary)' }} />
                             {orgToShow}
@@ -1079,7 +1021,7 @@ export const CollaborationRequests = ({
                             border: 'none',
                             fontWeight: 600,
                             cursor: 'pointer',
-                            fontSize: '12px'
+                            fontSize: 'var(--font-size-caption)'
                           }}
                           onClick={() => openDecision(pendingReqToAction, 'accept')}
                         >
@@ -1100,7 +1042,7 @@ export const CollaborationRequests = ({
                             border: 'none',
                             fontWeight: 600,
                             cursor: 'pointer',
-                            fontSize: '12px'
+                            fontSize: 'var(--font-size-caption)'
                           }}
                           onClick={() => openDecision(pendingReqToAction, 'reject')}
                         >
@@ -1116,7 +1058,7 @@ export const CollaborationRequests = ({
                       onClick={() => setExpandedIncident(isExpanded ? null : incident.id)}
                       aria-label={isExpanded ? 'Réduire' : 'Développer'}
                     >
-                      <ArrowRight2 size={18} variant="Linear" color="#6C7278" />
+                      <ArrowRight2 size={18} variant="Linear" color="var(--color-text-secondary)" />
 
                     </button>
                   </div>

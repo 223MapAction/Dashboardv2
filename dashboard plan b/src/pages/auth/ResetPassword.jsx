@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Eye, EyeSlash, Lock } from 'iconsax-react';
 import logoMapAction from '../../assets/logo.webp';
-import loginBg from '../../assets/login_bg.webp';
+import loginBg from '../../assets/login_bg_1.webp';
 import { authService } from './services/authService';
 import './login.css';
 import './forgot-password.css';
@@ -105,12 +105,12 @@ export const ResetPassword = () => {
               <form onSubmit={handleSubmit} className="login-form">
                 {error && (
                   <div className="login-error" style={{
-                    backgroundColor: '#FEE2E2',
+                    backgroundColor: 'var(--color-danger-surface)',
                     color: 'var(--color-danger-text)',
                     padding: '12px 16px',
                     borderRadius: '8px',
                     marginBottom: '16px',
-                    fontSize: '14px'
+                    fontSize: 'var(--font-size-body)'
                   }}>
                     {error}
                   </div>
@@ -129,7 +129,7 @@ export const ResetPassword = () => {
                       readOnly={!!emailFromUrl}
                       style={emailFromUrl ? { backgroundColor: 'var(--color-background)' } : {}}
                     />
-                    <Lock size={20} variant="Linear" color="#6C7278" />
+                    <Lock size={20} variant="Linear" color="var(--color-text-secondary)" />
                   </div>
                 </div>
 
@@ -147,9 +147,9 @@ export const ResetPassword = () => {
                       maxLength={6}
                       style={{ letterSpacing: '0.1em' }}
                     />
-                    <Lock size={20} variant="Linear" color="#6C7278" />
+                    <Lock size={20} variant="Linear" color="var(--color-text-secondary)" />
                   </div>
-                  <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '6px' }}>
+                  <p style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-text-muted)', marginTop: '6px' }}>
                     Vérifiez votre boîte de réception et vos spams
                   </p>
                 </div>
@@ -172,9 +172,9 @@ export const ResetPassword = () => {
                       aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
                     >
                       {showPassword ? (
-                        <EyeSlash size={20} variant="Linear" color="#6C7278" />
+                        <EyeSlash size={20} variant="Linear" color="var(--color-text-secondary)" />
                       ) : (
-                        <Eye size={20} variant="Linear" color="#6C7278" />
+                        <Eye size={20} variant="Linear" color="var(--color-text-secondary)" />
                       )}
                     </button>
                   </div>
@@ -215,9 +215,9 @@ export const ResetPassword = () => {
                       aria-label={showConfirmPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
                     >
                       {showConfirmPassword ? (
-                        <EyeSlash size={20} variant="Linear" color="#6C7278" />
+                        <EyeSlash size={20} variant="Linear" color="var(--color-text-secondary)" />
                       ) : (
-                        <Eye size={20} variant="Linear" color="#6C7278" />
+                        <Eye size={20} variant="Linear" color="var(--color-text-secondary)" />
                       )}
                     </button>
                   </div>
@@ -247,7 +247,7 @@ export const ResetPassword = () => {
             <div className="fp-success">
               <div className="fp-success-icon">
                 <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                  <circle cx="24" cy="24" r="24" fill="rgba(58,162,221,0.12)" />
+                  <circle cx="24" cy="24" r="24" fill="rgba(var(--rgb-primary),0.12)" />
                   <path
                     d="M14 24l7 7 13-13"
                     stroke="var(--color-primary)"
@@ -273,12 +273,11 @@ export const ResetPassword = () => {
         </div>
       </div>
 
-      {/* Colonne droite - Image */}
-      <div
-        className="login-hero"
-        style={{ backgroundImage: `url(${loginBg})` }}
-        aria-hidden="true"
-      />
+      {/* Colonne droite - Image (meme structure que Login : une balise <img>
+          en object-fit, et non un background, sinon rien ne la recadre) */}
+      <div className="login-hero" aria-hidden="true">
+        <img src={loginBg} alt="" className="login-hero-image" />
+      </div>
     </div>
   );
 };

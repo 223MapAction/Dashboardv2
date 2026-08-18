@@ -25,6 +25,7 @@ import { authService } from '../auth/services/authService';
 import { getUserProfileService, updateUserProfileService } from './service/profile_service';
 import { BlurryImage } from '../../components/atoms/BlurryImage';
 import './profile.css';
+import { BandeauErreur } from '../../components/molecules/BandeauErreur';
 
 const TABS = [
   { id: 'personal', label: 'Informations personnelles', icon: User },
@@ -68,7 +69,7 @@ export const Profile = () => {
 
   const userId = sessionStorage.getItem('user_id');
 
-  const { data: userProfile, error: swrError, isLoading: swrLoading, mutate } = useSWR(
+  const { data: userProfile, error: erreurProfil, mutate } = useSWR(
     userId ? `/MapApi/user/${userId}/` : null,
     () => getUserProfileService(userId),
     {
@@ -249,6 +250,12 @@ export const Profile = () => {
 
         <main className="profile-content">
           <div className="profile-page">
+
+            <BandeauErreur
+              erreur={erreurProfil}
+              onReessayer={mutate}
+              message="Impossible de charger votre profil. Les informations affichées peuvent ne plus être à jour."
+            />
             {/* Page header */}
             <div className="profile-page-header">
               <div>
@@ -260,7 +267,7 @@ export const Profile = () => {
               </div>
               {savedFlash && (
                 <div className="profile-flash">
-                  <TickCircle size={18} variant="Bold" color="#22C55E" />
+                  <TickCircle size={18} variant="Bold" color="var(--color-success-text)" />
                   Modifications enregistrées
                 </div>
               )}
@@ -284,7 +291,7 @@ export const Profile = () => {
                     onClick={() => fileInputRef.current?.click()}
                     aria-label="Changer la photo de profil"
                   >
-                    <Camera size={16} variant="Bold" color="#FFFFFF" />
+                    <Camera size={16} variant="Bold" color="var(--color-surface)" />
                   </button>
                   <input
                     ref={fileInputRef}
@@ -304,15 +311,15 @@ export const Profile = () => {
                   </p>
                   <div className="profile-banner-meta">
                     <span>
-                      <Sms size={14} variant="Bold" color="#6C7278" />
+                      <Sms size={14} variant="Bold" color="var(--color-text-secondary)" />
                       {profile.email}
                     </span>
                     <span>
-                      <Location size={14} variant="Bold" color="#6C7278" />
+                      <Location size={14} variant="Bold" color="var(--color-text-secondary)" />
                       {profile.address || '—'}
                     </span>
                     <span>
-                      <Calendar size={14} variant="Bold" color="#6C7278" />
+                      <Calendar size={14} variant="Bold" color="var(--color-text-secondary)" />
                       Membre depuis {formatDate(profile.date_joined)}
                     </span>
                   </div>
@@ -324,7 +331,7 @@ export const Profile = () => {
                     className="profile-btn profile-btn-primary"
                     onClick={() => setIsEditing(true)}
                   >
-                    <Edit2 size={16} variant="Bold" color="#FFFFFF" />
+                    <Edit2 size={16} variant="Bold" color="var(--color-surface)" />
                     Modifier
                   </button>
                 ) : (
@@ -346,7 +353,7 @@ export const Profile = () => {
                       <TickCircle
                         size={16}
                         variant="Bold"
-                        color="#FFFFFF"
+                        color="var(--color-surface)"
                       />
                       {isSaving ? 'Enregistrement...' : 'Enregistrer'}
                     </button>
@@ -513,13 +520,13 @@ export const Profile = () => {
                           <TickCircle
                             size={18}
                             variant="Bold"
-                            color="#22C55E"
+                            color="var(--color-success-text)"
                           />
                         ) : (
                           <CloseCircle
                             size={18}
                             variant="Bold"
-                            color="#EF4444"
+                            color="var(--color-danger-text)"
                           />
                         )}
                         {pwdMessage.text}
@@ -568,13 +575,13 @@ export const Profile = () => {
                                 <EyeSlash
                                   size={18}
                                   variant="Linear"
-                                  color="#6C7278"
+                                  color="var(--color-text-secondary)"
                                 />
                               ) : (
                                 <Eye
                                   size={18}
                                   variant="Linear"
-                                  color="#6C7278"
+                                  color="var(--color-text-secondary)"
                                 />
                               )}
                             </button>
@@ -589,7 +596,7 @@ export const Profile = () => {
                         className="profile-btn profile-btn-primary"
                         disabled={isChangingPwd}
                       >
-                        <Lock1 size={16} variant="Bold" color="#FFFFFF" />
+                        <Lock1 size={16} variant="Bold" color="var(--color-surface)" />
                         {isChangingPwd ? 'Mise à jour...' : 'Mettre à jour le mot de passe'}
                       </button>
                     </div>

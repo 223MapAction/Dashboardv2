@@ -78,10 +78,10 @@ export const RequestDecisionModal = ({
                   {request.organisationInitials}
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span className="decision-summary-org" style={{ fontWeight: 600, fontSize: '14px', color: 'var(--color-text-primary)' }}>
+                  <span className="decision-summary-org" style={{ fontWeight: 600, fontSize: 'var(--font-size-body)', color: 'var(--color-text-primary)' }}>
                     {request.organisation || request.applicantName}
                   </span>
-                  <span className="decision-summary-role" style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
+                  <span className="decision-summary-role" style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-text-secondary)' }}>
                     {request.type === 'suggestion' ? (
                       <>Rôle suggéré : <strong>{request.role}</strong></>
                     ) : (
@@ -92,10 +92,10 @@ export const RequestDecisionModal = ({
               </div>
 
               <div className="decision-motif" style={{ backgroundColor: 'var(--color-background)', padding: '12px 16px', borderRadius: '8px', marginBottom: '16px' }}>
-                <h4 className="decision-block-label" style={{ fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', color: 'var(--color-text-secondary)', marginBottom: '6px', letterSpacing: '0.03em' }}>
+                <h4 className="decision-block-label" style={{ fontSize: 'var(--font-size-caption)', fontWeight: 600, textTransform: 'uppercase', color: 'var(--color-text-secondary)', marginBottom: '6px', letterSpacing: '0.03em' }}>
                   {request.type === 'suggestion' ? 'Justification de la suggestion' : 'Motif de participation'}
                 </h4>
-                <p className="decision-motif-text" style={{ fontSize: '13px', fontStyle: 'italic', margin: 0, color: 'var(--color-text-primary)' }}>
+                <p className="decision-motif-text" style={{ fontSize: 'var(--font-size-body-small)', fontStyle: 'italic', margin: 0, color: 'var(--color-text-primary)' }}>
                   "{request.type === 'suggestion' ? request.suggestionMessage : request.motif}"
                 </p>
               </div>
@@ -103,7 +103,7 @@ export const RequestDecisionModal = ({
               {/* Suggestions display */}
               {request.type === 'suggestion' && (
                 <div className="decision-proposed" style={{ marginBottom: '16px' }}>
-                  <h4 className="decision-block-label" style={{ fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', color: 'var(--color-text-secondary)', marginBottom: '8px', letterSpacing: '0.03em' }}>
+                  <h4 className="decision-block-label" style={{ fontSize: 'var(--font-size-caption)', fontWeight: 600, textTransform: 'uppercase', color: 'var(--color-text-secondary)', marginBottom: '8px', letterSpacing: '0.03em' }}>
                     Organisation suggérée
                   </h4>
                   <div className="proposed-collabs-list">
@@ -120,21 +120,21 @@ export const RequestDecisionModal = ({
                             justifyContent: 'center',
                             fontWeight: 'bold',
                             color: 'var(--color-surface)',
-                            fontSize: '12px',
+                            fontSize: 'var(--font-size-caption)',
                             backgroundColor: request.organisationColor || 'var(--color-primary)'
                           }}
                         >
                           {request.organisationInitials}
                         </div>
                         <div className="proposed-collab-info" style={{ display: 'flex', flexDirection: 'column' }}>
-                          <span className="proposed-collab-name" style={{ fontWeight: 600, fontSize: '13px' }}>{request.organisation}</span>
-                          <span className="proposed-collab-role" style={{ fontSize: '11px', color: ROLE_META[request.role?.toLowerCase()]?.color || 'var(--color-primary)' }}>
+                          <span className="proposed-collab-name" style={{ fontWeight: 600, fontSize: 'var(--font-size-body-small)' }}>{request.organisation}</span>
+                          <span className="proposed-collab-role" style={{ fontSize: 'var(--font-size-micro)', color: ROLE_META[request.role?.toLowerCase()]?.color || 'var(--color-primary)' }}>
                             Rôle : {ROLE_META[request.role?.toLowerCase()]?.label || request.role}
                           </span>
                         </div>
                       </div>
                       {request.suggestedBy && (
-                        <p className="proposed-collab-comment" style={{ fontSize: '11px', color: 'var(--color-text-muted)', marginTop: '6px', marginBottom: 0 }}>
+                        <p className="proposed-collab-comment" style={{ fontSize: 'var(--font-size-micro)', color: 'var(--color-text-muted)', marginTop: '6px', marginBottom: 0 }}>
                           Suggéré par : {request.suggestedBy} ({request.suggestedByRole})
                         </p>
                       )}
@@ -145,7 +145,7 @@ export const RequestDecisionModal = ({
 
               {/* Action buttons */}
               <div className="decision-choice-group" role="radiogroup" style={{ marginBottom: '16px' }}>
-                <h4 className="decision-block-label" style={{ fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', color: 'var(--color-text-secondary)', marginBottom: '8px', letterSpacing: '0.03em' }}>
+                <h4 className="decision-block-label" style={{ fontSize: 'var(--font-size-caption)', fontWeight: 600, textTransform: 'uppercase', color: 'var(--color-text-secondary)', marginBottom: '8px', letterSpacing: '0.03em' }}>
                   Votre décision
                 </h4>
                 <div className="decision-choices" style={{ display: 'flex', gap: '12px' }}>

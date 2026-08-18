@@ -305,8 +305,6 @@ export const SuggestRequests = ({ embedded = false }) => {
 
   /* ── Compile flat requests ── */
   const compiledRequests = useMemo(() => {
-    const currUser = authService.getCurrentUser();
-    const myOrgId = currUser?.organisation_member || currUser?.organisation_id || '';
 
     // Suggestions + Invitations reçues (l'API /my-suggestions/received/ retourne maintenant les deux)
     // Une invitation est détectée par l'absence de suggested_partner_name (ou présence de is_invitation)
@@ -460,7 +458,7 @@ export const SuggestRequests = ({ embedded = false }) => {
     setDecisionError(null);
   };
 
-  const handleConfirmDecision = async (action, text) => {
+  const handleConfirmDecision = async (action) => {
     if (!decisionRequest || !action) return;
     setIsSubmittingDecision(true);
     setDecisionError(null);
@@ -496,26 +494,6 @@ export const SuggestRequests = ({ embedded = false }) => {
     return false;
   };
 
-  const renderStatusBadge = (status) => {
-    const meta = STATUS_META[status];
-    if (!meta) return null;
-    const Icon = meta.icon;
-    return (
-      <span
-        className={`request-status-badge ${meta.className}`}
-        style={{
-          display: 'inline-flex', alignItems: 'center', gap: '4px',
-          padding: '3px 10px', borderRadius: '4px',
-          fontSize: '11px', fontWeight: 600,
-          color: meta.color,
-          backgroundColor: `color-mix(in srgb, ${meta.color} 12%, transparent)`
-        }}
-      >
-        <Icon size={13} variant="Bold" color="currentColor" style={{ color: meta.color }} />
-        {meta.label}
-      </span>
-    );
-  };
 
   const renderRoleBadge = (role) => {
     const meta = getRoleMeta(role);
@@ -524,7 +502,7 @@ export const SuggestRequests = ({ embedded = false }) => {
       <span style={{
         display: 'inline-flex', alignItems: 'center', gap: '4px',
         padding: '3px 8px', borderRadius: '4px',
-        fontSize: '11px', fontWeight: 600,
+        fontSize: 'var(--font-size-micro)', fontWeight: 600,
         color: meta.color,
         backgroundColor: `color-mix(in srgb, ${meta.color} 10%, transparent)`
       }}>
@@ -560,7 +538,8 @@ export const SuggestRequests = ({ embedded = false }) => {
         </div>
       )}
 
-      {/* Toolbar */}
+      {/* Toolbar — fixe au defilement : voir .requests-filtres-fixes. */}
+      <div className="requests-filtres-fixes">
       <FiltersBar
         recherche={searchInput}
         onRecherche={setSearchInput}
@@ -599,6 +578,7 @@ export const SuggestRequests = ({ embedded = false }) => {
           ))}
         </div>
       </FiltersBar>
+      </div>
 
 
       {/* Info banner */}
@@ -640,7 +620,6 @@ export const SuggestRequests = ({ embedded = false }) => {
         <div className="incident-centric-list">
           {filtered.map((req) => {
             const meta = STATUS_META[req.status];
-            const roleMeta = getRoleMeta(req.role);
             const isSuggestion = req.type === 'suggestion';
             const showActions = canActOnRequest(req) && req.status === 'pending';
             const imgUrl = req.projectImage ? getStableImageUrl(req.apiId || req.id, req.projectImage) : '';
@@ -657,9 +636,9 @@ export const SuggestRequests = ({ embedded = false }) => {
                       <span style={{
                         position: 'absolute', top: '8px', left: '8px',
                         padding: '3px 8px', borderRadius: '4px',
-                        fontSize: '9px', fontWeight: 'bold', textTransform: 'uppercase',
+                        fontSize: 'var(--font-size-micro)', fontWeight: 'bold', textTransform: 'uppercase',
                         color: 'var(--color-surface)', backgroundColor: meta.color,
-                        boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
+                        boxShadow: '0 2px 6px rgba(var(--rgb-ombre),0.15)'
                       }}>
                         {meta.label}
                       </span>
@@ -669,13 +648,13 @@ export const SuggestRequests = ({ embedded = false }) => {
                   {/* Content */}
                   <div className="incident-group-title-section">
                     {/* Type + date */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', fontSize: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', fontSize: 'var(--font-size-caption)' }}>
                       <span style={{
                         display: 'inline-flex', alignItems: 'center', gap: '4px',
                         padding: '2px 8px', borderRadius: '4px',
-                        fontSize: '11px', fontWeight: 600,
+                        fontSize: 'var(--font-size-micro)', fontWeight: 600,
                         color: isSuggestion ? 'var(--color-primary)' : 'var(--color-warning)',
-                        backgroundColor: isSuggestion ? 'rgba(58,162,221,0.1)' : 'rgba(245,158,11,0.1)'
+                        backgroundColor: isSuggestion ? 'rgba(var(--rgb-primary),0.1)' : 'rgba(var(--rgb-warning),0.1)'
                       }}>
                         {isSuggestion
                           ? <><MessageText1 size={12} variant="Bold" color="currentColor" style={{ color: 'var(--color-primary-text)' }} /> Suggestion</>
@@ -690,13 +669,13 @@ export const SuggestRequests = ({ embedded = false }) => {
                     </div>
 
                     {/* Title */}
-                    <h3 className="incident-group-title" style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>
+                    <h3 className="incident-group-title" style={{ margin: 0, fontSize: 'var(--font-size-body-large)', fontWeight: 700 }}>
                       {req.projectTitle}
                     </h3>
 
                     {/* Description line */}
                     <p style={{
-                      margin: 0, fontSize: '13px', color: 'var(--color-text-secondary)',
+                      margin: 0, fontSize: 'var(--font-size-body-small)', color: 'var(--color-text-secondary)',
                       lineHeight: 1.5, display: '-webkit-box',
                       WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden'
                     }}>
@@ -719,9 +698,9 @@ export const SuggestRequests = ({ embedded = false }) => {
                       <span style={{
                         display: 'inline-flex', alignItems: 'center', gap: '4px',
                         padding: '3px 8px', borderRadius: '4px',
-                        fontSize: '11px', fontWeight: 600,
+                        fontSize: 'var(--font-size-micro)', fontWeight: 600,
                         color: 'var(--color-text-secondary)',
-                        backgroundColor: 'rgba(108,114,120,0.08)'
+                        backgroundColor: 'rgba(var(--rgb-text-secondary),0.08)'
                       }}>
                         <Building size={13} variant="Bold" color="currentColor" style={{ color: 'var(--color-text-secondary)' }} />
                         {req.organisationName || req.organisation}
@@ -731,9 +710,9 @@ export const SuggestRequests = ({ embedded = false }) => {
                         <span style={{
                           display: 'inline-flex', alignItems: 'center', gap: '4px',
                           padding: '3px 8px', borderRadius: '4px',
-                          fontSize: '11px', fontWeight: 600,
+                          fontSize: 'var(--font-size-micro)', fontWeight: 600,
                           color: 'var(--color-text-secondary)',
-                          backgroundColor: 'rgba(108,114,120,0.08)'
+                          backgroundColor: 'rgba(var(--rgb-text-secondary),0.08)'
                         }}>
                           <Location size={12} variant="Bold" color="currentColor" style={{ color: 'var(--color-text-secondary)' }} />
                           {req.incidentDetails.zone}
@@ -752,7 +731,7 @@ export const SuggestRequests = ({ embedded = false }) => {
                             display: 'flex', alignItems: 'center', gap: '6px',
                             padding: '6px 12px', borderRadius: '6px',
                             backgroundColor: 'var(--color-success)', color: 'var(--color-surface)',
-                            border: 'none', fontWeight: 600, cursor: 'pointer', fontSize: '12px'
+                            border: 'none', fontWeight: 600, cursor: 'pointer', fontSize: 'var(--font-size-caption)'
                           }}
                           onClick={(e) => { e.stopPropagation(); openDecision(req, 'accept'); }}
                         >
@@ -765,7 +744,7 @@ export const SuggestRequests = ({ embedded = false }) => {
                             display: 'flex', alignItems: 'center', gap: '6px',
                             padding: '6px 12px', borderRadius: '6px',
                             backgroundColor: 'var(--color-danger)', color: 'var(--color-surface)',
-                            border: 'none', fontWeight: 600, cursor: 'pointer', fontSize: '12px'
+                            border: 'none', fontWeight: 600, cursor: 'pointer', fontSize: 'var(--font-size-caption)'
                           }}
                           onClick={(e) => { e.stopPropagation(); openDecision(req, 'reject'); }}
                         >
@@ -782,7 +761,7 @@ export const SuggestRequests = ({ embedded = false }) => {
                       aria-label="Voir détails"
                       title="Voir l'incident"
                     >
-                      <ArrowRight2 size={18} variant="Linear" color="#6C7278" />
+                      <ArrowRight2 size={18} variant="Linear" color="var(--color-text-secondary)" />
                     </button>
                   </div>
                 </header>

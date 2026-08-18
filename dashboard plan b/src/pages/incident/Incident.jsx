@@ -10,6 +10,9 @@ import IncidentModalContext from './modale/IncidentModalContext';
 import IncidentDeleteModal from './modale/IncidentDeleteModal';
 import IncidentAssignModal from './modale/IncidentAssignModal';
 import './incident.css';
+import { useReinitialisationSurChangement } from '../../hooks/useReinitialisationSurChangement';
+import { BandeauErreur } from '../../components/molecules/BandeauErreur';
+
 
 // Fonction pour adapter les données de l'API au format attendu
 const adaptIncidentData = (incident, currentUserId = null) => {
@@ -108,15 +111,13 @@ export const Incident = () => {
     };
   }, [debouncedSetSearch]);
 
-  // Réinitialiser la page à 1 lorsque la recherche ou les filtres changent
-  useEffect(() => {
-    setPage(1);
-  }, [search, statusFilter]);
+  // Retour a la premiere page des qu'un filtre change.
+  useReinitialisationSurChangement([search, statusFilter], () => setPage(1));
 
   // Charger la liste des incidents avec useSWR
   const {
     data: rawIncidents,
-    error: incidentsError,
+    error: erreurIncidents,
     isLoading: isLoadingIncidents,
     mutate: mutateIncidents
   } = useSWR(
@@ -229,6 +230,11 @@ export const Incident = () => {
           />
 
           <div className={workspaceClass}>
+            <BandeauErreur
+              erreur={erreurIncidents}
+              onReessayer={mutateIncidents}
+              message="Impossible de charger les signalements. La liste affichée peut ne plus être à jour."
+            />
             {/* Liste des incidents (Pleine largeur) */}
             <IncidentList
               incidents={incidents}

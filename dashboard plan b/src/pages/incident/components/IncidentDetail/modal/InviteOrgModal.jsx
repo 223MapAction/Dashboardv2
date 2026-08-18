@@ -13,6 +13,7 @@ import {
 import { getOtherOrganisationsService } from '../../../../collaboration-detail/service/collab_detail_service';
 
 import { OffcanvasModal } from '../../../../../components/molecules/OffcanvasModal';
+import { AVATAR_COULEUR_DEFAUT } from '../../../../../utils/couleursAvatar';
 export const InviteOrgModal = () => {
   const {
     joinOpen,
@@ -43,7 +44,6 @@ export const InviteOrgModal = () => {
     setIsInvolvePrivate,
     workMode,
     setWorkMode,
-    takingOrg,
     hasAcceptedRole
   } = useIncidentDetail();
 
@@ -161,7 +161,7 @@ export const InviteOrgModal = () => {
   };
 
   const getOrgColor = (org) => {
-    return org.primary_color || '#3AA2DD';
+    return org.primary_color || AVATAR_COULEUR_DEFAUT;
   };
 
   const selectableOrgs = organisations.filter(
@@ -211,7 +211,7 @@ export const InviteOrgModal = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         padding: 'var(--spacing-4)',
-                        backgroundColor: workMode === 'interne' ? 'rgba(58, 162, 221, 0.08)' : 'var(--color-surface)',
+                        backgroundColor: workMode === 'interne' ? 'rgba(var(--rgb-primary), 0.08)' : 'var(--color-surface)',
                         borderRadius: 'var(--radius-md)',
                         border: workMode === 'interne' ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
                         cursor: safeIncident?.take_in_charge_mode ? 'not-allowed' : 'pointer',
@@ -222,15 +222,15 @@ export const InviteOrgModal = () => {
                         minHeight: '100px'
                       }}
                     >
-                      <EyeSlash size={24} variant={workMode === 'interne' ? "Bold" : "Linear"} color={workMode === 'interne' ? "var(--color-primary)" : "#6C7278"} />
+                      <EyeSlash size={24} variant={workMode === 'interne' ? "Bold" : "Linear"} color={workMode === 'interne' ? "var(--color-primary)" : "var(--color-text-secondary)"} />
                       <div style={{
-                        fontSize: '14px',
+                        fontSize: 'var(--font-size-body)',
                         fontWeight: 'var(--font-weight-bold)',
                         color: workMode === 'interne' ? 'var(--color-primary)' : 'var(--color-text-primary)'
                       }}>
                         Agir en interne
                       </div>
-                      <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)', textAlign: 'center', lineHeight: '1.3' }}>
+                      <div style={{ fontSize: 'var(--font-size-micro)', color: 'var(--color-text-secondary)', textAlign: 'center', lineHeight: '1.3' }}>
                         Je vais le gérer avec mes équipes en interne simplement
                       </div>
                     </button>
@@ -251,7 +251,7 @@ export const InviteOrgModal = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         padding: 'var(--spacing-4)',
-                        backgroundColor: workMode === 'collaboration' ? 'rgba(58, 162, 221, 0.08)' : 'var(--color-surface)',
+                        backgroundColor: workMode === 'collaboration' ? 'rgba(var(--rgb-primary), 0.08)' : 'var(--color-surface)',
                         borderRadius: 'var(--radius-md)',
                         border: workMode === 'collaboration' ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
                         cursor: 'pointer',
@@ -260,15 +260,15 @@ export const InviteOrgModal = () => {
                         minHeight: '100px'
                       }}
                     >
-                      <People size={24} variant={workMode === 'collaboration' ? "Bold" : "Linear"} color={workMode === 'collaboration' ? "var(--color-primary)" : "#6C7278"} />
+                      <People size={24} variant={workMode === 'collaboration' ? "Bold" : "Linear"} color={workMode === 'collaboration' ? "var(--color-primary)" : "var(--color-text-secondary)"} />
                       <div style={{
-                        fontSize: '14px',
+                        fontSize: 'var(--font-size-body)',
                         fontWeight: 'var(--font-weight-bold)',
                         color: workMode === 'collaboration' ? 'var(--color-primary)' : 'var(--color-text-primary)'
                       }}>
                         Travailler en collaboration
                       </div>
-                      <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)', textAlign: 'center', lineHeight: '1.3' }}>
+                      <div style={{ fontSize: 'var(--font-size-micro)', color: 'var(--color-text-secondary)', textAlign: 'center', lineHeight: '1.3' }}>
                         Public et visible par tous
                       </div>
                     </button>
@@ -308,7 +308,7 @@ export const InviteOrgModal = () => {
                           <RoleIcon
                             size={14}
                             variant={isSelected ? 'Bold' : 'Linear'}
-                            color={isSelected ? role.color : '#6C7278'}
+                            color={isSelected ? role.color : 'var(--color-text-secondary)'}
                           />
                           {role.label}
                         </button>
@@ -330,9 +330,9 @@ export const InviteOrgModal = () => {
               {safeIncident?.etat === 'declared' && workMode === 'interne' && (
                 <div style={{
                   padding: 'var(--spacing-5)',
-                  backgroundColor: 'rgba(58, 162, 221, 0.08)',
+                  backgroundColor: 'rgba(var(--rgb-primary), 0.08)',
                   borderRadius: 'var(--radius-md)',
-                  border: '1px solid rgba(58, 162, 221, 0.2)',
+                  border: '1px solid rgba(var(--rgb-primary), 0.2)',
                   marginBottom: 'var(--spacing-5)'
                 }}>
                   <p style={{ margin: 0, color: 'var(--color-primary-text)', fontSize: 'var(--font-size-body)', lineHeight: '1.6' }}>
@@ -449,7 +449,7 @@ export const InviteOrgModal = () => {
                         </div>
                       ) : orgsError ? (
                         <div className="invite-orgs-empty">
-                          <Buildings2 size={20} variant="Linear" color="#EF4444" />
+                          <Buildings2 size={20} variant="Linear" color="var(--color-danger-text)" />
                           <span>Erreur de chargement</span>
                         </div>
                       ) : selectableOrgs.length === 0 ? (
@@ -484,8 +484,8 @@ export const InviteOrgModal = () => {
                         className="invite-orgs-dropdown-footer"
                         style={{
                           flexShrink: 0,
-                          borderTop: '1px solid rgba(0, 0, 0, 0.06)',
-                          background: 'var(--color-surface, #ffffff)'
+                          borderTop: '1px solid rgba(var(--rgb-ombre), 0.06)',
+                          background: 'var(--color-surface)'
                         }}
                       >
                         <button
@@ -502,7 +502,7 @@ export const InviteOrgModal = () => {
                             padding: '10px',
                             margin: 0
                           }}
-                          onMouseEnter={(e) => !isLoadingMore && (e.currentTarget.style.backgroundColor = 'rgba(58, 162, 221, 0.08)')}
+                          onMouseEnter={(e) => !isLoadingMore && (e.currentTarget.style.backgroundColor = 'rgba(var(--rgb-primary), 0.08)')}
                           onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                         >
                           {isLoadingMore ? (
@@ -566,7 +566,7 @@ export const InviteOrgModal = () => {
                                   <RoleIcon
                                     size={14}
                                     variant={isSelected ? 'Bold' : 'Linear'}
-                                    color={isSelected ? role.color : '#6C7278'}
+                                    color={isSelected ? role.color : 'var(--color-text-secondary)'}
                                   />
                                   {role.label}
                                 </button>
@@ -576,11 +576,11 @@ export const InviteOrgModal = () => {
                         </div>
 
                         <div className="invited-org-comment" style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                          <span className="invited-org-role-label" style={{ fontSize: '12px', color: 'var(--color-text-secondary)', fontWeight: '500' }}>Motif de l'invitation / Justification :</span>
+                          <span className="invited-org-role-label" style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-text-secondary)', fontWeight: '500' }}>Motif de l'invitation / Justification :</span>
                           <input
                             type="text"
                             className="invite-orgs-search-input"
-                            style={{ width: '100%', fontSize: '13px', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-background)', color: 'var(--color-text-primary)' }}
+                            style={{ width: '100%', fontSize: 'var(--font-size-body-small)', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-background)', color: 'var(--color-text-primary)' }}
                             placeholder="Ex: Expert en biodiversité pour aider sur la zone A..."
                             value={org.comment || ''}
                             onChange={(e) => updateOrgComment(org.id, e.target.value)}

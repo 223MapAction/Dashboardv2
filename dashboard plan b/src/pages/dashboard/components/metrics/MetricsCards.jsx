@@ -19,21 +19,21 @@ export const MetricsCards = ({ stats: statsData }) => {
       label: 'Total des signalements',
       value: stats.total.toString(),
       color: 'primary',
-      icon: <NotificationBing size={24} variant="Bold" color="#3AA2DD" />
+      icon: <NotificationBing size={24} variant="Bold" color="var(--color-primary-text)" />
     },
     {
       id: 'taken-into-account',
       label: 'Signalements pris en compte',
       value: stats.takenIntoAccount.toString(),
       color: 'warning',
-      icon: <Activity size={24} variant="Bold" color="#F59E0B" />
+      icon: <Activity size={24} variant="Bold" color="var(--color-warning-text)" />
     },
     {
       id: 'resolved',
       label: 'Signalements résolus',
       value: stats.resolved.toString(),
       color: 'success',
-      icon: <TickCircle size={24} variant="Bold" color="#22C55E" />
+      icon: <TickCircle size={24} variant="Bold" color="var(--color-success-text)" />
     }
   ];
 

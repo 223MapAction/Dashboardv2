@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useMesInterventionsModalContext } from '../MesInterventionsModalContext';
+import React, { useState, useMemo } from 'react';
+import { useMesInterventionsModalContext } from '../mesInterventionsModalContexte';
 import { CloseCircle, TickCircle, SearchNormal1, Profile } from 'iconsax-react';
 
 import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
+import { useReinitialisationSurChangement } from '../../../hooks/useReinitialisationSurChangement';
 const getInitials = (name = '') =>
   name
     .split(' ')
@@ -25,14 +26,18 @@ export const IncidentMultiAssignModal = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [alert, setAlert] = useState({ type: null, message: null });
 
-  // Initialiser les agents sélectionnés lors de l'ouverture
-  useEffect(() => {
+  // Initialiser les agents sélectionnés lors de l'ouverture.
+  //
+  // L'effet precedent dependait aussi de `assignments`. Or cet objet change des
+  // qu'une assignation est enregistree ailleurs : la selection en cours de
+  // l'utilisateur etait alors ecrasee au milieu de sa saisie. On ne reinitialise
+  // plus que sur l'ouverture de la modale et sur le signalement concerne.
+  useReinitialisationSurChangement([assignModal.open, assignModal.incident?.id], () => {
     if (assignModal.open && assignModal.incident) {
-      const currentlyAssigned = assignments[assignModal.incident.id] || [];
-      setSelectedAgents(currentlyAssigned);
+      setSelectedAgents(assignments[assignModal.incident.id] || []);
       setAlert({ type: null, message: null });
     }
-  }, [assignModal.open, assignModal.incident, assignments]);
+  });
 
   const filteredAgents = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -99,9 +104,9 @@ export const IncidentMultiAssignModal = () => {
           {alert.message && (
             <div className={`am-alert am-alert--${alert.type === 'success' ? 'success' : 'danger'}`} role="alert" style={{ width: '100%' }}>
               {alert.type === 'success' ? (
-                <TickCircle size={18} variant="Bold" color="#22C55E" />
+                <TickCircle size={18} variant="Bold" color="var(--color-success-text)" />
               ) : (
-                <CloseCircle size={18} variant="Bold" color="#EF4444" />
+                <CloseCircle size={18} variant="Bold" color="var(--color-danger-text)" />
               )}
               <span className="am-alert__message" style={{ textAlign: 'left' }}>{alert.message}</span>
             </div>
@@ -116,7 +121,7 @@ export const IncidentMultiAssignModal = () => {
               <SearchNormal1
                 size={16}
                 variant="Linear"
-                color="#6C7278"
+                color="var(--color-text-secondary)"
                 style={{ position: 'absolute', left: '12px' }}
               />
               <input
@@ -140,7 +145,7 @@ export const IncidentMultiAssignModal = () => {
             {filteredAgents.length === 0 ? (
               <div className="d-flex flex-column align-items-center justify-content-center p-4 border rounded bg-light text-center">
                 <Profile size={32} variant="Linear" color="var(--color-text-muted)" />
-                <span className="fw-medium mt-2" style={{ fontSize: '13px', color: '#6B7280' }}>Aucun agent trouvé</span>
+                <span className="fw-medium mt-2" style={{ fontSize: 'var(--font-size-body-small)', color: 'var(--color-text-secondary)' }}>Aucun agent trouvé</span>
               </div>
             ) : (
               <div className="incidents-agents-list">
@@ -179,7 +184,7 @@ export const IncidentMultiAssignModal = () => {
                               alignItems: 'center',
                               justifyContent: 'center',
                               fontWeight: '600',
-                              fontSize: '13px',
+                              fontSize: 'var(--font-size-body-small)',
                               marginRight: '12px',
                               flexShrink: 0
                             }}
@@ -187,8 +192,8 @@ export const IncidentMultiAssignModal = () => {
                             {getInitials(agent.fullName)}
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: '14px', fontWeight: '500', color: 'var(--color-text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{agent.fullName}</div>
-                            <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            <div style={{ fontSize: 'var(--font-size-body)', fontWeight: '500', color: 'var(--color-text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{agent.fullName}</div>
+                            <div style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                               {agent.role} &bull; {agent.email}
                             </div>
                           </div>

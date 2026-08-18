@@ -7,7 +7,8 @@ import { useSidebarState } from '../../hooks/useSidebarState';
 import { Header, Sidebar } from '../../components/layout';
 import { SearchNormal1, ArrowDown2, Eye, EyeSlash, DirectboxReceive, People, UserAdd, DocumentText, Calendar, User, Location } from 'iconsax-react';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText, ShimmerCircularImage } from 'react-shimmer-effects';
-import { MesInterventionsModalProvider, useMesInterventionsModalContext } from './MesInterventionsModalContext';
+import { MesInterventionsModalProvider } from './MesInterventionsModalContext';
+import { useMesInterventionsModalContext } from './mesInterventionsModalContexte';
 import { MesInterventionsAssignModal } from './modal/MesInterventionsAssignModal';
 import { IncidentAgentsListModal } from './modal/IncidentAgentsListModal';
 import { IncidentReportsModal } from './modal/IncidentReportsModal';
@@ -21,6 +22,8 @@ import './mes-interventions.css';
 
 
 import { TableActionsMenu } from '../../components/molecules/TableActionsMenu';
+import { AVATAR_COLORS, AVATAR_COULEUR_DEFAUT } from '../../utils/couleursAvatar';
+import { BandeauErreur } from '../../components/molecules/BandeauErreur';
 // Initiales pour les avatars
 const getInitials = (name = '') =>
   name
@@ -57,12 +60,6 @@ const adaptIncidentData = (incident) => {
 };
 
 
-const AVATAR_COLORS = [
-  '#EF4444', '#F97316', '#F59E0B', '#22C55E',
-  '#3AA2DD', '#1E40AF', '#A855F7', '#EC4899',
-  '#10B981', '#6366F1'
-];
-
 const IncidentAgentsStack = ({ incident }) => {
   const { openAgentsModal } = useMesInterventionsModalContext();
   const { data: assignmentsData, isLoading } = useSWR(
@@ -76,7 +73,7 @@ const IncidentAgentsStack = ({ incident }) => {
       const agentId = a.agent || a.id;
       const fullName = a.agent_name || `Agent #${agentId}`;
       const email = a.agent_email || '';
-      const avatarColor = AVATAR_COLORS[Math.abs(agentId) % AVATAR_COLORS.length] || '#3AA2DD';
+      const avatarColor = AVATAR_COLORS[Math.abs(agentId) % AVATAR_COLORS.length] || AVATAR_COULEUR_DEFAUT;
 
       const isReporter = a.incident_detail?.user_id?.id === agentId;
       const roleVal = isReporter ? a.incident_detail?.user_id?.org_role : null;
@@ -108,7 +105,7 @@ const IncidentAgentsStack = ({ incident }) => {
 
   if (incidentAgents.length === 0) {
     return (
-      <span style={{ fontSize: '12px', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
+      <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
         Aucun agent
       </span>
     );
@@ -137,7 +134,7 @@ const IncidentAgentsStack = ({ incident }) => {
             alignItems: 'center',
             justifyContent: 'center',
             fontWeight: '600',
-            fontSize: '11px',
+            fontSize: 'var(--font-size-micro)',
             border: '2px solid white',
             marginLeft: index > 0 ? '-8px' : '0',
 
@@ -153,13 +150,13 @@ const IncidentAgentsStack = ({ incident }) => {
             width: '28px',
             height: '28px',
             borderRadius: '50%',
-            backgroundColor: '#E2E8F0',
-            color: '#475569',
+            backgroundColor: 'var(--color-border)',
+            color: 'var(--color-text-secondary)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontWeight: '600',
-            fontSize: '10px',
+            fontSize: 'var(--font-size-micro)',
             border: '2px solid white',
             marginLeft: '-8px',
             zIndex: 1
@@ -183,7 +180,6 @@ const MesInterventionsContent = () => {
 
   const {
     openAssignModal,
-    openAgentsModal,
     openReportsModal,
     setMutateIncidents
   } = useMesInterventionsModalContext();
@@ -212,7 +208,7 @@ const MesInterventionsContent = () => {
     return '';
   }, [statusFilter]);
 
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, error: erreurInterventions, isLoading, mutate } = useSWR(
     ['/MapApi/org-incidents', sourceFilter, mappedStatus, search, page],
     () => getOrgInternalIncidentsService({
       sourceFilter,
@@ -302,6 +298,11 @@ const MesInterventionsContent = () => {
         />
 
         <main className="mes-interventions-content">
+          <BandeauErreur
+            erreur={erreurInterventions}
+            onReessayer={mutate}
+            message="Impossible de charger vos interventions. La liste affichée peut ne plus être à jour."
+          />
           {/* Header de la page */}
           <header className="mes-interventions-header">
             <h1 className="mes-interventions-title">Mes interventions</h1>
@@ -310,7 +311,9 @@ const MesInterventionsContent = () => {
             </p>
           </header>
 
-          {/* Filtres et Barre de recherche */}
+          {/* Filtres et Barre de recherche — fixe au defilement : voir
+              .mes-interventions-filtres-fixes. */}
+          <div className="mes-interventions-filtres-fixes">
           <FiltersBar
             recherche={searchInput}
             onRecherche={setSearchInput}
@@ -337,6 +340,7 @@ const MesInterventionsContent = () => {
             resultats={data?.count ?? incidents.length}
             nomResultat="intervention"
           />
+          </div>
 
           {/* Affichage des données / Chargement */}
           {!isLoading && incidents.length === 0 ? (

@@ -226,7 +226,7 @@ export const Dashboard = () => {
         onClick={openActivityModal}
         aria-label="Voir l'historique des activités"
       >
-        <Clock size={24} variant="Bold" color="#FFFFFF" />
+        <Clock size={24} variant="Bold" color="var(--color-surface)" />
        {/*  {activitiesList.length > 0 && (
           <span className="activity-fab-badge">{activitiesList.length}</span>
         )} */}
@@ -247,7 +247,7 @@ export const Dashboard = () => {
               onClick={closeActivityModal}
               aria-label="Fermer"
             >
-              <CloseCircle size={28} variant="Bold" color="#6C7278" />
+              <CloseCircle size={28} variant="Bold" color="var(--color-text-secondary)" />
             </button>
             <ActivityPanel
               activities={activitiesList}

@@ -1,16 +1,11 @@
 import React, { useMemo } from 'react';
 import useSWR from 'swr';
-import { useMesInterventionsModalContext } from '../MesInterventionsModalContext';
+import { useMesInterventionsModalContext } from '../mesInterventionsModalContexte';
 import { CloseCircle, Profile, Edit2 } from 'iconsax-react';
 import { getIncidentAssignmentsService } from '../../incident/service/incident_service';
 
 import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
-const AVATAR_COLORS = [
-  '#EF4444', '#F97316', '#F59E0B', '#22C55E',
-  '#3AA2DD', '#1E40AF', '#A855F7', '#EC4899',
-  '#10B981', '#6366F1'
-];
-
+import { AVATAR_COLORS, AVATAR_COULEUR_DEFAUT } from '../../../utils/couleursAvatar';
 const getInitials = (name = '') =>
   name
     .split(' ')
@@ -30,7 +25,7 @@ const formatDate = (isoString) => {
       hour: '2-digit',
       minute: '2-digit'
     });
-  } catch (e) {
+  } catch {
     return isoString;
   }
 };
@@ -63,7 +58,7 @@ export const IncidentAgentsListModal = () => {
       const fullName = a.agent_name || `Agent #${agentId}`;
       const email = a.agent_email || '';
       const phone = a.agent_phone || '';
-      const avatarColor = AVATAR_COLORS[Math.abs(agentId) % AVATAR_COLORS.length] || '#3AA2DD';
+      const avatarColor = AVATAR_COLORS[Math.abs(agentId) % AVATAR_COLORS.length] || AVATAR_COULEUR_DEFAUT;
 
       // Find the org metadata and role if the reporter matches the agent ID
       const isReporter = a.incident_detail?.user_id?.id === agentId;
@@ -120,16 +115,16 @@ export const IncidentAgentsListModal = () => {
           {isLoading ? (
             <div className="d-flex flex-column align-items-center justify-content-center p-5 text-center">
               <div className="spinner-border text-primary" role="status" style={{ width: '1.5rem', height: '1.5rem' }} />
-              <span className="text-muted mt-2" style={{ fontSize: '12px' }}>Chargement de l'équipe...</span>
+              <span className="text-muted mt-2" style={{ fontSize: 'var(--font-size-caption)' }}>Chargement de l'équipe...</span>
             </div>
           ) : assignedAgents.length === 0 ? (
             <div className="d-flex flex-column align-items-center justify-content-center p-5 border rounded bg-light text-center" style={{ gap: '12px' }}>
               <Profile size={48} variant="Linear" color="var(--color-text-muted)" />
               <div>
-                <span className="fw-semibold d-block" style={{ fontSize: '14px', color: '#4B5563' }}>
+                <span className="fw-semibold d-block" style={{ fontSize: 'var(--font-size-body)', color: 'var(--color-text-secondary)' }}>
                   Aucun agent sur le terrain
                 </span>
-                <span className="text-muted d-block mt-1" style={{ fontSize: '12px' }}>
+                <span className="text-muted d-block mt-1" style={{ fontSize: 'var(--font-size-caption)' }}>
                   Aucun collaborateur n'est assigné à cet incident pour le moment.
                 </span>
               </div>
@@ -137,23 +132,23 @@ export const IncidentAgentsListModal = () => {
                 type="button"
                 className="am-btn am-btn--primary mt-2"
                 onClick={handleOpenEditModal}
-                style={{ minHeight: '38px', fontSize: '13px' }}
+                style={{ minHeight: '38px', fontSize: 'var(--font-size-body-small)' }}
               >
-                <Edit2 size={14} variant="Linear" color="#FFFFFF" />
+                <Edit2 size={14} variant="Linear" color="var(--color-surface)" />
                 Assigner un agent
               </button>
             </div>
           ) : (
             <div className="incidents-agents-list">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--color-text-secondary)' }}>
+                <span style={{ fontSize: 'var(--font-size-body-small)', fontWeight: '600', color: 'var(--color-text-secondary)' }}>
                   Collaborateur(s) actif(s) ({assignedAgents.length})
                 </span>
                 <button
                   type="button"
                   className="btn btn-secondary btn-sm"
                   onClick={handleOpenEditModal}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', minHeight: '34px', padding: '0 12px', fontSize: '12px' }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', minHeight: '34px', padding: '0 12px', fontSize: 'var(--font-size-caption)' }}
                 >
                   <Edit2 size={14} variant="Linear" color="var(--color-primary)" />
                   Modifier l'équipe
@@ -188,7 +183,7 @@ export const IncidentAgentsListModal = () => {
                           alignItems: 'center',
                           justifyContent: 'center',
                           fontWeight: '600',
-                          fontSize: '15px',
+                          fontSize: 'var(--font-size-body-large)',
                           marginRight: '12px',
                           flexShrink: 0
                         }}
@@ -196,22 +191,22 @@ export const IncidentAgentsListModal = () => {
                         {getInitials(agent.fullName)}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: '15px', fontWeight: '600', color: 'var(--color-text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        <div style={{ fontSize: 'var(--font-size-body-large)', fontWeight: '600', color: 'var(--color-text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {agent.fullName}
                         </div>
-                        <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        <div style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {agent.role} &bull; {agent.orgName}
                         </div>
                       </div>
                       {agent.status && (
-                        <span className={`mes-interventions-badge-glow variant-${agent.status === 'resolved' ? 'resolved' : (agent.status === 'pending' || agent.status === 'reported' ? 'taken' : 'declared')}`} style={{ fontSize: '10px', padding: '2px 8px', borderRadius: '12px', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                        <span className={`mes-interventions-badge-glow variant-${agent.status === 'resolved' ? 'resolved' : (agent.status === 'pending' || agent.status === 'reported' ? 'taken' : 'declared')}`} style={{ fontSize: 'var(--font-size-micro)', padding: '2px 8px', borderRadius: '12px', fontWeight: 'bold', textTransform: 'uppercase' }}>
                           {agent.status === 'reported' ? 'Reporté' : agent.status === 'pending' ? 'En cours' : agent.status}
                         </span>
                       )}
                     </div>
 
                     {/* Details: Contact, Deadline, Assigned by */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', borderTop: '1px dashed var(--color-border)', paddingTop: '10px', fontSize: '12px', color: 'var(--color-text-secondary)' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', borderTop: '1px dashed var(--color-border)', paddingTop: '10px', fontSize: 'var(--font-size-caption)', color: 'var(--color-text-secondary)' }}>
                       {agent.email && (
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                           <span style={{ color: 'var(--color-text-muted)' }}>Email :</span>
@@ -229,7 +224,7 @@ export const IncidentAgentsListModal = () => {
                         <span style={{ fontWeight: '600', color: 'var(--color-danger-text)' }}>{formatDate(agent.deadline)}</span>
                       </div>
                       {(agent.assignedByName || agent.assignedByEmail) && (
-                        <div style={{ display: 'flex', flexDirection: 'column', marginTop: '4px', padding: '6px 8px', borderRadius: '4px', backgroundColor: 'var(--color-background-hover)', fontSize: '11px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', marginTop: '4px', padding: '6px 8px', borderRadius: '4px', backgroundColor: 'var(--color-background-hover)', fontSize: 'var(--font-size-micro)' }}>
                           <span style={{ color: 'var(--color-text-muted)', marginBottom: '2px' }}>Assigné par :</span>
                           <span style={{ fontWeight: '500', color: 'var(--color-text-primary)' }}>
                             {agent.assignedByName} {agent.assignedByEmail && `(${agent.assignedByEmail})`}

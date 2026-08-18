@@ -1,14 +1,5 @@
-import React, { createContext, useContext } from 'react';
-
-const CollaborationDetailContext = createContext(null);
-
-export const useCollaborationDetail = () => {
-  const context = useContext(CollaborationDetailContext);
-  if (!context) {
-    throw new Error('useCollaborationDetail must be used within a CollaborationDetailProvider');
-  }
-  return context;
-};
+import React from 'react';
+import { CollaborationDetailContext } from './collaborationDetailContexte';
 
 export const CollaborationDetailProvider = ({ children, value }) => {
   return (

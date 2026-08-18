@@ -119,7 +119,7 @@
 .project-detail .project-badge {
   display: inline-flex;
   align-items: center;
-  font-size: 10px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
   letter-spacing: 0.05em;
   padding: 4px 8px;
@@ -128,23 +128,23 @@
 }
 
 .project-detail .project-badge-in-progress {
-  background-color: #DBEAFE;
-  color: #1D4ED8;
+  background-color: var(--color-primary-surface);
+  color: var(--color-primary-text);
 }
 
 .project-detail .project-badge-critical {
-  background-color: #FEE2E2;
-  color: #B91C1C;
+  background-color: var(--color-danger-surface);
+  color: var(--color-danger-text);
 }
 
 .project-detail .project-badge-planned {
-  background-color: #EDE9FE;
-  color: #6D28D9;
+  background-color: var(--color-accent-surface);
+  color: var(--color-accent-text);
 }
 
 .project-detail .project-badge-expert-needed {
-  background-color: #DBEAFE;
-  color: #1E40AF;
+  background-color: var(--color-primary-surface);
+  color: var(--color-primary-text);
 }
 
 .project-detail .detail-meta {
@@ -158,7 +158,7 @@
   align-items: center;
   gap: var(--spacing-2);
   font-size: var(--font-size-body-small);
-  color: var(--color-text-secondary, #4B5563);
+  color: var(--color-text-secondary, var(--color-text-secondary));
 }
 
 /* --- Top scrollable zone --- */
@@ -193,7 +193,7 @@
   aspect-ratio: 16 / 10;
   background-size: cover;
   background-position: center;
-  background-color: #1f4b5e;
+  background-color: var(--color-primary-text);
   overflow: hidden;
 }
 
@@ -201,15 +201,15 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(180deg,
-      rgba(0, 0, 0, 0) 50%,
-      rgba(0, 0, 0, 0.55) 100%);
+      rgba(var(--rgb-ombre), 0) 50%,
+      rgba(var(--rgb-ombre), 0.55) 100%);
 }
 
 .project-detail .map-overlay-bottom {
   position: absolute;
   left: var(--spacing-4);
   bottom: var(--spacing-4);
-  color: #fff;
+  color: var(--color-surface);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-1);
@@ -217,7 +217,7 @@
 }
 
 .project-detail .map-overlay-label {
-  font-size: 10px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-semibold);
   letter-spacing: 0.1em;
   opacity: 0.9;
@@ -227,15 +227,15 @@
   font-size: var(--font-size-body-large);
   font-weight: var(--font-weight-bold);
   margin: 0;
-  color: #fff;
+  color: var(--color-surface);
 }
 
 .project-detail .map-overlay-tag {
   display: inline-block;
   padding: 2px var(--spacing-2);
-  font-size: 10px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-semibold);
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(var(--rgb-ombre), 0.5);
   border-radius: var(--radius-sm);
   align-self: flex-start;
 }
@@ -280,7 +280,7 @@
   width: 36px;
   height: 36px;
   border-radius: var(--radius-sm);
-  background-color: rgba(34, 197, 94, 0.1);
+  background-color: rgba(var(--rgb-success), 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -335,7 +335,7 @@
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
-  background-color: #000;
+  background-color: rgba(var(--rgb-ombre), 1);
   border-radius: var(--radius-md);
   overflow: hidden;
 }
@@ -386,13 +386,18 @@
   border-radius: var(--radius-md);
   overflow: hidden;
   background-color: var(--color-background);
+  /* Meme raison que sur la carte du tableau de bord (map.css) : cette
+     mini-carte vit dans une fiche qui defile, et sans cette regle le
+     navigateur peut arbitrer le geste tactile a sa place, au detriment du
+     pincement a deux doigts. */
+  touch-action: none;
 }
 
 .project-detail .project-map-marker {
   display: flex;
   align-items: center;
   justify-content: center;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(0 2px 4px rgba(var(--rgb-ombre), 0.3));
   transform: translateY(-4px);
 }
 
@@ -441,14 +446,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
-  color: #fff;
+  color: var(--color-surface);
   flex-shrink: 0;
 }
 
 .project-detail .org-chip-extra {
-  background-color: #E5E7EB !important;
+  background-color: var(--color-border) !important;
   color: var(--color-text-primary);
 }
 
@@ -526,7 +531,7 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #c7d2fe, #818cf8);
+  background: linear-gradient(135deg, var(--color-accent-surface), var(--color-accent));
   flex-shrink: 0;
 }
 
@@ -551,28 +556,28 @@
 
 .project-detail .feed-role {
   padding: 2px var(--spacing-2);
-  font-size: 10px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-semibold);
   border-radius: var(--radius-full);
 }
 
 .project-detail .feed-role-info {
-  background-color: rgba(58, 162, 221, 0.12);
+  background-color: rgba(var(--rgb-primary), 0.12);
   color: var(--color-primary-text);
 }
 
 .project-detail .feed-role-success {
-  background-color: rgba(34, 197, 94, 0.12);
+  background-color: rgba(var(--rgb-success), 0.12);
   color: var(--color-success-text);
 }
 
 .project-detail .feed-role-warning {
-  background-color: rgba(245, 158, 11, 0.12);
+  background-color: rgba(var(--rgb-warning), 0.12);
   color: var(--color-warning-text);
 }
 
 .project-detail .feed-role-danger {
-  background-color: rgba(239, 68, 68, 0.12);
+  background-color: rgba(var(--rgb-danger), 0.12);
   color: var(--color-danger-text);
 }
 
@@ -710,7 +715,7 @@
     top: 0;
     background: white;
     z-index: 10;
-    border-bottom: 1px solid #dee2e6;
+    border-bottom: 1px solid var(--color-border);
   }
 
   .modal.join-modal-bootstrap .modal-footer {
@@ -718,8 +723,8 @@
     bottom: 0;
     background: white;
     z-index: 10;
-    border-top: 1px solid #dee2e6;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    border-top: 1px solid var(--color-border);
+    box-shadow: 0 -2px 10px rgba(var(--rgb-ombre), 0.05);
   }
 }
 
@@ -729,7 +734,7 @@
 .join-modal-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(15, 23, 42, 0.45);
+  background-color: rgba(var(--rgb-text-primary), 0.45);
   z-index: 9999;
   display: flex;
   justify-content: flex-end;
@@ -747,7 +752,7 @@
   background-color: var(--color-surface);
   display: flex;
   flex-direction: column;
-  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.18);
+  box-shadow: -8px 0 32px rgba(var(--rgb-ombre), 0.18);
   animation: slideInRight 0.3s cubic-bezier(0.32, 0.72, 0.35, 1) forwards;
 }
 
@@ -766,7 +771,7 @@
 }
 
 .join-modal-title {
-  font-size: 18px;
+  font-size: var(--font-size-h3);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   margin: 0 0 4px 0;
@@ -954,7 +959,7 @@
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 24px rgba(var(--rgb-ombre), 0.12);
   padding: var(--spacing-1);
 }
 
@@ -973,7 +978,7 @@
 }
 
 .invite-orgs-option:hover {
-  background-color: rgba(58, 162, 221, 0.08);
+  background-color: rgba(var(--rgb-primary), 0.08);
 }
 
 .invite-orgs-avatar {
@@ -984,7 +989,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: var(--color-surface);
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-bold);
 }
@@ -1055,7 +1060,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: var(--color-surface);
   font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-bold);
 }
@@ -1079,7 +1084,7 @@
 }
 
 .invited-org-remove:hover {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgba(var(--rgb-danger), 0.1);
 }
 
 .invited-org-roles {
@@ -1130,7 +1135,7 @@
 .invited-org-role-desc {
   margin: 0;
   padding: var(--spacing-2) var(--spacing-3);
-  background-color: rgba(58, 162, 221, 0.06);
+  background-color: rgba(var(--rgb-primary), 0.06);
   border-left: 3px solid var(--color-primary);
   border-radius: var(--radius-sm);
   font-size: var(--font-size-caption);
@@ -1268,7 +1273,7 @@
   }
 
   .project-detail .detail-title {
-    font-size: 18px;
+    font-size: var(--font-size-h3);
     width: calc(100% - 48px);
     flex: none;
   }
@@ -1363,7 +1368,7 @@
   height: 38px;
   border-radius: 50%;
   border: none;
-  background: #3AA2DD;
+  background: var(--color-primary);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1372,7 +1377,7 @@
 }
 
 .project-detail .detail-audio-play-btn:hover {
-  background: #2B8BC2;
+  background: var(--color-primary-dark);
 }
 
 .project-detail .detail-audio-play-btn:active {
@@ -1398,7 +1403,7 @@
 
 .project-detail .detail-audio-progress-fill {
   height: 100%;
-  background: #3AA2DD;
+  background: var(--color-primary);
   border-radius: 999px;
   transition: width 0.1s linear;
 }
@@ -1406,7 +1411,7 @@
 .project-detail .detail-audio-times {
   display: flex;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-muted);
   font-variant-numeric: tabular-nums;
@@ -1445,11 +1450,11 @@
 }
 
 .project-detail .incident-status-segment.is-done {
-  background-color: #22C55E;
+  background-color: var(--color-success);
 }
 
 .project-detail .incident-status-segment.is-current {
-  background-color: #3AA2DD;
+  background-color: var(--color-primary);
 }
 
 .project-detail .incident-status-steps {
@@ -1468,11 +1473,11 @@
 }
 
 .project-detail .incident-status-step.is-done {
-  color: #22C55E;
+  color: var(--color-success-text);
 }
 
 .project-detail .incident-status-step.is-current {
-  color: #3AA2DD;
+  color: var(--color-primary-text);
 }
 
 .project-detail .incident-status-dot {
@@ -1483,11 +1488,11 @@
 }
 
 .project-detail .incident-status-step.is-current .incident-status-dot {
-  box-shadow: 0 0 0 4px rgba(58, 162, 221, 0.18);
+  box-shadow: 0 0 0 4px rgba(var(--rgb-primary), 0.18);
 }
 
 .project-detail .incident-status-label {
-  font-size: 10px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-semibold);
   letter-spacing: 0.06em;
 }
@@ -1510,8 +1515,16 @@
 /* Responsive */
 @media (max-width: 639.98px) {
   .project-detail .incident-status-label {
-    font-size: 9px;
+    font-size: var(--font-size-micro);
     letter-spacing: 0.04em;
   }
 }
 
+
+/* Le badge de gravite s'aligne sur ses voisins de la meme rangee, qui se
+   separent par une marge et non par un `gap` du conteneur. Sans cette regle il
+   se collerait au badge de statut : le style en ligne qu'il portait avant
+   d'etre extrait dans le composant BadgeGravite comprenait cette marge. */
+.detail-severity-badge-custom {
+  margin-left: var(--spacing-2);
+}

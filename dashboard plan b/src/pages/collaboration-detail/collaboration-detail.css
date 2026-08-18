@@ -2,6 +2,20 @@
    COLLABORATION DETAIL - 3 COLONNES
    ============================================ */
 
+/* Hauteur de la nav mobile du bas, declaree une seule fois. La place qu'on
+   lui reserve au-dessus et sa hauteur reelle DOIVENT rester d'accord : quand
+   les deux etaient ecrites separement (70px reserves, 60px de nav sous
+   480px), l'ecart se voyait comme un vide au bas de l'ecran. */
+:root {
+  --hauteur-nav-mobile: 70px;
+}
+
+@media (max-width: 479.98px) {
+  :root {
+    --hauteur-nav-mobile: 60px;
+  }
+}
+
 /* Override le padding par défaut du main-content pour cette page */
 .collaboration-detail-page-wrapper {
   padding: 0 !important;
@@ -56,6 +70,29 @@
   border-color: var(--color-primary);
 }
 
+/* Le bouton retour de cette page porte la classe .detail-back-btn, dont le
+   style vit dans la feuille de la page Signalements. En arrivant directement
+   ici (lien partage, rechargement), cette feuille n'est jamais chargee et le
+   bouton s'affiche sans aucun style. On le definit donc la ou il sert. */
+.collab-detail-header .detail-back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.collab-detail-header .detail-back-btn:hover {
+  background-color: var(--color-surface);
+  border-color: var(--color-primary);
+}
+
 .collab-detail-header-info {
   flex: 1;
 }
@@ -100,8 +137,11 @@
   flex: 1;
   overflow: hidden;
   min-height: 0;
-  height: calc(100% - 80px);
-  /* 80px = hauteur du header de la page */
+  /* Pas de calc(100% - 80px) ici : le header n'a une hauteur fixe de 80px
+     que sur grand ecran. Des que son titre passe sur deux ou trois lignes
+     (petit ecran, titre long), il depasse les 80px supposes et tout ce qui
+     suit se decale d'autant. `flex: 1` mesure la place reellement restante,
+     quelle que soit la hauteur du header. */
 }
 
 /* Ajustement automatique des colonnes quand la barre latérale principale (Sidebar) est repliée */
@@ -174,19 +214,19 @@
 }
 
 .collab-detail-role.collab-role-leader {
-  background-color: rgba(245, 158, 11, 0.1);
-  color: #F59E0B;
+  background-color: rgba(var(--rgb-warning), 0.1);
+  color: var(--color-warning-text);
   width: fit-content;
 }
 
 .collab-detail-role.collab-role-contributeur {
-  background-color: rgba(58, 162, 221, 0.1);
-  color: #3AA2DD;
+  background-color: rgba(var(--rgb-primary), 0.1);
+  color: var(--color-primary-text);
 }
 
 .collab-detail-role.collab-role-observateur {
-  background-color: rgba(108, 114, 120, 0.1);
-  color: #6C7278;
+  background-color: rgba(var(--rgb-text-secondary), 0.1);
+  color: var(--color-text-secondary);
 }
 
 .collab-detail-info-block {
@@ -258,7 +298,7 @@
 }
 
 .collab-detail-meta-label {
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   font-weight: 600;
   text-transform: uppercase;
   color: var(--color-text-muted);
@@ -293,7 +333,7 @@
 }
 
 .collab-detail-badge.badge-warning {
-  color: #F59E0B;
+  color: var(--color-warning-text);
 }
 
 .collab-detail-badge.badge-danger {
@@ -312,11 +352,11 @@
 }
 
 .collab-detail-tag {
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-semibold);
   padding: 2px 8px;
   color: var(--color-primary-text);
-  border: 1px solid rgba(58, 162, 221, 0.3);
+  border: 1px solid rgba(var(--rgb-primary), 0.3);
   border-radius: var(--radius-full);
 }
 
@@ -401,7 +441,7 @@
 }
 
 .collab-detail-update-btn:hover {
-  background-color: #2E8BC0;
+  background-color: var(--color-primary-dark);
 }
 
 /* Section 2: Discussion */
@@ -422,7 +462,12 @@
   flex-direction: column;
   gap: var(--spacing-4);
   min-height: 0;
-  max-height: calc(100% - 120px);
+  /* Pas de max-height: calc(100% - 120px) : les 120px etaient une estimation
+     de la hauteur de la barre de saisie. Elle en fait 61 sur petit ecran, si
+     bien que la liste des messages s'arretait 59px trop haut et laissait un
+     vide entre le dernier message et la barre. `flex: 1` face a une barre
+     `flex-shrink: 0` donne deja le bon partage, quelle que soit sa hauteur
+     reelle (une ou plusieurs lignes, fichier joint affiche…). */
   /* Espace pour l'input fixe */
 }
 
@@ -501,18 +546,18 @@
   gap: var(--spacing-2);
   margin-top: var(--spacing-2);
   padding: var(--spacing-2) var(--spacing-3);
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(var(--rgb-ombre), 0.05);
   border-radius: var(--radius-md);
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(var(--rgb-ombre), 0.1);
 }
 
 .collab-message.is-me .collab-message-file {
-  background-color: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(var(--rgb-surface), 0.15);
+  border-color: rgba(var(--rgb-surface), 0.2);
 }
 
 .collab-message-file-icon {
-  font-size: 24px;
+  font-size: var(--font-size-h2);
   flex-shrink: 0;
 }
 
@@ -578,7 +623,7 @@
 }
 
 .collab-attached-file-icon {
-  font-size: 20px;
+  font-size: var(--font-size-title);
 }
 
 .collab-attached-file-name {
@@ -603,7 +648,7 @@
 }
 
 .collab-attached-file-remove:hover {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgba(var(--rgb-danger), 0.1);
 }
 
 .collab-discussion-field {
@@ -659,7 +704,7 @@
 }
 
 .collab-discussion-send:hover:not(:disabled) {
-  background-color: #2E8BC0;
+  background-color: var(--color-primary-dark);
 }
 
 .collab-discussion-send:disabled {
@@ -707,7 +752,7 @@
 }
 
 .collab-task-add-btn:hover:not(:disabled) {
-  background-color: #2E8BC0;
+  background-color: var(--color-primary-dark);
 }
 
 .collab-task-add-btn:disabled {
@@ -734,13 +779,13 @@
 }
 
 .collab-task-item.is-completed {
-  background-color: rgba(34, 197, 94, 0.05);
-  border-color: rgba(34, 197, 94, 0.2);
+  background-color: rgba(var(--rgb-success), 0.05);
+  border-color: rgba(var(--rgb-success), 0.2);
 }
 
 .collab-task-item.is-failed {
-  background-color: rgba(239, 68, 68, 0.05);
-  border-color: rgba(239, 68, 68, 0.2);
+  background-color: rgba(var(--rgb-danger), 0.05);
+  border-color: rgba(var(--rgb-danger), 0.2);
 }
 
 .collab-task-main {
@@ -815,7 +860,7 @@
   background-color: var(--color-severity-high);
   color: var(--color-surface);
   border-radius: var(--radius-sm);
-  font-size: 10px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
   margin-left: var(--spacing-2);
 }
@@ -847,7 +892,7 @@
 
 .collab-task-fail-btn:hover,
 .collab-task-delete-btn:hover {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgba(var(--rgb-danger), 0.1);
 }
 
 .collab-task-reset-btn:hover {
@@ -857,7 +902,7 @@
 .collab-task-failure-section {
   margin-top: var(--spacing-2);
   padding: var(--spacing-2) var(--spacing-3);
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgba(var(--rgb-danger), 0.1);
   border-radius: var(--radius-sm);
 }
 
@@ -964,7 +1009,7 @@
 }
 
 .collab-task-proof-btn:hover {
-  background-color: rgba(58, 162, 221, 0.1);
+  background-color: rgba(var(--rgb-primary), 0.1);
 }
 
 .collab-task-proof-image {
@@ -1001,18 +1046,15 @@
     overflow-y: auto;
   }
 
-  .collab-detail-main {
-    min-height: 500px;
-  }
-
   .collab-discussion {
     height: 100%;
-    min-height: 400px;
   }
 
-  .collab-discussion-messages {
-    max-height: calc(100% - 80px);
-  }
+  /* Ni min-height sur le panneau (500px) ni max-height ici (calc(100% - 80px)) :
+     les 80px supposaient une barre de saisie de cette hauteur, alors qu'elle
+     en fait 61 sur petit ecran. La zone des messages s'arretait donc 19px
+     trop tot et laissait un vide sous la barre de saisie. `flex: 1` (regle
+     de base) mesure la place reellement disponible. */
 }
 
 /* Mobile Bottom Navigation */
@@ -1027,9 +1069,15 @@
   background-color: var(--color-surface);
   border-top: 1px solid var(--color-border);
   padding: var(--spacing-2) var(--spacing-4);
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
   z-index: 100;
-  height: 70px;
+  /* iOS reserve une zone au bas de l'ecran pour la barre d'accueil (le
+     "home indicator") ; Android n'a pas cette contrainte. Sans cet ajout,
+     la nav colle au bord brut sur iOS et ses icones se retrouvent sous
+     cette zone geste — d'ou un rendu different d'un telephone a l'autre.
+     On agrandit la boite plutot que de rogner le padding existant, pour ne
+     pas retrecir la zone tactile des icones. */
+  height: calc(var(--hauteur-nav-mobile) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(var(--spacing-2) + env(safe-area-inset-bottom, 0px));
 }
 
 .collab-mobile-nav-item {
@@ -1069,16 +1117,21 @@
 }
 
 .collab-mobile-nav-item span {
-  font-size: 12px;
+  font-size: var(--font-size-caption);
   white-space: nowrap;
 }
 
 /* Mobile View Adjustments */
 .collab-detail-content.mobile-view {
-  padding-bottom: 70px;
-  /* Espace pour la bottom nav */
-  display: block !important;
-  /* Forcer le display block sur mobile */
+  /* Espace pour la bottom nav, + la zone geste iOS qu'elle reserve deja
+     (voir .collab-mobile-nav) — sinon le contenu passe sous la nav. */
+  padding-bottom: calc(var(--hauteur-nav-mobile) + env(safe-area-inset-bottom, 0px));
+  /* Une seule colonne sur mobile, mais en flex et non en block : le panneau
+     affiche doit remplir EXACTEMENT la place restante pour que la barre de
+     saisie de la discussion se pose juste au-dessus de la nav. En block, il
+     prenait la hauteur de son contenu et laissait un vide en dessous. */
+  display: flex !important;
+  flex-direction: column;
   grid-template-columns: none !important;
 }
 
@@ -1086,26 +1139,70 @@
   display: none !important;
 }
 
+/* Le panneau actif occupe toute la place restante et defile en interne —
+   exactement comme les trois colonnes sur grand ecran. C'est ce qui garantit
+   que le bas du panneau (la barre de saisie) tombe pile au-dessus de la nav,
+   sans plancher de hauteur fabrique a la main. */
 .collab-detail-content.mobile-view .collab-detail-sidebar,
 .collab-detail-content.mobile-view .collab-detail-main,
 .collab-detail-content.mobile-view .collab-detail-tasks {
-  display: block !important;
   width: 100%;
   max-width: 100%;
   border: none !important;
+  flex: 1;
+  min-height: 0;
   height: auto;
-  min-height: calc(100vh - 150px);
-  min-height: calc(100dvh - 150px);
-  /* Header + bottom nav */
+  overflow-y: auto;
+}
+
+/* La barre de saisie se pose contre la nav. Le retrait bas de la section la
+   faisait flotter au-dessus, ce qui la detachait du bord et donnait un
+   espacement bancal — sur un fil de discussion, la zone de saisie est
+   attendue au ras du bas de l'ecran. */
+.collab-detail-content.mobile-view .collab-detail-main .collab-detail-section {
+  padding-bottom: 0;
 }
 
 @media (max-width: 1023.98px) {
+  /* Trois elements se disputaient une seule ligne : le retour, le titre sur
+     deux lignes tronquees, et « Resoudre l'incident ». Le titre y perdait le
+     plus — c'est pourtant lui qui dit ou l'on est. On garde donc le retour et
+     le titre ensemble sur la premiere ligne, et l'action passe en dessous sur
+     toute la largeur, ou elle est aussi plus facile a viser au doigt. */
   .collab-detail-header {
     padding: var(--spacing-4);
+    height: auto;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-3);
+  }
+
+  .collab-detail-header-info {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .collab-detail-header>.btn,
+  .collab-detail-header>.collab-detail-closed-badge {
+    flex-basis: 100%;
+    justify-content: center;
+    text-align: center;
   }
 
   .collab-detail-title {
     font-size: var(--font-size-h3);
+    /* Deux lignes au plus : au-dela, le titre repousse tout le contenu de la
+       page vers le bas sur un ecran deja etroit. */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .collab-detail-subtitle {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .collab-detail-section {
@@ -1113,19 +1210,22 @@
   }
 
   .collab-detail-content {
-    display: block !important;
+    display: flex !important;
+    flex-direction: column;
     grid-template-columns: none !important;
-    padding-bottom: 70px;
-    overflow-y: auto;
+    padding-bottom: calc(var(--hauteur-nav-mobile) + env(safe-area-inset-bottom, 0px));
+    overflow: hidden;
   }
 
   .collab-detail-sidebar,
   .collab-detail-main,
   .collab-detail-tasks {
-    display: block !important;
     width: 100%;
     border: none !important;
+    flex: 1;
+    min-height: 0;
     height: auto;
+    overflow-y: auto;
   }
 
   /* Masquer les sections non actives sur mobile */
@@ -1133,11 +1233,12 @@
     display: none !important;
   }
 
-  /* S'assurer que la discussion s'affiche correctement */
-  .collab-discussion {
-    height: calc(100vh - 220px) !important;
-    height: calc(100dvh - 220px) !important;
-  }
+  /* Aucune hauteur fabriquee ici (c'etait calc(100dvh - 220px)) : les 220px
+     supposaient un en-tete et une nav de hauteurs fixes. Des que l'un des
+     deux differait — titre sur trois lignes, zone geste iOS — la discussion
+     tombait plus court que la place disponible et laissait un vide entre la
+     barre de saisie et la nav. La regle de base (flex: 1; min-height: 0)
+     prend simplement toute la place restante, quelle qu'elle soit. */
 
   .collab-discussion-messages {
     padding: var(--spacing-3);
@@ -1156,7 +1257,7 @@
 
   .collab-message-bubble {
     padding: var(--spacing-2) var(--spacing-3);
-    font-size: 0.95rem;
+    font-size: var(--font-size-body-large);
     max-width: 100%;
     word-break: break-word;
     overflow-wrap: break-word;
@@ -1165,15 +1266,15 @@
   .collab-message-avatar {
     width: 32px;
     height: 32px;
-    font-size: 0.75rem;
+    font-size: var(--font-size-caption);
   }
 
   .collab-message-sender {
-    font-size: 0.75rem;
+    font-size: var(--font-size-caption);
   }
 
   .collab-message-time {
-    font-size: 0.7rem;
+    font-size: var(--font-size-micro);
   }
 
   /* Input de discussion sur mobile */
@@ -1183,14 +1284,12 @@
 
   .collab-discussion-field {
     padding: var(--spacing-2) var(--spacing-3);
-    font-size: 0.95rem;
+    font-size: var(--font-size-body-large);
   }
 
-  .collab-discussion-attach,
-  .collab-discussion-send {
-    width: 40px;
-    height: 40px;
-  }
+  /* Pas de reduction ici : la regle de base (44px) reste la cible tactile
+     minimale. La retrecir sous 767px allait a l'inverse du besoin — c'est
+     precisement sur mobile qu'un bouton trop petit rate le doigt. */
 
   /* Fichiers dans les messages */
   .collab-message-file {
@@ -1224,7 +1323,7 @@
 .collab-task-create-btn:hover {
   background-color: var(--color-primary-dark);
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(58, 162, 221, 0.2);
+  box-shadow: 0 4px 8px rgba(var(--rgb-primary), 0.2);
 }
 
 .collab-task-create-btn:active {
@@ -1293,7 +1392,7 @@
     top: 0;
     background: white;
     z-index: 10;
-    border-bottom: 1px solid #dee2e6;
+    border-bottom: 1px solid var(--color-border);
   }
 
   .modal.tasks-modal-bootstrap .modal-footer {
@@ -1301,8 +1400,8 @@
     bottom: 0;
     background: white;
     z-index: 10;
-    border-top: 1px solid #dee2e6;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    border-top: 1px solid var(--color-border);
+    box-shadow: 0 -2px 10px rgba(var(--rgb-ombre), 0.05);
   }
 
   /* Messages encore plus compacts sur petit écran */
@@ -1315,25 +1414,20 @@
   }
 
   .collab-detail-title {
-    font-size: 1.1rem;
+    font-size: var(--font-size-h3);
   }
 
   .collab-detail-subtitle {
-    font-size: 0.85rem;
+    font-size: var(--font-size-body);
   }
 
-  .collab-discussion-input {
-    position: fixed;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    bottom: 70px;
-    padding-bottom: 30px;
-  }
-
-  .collab-discussion-messages {
-    padding-bottom: 85px;
-  }
+  /* Pas de position:fixed ici : .collab-discussion est deja borne a
+     calc(100dvh - 220px), qui exclut l'en-tete et la nav mobile — dvh reagit
+     au clavier virtuel, contrairement a vh. En sortant du flux flex pour
+     s'ancrer au bas BRUT de l'ecran, la barre de saisie perdait ce calage et
+     se retrouvait masquee par le clavier au lieu de remonter avec lui. La
+     regle de base (position: sticky; bottom: 0), dernier enfant de cette
+     colonne deja contrainte, suffit. */
 }
 
 @media (max-width: 479.98px) {
@@ -1344,16 +1438,16 @@
   }
 
   .collab-detail-title {
-    font-size: 1rem;
+    font-size: var(--font-size-body-large);
   }
 
   .collab-detail-subtitle {
-    font-size: 0.8rem;
+    font-size: var(--font-size-body-small);
   }
 
   .collab-detail-back {
     padding: var(--spacing-1) var(--spacing-2);
-    font-size: 0.85rem;
+    font-size: var(--font-size-body);
   }
 
   /* Messages très compacts */
@@ -1367,13 +1461,13 @@
 
   .collab-message-bubble {
     padding: var(--spacing-2);
-    font-size: 0.9rem;
+    font-size: var(--font-size-body);
   }
 
   .collab-message-avatar {
     width: 28px;
     height: 28px;
-    font-size: 0.7rem;
+    font-size: var(--font-size-micro);
   }
 
   .collab-discussion-input {
@@ -1381,29 +1475,25 @@
   }
 
   .collab-discussion-field {
-    font-size: 0.9rem;
+    font-size: var(--font-size-body);
     padding: var(--spacing-2);
   }
 
-  .collab-discussion-attach,
-  .collab-discussion-send {
-    width: 36px;
-    height: 36px;
-  }
+  /* Meme raison qu'au palier precedent : la regle de base (44px) reste la
+     cible tactile minimale, y compris sur les plus petits ecrans. */
 
-  .collab-discussion {
-    height: calc(100vh - 200px) !important;
-    height: calc(100dvh - 200px) !important;
-  }
+  /* Meme raison qu'au palier precedent : plus de hauteur fabriquee, la
+     discussion prend la place restante (flex: 1). */
 
   .collab-mobile-nav {
     padding: var(--spacing-1) var(--spacing-2);
-    height: 60px;
+    padding-bottom: calc(var(--spacing-1) + env(safe-area-inset-bottom, 0px));
+    height: calc(var(--hauteur-nav-mobile) + env(safe-area-inset-bottom, 0px));
   }
 
   .collab-mobile-nav-item {
     padding: var(--spacing-1);
-    font-size: 0.7rem;
+    font-size: var(--font-size-micro);
   }
 }
 
@@ -1413,7 +1503,7 @@
 .tasks-modal-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(var(--rgb-ombre), 0.5);
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -1451,7 +1541,7 @@
   height: 100vh;
   height: 100dvh;
   background-color: var(--color-surface);
-  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+  box-shadow: -4px 0 24px rgba(var(--rgb-ombre), 0.15);
   display: flex;
   flex-direction: column;
   animation: slideInRight 0.28s cubic-bezier(0.32, 0.72, 0, 1);
@@ -1571,7 +1661,7 @@
   flex: 1;
   padding: 12px var(--spacing-4);
   background-color: var(--color-primary);
-  color: #fff;
+  color: var(--color-surface);
   border: none;
   border-radius: var(--radius-md);
   font-family: var(--font-family);
@@ -1629,7 +1719,7 @@
 }
 
 .tasks-add-label .required {
-  color: #EF4444;
+  color: var(--color-danger-text);
   margin-left: 2px;
 }
 
@@ -1668,7 +1758,7 @@
   gap: var(--spacing-2);
   padding: 10px var(--spacing-4);
   background-color: var(--color-primary);
-  color: #fff;
+  color: var(--color-surface);
   border: none;
   border-radius: var(--radius-md);
   font-family: var(--font-family);
@@ -1681,7 +1771,7 @@
 .tasks-add-confirm:hover:not(:disabled) {
   background-color: var(--color-primary-dark);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(58, 162, 221, 0.3);
+  box-shadow: 0 4px 12px rgba(var(--rgb-primary), 0.3);
 }
 
 .tasks-add-confirm:disabled {
@@ -1747,17 +1837,17 @@
 
 .my-task-item:hover {
   border-color: var(--color-primary);
-  box-shadow: 0 2px 8px rgba(58, 162, 221, 0.08);
+  box-shadow: 0 2px 8px rgba(var(--rgb-primary), 0.08);
 }
 
 .my-task-item.is-completed {
-  background-color: rgba(34, 197, 94, 0.04);
-  border-color: rgba(34, 197, 94, 0.3);
+  background-color: rgba(var(--rgb-success), 0.04);
+  border-color: rgba(var(--rgb-success), 0.3);
 }
 
 .my-task-item.is-failed {
-  background-color: rgba(239, 68, 68, 0.04);
-  border-color: rgba(239, 68, 68, 0.3);
+  background-color: rgba(var(--rgb-danger), 0.04);
+  border-color: rgba(var(--rgb-danger), 0.3);
 }
 
 .my-task-info {
@@ -1797,18 +1887,18 @@
 }
 
 .my-task-status.completed {
-  background-color: rgba(34, 197, 94, 0.1);
-  color: #16A34A;
+  background-color: rgba(var(--rgb-success), 0.1);
+  color: var(--color-success-text);
 }
 
 .my-task-status.failed {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgba(var(--rgb-danger), 0.1);
   color: var(--color-danger-text);
 }
 
 .my-task-status.pending {
-  background-color: rgba(245, 158, 11, 0.1);
-  color: #B45309;
+  background-color: rgba(var(--rgb-warning), 0.1);
+  color: var(--color-warning-text);
 }
 
 .my-task-actions {
@@ -1832,11 +1922,11 @@
 }
 
 .my-task-action-btn.edit:hover {
-  background-color: rgba(58, 162, 221, 0.1);
+  background-color: rgba(var(--rgb-primary), 0.1);
 }
 
 .my-task-action-btn.delete:hover {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgba(var(--rgb-danger), 0.1);
 }
 
 /* Mode édition inline */
@@ -1878,14 +1968,14 @@
 }
 
 .my-task-btn-save {
-  background-color: #22C55E;
-  color: #fff;
-  border: 1px solid #22C55E;
+  background-color: var(--color-success);
+  color: var(--color-surface);
+  border: 1px solid var(--color-success);
 }
 
 .my-task-btn-save:hover:not(:disabled) {
-  background-color: #16A34A;
-  border-color: #16A34A;
+  background-color: var(--color-success);
+  border-color: var(--color-success);
 }
 
 .my-task-btn-save:disabled {
@@ -1902,9 +1992,9 @@
   width: fit-content;
   padding: var(--spacing-3) var(--spacing-4);
   background-color: var(--color-warning);
-  color: #fff;
+  color: var(--color-surface);
   border: none;
-  /* border: 1px solid rgba(245, 158, 11, 0.3); */
+  /* border: 1px solid rgba(var(--rgb-warning), 0.3); */
   border-radius: var(--radius-md);
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-semibold);
@@ -1914,7 +2004,7 @@
 }
 
 .collab-suggest-org-btn:hover {
-  background-color: rgba(217, 141, 10, 1);
+  background-color: rgba(var(--rgb-warning), 1);
 
   transform: translateY(-1px);
 }
@@ -1925,8 +2015,8 @@
   align-items: center;
   gap: var(--spacing-2);
   padding: var(--spacing-3);
-  background-color: rgba(245, 158, 11, 0.08);
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  background-color: rgba(var(--rgb-warning), 0.08);
+  border: 1px solid rgba(var(--rgb-warning), 0.3);
   border-radius: var(--radius-md);
   font-size: var(--font-size-body-small);
   color: var(--color-text-primary);
@@ -2006,7 +2096,7 @@
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0);
+  box-shadow: 0 4px 12px rgba(var(--rgb-ombre), 0);
   z-index: 10;
   animation: slideDown 0.2s ease;
 }
@@ -2052,7 +2142,7 @@
   justify-content: center;
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-bold);
-  color: #fff;
+  color: var(--color-surface);
   flex-shrink: 0;
 }
 
@@ -2123,7 +2213,7 @@
 }
 
 .suggest-remove-btn:hover {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgba(var(--rgb-danger), 0.1);
 }
 
 .suggest-role-attribution {
