@@ -3,20 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import useSWR from 'swr';
 import { activerGestesCooperatifs } from '../../../../utils/gestesCarte';
 import { NIVEAUX_GRAVITE, gravite, couleurGravite } from '../../../../utils/gravite';
-import Map, { Marker, Popup } from 'react-map-gl/mapbox';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import Map, { Marker, Popup } from 'react-map-gl/maplibre';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
 import { getIncidentService } from '../../../incident/service/incident_service';
 import { getOrgInternalIncidentsService } from '../../../mes-interventions/service/mes_interventions_service';
 import { getIncidentsFilteredService } from '../../service/dashboard_service';
 import { BlurryImage } from '../../../../components/atoms/BlurryImage';
 import { COUNTRIES } from '../../../organisations/data/organisations';
+import { OSM_STYLE, MAPBOX_SATELLITE_STYLE, HAS_MAPBOX_SATELLITE } from '../../../../config/mapStyles';
 import './map.css';
 import { useReinitialisationSurChangement } from '../../../../hooks/useReinitialisationSurChangement';
 
-
-// Token Mapbox depuis les variables d'environnement
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
 // Calcule la classe de couleur du marqueur en fonction de son statut et de l'utilisateur connecté
 const getMarkerColorClass = (incident, currentUserId) => {
@@ -50,52 +48,24 @@ const INCIDENT_STATUS_STEPS = [
   { id: 'resolved', label: 'Résolu' }
 ];
 
-// Style "Humanitaire" inspiré d'OpenStreetMap HOT (Humanitarian OSM Team)
-// Affichage mondial sans restriction géographique
-const HOT_OSM_STYLE = {
-  version: 8,
-  sources: {
-    'hot-osm': {
-      type: 'raster',
-      tiles: [
-        'https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
-        'https://b.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
-        'https://c.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png'
-      ],
-      tileSize: 256,
-      attribution:
-        '© OpenStreetMap contributors, Tiles style by Humanitarian OpenStreetMap Team'
-    }
-  },
-  layers: [
-    {
-      id: 'background',
-      type: 'background',
-      paint: {
-        'background-color': '#f0f0f0'
-      }
-    },
-    {
-      id: 'hot-osm-layer',
-      type: 'raster',
-      source: 'hot-osm',
-      minzoom: 0,
-      maxzoom: 19
-    }
-  ]
-};
-
+// Style "Humanitaire" par defaut : tuiles OpenStreetMap HOT ouvertes,
+// aucune dependance a un service tiers payant. Satellite optionnel,
+// disponible uniquement si un token Mapbox est configure.
 const MAP_STYLES = {
   humanitarian: {
     id: 'humanitarian',
     label: 'Carte',
-    style: HOT_OSM_STYLE
+    style: OSM_STYLE
   },
-  satellite: {
-    id: 'satellite',
-    label: 'Satellite',
-    style: 'mapbox://styles/mapbox/satellite-streets-v12'
-  }
+  ...(HAS_MAPBOX_SATELLITE
+    ? {
+        satellite: {
+          id: 'satellite',
+          label: 'Satellite',
+          style: MAPBOX_SATELLITE_STYLE
+        }
+      }
+    : {})
 };
 
 const DEFAULT_MALI_LAT = 12.65; // Bamako
@@ -446,7 +416,6 @@ export const MapContainer = () => {
             latitude: center.lat,
             zoom: 6
           }}
-          mapboxAccessToken={MAPBOX_TOKEN}
           style={{ width: '100%', height: '100%' }}
           mapStyle={MAP_STYLES[activeStyle].style}
           cooperativeGestures={true}

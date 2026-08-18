@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import Map, { Marker, NavigationControl, FullscreenControl } from 'react-map-gl/mapbox';
+import Map, { Marker, NavigationControl, FullscreenControl } from 'react-map-gl/maplibre';
 import { activerGestesCooperatifs } from '../../../../utils/gestesCarte';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import { OSM_STYLE, MAPBOX_SATELLITE_STYLE, HAS_MAPBOX_SATELLITE } from '../../../../config/mapStyles';
 import useSWR from 'swr';
 import {
   ShimmerThumbnail,
@@ -74,8 +75,6 @@ const formatMessageTime = (dateStr) => {
     return '';
   }
 };
-
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
 // Étapes du statut d'un incident (selon l'API)
 const INCIDENT_STATUS_STEPS = [
@@ -222,7 +221,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMessage, setChatMessage] = useState('');
   const [chatError, setChatError] = useState(null);
-  const [detailMapStyle, setDetailMapStyle] = useState('satellite'); // 'satellite' | 'streets'
+  const [detailMapStyle, setDetailMapStyle] = useState('streets'); // 'satellite' | 'streets'
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const chatMessagesEndRef = useRef(null);
@@ -1216,9 +1215,8 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                         latitude: safeIncident.coordinates.lat,
                         zoom: 14
                       }}
-                      mapboxAccessToken={MAPBOX_TOKEN}
                       style={{ width: '100%', height: '100%' }}
-                      mapStyle={detailMapStyle === 'satellite' ? 'mapbox://styles/mapbox/satellite-streets-v12' : 'mapbox://styles/mapbox/streets-v12'}
+                      mapStyle={detailMapStyle === 'satellite' && MAPBOX_SATELLITE_STYLE ? MAPBOX_SATELLITE_STYLE : OSM_STYLE}
                     >
                       <Marker longitude={safeIncident.coordinates.lng} latitude={safeIncident.coordinates.lat} anchor="bottom">
                         <div className="project-map-marker">
@@ -1243,23 +1241,25 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                       borderRadius: '6px',
                       border: '1px solid rgba(var(--rgb-surface), 0.1)'
                     }}>
-                      <button
-                        type="button"
-                        onClick={() => setDetailMapStyle('satellite')}
-                        style={{
-                          padding: '4px 10px',
-                          fontSize: 'var(--font-size-micro)',
-                          fontWeight: '600',
-                          borderRadius: '4px',
-                          border: 'none',
-                          cursor: 'pointer',
-                          backgroundColor: detailMapStyle === 'satellite' ? 'var(--color-primary)' : 'transparent',
-                          color: detailMapStyle === 'satellite' ? 'var(--color-surface)' : 'var(--color-text-muted)',
-                          transition: 'all 0.2s ease'
-                        }}
-                      >
-                        Satellite
-                      </button>
+                      {HAS_MAPBOX_SATELLITE && (
+                        <button
+                          type="button"
+                          onClick={() => setDetailMapStyle('satellite')}
+                          style={{
+                            padding: '4px 10px',
+                            fontSize: 'var(--font-size-micro)',
+                            fontWeight: '600',
+                            borderRadius: '4px',
+                            border: 'none',
+                            cursor: 'pointer',
+                            backgroundColor: detailMapStyle === 'satellite' ? 'var(--color-primary)' : 'transparent',
+                            color: detailMapStyle === 'satellite' ? 'var(--color-surface)' : 'var(--color-text-muted)',
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          Satellite
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() => setDetailMapStyle('streets')}

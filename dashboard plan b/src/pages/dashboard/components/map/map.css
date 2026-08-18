@@ -1233,7 +1233,7 @@
   pointer-events: none;
 }
 
-.incident-group-popup .mapboxgl-popup-content {
+.incident-group-popup .maplibregl-popup-content {
   padding: 10px 12px;
   border-radius: 10px;
   box-shadow: 0 8px 24px rgba(var(--rgb-ombre), 0.25);
