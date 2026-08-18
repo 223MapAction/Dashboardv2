@@ -41,7 +41,7 @@
   top: 64px;
   z-index: 4;
   flex-shrink: 0;
-  background-color: rgba(255, 255, 255, 0.7);
+  background-color: rgba(var(--rgb-surface), 0.7);
   backdrop-filter: saturate(180%) blur(16px);
   -webkit-backdrop-filter: saturate(180%) blur(16px);
   border-radius: var(--radius-lg);
@@ -58,12 +58,12 @@
   gap: var(--spacing-3);
   margin: 0 var(--spacing-5) var(--spacing-4) var(--spacing-5);
   padding: var(--spacing-3) var(--spacing-4);
-  background-color: rgba(255, 255, 255, 0.7);
+  background-color: rgba(var(--rgb-surface), 0.7);
   backdrop-filter: saturate(180%) blur(16px);
   -webkit-backdrop-filter: saturate(180%) blur(16px);
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 2px 12px rgba(var(--rgb-ombre), 0.03);
   position: sticky;
   top: 64px;
   z-index: 4;
@@ -91,7 +91,7 @@
 
 .project-search:focus-within {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(58, 162, 221, 0.1);
+  box-shadow: 0 0 0 3px rgba(var(--rgb-primary), 0.1);
 }
 
 .project-search input {
@@ -122,7 +122,7 @@
 
 .project-select:focus-within {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(58, 162, 221, 0.1);
+  box-shadow: 0 0 0 3px rgba(var(--rgb-primary), 0.1);
 }
 
 .project-select select {
@@ -211,7 +211,7 @@
   z-index: 3;
   background-color: var(--color-background);
   border-right: 1px solid var(--color-border);
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.03);
+  box-shadow: 2px 0 5px rgba(var(--rgb-ombre), 0.03);
 }
 
 .incident-table td:first-child {
@@ -220,7 +220,7 @@
   z-index: 2;
   background-color: var(--color-surface);
   border-right: 1px solid var(--color-border);
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.03);
+  box-shadow: 2px 0 5px rgba(var(--rgb-ombre), 0.03);
 }
 
 .incident-table tr:last-child td {
@@ -233,7 +233,7 @@
 }
 
 .incident-table tbody tr:hover {
-  background-color: rgba(58, 162, 221, 0.03);
+  background-color: rgba(var(--rgb-primary), 0.03);
 }
 
 .incident-table tbody tr:hover td:first-child {
@@ -241,7 +241,7 @@
 }
 
 .incident-table tbody tr.is-selected {
-  background-color: rgba(58, 162, 221, 0.08);
+  background-color: rgba(var(--rgb-primary), 0.08);
 }
 
 .incident-table tbody tr.is-selected td:first-child {
@@ -300,18 +300,18 @@
 }
 
 .incident-date-badge.is-pending {
-  background-color: rgba(245, 158, 11, 0.15);
+  background-color: rgba(var(--rgb-warning), 0.15);
   color: var(--color-warning-text);
 }
 
 .incident-date-badge.is-resolved {
-  background-color: rgba(34, 197, 94, 0.15);
+  background-color: rgba(var(--rgb-success), 0.15);
   color: var(--color-success-text);
-  border: 1px solid rgba(34, 197, 94, 0.2);
+  border: 1px solid rgba(var(--rgb-success), 0.2);
 }
 
 .incident-date-badge.is-neutral {
-  background-color: rgba(108, 114, 120, 0.1);
+  background-color: rgba(var(--rgb-text-secondary), 0.1);
   color: var(--color-text-secondary);
 }
 
@@ -362,7 +362,7 @@
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--color-surface);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(var(--rgb-ombre), 0.05);
 }
 
 .badge-dot {
@@ -390,33 +390,33 @@
 }
 
 .variant-declared {
-  background-color: rgba(108, 114, 120, 0.1);
+  background-color: rgba(var(--rgb-text-secondary), 0.1);
   color: var(--color-text-secondary);
-  border-color: rgba(108, 114, 120, 0.2);
+  border-color: rgba(var(--rgb-text-secondary), 0.2);
 }
 
 .variant-taken {
-  background-color: rgba(58, 162, 221, 0.1);
+  background-color: rgba(var(--rgb-primary), 0.1);
   color: var(--color-primary-text);
-  border-color: rgba(58, 162, 221, 0.2);
+  border-color: rgba(var(--rgb-primary), 0.2);
 }
 
 .variant-in-progress {
-  background-color: rgba(245, 158, 11, 0.1);
+  background-color: rgba(var(--rgb-warning), 0.1);
   color: var(--color-warning-text);
-  border-color: rgba(245, 158, 11, 0.2);
+  border-color: rgba(var(--rgb-warning), 0.2);
 }
 
 .variant-resolved {
-  background-color: rgba(34, 197, 94, 0.1);
+  background-color: rgba(var(--rgb-success), 0.1);
   color: var(--color-success-text);
-  border-color: rgba(34, 197, 94, 0.2);
+  border-color: rgba(var(--rgb-success), 0.2);
 }
 
 .variant-taken-me {
-  background-color: rgba(58, 162, 221, 0.15);
+  background-color: rgba(var(--rgb-primary), 0.15);
   color: var(--color-primary-text);
-  border-color: rgba(58, 162, 221, 0.35);
+  border-color: rgba(var(--rgb-primary), 0.35);
 }
 
 .variant-taken-me .badge-dot {
@@ -424,9 +424,9 @@
 }
 
 .variant-taken-other {
-  background-color: rgba(108, 114, 120, 0.08);
+  background-color: rgba(var(--rgb-text-secondary), 0.08);
   color: var(--color-text-secondary);
-  border-color: rgba(108, 114, 120, 0.18);
+  border-color: rgba(var(--rgb-text-secondary), 0.18);
 }
 
 .variant-taken-other .badge-dot {
@@ -434,9 +434,9 @@
 }
 
 .variant-resolved-me {
-  background-color: rgba(34, 197, 94, 0.15);
+  background-color: rgba(var(--rgb-success), 0.15);
   color: var(--color-success-text);
-  border-color: rgba(34, 197, 94, 0.35);
+  border-color: rgba(var(--rgb-success), 0.35);
 }
 
 .variant-resolved-me .badge-dot {
@@ -444,9 +444,9 @@
 }
 
 .variant-resolved-other {
-  background-color: rgba(108, 114, 120, 0.08);
+  background-color: rgba(var(--rgb-text-secondary), 0.08);
   color: var(--color-text-secondary);
-  border-color: rgba(108, 114, 120, 0.18);
+  border-color: rgba(var(--rgb-text-secondary), 0.18);
 }
 
 .variant-resolved-other .badge-dot {
@@ -481,11 +481,11 @@
 }
 
 .incident-icon-btn-view {
-  background-color: rgba(58, 162, 221, 0.1);
+  background-color: rgba(var(--rgb-primary), 0.1);
 }
 
 .incident-icon-btn-view:hover {
-  background-color: rgba(58, 162, 221, 0.2);
+  background-color: rgba(var(--rgb-primary), 0.2);
 }
 
 /* ============================================

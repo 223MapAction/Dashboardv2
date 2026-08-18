@@ -1,5 +1,6 @@
 import { authService } from '../../auth/services/authService';
 import { API_URL_BASE } from '../../../config/api_url_base';
+import { couleurAvatarPour, AVATAR_COULEUR_DEFAUT } from '../../../utils/couleursAvatar';
 
 /**
  * Récupère les organisations avec pagination et filtrage
@@ -297,7 +298,7 @@ export const formatOrganisation = (organisation) => {
     logo: organisation.logo_url,
     isPremium: organisation.is_premium,
     membersCount: organisation.members_count,
-    primaryColor: organisation.primary_color || '#3AA2DD',
+    primaryColor: organisation.primary_color || AVATAR_COULEUR_DEFAUT,
     secondaryColor: organisation.secondary_color || '#22C55E',
     backgroundColor: organisation.background_color || '#F0F0F0',
     createdAt: organisation.created_at,
@@ -311,20 +312,11 @@ export const formatOrganisation = (organisation) => {
  * @param {number} id - ID de l'organisation
  * @returns {string} Code couleur hexadécimal
  */
-const getColorFromId = (id) => {
-  const colors = [
-    '#3AA2DD', // primary
-    '#22C55E', // success
-    '#F59E0B', // warning
-    '#EF4444', // danger
-    '#A855F7', // purple
-    '#10B981', // green
-    '#EC4899', // pink
-    '#F97316', // orange
-    '#6366F1'  // indigo
-  ];
-  return colors[id % colors.length];
-};
+// Cette fonction portait sa propre liste de neuf couleurs, presque la meme que
+// la palette d'avatars mais pas tout a fait : ordre different et une teinte en
+// moins. Deux organisations pouvaient donc recevoir la meme pastille a un
+// endroit et deux differentes ailleurs. Une seule liste desormais.
+const getColorFromId = (id) => couleurAvatarPour(id);
 
 export default {
   getOrganisationsService,

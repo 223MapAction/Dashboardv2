@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { TickCircle, CloseCircle, Activity, Location, Chart2, Warning2 } from 'iconsax-react';
 import './incident-stats.css';
+import { lireRepartitionApi } from '../../../../utils/gravite';
 
 export const IncidentStats = ({ stats }) => {
   // 1. Statistiques de statut
@@ -35,29 +36,13 @@ export const IncidentStats = ({ stats }) => {
   }, [stats]);
 
   // 4. Statistiques par gravité
-  const severityStats = useMemo(() => {
-    if (stats?.by_severity) {
-      return {
-        high: {
-          count: stats.by_severity.high?.count ?? 0,
-          percentage: stats.by_severity.high?.percentage ?? 0
-        },
-        medium: {
-          count: stats.by_severity.medium?.count ?? 0,
-          percentage: stats.by_severity.medium?.percentage ?? 0
-        },
-        low: {
-          count: stats.by_severity.low?.count ?? 0,
-          percentage: stats.by_severity.low?.percentage ?? 0
-        }
-      };
-    }
-    return {
-      high: { count: 0, percentage: 0 },
-      medium: { count: 0, percentage: 0 },
-      low: { count: 0, percentage: 0 }
-    };
-  }, [stats]);
+  //
+  // Les libellés, l'ordre et les couleurs viennent de utils/gravite.js, donc de
+  // la carte : c'est elle la référence, et cette section s'y aligne. Elle disait
+  // « Critique / Grave / Modéré » pour les trois niveaux que la carte nomme
+  // « Élevée / Moyenne / Faible », et les peignait avec les couleurs de statut
+  // — « moyenne » et « faible » partageaient d'ailleurs le même orange.
+  const niveaux = useMemo(() => lireRepartitionApi(stats?.by_severity), [stats]);
 
   return (
     <div className="incident-stats-container">
@@ -166,47 +151,38 @@ export const IncidentStats = ({ stats }) => {
           Répartition par Gravité
         </h2>
         <div className="severity-stats-grid">
-          <div className="severity-stat-card high">
-            <div className="severity-header">
-              <span className="severity-label">Critique</span>
-              <span className="severity-percentage">{severityStats.high.percentage}%</span>
-            </div>
-            <div className="severity-count">{severityStats.high.count} incidents</div>
-            <div className="severity-bar">
-              <div
-                className="severity-bar-fill high"
-                style={{ width: `${severityStats.high.percentage}%` }}
-              />
-            </div>
-          </div>
-
-          <div className="severity-stat-card medium">
-            <div className="severity-header">
-              <span className="severity-label">Grave</span>
-              <span className="severity-percentage">{severityStats.medium.percentage}%</span>
-            </div>
-            <div className="severity-count">{severityStats.medium.count} incidents</div>
-            <div className="severity-bar">
-              <div
-                className="severity-bar-fill medium"
-                style={{ width: `${severityStats.medium.percentage}%` }}
-              />
-            </div>
-          </div>
-
-          <div className="severity-stat-card low">
-            <div className="severity-header">
-              <span className="severity-label">Modéré</span>
-              <span className="severity-percentage">{severityStats.low.percentage}%</span>
-            </div>
-            <div className="severity-count">{severityStats.low.count} incidents</div>
-            <div className="severity-bar">
-              <div
-                className="severity-bar-fill low"
-                style={{ width: `${severityStats.low.percentage}%` }}
-              />
-            </div>
-          </div>
+          {niveaux.length === 0 && (
+            <div className="no-data">Aucune donnée disponible</div>
+          )}
+          {niveaux.map(({ cle, libelle, count, percentage }) => (
+              <div key={cle} className={`severity-stat-card ${cle}`}>
+                <div className="severity-header">
+                  <span className="severity-label">
+                    {/* La pastille reprend la couleur du marqueur correspondant
+                        sur la carte. Sans elle, la couleur ne vivait que dans
+                        une bordure de 2px et une barre de progression : on
+                        pouvait lire toute la section sans jamais faire le lien
+                        avec ce qu'on voit sur la carte. */}
+                    <span className={`severity-puce ${cle}`} aria-hidden="true" />
+                    {libelle}
+                  </span>
+                  <span className="severity-percentage">{percentage}%</span>
+                </div>
+                <div className="severity-count">
+                  {count} incident{count > 1 ? 's' : ''}
+                </div>
+                <div
+                  className="severity-bar"
+                  role="img"
+                  aria-label={`Gravité ${libelle.toLowerCase()} : ${percentage}% des incidents`}
+                >
+                  <div
+                    className={`severity-bar-fill ${cle}`}
+                    style={{ width: `${percentage}%` }}
+                  />
+                </div>
+              </div>
+          ))}
         </div>
       </div>
     </div>

@@ -457,7 +457,8 @@ export const TrashPage = () => {
                 <span>{incidents.length} incident(s) dans la corbeille. La suppression définitive est irréversible.</span>
               </div>
 
-              {/* ── Filtres ── */}
+              {/* ── Filtres — fixe au defilement : voir .trash-filtres-fixes. ── */}
+              <div className="trash-filtres-fixes">
               <FiltersBar
                 recherche={searchInput}
                 onRecherche={setSearchInput}
@@ -512,6 +513,7 @@ export const TrashPage = () => {
                 </div>
 
               </FiltersBar>
+              </div>
 
               {/* ── Contenu ── */}
               {filtered.length === 0 ? (

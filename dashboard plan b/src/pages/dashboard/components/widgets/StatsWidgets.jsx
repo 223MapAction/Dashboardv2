@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Location, Chart2, Warning2, ArrowRight2, Clock } from 'iconsax-react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import './stats-widgets.css';
+import { NIVEAUX_GRAVITE, lireRepartitionApi, couleurGravite } from '../../../../utils/gravite';
 
 const getStatusLabel = (etat) => {
   switch (etat) {
@@ -16,13 +17,13 @@ const getStatusLabel = (etat) => {
 const getStatusStyle = (etat) => {
   switch (etat) {
     case 'resolved':
-      return { backgroundColor: 'rgba(34, 197, 94, 0.1)', color: 'var(--color-success-text)' };
+      return { backgroundColor: 'rgba(var(--rgb-success), 0.1)', color: 'var(--color-success-text)' };
     case 'taken_into_account':
     case 'in_progress':
-      return { backgroundColor: 'rgba(245, 158, 11, 0.1)', color: 'var(--color-warning-text)' };
+      return { backgroundColor: 'rgba(var(--rgb-warning), 0.1)', color: 'var(--color-warning-text)' };
     case 'declared':
     default:
-      return { backgroundColor: 'rgba(107, 114, 128, 0.1)', color: 'var(--color-text-secondary)' };
+      return { backgroundColor: 'rgba(var(--rgb-text-muted), 0.1)', color: 'var(--color-text-secondary)' };
   }
 };
 
@@ -44,34 +45,30 @@ export const StatsWidgets = ({ stats }) => {
   }, [stats]);
 
   // Calculer les statistiques par gravité
+  //
+  // Les niveaux, leur ordre et leurs couleurs viennent de utils/gravite.js.
+  // On prend les teintes VIVES, celles des marqueurs : une part de camembert
+  // est un aplat, exactement comme une pastille sur la carte. Les variantes
+  // assombries ne servent qu'au texte et aux fonds sous du blanc. Ce widget
+  // rejouait la collision corrigée ailleurs : « Moyenne » et « Faible » y
+  // étaient toutes deux en --color-warning-text, donc deux parts du même
+  // camembert peintes de la même couleur.
   const severityData = useMemo(() => {
-    if (stats?.by_severity) {
-      const high = stats.by_severity.high?.percentage ?? 0;
-      const medium = stats.by_severity.medium?.percentage ?? 0;
-      const low = stats.by_severity.low?.percentage ?? 0;
-      return [
-        {
-          label: 'Élevée',
-          percentage: high,
-          color: 'var(--color-danger-text)'
-        },
-        {
-          label: 'Moyenne',
-          percentage: medium,
-          color: 'var(--color-warning-text)'
-        },
-        {
-          label: 'Faible',
-          percentage: low,
-          color: 'var(--color-warning-text)'
-        }
-      ];
+    const niveaux = lireRepartitionApi(stats?.by_severity);
+    if (niveaux.length > 0) {
+      return niveaux.map(({ cle, libelle, percentage }) => ({
+        label: libelle,
+        percentage,
+        color: couleurGravite(cle)
+      }));
     }
-    return [
-      { label: 'Élevée', percentage: 0, color: 'var(--color-danger-text)' },
-      { label: 'Moyenne', percentage: 0, color: 'var(--color-warning-text)' },
-      { label: 'Faible', percentage: 0, color: 'var(--color-warning-text)' }
-    ];
+    // Sans données, on garde l'échelle complète à 0 : la légende reste lisible
+    // et le graphique bascule sur son état « Pas de données ».
+    return NIVEAUX_GRAVITE.map(({ cle, libelle }) => ({
+      label: libelle,
+      percentage: 0,
+      color: couleurGravite(cle)
+    }));
   }, [stats]);
 
   const chartData = useMemo(() => {
@@ -183,8 +180,8 @@ export const StatsWidgets = ({ stats }) => {
                 <Tooltip
                   formatter={(value, name) => [`${value}%`, name]}
                   contentStyle={{
-                    backgroundColor: 'var(--color-bg-primary, #ffffff)',
-                    border: '1px solid var(--color-border, #e5e7eb)',
+                    backgroundColor: 'var(--color-surface)',
+                    border: '1px solid var(--color-border)',
                     borderRadius: '8px',
                     fontSize: 'var(--font-size-caption)',
                     color: 'var(--color-text-primary)'

@@ -538,7 +538,8 @@ export const SuggestRequests = ({ embedded = false }) => {
         </div>
       )}
 
-      {/* Toolbar */}
+      {/* Toolbar — fixe au defilement : voir .requests-filtres-fixes. */}
+      <div className="requests-filtres-fixes">
       <FiltersBar
         recherche={searchInput}
         onRecherche={setSearchInput}
@@ -577,6 +578,7 @@ export const SuggestRequests = ({ embedded = false }) => {
           ))}
         </div>
       </FiltersBar>
+      </div>
 
 
       {/* Info banner */}
@@ -636,7 +638,7 @@ export const SuggestRequests = ({ embedded = false }) => {
                         padding: '3px 8px', borderRadius: '4px',
                         fontSize: 'var(--font-size-micro)', fontWeight: 'bold', textTransform: 'uppercase',
                         color: 'var(--color-surface)', backgroundColor: meta.color,
-                        boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
+                        boxShadow: '0 2px 6px rgba(var(--rgb-ombre),0.15)'
                       }}>
                         {meta.label}
                       </span>
@@ -652,7 +654,7 @@ export const SuggestRequests = ({ embedded = false }) => {
                         padding: '2px 8px', borderRadius: '4px',
                         fontSize: 'var(--font-size-micro)', fontWeight: 600,
                         color: isSuggestion ? 'var(--color-primary)' : 'var(--color-warning)',
-                        backgroundColor: isSuggestion ? 'rgba(58,162,221,0.1)' : 'rgba(245,158,11,0.1)'
+                        backgroundColor: isSuggestion ? 'rgba(var(--rgb-primary),0.1)' : 'rgba(var(--rgb-warning),0.1)'
                       }}>
                         {isSuggestion
                           ? <><MessageText1 size={12} variant="Bold" color="currentColor" style={{ color: 'var(--color-primary-text)' }} /> Suggestion</>
@@ -698,7 +700,7 @@ export const SuggestRequests = ({ embedded = false }) => {
                         padding: '3px 8px', borderRadius: '4px',
                         fontSize: 'var(--font-size-micro)', fontWeight: 600,
                         color: 'var(--color-text-secondary)',
-                        backgroundColor: 'rgba(108,114,120,0.08)'
+                        backgroundColor: 'rgba(var(--rgb-text-secondary),0.08)'
                       }}>
                         <Building size={13} variant="Bold" color="currentColor" style={{ color: 'var(--color-text-secondary)' }} />
                         {req.organisationName || req.organisation}
@@ -710,7 +712,7 @@ export const SuggestRequests = ({ embedded = false }) => {
                           padding: '3px 8px', borderRadius: '4px',
                           fontSize: 'var(--font-size-micro)', fontWeight: 600,
                           color: 'var(--color-text-secondary)',
-                          backgroundColor: 'rgba(108,114,120,0.08)'
+                          backgroundColor: 'rgba(var(--rgb-text-secondary),0.08)'
                         }}>
                           <Location size={12} variant="Bold" color="currentColor" style={{ color: 'var(--color-text-secondary)' }} />
                           {req.incidentDetails.zone}

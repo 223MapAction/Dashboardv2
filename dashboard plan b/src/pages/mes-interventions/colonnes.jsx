@@ -74,9 +74,9 @@ export const creerColonnesInterventions = ({ onOuvrirRapports, RenduEquipe }) =>
               borderRadius: '12px',
               fontSize: 'var(--font-size-micro)',
               fontWeight: '600',
-              backgroundColor: (incident.take_in_charge_mode === 'internal' || incident.take_in_charge_mode === 'interne') ? 'rgba(58, 162, 221, 0.12)' : 'rgba(168, 85, 247, 0.12)',
-              color: (incident.take_in_charge_mode === 'internal' || incident.take_in_charge_mode === 'interne') ? 'var(--color-primary)' : '#A855F7',
-              border: (incident.take_in_charge_mode === 'internal' || incident.take_in_charge_mode === 'interne') ? '1px solid rgba(58, 162, 221, 0.3)' : '1px solid rgba(168, 85, 247, 0.3)'
+              backgroundColor: (incident.take_in_charge_mode === 'internal' || incident.take_in_charge_mode === 'interne') ? 'rgba(var(--rgb-primary), 0.12)' : 'rgba(var(--rgb-accent), 0.12)',
+              color: (incident.take_in_charge_mode === 'internal' || incident.take_in_charge_mode === 'interne') ? 'var(--color-primary)' : 'var(--color-accent)',
+              border: (incident.take_in_charge_mode === 'internal' || incident.take_in_charge_mode === 'interne') ? '1px solid rgba(var(--rgb-primary), 0.3)' : '1px solid rgba(var(--rgb-accent), 0.3)'
             }}>
               {(incident.take_in_charge_mode === 'internal' || incident.take_in_charge_mode === 'interne') ? 'Interne' : 'Collaboratif'}
             </span>
@@ -146,7 +146,7 @@ export const creerColonnesInterventions = ({ onOuvrirRapports, RenduEquipe }) =>
                 disabled={reportsCount === 0}
                 title={reportsCount > 0 ? `Voir les ${reportsCount} rapport(s)` : 'Aucun rapport'}
               >
-                <DocumentText size={16} variant={reportsCount > 0 ? 'Bold' : 'Linear'} color={reportsCount > 0 ? '#3AA2DD' : 'var(--color-text-muted)'} />
+                <DocumentText size={16} variant={reportsCount > 0 ? 'Bold' : 'Linear'} color={reportsCount > 0 ? 'var(--color-primary)' : 'var(--color-text-muted)'} />
                 <span>{reportsCount}</span>
               </button>
             );

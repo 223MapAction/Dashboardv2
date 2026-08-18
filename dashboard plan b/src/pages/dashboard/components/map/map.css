@@ -5,6 +5,14 @@
 /* Container map - vignette d'alerte */
 .map-container {
   position: relative;
+  /* La carte vit dans une page qui defile verticalement. Sans cette regle, le
+     navigateur peut arbitrer un geste tactile qui commence sur la carte (le
+     revendiquer pour son propre defilement/zoom de page) avant meme que
+     Mapbox ne le recoive — le pincement a deux doigts en est la victime la
+     plus frequente. `touch-action: none` cede TOUS les gestes tactiles a
+     Mapbox, qui gere deja lui-meme le glisser (dragPan) et le pincement
+     (touchZoomRotate) ; le navigateur n'a plus besoin d'intervenir ici. */
+  touch-action: none;
 }
 
 .map-container::after {
@@ -13,7 +21,7 @@
   inset: 0;
   pointer-events: none;
   z-index: 4;
-  box-shadow: inset 0 0 80px rgba(239, 68, 68, 0.25);
+  box-shadow: inset 0 0 80px rgba(var(--rgb-danger), 0.25);
   border-radius: inherit;
 }
 
@@ -50,7 +58,7 @@
   height: 22px;
   border-radius: 50%;
   border: 3px solid var(--color-surface);
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 2px rgba(var(--rgb-ombre), 0.2), 0 4px 12px rgba(var(--rgb-ombre), 0.5);
   z-index: 2;
   transition: transform 0.2s ease;
 }
@@ -80,27 +88,31 @@
   }
 }
 
-/* Pulsation plus rapide pour les incidents de sévérité élevée */
+/* Pulsation plus rapide pour les incidents de gravité élevée */
 .incident-marker.severity-active-high .incident-marker-pulse {
   animation-duration: 1.2s;
 }
 
 /* Couleurs par sévérité active et statut de résolution */
+/* Ces trois règles pointent vers l'échelle de gravité, plus vers les couleurs
+   de statut. « Faible » annonçait déjà « Jaune » en commentaire mais peignait
+   --color-warning, soit exactement la couleur de « moyenne » : le commentaire
+   disait l'intention, la valeur avait dérivé. */
 .incident-marker.severity-active-high .incident-marker-dot,
 .incident-marker.severity-active-high .incident-marker-pulse {
-  background-color: var(--color-danger);
+  background-color: var(--color-severity-high);
   /* Rouge */
 }
 
 .incident-marker.severity-active-medium .incident-marker-dot,
 .incident-marker.severity-active-medium .incident-marker-pulse {
-  background-color: var(--color-warning);
+  background-color: var(--color-severity-medium);
   /* Orange */
 }
 
 .incident-marker.severity-active-low .incident-marker-dot,
 .incident-marker.severity-active-low .incident-marker-pulse {
-  background-color: var(--color-warning);
+  background-color: var(--color-severity-low);
   /* Jaune */
 }
 
@@ -122,7 +134,7 @@
 .incident-modal-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(var(--rgb-ombre), 0.5);
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -160,7 +172,7 @@
   height: 100vh;
   height: 100dvh;
   background-color: var(--color-surface);
-  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+  box-shadow: -4px 0 24px rgba(var(--rgb-ombre), 0.15);
   display: flex;
   flex-direction: column;
   animation: incident-slide-in 0.28s cubic-bezier(0.32, 0.72, 0, 1);
@@ -283,22 +295,22 @@
 }
 
 .incident-modal-badge.variant-in-progress {
-  background-color: rgba(58, 162, 221, 0.15);
+  background-color: rgba(var(--rgb-primary), 0.15);
   color: var(--color-primary-text);
 }
 
 .incident-modal-badge.variant-critical {
-  background-color: rgba(239, 68, 68, 0.15);
+  background-color: rgba(var(--rgb-danger), 0.15);
   color: var(--color-danger-text);
 }
 
 .incident-modal-badge.variant-planned {
-  background-color: rgba(245, 158, 11, 0.15);
+  background-color: rgba(var(--rgb-warning), 0.15);
   color: var(--color-warning-text);
 }
 
 .incident-modal-badge.variant-expert-needed {
-  background-color: rgba(168, 85, 247, 0.15);
+  background-color: rgba(var(--rgb-accent), 0.15);
   color: var(--color-accent-text);
 }
 
@@ -379,7 +391,7 @@
   aspect-ratio: 16 / 9;
   border-radius: var(--radius-md);
   overflow: hidden;
-  background: #000;
+  background: rgba(var(--rgb-ombre), 1);
 }
 
 .incident-modal-video iframe {
@@ -476,7 +488,7 @@
 }
 
 .incident-modal-status-step.is-current .incident-modal-status-dot {
-  box-shadow: 0 0 0 4px rgba(58, 162, 221, 0.18);
+  box-shadow: 0 0 0 4px rgba(var(--rgb-primary), 0.18);
   transform: scale(1.2);
 }
 
@@ -492,7 +504,7 @@
 }
 
 .status-stepper-declared .incident-modal-status-step.is-current .incident-modal-status-dot {
-  box-shadow: 0 0 0 4px rgba(108, 114, 120, 0.18);
+  box-shadow: 0 0 0 4px rgba(var(--rgb-text-secondary), 0.18);
 }
 
 /* Pending status (warning) */
@@ -505,7 +517,7 @@
 }
 
 .status-stepper-pending .incident-modal-status-step.is-current .incident-modal-status-dot {
-  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.18);
+  box-shadow: 0 0 0 4px rgba(var(--rgb-warning), 0.18);
 }
 
 /* Taken into account (primary) */
@@ -518,7 +530,7 @@
 }
 
 .status-stepper-taken_into_account .incident-modal-status-step.is-current .incident-modal-status-dot {
-  box-shadow: 0 0 0 4px rgba(58, 162, 221, 0.18);
+  box-shadow: 0 0 0 4px rgba(var(--rgb-primary), 0.18);
 }
 
 /* Resolved status (success) */
@@ -533,7 +545,7 @@
 }
 
 .status-stepper-resolved .incident-modal-status-step.is-current .incident-modal-status-dot {
-  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.18);
+  box-shadow: 0 0 0 4px rgba(var(--rgb-success), 0.18);
 }
 
 /* Custom status badges conforming to index.css design tokens */
@@ -600,12 +612,12 @@
   position: absolute;
   bottom: var(--spacing-4);
   left: var(--spacing-4);
-  background: rgba(15, 23, 42, 0.85);
+  background: rgba(var(--rgb-text-primary), 0.85);
   backdrop-filter: blur(10px);
   padding: var(--spacing-3);
   border-radius: var(--radius-md);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  box-shadow: 0 8px 24px rgba(var(--rgb-ombre), 0.4);
+  border: 1px solid rgba(var(--rgb-danger), 0.3);
   z-index: 5;
 }
 
@@ -613,7 +625,7 @@
   font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
   letter-spacing: 0.1em;
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(var(--rgb-surface), 0.75);
   margin: 0 0 var(--spacing-2) 0;
 }
 
@@ -637,7 +649,7 @@
   height: 10px;
   border-radius: 50%;
   flex-shrink: 0;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9), 0 0 8px currentColor;
+  box-shadow: 0 0 0 2px rgba(var(--rgb-surface), 0.9), 0 0 8px currentColor;
 }
 
 /* ============================================
@@ -649,12 +661,12 @@
   left: var(--spacing-4);
   z-index: 5;
   display: inline-flex;
-  background: rgba(15, 23, 42, 0.9);
+  background: rgba(var(--rgb-text-primary), 0.9);
   backdrop-filter: blur(10px);
   border-radius: var(--radius-md);
   padding: 4px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 8px 24px rgba(var(--rgb-ombre), 0.4),
+    0 0 0 1px rgba(var(--rgb-danger), 0.4);
 }
 
 .map-style-btn {
@@ -665,7 +677,7 @@
   font-weight: var(--font-weight-bold);
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(var(--rgb-surface), 0.7);
   cursor: pointer;
   border-radius: 6px;
   transition: background-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
@@ -679,7 +691,7 @@
 .map-style-btn.is-active {
   background: var(--color-danger);
   color: var(--color-surface);
-  box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 12px rgba(var(--rgb-danger), 0.5);
 }
 
 /* ============================================
@@ -689,12 +701,12 @@
   position: absolute;
   top: var(--spacing-4);
   left: var(--spacing-4);
-  background: rgba(15, 23, 42, 0.9);
+  background: rgba(var(--rgb-text-primary), 0.9);
   backdrop-filter: blur(10px);
   padding: var(--spacing-2) var(--spacing-3);
   border-radius: var(--radius-md);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 8px 24px rgba(var(--rgb-ombre), 0.4),
+    0 0 0 1px rgba(var(--rgb-danger), 0.4);
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-2);
@@ -743,7 +755,7 @@
   color: var(--color-surface);
   font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
-  box-shadow: 0 0 12px rgba(239, 68, 68, 0.6);
+  box-shadow: 0 0 12px rgba(var(--rgb-danger), 0.6);
 }
 
 /* Responsive */
@@ -797,7 +809,7 @@
 .map-loading-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(var(--rgb-surface), 0.95);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -918,7 +930,7 @@
   background-color: var(--color-primary);
   color: var(--color-surface);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(58, 162, 221, 0.3);
+  box-shadow: 0 4px 12px rgba(var(--rgb-primary), 0.3);
 }
 
 /* ============================================
@@ -965,7 +977,7 @@
     background: white;
     z-index: 10;
     border-top: 1px solid var(--color-border);
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 -2px 10px rgba(var(--rgb-ombre), 0.05);
   }
 
   /* Badges plus grands */
@@ -1066,13 +1078,13 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  background: rgba(15, 23, 42, 0.9);
+  background: rgba(var(--rgb-text-primary), 0.9);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: var(--radius-md);
   padding: var(--spacing-3);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 8px 24px rgba(var(--rgb-ombre), 0.4),
+    0 0 0 1px rgba(var(--rgb-danger), 0.4);
   width: 200px;
 }
 
@@ -1082,8 +1094,8 @@
 }
 
 .map-filter-select {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(var(--rgb-surface), 0.1);
+  border: 1px solid rgba(var(--rgb-surface), 0.2);
   border-radius: 6px;
   padding: 6px 10px;
   color: var(--color-surface);
@@ -1118,12 +1130,12 @@
 .map-filter-btn {
   flex: 1;
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(var(--rgb-surface), 0.2);
   padding: 6px 4px;
   font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(var(--rgb-surface), 0.7);
   cursor: pointer;
   border-radius: 6px;
   transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
@@ -1133,14 +1145,14 @@
 
 .map-filter-btn:hover {
   color: var(--color-surface);
-  border-color: rgba(255, 255, 255, 0.4);
+  border-color: rgba(var(--rgb-surface), 0.4);
 }
 
 .map-filter-btn.is-active {
   background: var(--color-danger);
   color: var(--color-surface);
   border-color: var(--color-danger);
-  box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 12px rgba(var(--rgb-danger), 0.5);
 }
 
 .desktop-only-inline {
@@ -1212,7 +1224,7 @@
   border-radius: 9px;
   background: var(--color-text-primary);
   border: 2px solid var(--color-surface);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 2px 6px rgba(var(--rgb-ombre), 0.4);
   color: var(--color-surface);
   font-size: var(--font-size-micro);
   font-weight: 700;
@@ -1224,7 +1236,7 @@
 .incident-group-popup .mapboxgl-popup-content {
   padding: 10px 12px;
   border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 8px 24px rgba(var(--rgb-ombre), 0.25);
   max-width: 280px;
 }
 
@@ -1273,10 +1285,15 @@
   background: var(--color-text-secondary);
 }
 
-.incident-group-item.severity-active-high .incident-group-dot { background: var(--color-danger); }
-.incident-group-item.severity-active-medium .incident-group-dot { background: var(--color-warning); }
-.incident-group-item.severity-active-low .incident-group-dot { background: var(--color-primary); }
-.incident-group-item.severity-resolved-others .incident-group-dot { background: var(--color-success); }
+/* La liste d'un groupe de marqueurs doit reprendre EXACTEMENT les couleurs des
+   marqueurs eux-mêmes, sinon un même incident change de couleur selon qu'on le
+   regarde sur la carte ou dans la liste. Trois écarts s'y étaient glissés :
+   « faible » y était bleu (la couleur de « résolu par d'autres »), et les deux
+   états résolus partageaient le même vert. */
+.incident-group-item.severity-active-high .incident-group-dot { background: var(--color-severity-high); }
+.incident-group-item.severity-active-medium .incident-group-dot { background: var(--color-severity-medium); }
+.incident-group-item.severity-active-low .incident-group-dot { background: var(--color-severity-low); }
+.incident-group-item.severity-resolved-others .incident-group-dot { background: var(--color-primary); }
 .incident-group-item.severity-resolved-mine .incident-group-dot { background: var(--color-success); }
 
 .incident-group-label {
@@ -1312,14 +1329,14 @@
 }
 
 .map-incidents-count {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(var(--rgb-surface), 0.95);
   backdrop-filter: blur(8px);
   padding: 8px 16px;
   border-radius: 20px;
   font-size: var(--font-size-body-small);
   font-weight: 600;
   color: var(--color-text-secondary);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(var(--rgb-ombre), 0.15);
   white-space: nowrap;
 }
 

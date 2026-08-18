@@ -4,8 +4,10 @@
 
 .impact-layout {
   display: flex;
-  min-height: 100vh;
-  min-height: 100dvh;
+  /* height, pas min-height : voir dashboard.css pour l'explication complète.
+     Même piège, même correctif. */
+  height: 100vh;
+  height: 100dvh;
   background-color: var(--color-background);
 }
 
@@ -14,11 +16,17 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  /* Même piège flexbox qu'ailleurs dans l'app (dashboard.css a le même
+     correctif) : sans ce 0, .impact-content grandit pour englober tout son
+     contenu au lieu de se limiter à l'écran, et overflow-y:auto ne se
+     déclenche jamais. */
+  min-height: 0;
 }
 
 .impact-content {
   margin-top: 65px;
   flex: 1;
+  min-height: 0;
   padding: var(--spacing-6);
   overflow-y: auto;
 }
@@ -54,7 +62,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 14px rgba(58, 162, 221, 0.35);
+  box-shadow: 0 4px 14px rgba(var(--rgb-primary), 0.35);
 }
 
 .impact-title {
@@ -124,7 +132,7 @@
   background-color: var(--color-primary);
   border-color: var(--color-primary);
   color: var(--color-surface);
-  box-shadow: 0 4px 10px rgba(58, 162, 221, 0.2);
+  box-shadow: 0 4px 10px rgba(var(--rgb-primary), 0.2);
 }
 
 /* --- Core KPI Cards Grid --- */
@@ -166,7 +174,7 @@
   right: -50%;
   width: 150px;
   height: 150px;
-  background: radial-gradient(circle, rgba(34, 197, 94, 0.15) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(var(--rgb-success), 0.15) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -176,7 +184,7 @@
 }
 
 .impact-kpi-primary-glow .impact-kpi-label {
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(var(--rgb-surface), 0.9);
   text-transform: uppercase;
   font-weight: var(--font-weight-bold);
   font-size: var(--font-size-caption);
@@ -186,7 +194,7 @@
 
 .impact-kpi-primary-glow .impact-kpi-subtext {
   font-size: var(--font-size-caption);
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(var(--rgb-surface), 0.8);
   margin-top: var(--spacing-2);
   line-height: 1.4;
 }
@@ -207,11 +215,11 @@
   align-items: center;
   justify-content: center;
   margin-bottom: var(--spacing-3);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
+  box-shadow: inset 0 2px 4px rgba(var(--rgb-ombre), 0.03);
 }
 
 .impact-kpi-primary-glow .impact-kpi-icon-glow {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(var(--rgb-surface), 0.08);
 }
 
 .impact-kpi-top-row {
@@ -340,7 +348,7 @@
 }
 
 .structure-chip.active {
-  background-color: rgba(58, 162, 221, 0.1);
+  background-color: rgba(var(--rgb-primary), 0.1);
   border-color: var(--color-primary);
   color: var(--color-primary-text);
   font-weight: var(--font-weight-bold);
@@ -398,7 +406,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 6px rgba(var(--rgb-ombre), 0.04);
 }
 
 .perf-stats {
@@ -577,7 +585,7 @@
 }
 
 .impact-card-main:hover {
-  background-color: rgba(58, 162, 221, 0.02);
+  background-color: rgba(var(--rgb-primary), 0.02);
 }
 
 /* Thumbnail / Image container */
@@ -606,7 +614,7 @@
   border-radius: var(--radius-sm);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 4px rgba(var(--rgb-ombre), 0.15);
   pointer-events: none;
 }
 
@@ -709,7 +717,7 @@
 .impact-toggle:hover {
   color: var(--color-primary-text);
   border-color: var(--color-primary);
-  background-color: rgba(58, 162, 221, 0.08);
+  background-color: rgba(var(--rgb-primary), 0.08);
   box-shadow: var(--shadow-sm);
 }
 
@@ -717,7 +725,7 @@
   transform: rotate(90deg);
   color: var(--color-primary-text);
   border-color: var(--color-primary);
-  background-color: rgba(58, 162, 221, 0.1);
+  background-color: rgba(var(--rgb-primary), 0.1);
 }
 
 /* Expanded Card Body */
@@ -772,7 +780,7 @@
   border-top-color: var(--color-primary);
 }
 .impact-detail-card.is-direct .impact-detail-header {
-  background-color: rgba(58, 162, 221, 0.08);
+  background-color: rgba(var(--rgb-primary), 0.08);
   color: var(--color-primary-text);
 }
 
@@ -780,7 +788,7 @@
   border-top-color: var(--color-primary-dark);
 }
 .impact-detail-card.is-indirect .impact-detail-header {
-  background-color: rgba(43, 139, 196, 0.08); /* Derived from primary-dark */
+  background-color: rgba(var(--rgb-primary-dark), 0.08); /* Derived from primary-dark */
   color: var(--color-primary-dark);
 }
 
@@ -788,7 +796,7 @@
   border-top-color: var(--color-warning);
 }
 .impact-detail-card.is-structures .impact-detail-header {
-  background-color: rgba(245, 158, 11, 0.08);
+  background-color: rgba(var(--rgb-warning), 0.08);
   color: var(--color-warning-text);
 }
 
@@ -945,17 +953,17 @@
 }
 
 .text-primary {
-  background-color: rgba(58, 162, 221, 0.1);
+  background-color: rgba(var(--rgb-primary), 0.1);
   color: var(--color-primary-text);
 }
 
 .text-purple {
-  background-color: rgba(43, 139, 196, 0.1);
+  background-color: rgba(var(--rgb-primary-dark), 0.1);
   color: var(--color-primary-dark);
 }
 
 .text-success {
-  background-color: rgba(34, 197, 94, 0.1);
+  background-color: rgba(var(--rgb-success), 0.1);
   color: var(--color-success-text);
 }
 
@@ -965,7 +973,7 @@
 }
 
 .bg-blue {
-  background-color: rgba(58, 162, 221, 0.1) !important;
+  background-color: rgba(var(--rgb-primary), 0.1) !important;
   color: var(--color-primary-text) !important;
   border-color: var(--color-primary) !important;
 }
@@ -989,7 +997,7 @@
 
 .task-impact-card.done {
   border-color: var(--color-success);
-  background-color: rgba(34, 197, 94, 0.02);
+  background-color: rgba(var(--rgb-success), 0.02);
 }
 
 .task-impact-header {
@@ -1014,22 +1022,22 @@
 }
 
 .task-badge.done {
-  background-color: rgba(34, 197, 94, 0.12);
+  background-color: rgba(var(--rgb-success), 0.12);
   color: var(--color-success-text);
 }
 
 .task-badge.in_progress {
-  background-color: rgba(58, 162, 221, 0.12);
+  background-color: rgba(var(--rgb-primary), 0.12);
   color: var(--color-primary-text);
 }
 
 .task-badge.failed {
-  background-color: rgba(239, 68, 68, 0.12);
+  background-color: rgba(var(--rgb-danger), 0.12);
   color: var(--color-danger-text);
 }
 
 .task-badge.pending {
-  background-color: rgba(108, 114, 120, 0.12);
+  background-color: rgba(var(--rgb-text-secondary), 0.12);
   color: var(--color-text-secondary);
 }
 

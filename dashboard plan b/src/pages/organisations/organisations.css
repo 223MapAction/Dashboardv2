@@ -27,6 +27,22 @@
   background-color: var(--color-background);
 }
 
+/* Recherche et filtres restent visibles pendant le defilement de la liste :
+   .orgs-content est le conteneur qui defile (overflow-y: auto). Le top est
+   a 60px, pas 0 : .app-header (position: fixed, 60px de haut, z-index: 100)
+   recouvre le haut de la page, donc coller ce bloc a top:0 le ferait passer
+   sous le header fixe, qui masquerait sa premiere ligne. */
+.orgs-filtres-fixes {
+  position: sticky;
+  top: 60px;
+  z-index: 20;
+  background-color: var(--color-background);
+  padding-top: var(--spacing-2);
+  margin-top: calc(-1 * var(--spacing-2));
+  padding-bottom: var(--spacing-2);
+  margin-bottom: calc(-1 * var(--spacing-2));
+}
+
 /* ── Page wrapper ──────────────────── */
 .orgs-page {
   max-width: 1400px;
@@ -78,7 +94,7 @@
 
 .orgs-add-btn:hover {
   background-color: var(--color-primary-dark);
-  box-shadow: 0 4px 12px rgba(58, 162, 221, 0.3);
+  box-shadow: 0 4px 12px rgba(var(--rgb-primary), 0.3);
 }
 
 .orgs-add-btn:active {
@@ -116,15 +132,15 @@
 }
 
 .orgs-stat-icon-primary {
-  background-color: rgba(58, 162, 221, 0.1);
+  background-color: rgba(var(--rgb-primary), 0.1);
 }
 
 .orgs-stat-icon-success {
-  background-color: rgba(34, 197, 94, 0.1);
+  background-color: rgba(var(--rgb-success), 0.1);
 }
 
 .orgs-stat-icon-warning {
-  background-color: rgba(245, 158, 11, 0.1);
+  background-color: rgba(var(--rgb-warning), 0.1);
 }
 
 .orgs-stat-value {
@@ -151,7 +167,7 @@
   gap: var(--spacing-3);
   flex-wrap: wrap;
   align-items: center;
-  background-color: rgba(255, 255, 255, 0.85);
+  background-color: rgba(var(--rgb-surface), 0.85);
   backdrop-filter: saturate(180%) blur(12px);
   -webkit-backdrop-filter: saturate(180%) blur(12px);
   padding: var(--spacing-3) var(--spacing-4);
@@ -177,7 +193,7 @@
 
 .orgs-search:focus-within {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(58, 162, 221, 0.1);
+  box-shadow: 0 0 0 3px rgba(var(--rgb-primary), 0.1);
 }
 
 .orgs-search input {
@@ -295,7 +311,7 @@
   z-index: 3;
   background-color: var(--color-background);
   border-right: 1px solid var(--color-border);
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.03);
+  box-shadow: 2px 0 5px rgba(var(--rgb-ombre), 0.03);
 }
 
 .orgs-table td:first-child {
@@ -304,7 +320,7 @@
   z-index: 2;
   background-color: var(--color-surface);
   border-right: 1px solid var(--color-border);
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.03);
+  box-shadow: 2px 0 5px rgba(var(--rgb-ombre), 0.03);
 }
 
 .orgs-table tr:last-child td {
@@ -316,7 +332,7 @@
 }
 
 .orgs-table tbody tr:hover {
-  background-color: rgba(58, 162, 221, 0.03);
+  background-color: rgba(var(--rgb-primary), 0.03);
   cursor: pointer;
 }
 
@@ -381,12 +397,12 @@
 }
 
 .orgs-status-active {
-  background-color: rgba(34, 197, 94, 0.1);
+  background-color: rgba(var(--rgb-success), 0.1);
   color: var(--color-success-text);
 }
 
 .orgs-status-inactive {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgba(var(--rgb-danger), 0.1);
   color: var(--color-danger-text);
 }
 
@@ -496,7 +512,7 @@
 .orgs-photo-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(var(--rgb-ombre), 0.55);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -554,24 +570,24 @@
 }
 
 .orgs-photo-btn-upload {
-  background-color: rgba(58, 162, 221, 0.1);
+  background-color: rgba(var(--rgb-primary), 0.1);
   color: var(--color-primary-text);
-  border: 1px solid rgba(58, 162, 221, 0.3);
+  border: 1px solid rgba(var(--rgb-primary), 0.3);
 }
 
 .orgs-photo-btn-upload:hover {
-  background-color: rgba(58, 162, 221, 0.18);
+  background-color: rgba(var(--rgb-primary), 0.18);
   border-color: var(--color-primary);
 }
 
 .orgs-photo-btn-remove {
-  background-color: rgba(239, 68, 68, 0.07);
+  background-color: rgba(var(--rgb-danger), 0.07);
   color: var(--color-danger-text);
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(var(--rgb-danger), 0.2);
 }
 
 .orgs-photo-btn-remove:hover {
-  background-color: rgba(239, 68, 68, 0.14);
+  background-color: rgba(var(--rgb-danger), 0.14);
   border-color: var(--color-danger);
 }
 
@@ -618,7 +634,7 @@
 .orgs-field select:focus,
 .orgs-field textarea:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(58, 162, 221, 0.1);
+  box-shadow: 0 0 0 3px rgba(var(--rgb-primary), 0.1);
 }
 
 .orgs-field input::placeholder,
@@ -709,7 +725,7 @@
   width: 64px;
   height: 64px;
   border-radius: var(--radius-full);
-  background-color: rgba(239, 68, 68, 0.08);
+  background-color: rgba(var(--rgb-danger), 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -879,8 +895,8 @@
 }
 
 .orgs-bootstrap-alert.alert-success {
-  background-color: rgba(34, 197, 94, 0.12);
-  border: 1px solid rgba(34, 197, 94, 0.3);
+  background-color: rgba(var(--rgb-success), 0.12);
+  border: 1px solid rgba(var(--rgb-success), 0.3);
   color: var(--color-success-text);
 }
 
@@ -889,8 +905,8 @@
 }
 
 .orgs-bootstrap-alert.alert-danger {
-  background-color: rgba(239, 68, 68, 0.12);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background-color: rgba(var(--rgb-danger), 0.12);
+  border: 1px solid rgba(var(--rgb-danger), 0.3);
   color: var(--color-danger-text);
 }
 
@@ -902,7 +918,7 @@
 .orgs-spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(var(--rgb-surface), 0.3);
   border-radius: 50%;
   border-top-color: var(--color-surface);
   animation: spin 0.8s linear infinite;

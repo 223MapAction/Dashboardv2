@@ -330,7 +330,6 @@ export const formatCollaboration = (collaboration) => {
     roleColor: getRoleColor(collaboration.role),
     status: collaboration.status,
     statusLabel: getStatusLabel(collaboration.status),
-    statusColor: getStatusColor(collaboration.status),
     motivation: collaboration.motivation,
     otherOption: collaboration.other_option,
     endDate: collaboration.end_date,
@@ -378,20 +377,6 @@ const getStatusLabel = (status) => {
     rejected: 'Rejetée'
   };
   return labels[status] || status;
-};
-
-/**
- * Obtient la couleur associée à un statut
- * @param {string} status - Statut de la collaboration
- * @returns {string} Code couleur
- */
-const getStatusColor = (status) => {
-  const colors = {
-    pending: '#F59E0B',   // orange (warning)
-    accepted: '#22C55E',  // vert (success)
-    rejected: '#EF4444'   // rouge (danger)
-  };
-  return colors[status] || '#6C7278';
 };
 
 /**

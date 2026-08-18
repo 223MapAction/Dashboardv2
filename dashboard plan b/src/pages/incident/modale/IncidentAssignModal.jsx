@@ -10,6 +10,7 @@ import { getOrganisationMembersService } from '../../agents/service/members_serv
 import { authService } from '../../auth/services/authService';
 
 import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
+import { AVATAR_COLORS, AVATAR_COULEUR_DEFAUT } from '../../../utils/couleursAvatar';
 
 // `fetchedAgents || []` fabriquait un tableau neuf a chaque rendu tant que la
 // requete n'avait pas repondu. Les useMemo qui en dependent ne memoisaient donc
@@ -20,12 +21,6 @@ const schema = yup.object().shape({
   agent: yup.string().required('Veuillez sélectionner un agent.'),
   deadline: yup.string().nullable().optional()
 });
-
-const AVATAR_COLORS = [
-  '#EF4444', '#F97316', '#F59E0B', '#22C55E',
-  '#3AA2DD', '#1E40AF', '#A855F7', '#EC4899',
-  '#10B981', '#6366F1'
-];
 
 const getInitials = (name = '') =>
   name
@@ -115,7 +110,7 @@ export const IncidentAssignModal = () => {
             role: roleLabel,
             orgId: userOrgId,
             orgName: userOrgName,
-            avatarColor: AVATAR_COLORS[Math.abs(m.id) % AVATAR_COLORS.length] || '#3AA2DD'
+            avatarColor: AVATAR_COLORS[Math.abs(m.id) % AVATAR_COLORS.length] || AVATAR_COULEUR_DEFAUT
           };
         });
       } catch (err) {
@@ -420,7 +415,7 @@ export const IncidentAssignModal = () => {
                             <div style={{ fontSize: 'var(--font-size-body)', fontWeight: '600', color: isAlreadyAssigned ? 'var(--color-text-secondary)' : 'var(--color-text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                               {agent.fullName}
                               {isAlreadyAssigned && (
-                                <span style={{ marginLeft: '8px', fontSize: 'var(--font-size-micro)', padding: '2px 8px', background: 'var(--color-background)', color: 'var(--color-text-secondary)', borderRadius: '12px', border: '1px solid #CBD5E1', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                <span style={{ marginLeft: '8px', fontSize: 'var(--font-size-micro)', padding: '2px 8px', background: 'var(--color-background)', color: 'var(--color-text-secondary)', borderRadius: '12px', border: '1px solid var(--color-border)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                                   ✓ Assigné
                                 </span>
                               )}

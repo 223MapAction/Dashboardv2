@@ -5,12 +5,7 @@ import { CloseCircle, Profile, Edit2 } from 'iconsax-react';
 import { getIncidentAssignmentsService } from '../../incident/service/incident_service';
 
 import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
-const AVATAR_COLORS = [
-  '#EF4444', '#F97316', '#F59E0B', '#22C55E',
-  '#3AA2DD', '#1E40AF', '#A855F7', '#EC4899',
-  '#10B981', '#6366F1'
-];
-
+import { AVATAR_COLORS, AVATAR_COULEUR_DEFAUT } from '../../../utils/couleursAvatar';
 const getInitials = (name = '') =>
   name
     .split(' ')
@@ -63,7 +58,7 @@ export const IncidentAgentsListModal = () => {
       const fullName = a.agent_name || `Agent #${agentId}`;
       const email = a.agent_email || '';
       const phone = a.agent_phone || '';
-      const avatarColor = AVATAR_COLORS[Math.abs(agentId) % AVATAR_COLORS.length] || '#3AA2DD';
+      const avatarColor = AVATAR_COLORS[Math.abs(agentId) % AVATAR_COLORS.length] || AVATAR_COULEUR_DEFAUT;
 
       // Find the org metadata and role if the reporter matches the agent ID
       const isReporter = a.incident_detail?.user_id?.id === agentId;

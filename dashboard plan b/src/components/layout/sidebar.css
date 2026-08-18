@@ -8,7 +8,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(var(--rgb-ombre), 0.5);
   z-index: 998;
   display: none;
 }
@@ -38,7 +38,7 @@
 
 .app-sidebar.open {
   left: 0;
-  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 0 12px rgba(var(--rgb-ombre), 0.1);
 }
 
 /* === HEADER LOGO === */
@@ -83,8 +83,8 @@
   height: 34px;
   border-radius: 50%;
   background-color: var(--color-surface);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); */
+  border: 1px solid rgba(var(--rgb-ombre), 0.1);
+  /* box-shadow: 0 4px 8px rgba(var(--rgb-ombre), 0.15); */
   display: none;
   align-items: center;
   justify-content: center;
@@ -98,7 +98,7 @@
   background-color: var(--color-primary);
   border-color: var(--color-primary);
   color: var(--color-surface);
-  box-shadow: 0 6px 12px rgba(58, 162, 221, 0.3);
+  box-shadow: 0 6px 12px rgba(var(--rgb-primary), 0.3);
   transform: scale(1.1);
 }
 
@@ -140,7 +140,7 @@
 }
 
 .sidebar-item:hover {
-  background-color: rgba(58, 162, 221, 0.05);
+  background-color: rgba(var(--rgb-primary), 0.05);
   color: var(--color-primary-text);
 }
 
@@ -150,7 +150,7 @@
 
 .sidebar-item.active {
   color: var(--color-primary-text);
-  background-color: rgba(58, 162, 221, 0.08);
+  background-color: rgba(var(--rgb-primary), 0.08);
   font-weight: 600;
 }
 
@@ -295,7 +295,7 @@
   }
 
   .app-sidebar.collapsed .sidebar-item.active {
-    background-color: rgba(58, 162, 221, 0.05);
+    background-color: rgba(var(--rgb-primary), 0.05);
     color: var(--color-primary-text);
     border-right-color: var(--color-primary);
   }
@@ -305,7 +305,7 @@
   }
 
   .app-sidebar.collapsed .sidebar-item:hover {
-    background-color: rgba(58, 162, 221, 0.05);
+    background-color: rgba(var(--rgb-primary), 0.05);
   }
 
   .app-sidebar.collapsed .sidebar-item:hover svg {
@@ -353,7 +353,7 @@
   }
 
   .sidebar-item:hover {
-    background-color: rgba(58, 162, 221, 0.1);
+    background-color: rgba(var(--rgb-primary), 0.1);
   }
 
   .sidebar-item:hover svg {
@@ -414,7 +414,7 @@
   }
 
   .sidebar-item.active {
-    background-color: rgba(58, 162, 221, 0.08);
+    background-color: rgba(var(--rgb-primary), 0.08);
     color: var(--color-primary-text);
   }
 
@@ -423,7 +423,7 @@
   }
 
   .sidebar-item:hover {
-    background-color: rgba(58, 162, 221, 0.05);
+    background-color: rgba(var(--rgb-primary), 0.05);
     border-radius: 0;
   }
 

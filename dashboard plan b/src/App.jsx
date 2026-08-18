@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-
 import { SWRConfig } from 'swr';
 import { Login, ForgotPassword, ResetPassword } from './pages/auth';
 import { ProtectedRoute } from './components/auth';
+import { FrontiereChargementPage } from './components/atoms/FrontiereChargementPage';
+import { ChargementPage } from './components/atoms/ChargementPage';
 
 // Les pages protégées sont chargées à la demande : sans ça, mapbox-gl et
 // recharts partent dans le bundle initial et se téléchargent dès le login.
@@ -48,7 +50,11 @@ function App() {
       }}
     >
     <BrowserRouter>
-      <Suspense fallback={null}>
+      {/* Les pages arrivent a la demande. La frontiere rattrape l'echec de
+          cette recuperation — deploiement en cours, connexion coupee — qui
+          laissait jusqu'ici un ecran blanc et une erreur non rattrapee. */}
+      <FrontiereChargementPage>
+      <Suspense fallback={<ChargementPage />}>
       <Routes>
         {/* Route publique - Login */}
         <Route path="/login" element={<Login onLogin={() => {}} />} />
@@ -168,6 +174,7 @@ function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
       </Suspense>
+      </FrontiereChargementPage>
     </BrowserRouter>
     </SWRConfig>
   );

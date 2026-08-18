@@ -182,7 +182,7 @@ export const TaskModal = () => {
 
           {/* Liste des tâches en cours de création (draft) */}
           {draftTasks.length > 0 && (
-            <div className="draft-tasks-section" style={{ marginTop: 'var(--spacing-4)', marginBottom: 'var(--spacing-4)', padding: 'var(--spacing-3)', backgroundColor: 'rgba(58, 162, 221, 0.05)', border: '1.5px dashed var(--color-primary)', borderRadius: 'var(--radius-md)' }}>
+            <div className="draft-tasks-section" style={{ marginTop: 'var(--spacing-4)', marginBottom: 'var(--spacing-4)', padding: 'var(--spacing-3)', backgroundColor: 'rgba(var(--rgb-primary), 0.05)', border: '1.5px dashed var(--color-primary)', borderRadius: 'var(--radius-md)' }}>
               <h4 className="draft-tasks-title" style={{ fontSize: 'var(--font-size-body-large)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-primary-text)', marginBottom: 'var(--spacing-3)' }}>
                 Tâches à ajouter ({draftTasks.length})
               </h4>
@@ -232,7 +232,7 @@ export const TaskModal = () => {
                     className={`my-task-item ${task.completed ? 'is-completed' : ''} ${task.failed ? 'is-failed' : ''}`}
                   >
                     {editingTaskId === task.id ? (
-                      <div className="my-task-edit" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)', width: '100%', padding: 'var(--spacing-3)', backgroundColor: 'rgba(58, 162, 221, 0.03)', borderRadius: 'var(--radius-md)', border: '1.5px solid var(--color-primary)' }}>
+                      <div className="my-task-edit" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)', width: '100%', padding: 'var(--spacing-3)', backgroundColor: 'rgba(var(--rgb-primary), 0.03)', borderRadius: 'var(--radius-md)', border: '1.5px solid var(--color-primary)' }}>
                         {taskAlert && (
                           <div className={`am-alert am-alert--${taskAlert.type === 'success' ? 'success' : 'danger'}`} role="alert" style={{ margin: 0, padding: '8px 12px', fontSize: 'var(--font-size-body-small)', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                             {taskAlert.type === 'success' ? (

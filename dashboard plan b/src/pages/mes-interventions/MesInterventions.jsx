@@ -22,6 +22,8 @@ import './mes-interventions.css';
 
 
 import { TableActionsMenu } from '../../components/molecules/TableActionsMenu';
+import { AVATAR_COLORS, AVATAR_COULEUR_DEFAUT } from '../../utils/couleursAvatar';
+import { BandeauErreur } from '../../components/molecules/BandeauErreur';
 // Initiales pour les avatars
 const getInitials = (name = '') =>
   name
@@ -58,12 +60,6 @@ const adaptIncidentData = (incident) => {
 };
 
 
-const AVATAR_COLORS = [
-  '#EF4444', '#F97316', '#F59E0B', '#22C55E',
-  '#3AA2DD', '#1E40AF', '#A855F7', '#EC4899',
-  '#10B981', '#6366F1'
-];
-
 const IncidentAgentsStack = ({ incident }) => {
   const { openAgentsModal } = useMesInterventionsModalContext();
   const { data: assignmentsData, isLoading } = useSWR(
@@ -77,7 +73,7 @@ const IncidentAgentsStack = ({ incident }) => {
       const agentId = a.agent || a.id;
       const fullName = a.agent_name || `Agent #${agentId}`;
       const email = a.agent_email || '';
-      const avatarColor = AVATAR_COLORS[Math.abs(agentId) % AVATAR_COLORS.length] || '#3AA2DD';
+      const avatarColor = AVATAR_COLORS[Math.abs(agentId) % AVATAR_COLORS.length] || AVATAR_COULEUR_DEFAUT;
 
       const isReporter = a.incident_detail?.user_id?.id === agentId;
       const roleVal = isReporter ? a.incident_detail?.user_id?.org_role : null;
@@ -212,7 +208,7 @@ const MesInterventionsContent = () => {
     return '';
   }, [statusFilter]);
 
-  const { data, isLoading, mutate } = useSWR(
+  const { data, error: erreurInterventions, isLoading, mutate } = useSWR(
     ['/MapApi/org-incidents', sourceFilter, mappedStatus, search, page],
     () => getOrgInternalIncidentsService({
       sourceFilter,
@@ -302,6 +298,11 @@ const MesInterventionsContent = () => {
         />
 
         <main className="mes-interventions-content">
+          <BandeauErreur
+            erreur={erreurInterventions}
+            onReessayer={mutate}
+            message="Impossible de charger vos interventions. La liste affichée peut ne plus être à jour."
+          />
           {/* Header de la page */}
           <header className="mes-interventions-header">
             <h1 className="mes-interventions-title">Mes interventions</h1>
@@ -310,7 +311,9 @@ const MesInterventionsContent = () => {
             </p>
           </header>
 
-          {/* Filtres et Barre de recherche */}
+          {/* Filtres et Barre de recherche — fixe au defilement : voir
+              .mes-interventions-filtres-fixes. */}
+          <div className="mes-interventions-filtres-fixes">
           <FiltersBar
             recherche={searchInput}
             onRecherche={setSearchInput}
@@ -337,6 +340,7 @@ const MesInterventionsContent = () => {
             resultats={data?.count ?? incidents.length}
             nomResultat="intervention"
           />
+          </div>
 
           {/* Affichage des données / Chargement */}
           {!isLoading && incidents.length === 0 ? (

@@ -11,6 +11,7 @@ import IncidentDeleteModal from './modale/IncidentDeleteModal';
 import IncidentAssignModal from './modale/IncidentAssignModal';
 import './incident.css';
 import { useReinitialisationSurChangement } from '../../hooks/useReinitialisationSurChangement';
+import { BandeauErreur } from '../../components/molecules/BandeauErreur';
 
 
 // Fonction pour adapter les données de l'API au format attendu
@@ -116,6 +117,7 @@ export const Incident = () => {
   // Charger la liste des incidents avec useSWR
   const {
     data: rawIncidents,
+    error: erreurIncidents,
     isLoading: isLoadingIncidents,
     mutate: mutateIncidents
   } = useSWR(
@@ -228,6 +230,11 @@ export const Incident = () => {
           />
 
           <div className={workspaceClass}>
+            <BandeauErreur
+              erreur={erreurIncidents}
+              onReessayer={mutateIncidents}
+              message="Impossible de charger les signalements. La liste affichée peut ne plus être à jour."
+            />
             {/* Liste des incidents (Pleine largeur) */}
             <IncidentList
               incidents={incidents}

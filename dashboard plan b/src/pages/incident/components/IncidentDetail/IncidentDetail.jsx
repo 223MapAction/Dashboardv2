@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Map, { Marker, NavigationControl, FullscreenControl } from 'react-map-gl/mapbox';
+import { activerGestesCooperatifs } from '../../../../utils/gestesCarte';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import useSWR from 'swr';
 import {
@@ -47,6 +48,13 @@ import {
   Send2
 } from 'iconsax-react';
 import './incident-detail.css';
+import { IncidentDetailSkeleton } from './SqueletteDetail';
+import { ROLE_OPTIONS, ORG_ROLE_OPTIONS } from './roles';
+import { useLecteurAudio } from './useLecteurAudio';
+import {
+  getStatusBadge, getModeBadge, getUserRoleBadge,
+  getCollabBadgeStyle, getRoleLabel, getStatusLabel,
+} from './badges';
 import './dark-dashboard.css';
 import { getOrganisationsService, formatOrganisation } from '../../../organisations/service/organisation_service';
 import { IncidentDetailContext } from './IncidentDetailContext';
@@ -56,6 +64,7 @@ import { BlurryImage } from '../../../../components/atoms/BlurryImage';
 
 
 import { ImageViewer } from '../../../../components/molecules/ImageViewer';
+import { BadgeGravite } from '../../../../components/atoms/BadgeGravite';
 const formatMessageTime = (dateStr) => {
   if (!dateStr) return '';
   try {
@@ -65,138 +74,6 @@ const formatMessageTime = (dateStr) => {
     return '';
   }
 };
-
-// Composant shimmer pour le détail d'incident
-const IncidentDetailSkeleton = () => (
-  <section className="project-detail" style={{ backgroundColor: 'var(--color-background)', minHeight: '100vh', padding: '0' }}>
-    {/* Header */}
-    <div className="detail-header" style={{ backgroundColor: 'var(--color-surface)', borderBottom: '1px solid var(--color-border)' }}>
-      <div className="detail-title-block">
-        <div className="detail-back-btn-skeleton" style={{ width: '40px', height: '40px', borderRadius: '8px', overflow: 'hidden' }}>
-          <ShimmerThumbnail height={40} width={40} rounded />
-        </div>
-        <div className="detail-title-skeleton" style={{ flex: 1, marginLeft: '12px', maxWidth: '300px' }}>
-          <ShimmerTitle line={1} gap={0} variant="primary" />
-        </div>
-        <div className="detail-badges-skeleton" style={{ display: 'flex', gap: '8px', marginLeft: '12px' }}>
-          <div style={{ width: '80px', height: '24px', borderRadius: '20px', overflow: 'hidden' }}>
-            <ShimmerThumbnail height={24} width={80} rounded />
-          </div>
-          <div style={{ width: '60px', height: '24px', borderRadius: '20px', overflow: 'hidden' }}>
-            <ShimmerThumbnail height={24} width={60} rounded />
-          </div>
-        </div>
-        <div className="detail-action-btn-skeleton" style={{ marginLeft: 'auto', width: '180px', height: '38px', borderRadius: '8px', overflow: 'hidden' }}>
-          <ShimmerThumbnail height={38} width={180} rounded />
-        </div>
-      </div>
-
-      {/* Meta info list shimmer */}
-      <div className="detail-meta" style={{ marginTop: '8px', display: 'flex', gap: '16px' }}>
-        <div style={{ width: '150px', height: '16px', borderRadius: '4px', overflow: 'hidden' }}>
-          <ShimmerThumbnail height={16} width={150} rounded />
-        </div>
-        <div style={{ width: '120px', height: '16px', borderRadius: '4px', overflow: 'hidden' }}>
-          <ShimmerThumbnail height={16} width={120} rounded />
-        </div>
-      </div>
-    </div>
-
-    <div className="incident-dark-dashboard">
-      {/* ── Colonne gauche ── */}
-      <div className="dashboard-col-left">
-        {/* Photo Card Shimmer */}
-        <div className="dark-card" style={{ marginBottom: '20px', padding: '16px' }}>
-          <div style={{ width: '180px', height: '16px', marginBottom: '16px', overflow: 'hidden' }}>
-            <ShimmerTitle line={1} gap={0} />
-          </div>
-          <div style={{ width: '100%', height: '260px', borderRadius: '8px', overflow: 'hidden' }}>
-            <ShimmerThumbnail height={260} rounded />
-          </div>
-        </div>
-
-        {/* Audio Card Shimmer */}
-        <div className="dark-card" style={{ marginBottom: '20px', padding: '16px' }}>
-          <div style={{ width: '150px', height: '16px', marginBottom: '16px', overflow: 'hidden' }}>
-            <ShimmerTitle line={1} gap={0} />
-          </div>
-          <div style={{ width: '100%', height: '54px', borderRadius: '8px', overflow: 'hidden' }}>
-            <ShimmerThumbnail height={54} rounded />
-          </div>
-        </div>
-
-        {/* GPS Card Shimmer */}
-        <div className="dark-card" style={{ marginBottom: '20px', padding: '16px' }}>
-          <div style={{ width: '160px', height: '16px', marginBottom: '16px', overflow: 'hidden' }}>
-            <ShimmerTitle line={1} gap={0} />
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
-            <div style={{ height: '38px', borderRadius: '6px', overflow: 'hidden' }}>
-              <ShimmerThumbnail height={38} rounded />
-            </div>
-            <div style={{ height: '38px', borderRadius: '6px', overflow: 'hidden' }}>
-              <ShimmerThumbnail height={38} rounded />
-            </div>
-          </div>
-          <div style={{ width: '100%', height: '180px', borderRadius: '8px', overflow: 'hidden' }}>
-            <ShimmerThumbnail height={180} rounded />
-          </div>
-        </div>
-      </div>
-
-      {/* ── Colonne droite ── */}
-      <div className="dashboard-col-right">
-        {/* KPIs row shimmer */}
-        <div className="kpi-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '20px' }}>
-          <div className="kpi-card" style={{ padding: '16px', height: '120px', overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <ShimmerCircularImage size={32} />
-            <ShimmerText line={1} gap={0} />
-            <ShimmerText line={1} gap={0} />
-          </div>
-          <div className="kpi-card" style={{ padding: '16px', height: '120px', overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <ShimmerCircularImage size={32} />
-            <ShimmerText line={1} gap={0} />
-            <ShimmerText line={1} gap={0} />
-          </div>
-          <div className="kpi-card" style={{ padding: '16px', height: '120px', overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <ShimmerCircularImage size={32} />
-            <ShimmerText line={1} gap={0} />
-            <ShimmerText line={1} gap={0} />
-          </div>
-        </div>
-
-        {/* IA vision analysis card shimmer */}
-        <div className="dark-card" style={{ marginBottom: '20px', padding: '16px' }}>
-          <div style={{ width: '200px', height: '18px', marginBottom: '16px', overflow: 'hidden' }}>
-            <ShimmerTitle line={1} gap={0} />
-          </div>
-          <div style={{ width: '120px', height: '24px', borderRadius: '20px', marginBottom: '16px', overflow: 'hidden' }}>
-            <ShimmerThumbnail height={24} width={120} rounded />
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <ShimmerText line={4} gap={10} />
-          </div>
-        </div>
-
-        {/* 3 Pillars shimmer */}
-        <div className="pillars-grid" style={{ marginBottom: '20px' }}>
-          <div className="dark-card" style={{ padding: '16px', height: '220px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <ShimmerTitle line={1} gap={0} />
-            <ShimmerText line={3} gap={10} />
-          </div>
-          <div className="dark-card" style={{ padding: '16px', height: '220px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <ShimmerTitle line={1} gap={0} />
-            <ShimmerText line={3} gap={10} />
-          </div>
-          <div className="dark-card" style={{ padding: '16px', height: '220px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <ShimmerTitle line={1} gap={0} />
-            <ShimmerText line={3} gap={10} />
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-);
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
@@ -215,34 +92,24 @@ const formatTime = (seconds) => {
   return `${m}:${s.toString().padStart(2, '0')}`;
 };
 
-const ROLE_OPTIONS = [
-  {
-    id: 'leader',
-    label: 'Leader',
-    description: 'Pilote l\'action et coordonne les autres organisations',
-    icon: Crown1,
-    color: 'var(--color-warning-text)'
-  },
-  {
-    id: 'contributeur',
-    label: 'Contributeur',
-    description: 'Participe activement à la réalisation des tâches',
-    icon: People,
-    color: 'var(--color-primary-text)'
-  },
-  {
-    id: 'observateur',
-    label: 'Observateur',
-    description: 'Suit l\'avancement sans participer directement',
-    icon: Eye,
-    color: 'var(--color-text-secondary)'
-  }
-];
-
-// Rôles disponibles pour les organisations invitées (sans Leader)
-const ORG_ROLE_OPTIONS = ROLE_OPTIONS.filter(role => role.id !== 'leader');
 
 export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
+  // Voir utils/gestesCarte : sur ecran tactile, un doigt fait defiler la fiche
+  // et deux doigts pilotent la carte. On passe par la reference et non par
+  // `onLoad`, qui ne se declenche pas de facon fiable avec react-map-gl v8.
+  const carteDetailRef = useRef(null);
+  useEffect(() => {
+    let annule = false;
+    const essayer = () => {
+      if (annule) return;
+      const carte = carteDetailRef.current?.getMap?.();
+      if (carte) { activerGestesCooperatifs(carte); return; }
+      setTimeout(essayer, 300);
+    };
+    essayer();
+    return () => { annule = true; };
+  }, []);
+
   // Utiliser useSWR pour rafraîchir les données automatiquement
   const { data: swrIncident, mutate, isLoading: isSwrLoading, error: swrError } = useSWR(
     incident?.id ? `/incidents/${incident.id}` : null,
@@ -292,6 +159,12 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
 
   // Récupérer l'ID de l'utilisateur connecté
   const currentUserId = sessionStorage.getItem('user_id');
+
+  const {
+    audioRef, isPlaying, setIsPlaying, currentTime, duration,
+    togglePlay, onAudioTimeUpdate, onAudioLoaded, onAudioEnded,
+    seekAudio, seekAudioClavier,
+  } = useLecteurAudio(incident?.id);
 
   // Valeurs par défaut pour les champs manquants
   const safeIncident = currentIncident ? {
@@ -472,8 +345,6 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
   const availableOrgs = rawOrganisations ? rawOrganisations?.map(formatOrganisation) : [];
 
 
-  const audioRef = useRef(null);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [loadingTimeout, setLoadingTimeout] = useState(false);
   const timeoutRef = useRef(null);
 
@@ -561,70 +432,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
     }
   };
 
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
 
-  const togglePlay = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    if (isPlaying) {
-      audio.pause();
-    } else {
-      audio.play();
-    }
-  };
-
-  const onAudioTimeUpdate = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    setCurrentTime(audio.currentTime);
-  };
-
-  const onAudioLoaded = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    setDuration(audio.duration);
-  };
-
-  const onAudioEnded = () => {
-    setIsPlaying(false);
-    setCurrentTime(0);
-  };
-
-  const seekAudio = (e) => {
-    const audio = audioRef.current;
-    if (!audio || !duration) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const ratio = (e.clientX - rect.left) / rect.width;
-    audio.currentTime = Math.max(0, Math.min(duration, ratio * duration));
-  };
-
-  // La barre s'annoncait comme un curseur (role="slider") mais n'ecoutait que
-  // la souris : au clavier, elle prenait le focus puis ne repondait a rien.
-  // Les fleches deplacent de 5 s, Debut/Fin sautent aux extremites.
-  const seekAudioClavier = (e) => {
-    const audio = audioRef.current;
-    if (!audio || !duration) return;
-    const pas = { ArrowLeft: -5, ArrowRight: 5, ArrowDown: -5, ArrowUp: 5 };
-    let cible = null;
-    if (e.key in pas) cible = audio.currentTime + pas[e.key];
-    else if (e.key === 'Home') cible = 0;
-    else if (e.key === 'End') cible = duration;
-    if (cible === null) return;
-    e.preventDefault();
-    audio.currentTime = Math.max(0, Math.min(duration, cible));
-  };
-
-  // Reset l'audio quand le projet change
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-    setIsPlaying(false);
-    setCurrentTime(0);
-    setDuration(0);
-  }, [safeIncident?.id]);
 
   // Bloquer le scroll du body quand le modal est ouvert
   useEffect(() => {
@@ -948,112 +756,12 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
     );
   }
 
-  const getStatusBadge = () => {
-    switch (safeIncident.etat) {
-      case 'resolved':
-        return safeIncident.isOwner
-          ? {
-            label: 'Résolu (Moi)',
-            color: 'var(--color-success-text)',
-            bg: 'rgba(34, 197, 94, 0.12)',
-            border: 'rgba(34, 197, 94, 0.3)',
-            icon: <ShieldTick size={14} variant="Bold" color="var(--color-success)" style={{ marginRight: '6px' }} />
-          }
-          : {
-            label: 'Résolu (Autre)',
-            color: 'var(--color-text-secondary)',
-            bg: 'rgba(107, 114, 128, 0.12)',
-            border: 'rgba(107, 114, 128, 0.3)',
-            icon: <ShieldTick size={14} variant="Bold" color="var(--color-text-secondary)" style={{ marginRight: '6px' }} />
-          };
-      case 'taken_into_account':
-        return safeIncident.isOwner
-          ? {
-            label: 'Pris en compte (Moi)',
-            color: 'var(--color-primary-text)',
-            bg: 'rgba(58, 162, 221, 0.12)',
-            border: 'rgba(58, 162, 221, 0.3)',
-            icon: <ClipboardTick size={14} variant="Bold" color="var(--color-primary)" style={{ marginRight: '6px' }} />
-          }
-          : {
-            label: 'Pris en compte (Autre)',
-            color: 'var(--color-warning-text)',
-            bg: 'rgba(249, 115, 22, 0.12)',
-            border: 'rgba(249, 115, 22, 0.3)',
-            icon: <ClipboardTick size={14} variant="Bold" color="var(--color-warning)" style={{ marginRight: '6px' }} />
-          };
-      case 'declared':
-      default:
-        return {
-          label: 'Déclaré',
-          color: 'var(--color-danger-text)',
-          bg: 'rgba(239, 68, 68, 0.12)',
-          border: 'rgba(239, 68, 68, 0.3)',
-          icon: <Danger size={14} variant="Bold" color="var(--color-danger)" style={{ marginRight: '6px' }} />
-        };
-    }
-  };
+
+  const currentStatus = getStatusBadge(safeIncident);
+  const modeBadge = getModeBadge(safeIncident);
 
 
-  const getModeBadge = () => {
-    if (!safeIncident?.take_in_charge_mode) return null;
-    const isInternal = safeIncident.take_in_charge_mode === 'internal' || safeIncident.take_in_charge_mode === 'interne';
-    return isInternal
-      ? {
-        label: 'Interne',
-        color: 'var(--color-danger-text)',
-        bg: 'rgba(239, 68, 68, 0.12)',
-        border: 'rgba(239, 68, 68, 0.3)',
-        icon: <Briefcase size={14} variant="Bold" color="var(--color-danger)" style={{ marginRight: '6px' }} />
-      }
-      : {
-        label: 'Collaboratif',
-        color: 'var(--color-primary-text)',
-        bg: 'rgba(58, 162, 221, 0.12)',
-        border: 'rgba(58, 162, 221, 0.3)',
-        icon: <People size={14} variant="Bold" color="var(--color-primary)" style={{ marginRight: '6px' }} />
-      };
-  };
-
-  const currentStatus = getStatusBadge();
-  const modeBadge = getModeBadge();
-
-  const getUserRoleBadge = () => {
-    const roleVal = safeIncident?.role || safeIncident?.userRole;
-    if (!roleVal) return null;
-
-    const normalizedRole = roleVal.toLowerCase();
-    if (normalizedRole === 'observer' || normalizedRole === 'observateur') {
-      return {
-        label: 'Observateur',
-        color: 'var(--color-text-secondary)',
-        bg: 'rgba(108, 114, 120, 0.12)',
-        border: 'rgba(108, 114, 120, 0.3)',
-        icon: <Eye size={14} variant="Bold" color="var(--color-text-secondary)" style={{ marginRight: '6px' }} />
-      };
-    }
-    if (normalizedRole === 'contributor' || normalizedRole === 'contributeur') {
-      return {
-        label: 'Contributeur',
-        color: 'var(--color-primary-text)',
-        bg: 'rgba(58, 162, 221, 0.12)',
-        border: 'rgba(58, 162, 221, 0.3)',
-        icon: <People size={14} variant="Bold" color="var(--color-primary)" style={{ marginRight: '6px' }} />
-      };
-    }
-    if (normalizedRole === 'leader') {
-      return {
-        label: 'Leader',
-        color: 'var(--color-warning-text)',
-        bg: 'rgba(245, 158, 11, 0.12)',
-        border: 'rgba(245, 158, 11, 0.3)',
-        icon: <Crown1 size={14} variant="Bold" color="var(--color-warning)" style={{ marginRight: '6px' }} />
-      };
-    }
-    return null;
-  };
-
-  const userRoleBadge = getUserRoleBadge();
+  const userRoleBadge = getUserRoleBadge(safeIncident);
   const userRoleVal = safeIncident?.role || safeIncident?.userRole;
   const hasParticipantRole = userRoleVal && (
     userRoleVal.toLowerCase() === 'observer' ||
@@ -1113,55 +821,6 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
     )
   );
 
-  const getCollabBadgeStyle = (status) => {
-    const norm = status?.toLowerCase();
-    const isAccepted = norm === 'accepted' || norm === 'in-progress';
-    const isPending = norm === 'pending';
-    const isRejected = norm === 'rejected' || norm === 'refused';
-
-    if (isAccepted) {
-      return {
-        color: 'var(--color-success-text)',
-        bg: 'rgba(34, 197, 94, 0.12)',
-        border: 'rgba(34, 197, 94, 0.3)'
-      };
-    } else if (isPending) {
-      return {
-        color: 'var(--color-warning-text)',
-        bg: 'rgba(245, 158, 11, 0.12)',
-        border: 'rgba(245, 158, 11, 0.3)'
-      };
-    } else if (isRejected) {
-      return {
-        color: 'var(--color-danger-text)',
-        bg: 'rgba(239, 68, 68, 0.12)',
-        border: 'rgba(239, 68, 68, 0.3)'
-      };
-    }
-    return {
-      color: 'var(--color-text-secondary)',
-      bg: 'rgba(108, 114, 120, 0.12)',
-      border: 'rgba(108, 114, 120, 0.3)'
-    };
-  };
-
-  const getRoleLabel = (r) => {
-    if (!r) return '';
-    const norm = r.toLowerCase();
-    if (norm === 'leader') return 'Leader';
-    if (norm === 'contributor' || norm === 'contributeur') return 'Contributeur';
-    if (norm === 'observer' || norm === 'observateur') return 'Observateur';
-    return r;
-  };
-
-  const getStatusLabel = (s) => {
-    if (!s) return '';
-    const norm = s.toLowerCase();
-    if (norm === 'accepted' || norm === 'in-progress') return 'Acceptée';
-    if (norm === 'pending') return 'En attente';
-    if (norm === 'rejected' || norm === 'refused') return 'Refusée';
-    return s;
-  };
 
   const contextValue = {
     joinOpen,
@@ -1280,37 +939,11 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
 
               {/* Badge de gravité */}
               {safeIncident.severity && (
-                <span className="detail-severity-badge-custom" style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  padding: '4px 12px',
-                  borderRadius: '20px',
-                  fontSize: 'var(--font-size-caption)',
-                  fontWeight: '600',
-                  backgroundColor: (() => {
-                    if (safeIncident.severity === 'high') return 'rgba(239, 68, 68, 0.12)';
-                    if (safeIncident.severity === 'medium') return 'rgba(245, 158, 11, 0.12)';
-                    return 'rgba(34, 197, 94, 0.12)';
-                  })(),
-                  color: (() => {
-                    if (safeIncident.severity === 'high') return 'var(--color-danger)';
-                    if (safeIncident.severity === 'medium') return 'var(--color-warning)';
-                    return 'var(--color-success)';
-                  })(),
-                  border: `1px solid ${(() => {
-                    if (safeIncident.severity === 'high') return 'rgba(239, 68, 68, 0.3)';
-                    if (safeIncident.severity === 'medium') return 'rgba(245, 158, 11, 0.3)';
-                    return 'rgba(34, 197, 94, 0.3)';
-                  })()}`,
-                  whiteSpace: 'nowrap',
-                  marginLeft: '8px'
-                }}>
-                  {(() => {
-                    if (safeIncident.severity === 'high') return 'GRAVITÉ ÉLEVÉE';
-                    if (safeIncident.severity === 'medium') return 'GRAVITÉ MOYENNE';
-                    return 'GRAVITÉ FAIBLE';
-                  })()}
-                </span>
+                <BadgeGravite
+                  incident={safeIncident}
+                  variante="plein"
+                  className="detail-severity-badge-custom"
+                />
               )}
 
               {/* Badge de demande de collaboration envoyée */}
@@ -1353,9 +986,9 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                   alignItems: 'center',
                   gap: '8px',
                   padding: '8px 16px',
-                  backgroundColor: hasPendingRequest ? 'rgba(245, 158, 11, 0.12)' : 'var(--color-primary)',
+                  backgroundColor: hasPendingRequest ? 'rgba(var(--rgb-warning), 0.12)' : 'var(--color-primary)',
                   color: hasPendingRequest ? 'var(--color-warning)' : 'var(--color-surface)',
-                  border: hasPendingRequest ? '1px solid rgba(245, 158, 11, 0.3)' : 'none',
+                  border: hasPendingRequest ? '1px solid rgba(var(--rgb-warning), 0.3)' : 'none',
                   borderRadius: '8px',
                   fontSize: 'var(--font-size-body)',
                   fontWeight: '600',
@@ -1419,14 +1052,14 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
               gridColumn: '1 / -1',
               padding: '16px 20px',
               borderRadius: '12px',
-              background: 'rgba(245, 158, 11, 0.08)',
-              border: '1px solid rgba(245, 158, 11, 0.25)',
+              background: 'rgba(var(--rgb-warning), 0.08)',
+              border: '1px solid rgba(var(--rgb-warning), 0.25)',
               color: 'var(--color-text-primary)',
               display: 'flex',
               alignItems: 'center',
               gap: '12px',
               marginBottom: '20px',
-              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.02)'
+              boxShadow: '0 4px 20px rgba(var(--rgb-ombre), 0.02)'
             }}>
               <People size={20} variant="Bold" color="var(--color-warning)" />
               <div style={{ fontSize: 'var(--font-size-body)', fontWeight: '500' }}>
@@ -1446,14 +1079,14 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                 gridColumn: '1 / -1',
                 padding: '16px 20px',
                 borderRadius: '12px',
-                background: takingOrg.isMe ? 'rgba(34, 197, 94, 0.08)' : 'rgba(58, 162, 221, 0.08)',
-                border: takingOrg.isMe ? '1px solid rgba(34, 197, 94, 0.25)' : '1px solid rgba(58, 162, 221, 0.25)',
+                background: takingOrg.isMe ? 'rgba(var(--rgb-success), 0.08)' : 'rgba(var(--rgb-primary), 0.08)',
+                border: takingOrg.isMe ? '1px solid rgba(var(--rgb-success), 0.25)' : '1px solid rgba(var(--rgb-primary), 0.25)',
                 color: 'var(--color-text-primary)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '12px',
                 marginBottom: '20px',
-                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.02)'
+                boxShadow: '0 4px 20px rgba(var(--rgb-ombre), 0.02)'
               }}>
                 <Briefcase size={20} variant="Bold" color={takingOrg.isMe ? 'var(--color-success)' : 'var(--color-primary)'} />
                 <div style={{ fontSize: 'var(--font-size-body)', fontWeight: '500' }}>
@@ -1484,7 +1117,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                   position: 'relative',
                   overflow: 'hidden', borderRadius: '8px',
                   minHeight: '180px',
-                  backgroundColor: '#d2d6deff'
+                  backgroundColor: 'var(--color-border)'
                 }}>
                 {safeIncident.image ? (
                   <BlurryImage
@@ -1576,12 +1209,8 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                   </div>
                   {/* Mini-carte détaillée */}
                   <div className="detail-geo-map" style={{ marginTop: '12px', height: '320px', borderRadius: '8px', overflow: 'hidden', position: 'relative' }}>
-                    {/* Meme correctif que sur le tableau de bord :
-                        `cooperativeGestures` est ignore par react-map-gl v8, donc
-                        la carte avalait la molette et bloquait le defilement de
-                        la fiche. Le zoom passe par les boutons. */}
                     <Map
-                      scrollZoom={false}
+                      ref={carteDetailRef}
                       initialViewState={{
                         longitude: safeIncident.coordinates.lng,
                         latitude: safeIncident.coordinates.lat,
@@ -1608,11 +1237,11 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                       display: 'flex',
                       gap: '4px',
                       zIndex: 10,
-                      backgroundColor: 'rgba(26, 32, 44, 0.85)',
+                      backgroundColor: 'rgba(var(--rgb-text-primary), 0.85)',
                       backdropFilter: 'blur(8px)',
                       padding: '4px',
                       borderRadius: '6px',
-                      border: '1px solid rgba(255, 255, 255, 0.1)'
+                      border: '1px solid rgba(var(--rgb-surface), 0.1)'
                     }}>
                       <button
                         type="button"
@@ -1625,7 +1254,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                           border: 'none',
                           cursor: 'pointer',
                           backgroundColor: detailMapStyle === 'satellite' ? 'var(--color-primary)' : 'transparent',
-                          color: detailMapStyle === 'satellite' ? '#ffffff' : 'var(--color-text-muted)',
+                          color: detailMapStyle === 'satellite' ? 'var(--color-surface)' : 'var(--color-text-muted)',
                           transition: 'all 0.2s ease'
                         }}
                       >
@@ -1642,7 +1271,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                           border: 'none',
                           cursor: 'pointer',
                           backgroundColor: detailMapStyle === 'streets' ? 'var(--color-primary)' : 'transparent',
-                          color: detailMapStyle === 'streets' ? '#ffffff' : 'var(--color-text-muted)',
+                          color: detailMapStyle === 'streets' ? 'var(--color-surface)' : 'var(--color-text-muted)',
                           transition: 'all 0.2s ease'
                         }}
                       >
@@ -1690,7 +1319,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                           width: '24px',
                           height: '24px',
                           borderRadius: '4px',
-                          backgroundColor: 'rgba(58, 162, 221, 0.1)',
+                          backgroundColor: 'rgba(var(--rgb-primary), 0.1)',
                           color: 'var(--color-primary-text)',
                           fontWeight: 'bold',
                           fontSize: 'var(--font-size-caption)'
@@ -1711,7 +1340,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                       </span>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                         {safeIncident.acting_organisations.map((org, index) => (
-                          <div key={org.id || index} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', backgroundColor: 'rgba(255, 255, 255, 0.02)', borderRadius: '6px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                          <div key={org.id || index} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', backgroundColor: 'rgba(var(--rgb-surface), 0.02)', borderRadius: '6px', border: '1px solid rgba(var(--rgb-surface), 0.05)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
 
 
@@ -1739,7 +1368,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                 VIDÉO DE L'INCIDENT
               </div>
               {safeIncident.video ? (
-                <div style={{ position: 'relative', width: '100%', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#000', aspectRatio: '16/9' }}>
+                <div style={{ position: 'relative', width: '100%', borderRadius: '8px', overflow: 'hidden', backgroundColor: 'rgba(var(--rgb-ombre), 1)', aspectRatio: '16/9' }}>
                   <video
                     controls
                     style={{ width: '100%', height: '100%', display: 'block', objectFit: 'contain' }}
@@ -1783,7 +1412,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                 minHeight: '400px',
                 border: '1px dashed var(--color-border)',
               }}>
-                <div className="spinner" style={{ width: '48px', height: '48px', border: '4px solid rgba(58, 162, 221, 0.25)', borderTopColor: 'var(--color-primary)' }} />
+                <div className="spinner" style={{ width: '48px', height: '48px', border: '4px solid rgba(var(--rgb-primary), 0.25)', borderTopColor: 'var(--color-primary)' }} />
                 <h3 style={{ margin: 0, fontSize: 'var(--font-size-h3)', color: 'var(--color-text-primary)' }}>Chargement de la prédiction...</h3>
                 <p style={{ fontSize: 'var(--font-size-body-small)', color: 'var(--color-text-secondary)', lineHeight: '1.6', maxWidth: '320px', margin: 0 }}>
                   Récupération de l'analyse IA en cours...
@@ -1812,7 +1441,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                       fontSize: 'var(--font-size-caption)',
                       color: 'var(--color-warning-text)',
                       padding: 'var(--spacing-2) var(--spacing-3)',
-                      backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                      backgroundColor: 'rgba(var(--rgb-warning), 0.1)',
                       borderRadius: 'var(--radius-sm)',
                       marginTop: 'var(--spacing-2)'
                     }}>
@@ -2299,7 +1928,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                 justifyContent: 'center',
                 backgroundColor: 'var(--color-surface)'
               }}>
-                <span className="chatbot-btn-spinner" style={{ width: '24px', height: '24px', border: '3px solid rgba(58, 162, 221, 0.25)', borderTopColor: 'var(--color-primary)' }} />
+                <span className="chatbot-btn-spinner" style={{ width: '24px', height: '24px', border: '3px solid rgba(var(--rgb-primary), 0.25)', borderTopColor: 'var(--color-primary)' }} />
               </div>
             ) : !pred ? (
               <div style={{

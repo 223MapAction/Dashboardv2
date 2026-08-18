@@ -1,0 +1,61 @@
+/* Bandeau de panne reseau.
+   Assez visible pour ne pas passer inapercu, assez discret pour ne pas
+   masquer les donnees encore affichees dessous. */
+.bandeau-erreur {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+  background-color: var(--color-danger-surface);
+  border: 1px solid rgba(var(--rgb-danger), 0.35);
+  border-radius: var(--radius-md);
+  color: var(--color-danger-text);
+}
+
+.bandeau-erreur-texte {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--font-size-body-small);
+  font-weight: var(--font-weight-medium);
+}
+
+.bandeau-erreur-action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  flex-shrink: 0;
+  /* 44px : la cible tactile minimale. Ce bouton s'utilise sur telephone, dans
+     les conditions ou le reseau tombe justement. */
+  min-height: 44px;
+  padding: var(--spacing-2) var(--spacing-3);
+  background-color: var(--color-surface);
+  border: 1px solid rgba(var(--rgb-danger), 0.35);
+  border-radius: var(--radius-md);
+  color: var(--color-danger-text);
+  font-size: var(--font-size-body-small);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.bandeau-erreur-action:hover {
+  background-color: var(--color-danger-surface);
+}
+
+/* Sous 480px, le texte et le bouton ne tiennent plus cote a cote sans que le
+   message soit reduit a deux mots par ligne. */
+@media (max-width: 479.98px) {
+  .bandeau-erreur {
+    flex-wrap: wrap;
+  }
+
+  .bandeau-erreur-texte {
+    flex-basis: calc(100% - var(--spacing-6) - var(--spacing-3));
+  }
+
+  .bandeau-erreur-action {
+    width: 100%;
+    justify-content: center;
+  }
+}

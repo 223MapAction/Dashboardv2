@@ -11,7 +11,7 @@
   background: white;
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(var(--rgb-ombre), 0.08);
 }
 
 .stats-section-title {
@@ -49,7 +49,7 @@
 
 .status-stat-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(var(--rgb-ombre), 0.1);
 }
 
 .status-stat-card.total {
@@ -80,7 +80,7 @@
   height: 56px;
   border-radius: 12px;
   background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(var(--rgb-ombre), 0.08);
 }
 
 .status-stat-card.total .stat-icon svg {
@@ -236,28 +236,30 @@
   transform: translateY(-2px);
 }
 
+/* Chaque niveau prend sa propre teinte de l'echelle de gravite. « moyenne » et
+   « faible » partageaient --color-warning-surface, donc la meme bordure. */
 .severity-stat-card.high {
-  border-color: var(--color-danger-surface);
+  border-color: var(--color-severity-high-surface);
 }
 
 .severity-stat-card.high:hover {
-  border-color: var(--color-danger);
+  border-color: var(--color-severity-high);
 }
 
 .severity-stat-card.medium {
-  border-color: var(--color-warning-surface);
+  border-color: var(--color-severity-medium-surface);
 }
 
 .severity-stat-card.medium:hover {
-  border-color: var(--color-warning);
+  border-color: var(--color-severity-medium);
 }
 
 .severity-stat-card.low {
-  border-color: var(--color-warning-surface);
+  border-color: var(--color-severity-low-surface);
 }
 
 .severity-stat-card.low:hover {
-  border-color: var(--color-warning);
+  border-color: var(--color-severity-low);
 }
 
 .severity-header {
@@ -267,10 +269,26 @@
 }
 
 .severity-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
   font-size: var(--font-size-body-large);
   font-weight: 700;
   color: var(--color-text-primary);
 }
+
+/* Meme forme et memes couleurs que les marqueurs de la carte : c'est ce qui
+   permet de passer de la statistique au terrain sans traduction. */
+.severity-puce {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+}
+
+.severity-puce.high { background: var(--color-severity-high); }
+.severity-puce.medium { background: var(--color-severity-medium); }
+.severity-puce.low { background: var(--color-severity-low); }
 
 .severity-percentage {
   font-size: var(--font-size-title);
@@ -278,15 +296,15 @@
 }
 
 .severity-stat-card.high .severity-percentage {
-  color: var(--color-danger-text);
+  color: var(--color-severity-high-text);
 }
 
 .severity-stat-card.medium .severity-percentage {
-  color: var(--color-warning-text);
+  color: var(--color-severity-medium-text);
 }
 
 .severity-stat-card.low .severity-percentage {
-  color: var(--color-warning-text);
+  color: var(--color-severity-low-text);
 }
 
 .severity-count {
@@ -309,15 +327,15 @@
 }
 
 .severity-bar-fill.high {
-  background: linear-gradient(90deg, var(--color-danger) 0%, var(--color-danger) 100%);
+  background: var(--color-severity-high);
 }
 
 .severity-bar-fill.medium {
-  background: linear-gradient(90deg, var(--color-warning) 0%, var(--color-warning) 100%);
+  background: var(--color-severity-medium);
 }
 
 .severity-bar-fill.low {
-  background: linear-gradient(90deg, var(--color-warning) 0%, var(--color-warning) 100%);
+  background: var(--color-severity-low);
 }
 
 /* Message "Aucune donnée" */

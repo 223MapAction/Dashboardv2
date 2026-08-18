@@ -25,6 +25,7 @@ import { authService } from '../auth/services/authService';
 import { getUserProfileService, updateUserProfileService } from './service/profile_service';
 import { BlurryImage } from '../../components/atoms/BlurryImage';
 import './profile.css';
+import { BandeauErreur } from '../../components/molecules/BandeauErreur';
 
 const TABS = [
   { id: 'personal', label: 'Informations personnelles', icon: User },
@@ -68,7 +69,7 @@ export const Profile = () => {
 
   const userId = sessionStorage.getItem('user_id');
 
-  const { data: userProfile, mutate } = useSWR(
+  const { data: userProfile, error: erreurProfil, mutate } = useSWR(
     userId ? `/MapApi/user/${userId}/` : null,
     () => getUserProfileService(userId),
     {
@@ -249,6 +250,12 @@ export const Profile = () => {
 
         <main className="profile-content">
           <div className="profile-page">
+
+            <BandeauErreur
+              erreur={erreurProfil}
+              onReessayer={mutate}
+              message="Impossible de charger votre profil. Les informations affichées peuvent ne plus être à jour."
+            />
             {/* Page header */}
             <div className="profile-page-header">
               <div>

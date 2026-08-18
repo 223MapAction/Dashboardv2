@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Sms } from 'iconsax-react';
 import { authService } from './services/authService';
 import logoMapAction from '../../assets/logo.webp';
-import loginBg from '../../assets/login_bg.webp';
+import loginBg from '../../assets/login_bg_1.webp';
 import './login.css';
 import './forgot-password.css';
 
@@ -102,7 +102,7 @@ export const ForgotPassword = () => {
             <div className="fp-success">
               <div className="fp-success-icon">
                 <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                  <circle cx="24" cy="24" r="24" fill="rgba(58,162,221,0.12)" />
+                  <circle cx="24" cy="24" r="24" fill="rgba(var(--rgb-primary),0.12)" />
                   <path
                     d="M14 24l7 7 13-13"
                     stroke="var(--color-primary)"
@@ -132,12 +132,11 @@ export const ForgotPassword = () => {
         </div>
       </div>
 
-      {/* Colonne droite - Image */}
-      <div
-        className="login-hero"
-        style={{ backgroundImage: `url(${loginBg})` }}
-        aria-hidden="true"
-      />
+      {/* Colonne droite - Image (meme structure que Login : une balise <img>
+          en object-fit, et non un background, sinon rien ne la recadre) */}
+      <div className="login-hero" aria-hidden="true">
+        <img src={loginBg} alt="" className="login-hero-image" />
+      </div>
     </div>
   );
 };

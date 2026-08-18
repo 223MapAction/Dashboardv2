@@ -76,7 +76,7 @@
 
 .agents-add-btn:hover {
   background-color: var(--color-primary-dark);
-  box-shadow: 0 4px 12px rgba(58, 162, 221, 0.3);
+  box-shadow: 0 4px 12px rgba(var(--rgb-primary), 0.3);
 }
 
 .agents-add-btn:active {
@@ -113,10 +113,10 @@
   flex-shrink: 0;
 }
 
-.agents-stat-icon-primary  { background-color: rgba(58, 162, 221, 0.1); }
-.agents-stat-icon-success  { background-color: rgba(34, 197, 94, 0.1); }
-.agents-stat-icon-warning  { background-color: rgba(245, 158, 11, 0.1); }
-.agents-stat-icon-danger   { background-color: rgba(239, 68, 68, 0.1); }
+.agents-stat-icon-primary  { background-color: rgba(var(--rgb-primary), 0.1); }
+.agents-stat-icon-success  { background-color: rgba(var(--rgb-success), 0.1); }
+.agents-stat-icon-warning  { background-color: rgba(var(--rgb-warning), 0.1); }
+.agents-stat-icon-danger   { background-color: rgba(var(--rgb-danger), 0.1); }
 
 .agents-stat-value {
   font-size: var(--font-size-h2);
@@ -134,49 +134,52 @@
 }
 
 /* ── Toolbar sticky ────────────────── */
+/* .app-header (position: fixed, 60px de haut, z-index: 100) recouvre le
+   haut de la page : coller ce bloc trop haut (top: -4px) le faisait passer
+   sous le header fixe, qui masquait alors la recherche au defilement. */
 .agents-toolbar {
   position: sticky;
-  top: -4px;
+  top: 60px;
   z-index: 50;
   display: flex;
-  gap: var(--spacing-3);
+  gap: var(--spacing-2);
   flex-wrap: wrap;
   align-items: center;
-  background-color: rgba(255, 255, 255, 0.85);
-  backdrop-filter: saturate(180%) blur(12px);
-  -webkit-backdrop-filter: saturate(180%) blur(12px);
-  padding: var(--spacing-3) var(--spacing-4);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
-  margin: 0 calc(var(--spacing-2) * -1);
-  padding-left: calc(var(--spacing-4) + var(--spacing-2));
-  padding-right: calc(var(--spacing-4) + var(--spacing-2));
+  /* Meme carte "flottante" que les autres listes (am-filtres) : pas de
+     cadre ni de flou verre, juste un fond opaque pour couvrir le contenu
+     qui defile dessous. */
+  background-color: var(--color-background);
+  padding-top: var(--spacing-2);
+  margin-top: calc(-1 * var(--spacing-2));
+  padding-bottom: var(--spacing-2);
+  margin-bottom: calc(-1 * var(--spacing-2));
 }
 
 .agents-search {
-  flex: 1;
-  min-width: 220px;
+  flex: 1 1 240px;
+  min-width: 0;
+  min-height: 40px;
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: var(--spacing-3) var(--spacing-4);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  padding: 0 var(--spacing-3);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .agents-search:focus-within {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(58, 162, 221, 0.1);
 }
 
 .agents-search input {
   flex: 1;
+  min-width: 0;
   border: none;
   outline: none;
   background: transparent;
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-body-small);
   color: var(--color-text-primary);
   font-family: var(--font-family);
 }
@@ -189,10 +192,11 @@
   position: relative;
   display: flex;
   align-items: center;
+  min-height: 40px;
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  transition: border-color 0.2s ease;
+  transition: border-color 0.15s ease;
   cursor: pointer;
 }
 
@@ -205,12 +209,13 @@
   border: none;
   outline: none;
   background: transparent;
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-body-small);
   color: var(--color-text-primary);
   font-family: var(--font-family);
   appearance: none;
   cursor: pointer;
-  padding: var(--spacing-3) var(--spacing-8) var(--spacing-3) var(--spacing-4);
+  min-height: 40px;
+  padding: 0 var(--spacing-8) 0 var(--spacing-3);
 }
 
 .agents-select-wrap>svg {
@@ -283,7 +288,7 @@
   z-index: 3;
   background-color: var(--color-background);
   border-right: 1px solid var(--color-border);
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.03);
+  box-shadow: 2px 0 5px rgba(var(--rgb-ombre), 0.03);
 }
 
 .agents-table td:first-child {
@@ -292,7 +297,7 @@
   z-index: 2;
   background-color: var(--color-surface);
   border-right: 1px solid var(--color-border);
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.03);
+  box-shadow: 2px 0 5px rgba(var(--rgb-ombre), 0.03);
 }
 
 .agents-table tr:last-child td {
@@ -304,7 +309,7 @@
 }
 
 .agents-table tbody tr:hover {
-  background-color: rgba(58, 162, 221, 0.03);
+  background-color: rgba(var(--rgb-primary), 0.03);
 }
 
 .agents-table tbody tr:hover td:first-child {
@@ -380,12 +385,12 @@
 }
 
 .agents-status-active {
-  background-color: rgba(34, 197, 94, 0.1);
+  background-color: rgba(var(--rgb-success), 0.1);
   color: var(--color-success-text);
 }
 
 .agents-status-inactive {
-  background-color: rgba(156, 163, 175, 0.15);
+  background-color: rgba(var(--rgb-text-muted), 0.15);
   color: var(--color-text-muted);
 }
 
@@ -425,7 +430,7 @@
 .agents-modal-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.45);
+  background-color: rgba(var(--rgb-ombre), 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -571,7 +576,7 @@
 .agents-field input:focus,
 .agents-field select:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(58, 162, 221, 0.1);
+  box-shadow: 0 0 0 3px rgba(var(--rgb-primary), 0.1);
 }
 
 .agents-field input::placeholder {
@@ -684,7 +689,7 @@
   width: 64px;
   height: 64px;
   border-radius: var(--radius-full);
-  background-color: rgba(239, 68, 68, 0.08);
+  background-color: rgba(var(--rgb-danger), 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -787,8 +792,14 @@
   .agents-toolbar {
     flex-direction: column;
     align-items: stretch;
-    margin: 0;
-    padding: var(--spacing-3) var(--spacing-4);
+  }
+
+  /* En colonne, la base de `flex: 1 1 240px` s'applique a la HAUTEUR et non
+     plus a la largeur : le champ de recherche se retrouvait haut de 240px.
+     Empiles, les controles gardent simplement leur hauteur naturelle. */
+  .agents-search,
+  .agents-select-wrap {
+    flex: 0 0 auto;
   }
 
   .agents-count-label {
@@ -809,7 +820,7 @@
 .agents-spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(var(--rgb-surface), 0.3);
   border-radius: 50%;
   border-top-color: var(--color-surface);
   animation: agentsSpin 0.8s linear infinite;
@@ -834,8 +845,8 @@
 }
 
 .agents-bootstrap-alert.alert-success {
-  background-color: rgba(34, 197, 94, 0.12);
-  border: 1px solid rgba(34, 197, 94, 0.3);
+  background-color: rgba(var(--rgb-success), 0.12);
+  border: 1px solid rgba(var(--rgb-success), 0.3);
   color: var(--color-success-text);
 }
 
@@ -844,8 +855,8 @@
 }
 
 .agents-bootstrap-alert.alert-danger {
-  background-color: rgba(239, 68, 68, 0.12);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background-color: rgba(var(--rgb-danger), 0.12);
+  border: 1px solid rgba(var(--rgb-danger), 0.3);
   color: var(--color-danger-text);
 }
 
