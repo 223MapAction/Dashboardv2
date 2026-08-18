@@ -34,6 +34,11 @@ jobs:
           # Optionnel : active seulement le fond de carte satellite. Sans lui,
           # la carte fonctionne avec les tuiles OpenStreetMap ouvertes.
           VITE_MAPBOX_TOKEN: ${{ secrets.VITE_MAPBOX_TOKEN }}
+          # GitHub Pages sert depuis https://<org>.github.io/<depot>/ : sans
+          # ce prefixe, la page demande ses assets a la racine du domaine et
+          # recoit des 404. Un deploiement auto-heberge a la racine d'un
+          # domaine n'a pas besoin de renseigner cette variable.
+          VITE_BASE_PATH: /${{ github.event.repository.name }}/
         run: npm run build
 
       - name: Deploy to GitHub Pages
