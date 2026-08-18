@@ -1,10 +1,10 @@
 # Map Action — Dashboard
 
-Tableau de bord web de Map Action, plateforme de gestion des incidents
+Tableau de bord web de Map Action, plateforme de gestion des signalements
 environnementaux et humanitaires au Mali.
 
-La plateforme relie trois acteurs : les **citoyens**, qui signalent un
-incident depuis l'application mobile ; les **agents de terrain**, qui
+La plateforme relie trois acteurs : les **citoyens**, qui déposent un
+signalement depuis l'application mobile ; les **agents de terrain**, qui
 interviennent ; et les **organisations**, qui pilotent la réponse. Ce dépôt
 contient l'outil des organisations — celui qui reçoit les signalements,
 assigne les missions et suit leur impact.
@@ -13,8 +13,8 @@ assigne les missions et suit leur impact.
 
 | Page | Rôle |
 |---|---|
-| Dashboard | Vue d'ensemble et carte des incidents |
-| Incidents | Liste et détail des signalements reçus |
+| Dashboard | Vue d'ensemble et carte des signalements |
+| Signalements | Liste et détail des signalements reçus |
 | Mes interventions | Missions assignées à l'utilisateur connecté |
 | Collaboration | Partenariats entre organisations, discussion, tâches |
 | Organisations | Gestion des organisations partenaires |
@@ -68,7 +68,7 @@ Toutes sont décrites dans [`.env.example`](./.env.example).
 
 Le dashboard consomme l'API [`map-action-api`](https://github.com/223MapAction/map-action-api)
 (routes `/MapApi/…`). Il n'implémente aucune logique métier côté serveur :
-authentification, incidents, collaborations et statistiques viennent tous de
+authentification, signalements, collaborations et statistiques viennent tous de
 l'API.
 
 Pour un déploiement autonome, faites tourner votre propre instance de l'API
@@ -82,7 +82,7 @@ utilisateur porte un champ `web_role` qui gouverne son accès :
 | `web_role` | Accès |
 |---|---|
 | `super_admin` | Toutes les pages |
-| `org_admin` | Son organisation : dashboard, collaboration, incidents, interventions, agents, impact, profil |
+| `org_admin` | Son organisation : dashboard, collaboration, signalements, interventions, agents, impact, profil |
 | `bureau_agent` | Idem `org_admin` |
 
 Un rôle absent ou inconnu est refusé et l'utilisateur est déconnecté — il n'y

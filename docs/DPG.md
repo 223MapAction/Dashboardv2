@@ -82,6 +82,6 @@ conduire par Map Action Mali.
 
 - Base légale et durées de conservation, côté API
   (voir [Données personnelles](./DONNEES-PERSONNELLES.md)).
-- Décision sur le floutage des coordonnées des incidents sensibles.
+- Décision sur le floutage des coordonnées des signalements sensibles.
 - Soumission DPG : par dépôt, ou pour la plateforme entière (dashboard,
   mobile, API, service d'analyse) via un inventaire central.
