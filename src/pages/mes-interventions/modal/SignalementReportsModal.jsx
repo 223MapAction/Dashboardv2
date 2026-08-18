@@ -32,15 +32,15 @@ export const SignalementReportsModal = () => {
     closeReportsModal
   } = useMesInterventionsModalContext();
 
-  const currentIncident = reportsModal.incident;
+  const currentSignalement = reportsModal.incident;
 
   const [reportsList, setReportsList] = useState([]);
   const [nextUrl, setNextUrl] = useState(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const { data: initialData, error, isLoading } = useSWR(
-    reportsModal.open && currentIncident?.id ? `field-reports-${currentIncident.id}` : null,
-    () => getFieldReportsService({ incident_id: currentIncident.id, page_size: 10 }),
+    reportsModal.open && currentSignalement?.id ? `field-reports-${currentSignalement.id}` : null,
+    () => getFieldReportsService({ incident_id: currentSignalement.id, page_size: 10 }),
     { revalidateOnFocus: false }
   );
 
@@ -77,16 +77,16 @@ export const SignalementReportsModal = () => {
     }
   };
 
-  if (!reportsModal.open || !currentIncident) return null;
+  if (!reportsModal.open || !currentSignalement) return null;
 
   const handleOverlayClick = () => {
     closeReportsModal();
   };
 
   const displayedReports = (reportsList || []).filter(report => {
-    const reportIncidentId = report.incident ?? report.incident_id;
-    if (reportIncidentId === undefined || reportIncidentId === null) return false;
-    return String(reportIncidentId).toLowerCase() === String(currentIncident.id).toLowerCase();
+    const reportSignalementId = report.incident ?? report.incident_id;
+    if (reportSignalementId === undefined || reportSignalementId === null) return false;
+    return String(reportSignalementId).toLowerCase() === String(currentSignalement.id).toLowerCase();
   });
 
   return (
@@ -94,7 +94,7 @@ export const SignalementReportsModal = () => {
       onClose={handleOverlayClick}
       isClosing={Boolean(reportsClosing)}
       title="Rapports de terrain"
-      subtitle={currentIncident.title || 'Sans titre'}
+      subtitle={currentSignalement.title || 'Sans titre'}
       ariaLabel="Liste des rapports de terrain"
       closeVariant="plain"
     >
@@ -155,12 +155,12 @@ export const SignalementReportsModal = () => {
                   Aucun rapport disponible
                 </span>
                 <span className="text-muted d-block mt-1" style={{ fontSize: 'var(--font-size-caption)' }}>
-                  Aucun rapport de terrain n'a encore été remonté pour cet incident.
+                  Aucun rapport de terrain n'a encore été remonté pour cet signalement.
                 </span>
               </div>
             </div>
           ) : (
-            <div className="incidents-reports-list" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div className="signalements-reports-list" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: 'var(--font-size-body-small)', fontWeight: '600', color: 'var(--color-text-secondary)' }}>
                   {displayedReports.length} rapport(s) de terrain trouvé(s)
@@ -171,7 +171,7 @@ export const SignalementReportsModal = () => {
                 {displayedReports.map((report) => (
                   <div
                     key={report.id}
-                    className="incidents-report-item"
+                    className="signalements-report-item"
                     style={{
                       display: 'flex',
                       flexDirection: 'column',
@@ -232,7 +232,7 @@ export const SignalementReportsModal = () => {
                       {report.distance_meters && (
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                           <span style={{ color: 'var(--color-text-muted)' }}>Précision de localisation :</span>
-                          <span style={{ fontWeight: '500' }}>± {report.distance_meters}m de l'incident</span>
+                          <span style={{ fontWeight: '500' }}>± {report.distance_meters}m de l'signalement</span>
                         </div>
                       )}
                     </div>

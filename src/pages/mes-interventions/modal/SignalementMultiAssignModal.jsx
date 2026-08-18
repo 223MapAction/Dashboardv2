@@ -17,7 +17,7 @@ export const SignalementMultiAssignModal = () => {
     assignClosing,
     closeAssignModal,
     assignments,
-    assignAgentsToIncident,
+    assignAgentsToSignalement,
     allMockAgents
   } = useMesInterventionsModalContext();
 
@@ -69,7 +69,7 @@ export const SignalementMultiAssignModal = () => {
     setAlert({ type: null, message: null });
 
     setTimeout(() => {
-      assignAgentsToIncident(assignModal.incident.id, selectedAgents);
+      assignAgentsToSignalement(assignModal.incident.id, selectedAgents);
       setAlert({
         type: 'success',
         message: 'L\'équipe d\'agents a été mise à jour avec succès.'
@@ -148,7 +148,7 @@ export const SignalementMultiAssignModal = () => {
                 <span className="fw-medium mt-2" style={{ fontSize: 'var(--font-size-body-small)', color: 'var(--color-text-secondary)' }}>Aucun agent trouvé</span>
               </div>
             ) : (
-              <div className="incidents-agents-list">
+              <div className="signalements-agents-list">
                 {Object.entries(
                   filteredAgents.reduce((acc, curr) => {
                     if (!acc[curr.orgName]) acc[curr.orgName] = [];
@@ -156,14 +156,14 @@ export const SignalementMultiAssignModal = () => {
                     return acc;
                   }, {})
                 ).map(([orgName, orgAgents]) => (
-                  <div key={orgName} className="incidents-org-group">
-                    <div className="incidents-org-name">{orgName}</div>
+                  <div key={orgName} className="signalements-org-group">
+                    <div className="signalements-org-name">{orgName}</div>
                     {orgAgents.map((agent) => {
                       const isChecked = selectedAgents.some((a) => a.id === agent.id);
                       return (
                         <div
                           key={agent.id}
-                          className={`incidents-agent-item ${isChecked ? 'is-selected' : ''}`}
+                          className={`signalements-agent-item ${isChecked ? 'is-selected' : ''}`}
                           onClick={() => handleToggleAgent(agent)}
                           style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                         >

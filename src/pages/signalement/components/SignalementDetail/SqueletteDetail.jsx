@@ -1,8 +1,8 @@
 import React from 'react';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText, ShimmerCircularImage } from 'react-shimmer-effects';
 
-// Composant shimmer pour le détail d'incident
-export const IncidentDetailSkeleton = () => (
+// Composant shimmer pour le détail d'signalement
+export const SignalementDetailSkeleton = () => (
   <section className="project-detail" style={{ backgroundColor: 'var(--color-background)', minHeight: '100vh', padding: '0' }}>
     {/* Header */}
     <div className="detail-header" style={{ backgroundColor: 'var(--color-surface)', borderBottom: '1px solid var(--color-border)' }}>
@@ -37,7 +37,7 @@ export const IncidentDetailSkeleton = () => (
       </div>
     </div>
 
-    <div className="incident-dark-dashboard">
+    <div className="signalement-dark-dashboard">
       {/* ── Colonne gauche ── */}
       <div className="dashboard-col-left">
         {/* Photo Card Shimmer */}

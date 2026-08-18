@@ -1,40 +1,40 @@
 /**
- * Utilitaires pour calculer les statistiques des incidents
+ * Utilitaires pour calculer les statistiques des signalements
  */
 import { gravite, repartitionGravite } from './gravite';
 
 /**
- * Détermine la gravité d'un incident.
+ * Détermine la gravité d'un signalement.
  *
  * Ce module en hébergeait sa propre copie, avec ses propres seuils. Il ne fait
  * plus que réexporter la définition commune : deux implémentations d'une même
  * règle finissent toujours par diverger, et c'est exactement ce qui s'était
  * produit ici (>= 4 pour « moyen », contre >= 3 sur la page Impact).
  *
- * @param {Object} incident
+ * @param {Object} signalement
  * @returns {'high'|'medium'|'low'}
  */
 export const getSeverity = gravite;
 
 /**
- * Normalise les incidents (gère les formats array ou objet avec results)
- * @param {Array|Object} incidents - Les incidents à normaliser
- * @returns {Array} Tableau d'incidents non supprimés
+ * Normalise les signalements (gère les formats array ou objet avec results)
+ * @param {Array|Object} signalements - Les signalements à normaliser
+ * @returns {Array} Tableau d'signalements non supprimés
  */
-export const normalizeIncidents = (incidents) => {
-  const data = Array.isArray(incidents)
-    ? incidents
-    : (incidents && Array.isArray(incidents.results) ? incidents.results : []);
+export const normalizeSignalements = (signalements) => {
+  const data = Array.isArray(signalements)
+    ? signalements
+    : (signalements && Array.isArray(signalements.results) ? signalements.results : []);
   return data.filter(inc => !inc.is_deleted);
 };
 
 /**
  * Calcule les statistiques par statut
- * @param {Array} incidents - Liste des incidents
+ * @param {Array} signalements - Liste des signalements
  * @returns {Object} { total, resolved, inProgress, unresolved }
  */
-export const calculateStatusStats = (incidents) => {
-  const normalized = normalizeIncidents(incidents);
+export const calculateStatusStats = (signalements) => {
+  const normalized = normalizeSignalements(signalements);
   
   return {
     total: normalized.length,
@@ -48,12 +48,12 @@ export const calculateStatusStats = (incidents) => {
 
 /**
  * Calcule les statistiques par localité
- * @param {Array} incidents - Liste des incidents
+ * @param {Array} signalements - Liste des signalements
  * @param {number} limit - Nombre de résultats à retourner (défaut: 5)
  * @returns {Array} [{ name, count }]
  */
-export const calculateLocationStats = (incidents, limit = 5) => {
-  const normalized = normalizeIncidents(incidents);
+export const calculateLocationStats = (signalements, limit = 5) => {
+  const normalized = normalizeSignalements(signalements);
   const locationMap = {};
   
   normalized.forEach(inc => {
@@ -68,13 +68,13 @@ export const calculateLocationStats = (incidents, limit = 5) => {
 };
 
 /**
- * Calcule le top des incidents par type
- * @param {Array} incidents - Liste des incidents
+ * Calcule le top des signalements par type
+ * @param {Array} signalements - Liste des signalements
  * @param {number} limit - Nombre de résultats à retourner (défaut: 5)
  * @returns {Array} [{ name, count, percentage }]
  */
-export const calculateTopIncidents = (incidents, limit = 5) => {
-  const normalized = normalizeIncidents(incidents);
+export const calculateTopSignalements = (signalements, limit = 5) => {
+  const normalized = normalizeSignalements(signalements);
   const categoryMap = {};
   
   normalized.forEach(inc => {
@@ -96,32 +96,32 @@ export const calculateTopIncidents = (incidents, limit = 5) => {
 
 /**
  * Calcule les statistiques par gravité
- * @param {Array} incidents - Liste des incidents
+ * @param {Array} signalements - Liste des signalements
  * @returns {Object} { high: {count, percentage}, medium: …, low: … }
  */
-export const calculateSeverityStats = (incidents) =>
-  repartitionGravite(normalizeIncidents(incidents));
+export const calculateSeverityStats = (signalements) =>
+  repartitionGravite(normalizeSignalements(signalements));
 
 /**
  * Calcule toutes les statistiques en une seule fois
- * @param {Array} incidents - Liste des incidents
+ * @param {Array} signalements - Liste des signalements
  * @returns {Object} Objet contenant toutes les statistiques
  */
-export const calculateAllStats = (incidents) => {
+export const calculateAllStats = (signalements) => {
   return {
-    status: calculateStatusStats(incidents),
-    locations: calculateLocationStats(incidents),
-    topIncidents: calculateTopIncidents(incidents),
-    severity: calculateSeverityStats(incidents)
+    status: calculateStatusStats(signalements),
+    locations: calculateLocationStats(signalements),
+    topSignalements: calculateTopSignalements(signalements),
+    severity: calculateSeverityStats(signalements)
   };
 };
 
 export default {
   getSeverity,
-  normalizeIncidents,
+  normalizeSignalements,
   calculateStatusStats,
   calculateLocationStats,
-  calculateTopIncidents,
+  calculateTopSignalements,
   calculateSeverityStats,
   calculateAllStats
 };

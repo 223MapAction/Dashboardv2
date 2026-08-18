@@ -3,15 +3,15 @@ import { API_URL_BASE } from '../../../config/api_url_base';
 import { logger } from '../../../utils/logger';
 
 /**
- * Récupère tous les messages de discussion d'un incident
- * @param {number} incidentId 
+ * Récupère tous les messages de discussion d'un signalement
+ * @param {number} signalementId 
  * @returns 
  */
-export const getDiscussionMessagesService = async (incidentId) => {
+export const getDiscussionMessagesService = async (signalementId) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.get(
-      `${API_URL_BASE}/MapApi/discussion/${incidentId}/`
+      `${API_URL_BASE}/MapApi/discussion/${signalementId}/`
     );
 
     return response.data || [];
@@ -23,15 +23,15 @@ export const getDiscussionMessagesService = async (incidentId) => {
 
 /**
  * Envoyer un message texte dans la discussion
- * @param {number} incidentId 
+ * @param {number} signalementId 
  * @param {object} data - { message, recipient (optionnel) }
  * @returns 
  */
-export const sendTextMessageService = async (incidentId, data) => {
+export const sendTextMessageService = async (signalementId, data) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.post(
-      `${API_URL_BASE}/MapApi/discussion/${incidentId}/`,
+      `${API_URL_BASE}/MapApi/discussion/${signalementId}/`,
       data
     );
 
@@ -44,15 +44,15 @@ export const sendTextMessageService = async (incidentId, data) => {
 
 /**
  * Envoyer un message audio dans la discussion
- * @param {number} incidentId 
+ * @param {number} signalementId 
  * @param {FormData} formData - { audio, recipient (optionnel) }
  * @returns 
  */
-export const sendAudioMessageService = async (incidentId, formData) => {
+export const sendAudioMessageService = async (signalementId, formData) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.post(
-      `${API_URL_BASE}/MapApi/discussion/${incidentId}/`,
+      `${API_URL_BASE}/MapApi/discussion/${signalementId}/`,
       formData,
       {
         headers: {
@@ -70,15 +70,15 @@ export const sendAudioMessageService = async (incidentId, formData) => {
 
 /**
  * Envoyer un fichier dans la discussion
- * @param {number} incidentId 
+ * @param {number} signalementId 
  * @param {FormData} formData - { attachment, recipient (optionnel) }
  * @returns 
  */
-export const sendAttachmentMessageService = async (incidentId, formData) => {
+export const sendAttachmentMessageService = async (signalementId, formData) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.post(
-      `${API_URL_BASE}/MapApi/discussion/${incidentId}/`,
+      `${API_URL_BASE}/MapApi/discussion/${signalementId}/`,
       formData,
       {
         headers: {
@@ -96,17 +96,17 @@ export const sendAttachmentMessageService = async (incidentId, formData) => {
 
 /**
  * Envoyer un message (texte, audio ou fichier) - Fonction générique
- * @param {number} incidentId 
+ * @param {number} signalementId 
  * @param {object|FormData} data - Message texte ou FormData pour audio/fichier
  * @returns 
  */
-export const sendMessageService = async (incidentId, data) => {
+export const sendMessageService = async (signalementId, data) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const isFormData = data instanceof FormData;
 
     const response = await axios.post(
-      `${API_URL_BASE}/MapApi/discussion/${incidentId}/`,
+      `${API_URL_BASE}/MapApi/discussion/${signalementId}/`,
       data,
       isFormData ? {
         headers: {

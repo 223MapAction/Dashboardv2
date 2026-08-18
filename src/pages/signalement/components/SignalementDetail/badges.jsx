@@ -6,10 +6,10 @@ import { Briefcase, ClipboardTick, Crown1, Danger, Eye, People, ShieldTick } fro
 // corps du composant, ou elles se melaient a la logique de la page sans jamais
 // en dependre.
 
-export const getStatusBadge = (safeIncident) => {
-  switch (safeIncident.etat) {
+export const getStatusBadge = (safeSignalement) => {
+  switch (safeSignalement.etat) {
     case 'resolved':
-      return safeIncident.isOwner
+      return safeSignalement.isOwner
         ? {
           label: 'Résolu (Moi)',
           color: 'var(--color-success-text)',
@@ -25,7 +25,7 @@ export const getStatusBadge = (safeIncident) => {
           icon: <ShieldTick size={14} variant="Bold" color="var(--color-text-secondary)" style={{ marginRight: '6px' }} />
         };
     case 'taken_into_account':
-      return safeIncident.isOwner
+      return safeSignalement.isOwner
         ? {
           label: 'Pris en compte (Moi)',
           color: 'var(--color-primary-text)',
@@ -53,9 +53,9 @@ export const getStatusBadge = (safeIncident) => {
 };
 
 
-export const getModeBadge = (safeIncident) => {
-  if (!safeIncident?.take_in_charge_mode) return null;
-  const isInternal = safeIncident.take_in_charge_mode === 'internal' || safeIncident.take_in_charge_mode === 'interne';
+export const getModeBadge = (safeSignalement) => {
+  if (!safeSignalement?.take_in_charge_mode) return null;
+  const isInternal = safeSignalement.take_in_charge_mode === 'internal' || safeSignalement.take_in_charge_mode === 'interne';
   return isInternal
     ? {
       label: 'Interne',
@@ -73,8 +73,8 @@ export const getModeBadge = (safeIncident) => {
     };
 };
 
-export const getUserRoleBadge = (safeIncident) => {
-  const roleVal = safeIncident?.role || safeIncident?.userRole;
+export const getUserRoleBadge = (safeSignalement) => {
+  const roleVal = safeSignalement?.role || safeSignalement?.userRole;
   if (!roleVal) return null;
 
   const normalizedRole = roleVal.toLowerCase();

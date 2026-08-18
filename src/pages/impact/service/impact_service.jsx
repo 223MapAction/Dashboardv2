@@ -22,7 +22,7 @@ export const getGlobalImpactService = async (status = 'all', period = 'all') => 
 };
 
 /**
- * Récupère la liste paginée et filtrée des incidents d'impact
+ * Récupère la liste paginée et filtrée des signalements d'impact
  * @param {string} status - all | resolved | taken_action
  * @param {string} period - all | 30d | 90d | year
  * @param {string} search - terme de recherche
@@ -30,7 +30,7 @@ export const getGlobalImpactService = async (status = 'all', period = 'all') => 
  * @param {number} pageSize - taille de la page
  * @returns {Promise<Object>}
  */
-export const getImpactIncidentsService = async (status = 'all', period = 'all', search = '', page = 1, pageSize = 10) => {
+export const getImpactSignalementsService = async (status = 'all', period = 'all', search = '', page = 1, pageSize = 10) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const params = {
@@ -44,7 +44,7 @@ export const getImpactIncidentsService = async (status = 'all', period = 'all', 
     const response = await axios.get(`${API_URL_BASE}/MapApi/impact/incidents/`, { params });
     return response.data;
   } catch (error) {
-    logger.error('[Impact] Erreur récupération incidents d\'impact:', error.response?.status, error.response?.data);
+    logger.error('[Impact] Erreur récupération signalements d\'impact:', error.response?.status, error.response?.data);
     throw error;
   }
 };

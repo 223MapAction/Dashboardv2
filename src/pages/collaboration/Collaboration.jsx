@@ -5,7 +5,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import useSWR from 'swr';
 import { useSidebarState } from '../../hooks/useSidebarState';
 import Pagination from '../../components/molecules/Pagination';
-import { getIncidentsService } from '../signalement/service/signalement_service';
+import { getSignalementsService } from '../signalement/service/signalement_service';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import { fr } from 'date-fns/locale/fr';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -94,7 +94,7 @@ export const Collaboration = () => {
   const [roleFilter, setRoleFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('accepted');
   const [localStatusFilter, setLocalStatusFilter] = useState('all');
-  const [incidentFilter, setIncidentFilter] = useState('');
+  const [incidentFilter, setSignalementFilter] = useState('');
   const [dateRange, setDateRange] = useState([null, null]);
   const [dateFrom, dateTo] = dateRange;
 
@@ -105,7 +105,7 @@ export const Collaboration = () => {
   // utilisees) toujours visibles, et on replie le reste.
   //
   // Le panneau s'ouvre tout seul si un filtre replie est deja actif (ex. lien
-  // partage avec ?incident=...) : sinon l'utilisateur verrait une liste
+  // partage avec ?signalement=...) : sinon l'utilisateur verrait une liste
   // filtree sans savoir pourquoi, ni comment revenir en arriere.
   const filtresAvancesActifs =
     statusFilter !== 'all' || Boolean(roleFilter) || Boolean(incidentFilter) ||
@@ -146,14 +146,14 @@ export const Collaboration = () => {
     return () => annuler(id);
   }, []);
 
-  const { data: rawIncidents } = useSWR(
+  const { data: rawSignalements } = useSWR(
     filtreChargeable ? 'incidents_dropdown_list' : null,
-    () => getIncidentsService(1, 100),
+    () => getSignalementsService(1, 100),
     { dedupingInterval: 300000, revalidateIfStale: false, revalidateOnFocus: false }
   );
   const incidentsList = useMemo(() => {
-    return rawIncidents?.results || (Array.isArray(rawIncidents) ? rawIncidents : []);
-  }, [rawIncidents]);
+    return rawSignalements?.results || (Array.isArray(rawSignalements) ? rawSignalements : []);
+  }, [rawSignalements]);
 
   // Modal tâches
   const [selectedCollab, setSelectedCollab] = useState(null);
@@ -279,7 +279,7 @@ export const Collaboration = () => {
         id: collab.id,
         userRole: collab.role,
         title: incidentTitle,
-        incidentId: collab.incident,
+        signalementId: collab.incident,
         userId: collab.user,
         status: parseInt(incidentProgress) === 100 ? 'completed' : (collab.status === 'accepted' ? 'in-progress' : collab.status),
         createdAt: collab.created_at,
@@ -775,7 +775,7 @@ export const Collaboration = () => {
                         <div className="am-filtres-select">
                           <select
                             value={incidentFilter}
-                            onChange={(e) => setIncidentFilter(e.target.value)}
+                            onChange={(e) => setSignalementFilter(e.target.value)}
                             aria-label="Filtrer par signalement"
                           >
                             <option value="">Tous les signalements</option>

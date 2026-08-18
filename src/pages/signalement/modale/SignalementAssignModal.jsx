@@ -5,7 +5,7 @@ import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { CloseCircle, TickCircle, SearchNormal1, UserTick, Profile } from 'iconsax-react';
 import { useSignalementModalContext } from './SignalementModalContext';
-import { assignIncidentToAgentService, getIncidentAssignmentsService } from '../service/signalement_service';
+import { assignSignalementToAgentService, getSignalementAssignmentsService } from '../service/signalement_service';
 import { getOrganisationMembersService } from '../../agents/service/members_service';
 import { authService } from '../../auth/services/authService';
 
@@ -51,7 +51,7 @@ export const SignalementAssignModal = () => {
     assignAlert,
     setAssignAlert,
     closeAssignModal,
-    mutateIncidents
+    mutateSignalements
   } = useSignalementModalContext();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -128,10 +128,10 @@ export const SignalementAssignModal = () => {
 
   const agents = fetchedAgents || EMPTY_ARRAY;
 
-  // 3. Charger les assignations existantes de cet incident
+  // 3. Charger les assignations existantes de cet signalement
   const { data: existingAssignments, mutate: mutateAssignments } = useSWR(
     assignModal.open && assignModal.incident ? `incident_assignments_${assignModal.incident.id}` : null,
-    () => getIncidentAssignmentsService(assignModal.incident.id),
+    () => getSignalementAssignmentsService(assignModal.incident.id),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
@@ -199,27 +199,27 @@ export const SignalementAssignModal = () => {
     setIsAssigning(true);
     setAssignAlert({ type: null, message: null });
 
-    const incident = assignModal.incident;
+    const signalement = assignModal.incident;
     const agentObj = agents.find((a) => String(a.id) === data.agent);
 
     const payload = {
       deadline: data.deadline ? new Date(data.deadline).toISOString() : null,
       status: 'pending',
-      incident: incident.id,
+      incident: signalement.id,
       agent: data.agent
     };
 
     try {
-      await assignIncidentToAgentService(incident.id, payload);
+      await assignSignalementToAgentService(signalement.id, payload);
 
       setAssignAlert({
         type: 'success',
-        message: `L'incident a été assigné avec succès à ${agentObj?.fullName || 'l\'agent'}.`
+        message: `L'signalement a été assigné avec succès à ${agentObj?.fullName || 'l\'agent'}.`
       });
 
       // Rafraîchir les données de la table
-      if (mutateIncidents) {
-        await mutateIncidents();
+      if (mutateSignalements) {
+        await mutateSignalements();
       }
       mutateAssignments();
 
@@ -252,7 +252,7 @@ export const SignalementAssignModal = () => {
 
         let hasFieldErrors = false;
         Object.keys(serverErrors).forEach((key) => {
-          if (['deadline', 'agent', 'status', 'incident'].includes(key)) {
+          if (['deadline', 'agent', 'status', 'signalement'].includes(key)) {
             const messages = serverErrors[key];
             const message = Array.isArray(messages) ? messages[0] : messages;
             setError(key, { type: 'server', message });
@@ -285,7 +285,7 @@ export const SignalementAssignModal = () => {
       }
 
       if (!msg) {
-        msg = "Une erreur est survenue lors de l'assignation de l'incident.";
+        msg = "Une erreur est survenue lors de l'assignation de l'signalement.";
       }
 
       setAssignAlert({
@@ -317,7 +317,7 @@ export const SignalementAssignModal = () => {
       closeVariant="plain"
     >
 
-        <form onSubmit={handleSubmit(onSubmit)} id="assign-incident-form" className="am-offcanvas-body" ref={bodyRef} noValidate>
+        <form onSubmit={handleSubmit(onSubmit)} id="assign-signalement-form" className="am-offcanvas-body" ref={bodyRef} noValidate>
           {assignAlert && assignAlert.message && (
             <div className={`am-alert am-alert--${assignAlert.type === 'success' ? 'success' : 'danger'}`} role="alert" style={{ marginBottom: 'var(--spacing-4)', display: 'flex', alignItems: 'center', gap: '8px' }}>
               {assignAlert.type === 'success' ? (
@@ -372,7 +372,7 @@ export const SignalementAssignModal = () => {
                 <span className="text-muted" style={{ fontSize: 'var(--font-size-micro)' }}>Assurez-vous que des agents sont enregistrés.</span>
               </div>
             ) : (
-              <div className="incidents-agents-list">
+              <div className="signalements-agents-list">
                 {Object.entries(
                   filteredAgents.reduce((acc, curr) => {
                     if (!acc[curr.orgName]) acc[curr.orgName] = [];
@@ -380,8 +380,8 @@ export const SignalementAssignModal = () => {
                     return acc;
                   }, {})
                 ).map(([orgName, orgAgents]) => (
-                  <div key={orgName} className="incidents-org-group">
-                    <div className="incidents-org-name">{orgName}</div>
+                  <div key={orgName} className="signalements-org-group">
+                    <div className="signalements-org-name">{orgName}</div>
                     {orgAgents.map((agent) => {
                       const isSelected = selectedAgent?.id === agent.id;
                       const isAlreadyAssigned = assignedAgentIds.includes(agent.id);
@@ -389,7 +389,7 @@ export const SignalementAssignModal = () => {
                         <button
                           key={agent.id}
                           type="button"
-                          className={`incidents-agent-item ${isSelected ? 'is-selected' : ''} ${isAlreadyAssigned ? 'is-disabled' : ''}`}
+                          className={`signalements-agent-item ${isSelected ? 'is-selected' : ''} ${isAlreadyAssigned ? 'is-disabled' : ''}`}
                           onClick={() => !isAlreadyAssigned && handleSelectAgent(agent)}
                           disabled={isAlreadyAssigned}
                         >
@@ -494,7 +494,7 @@ export const SignalementAssignModal = () => {
           </button>
           <button
             type="submit"
-            form="assign-incident-form"
+            form="assign-signalement-form"
             className="am-btn am-btn--primary"
             disabled={!selectedAgent || !deadline || isAssigning || assignAlert.type === 'success'}
           >

@@ -5,16 +5,16 @@ import { logger } from '../../../utils/logger';
 
 
 
-const INCIDENT_URL = 'incident';
-const INCIDENTS_URL = 'incidents';
+const INCIDENT_URL = 'signalement';
+const INCIDENTS_URL = 'signalements';
 
 /**
- * Récupère tous les incidents avec pagination
+ * Récupère tous les signalements avec pagination
  * @param {number} page - Numéro de page (default: 1)
  * @param {number} pageSize - Taille de la page (default: 10)
  * @returns {Promise<Object>} - { count, next, previous, results }
  */
-export const getIncidentsService = async (page = null, pageSize = null, search = '', etat = '') => {
+export const getSignalementsService = async (page = null, pageSize = null, search = '', etat = '') => {
   try {
     const axios = authService.createAuthenticatedAxios();
     
@@ -39,7 +39,7 @@ export const getIncidentsService = async (page = null, pageSize = null, search =
       `${API_URL_BASE}/MapApi/incident/${queryString}`
     );
 
-    logger.warn('[Signalement]url Incidents récupérés:', `${API_URL_BASE}/MapApi/incident/${queryString}`);
+    logger.warn('[Signalement]url Signalements récupérés:', `${API_URL_BASE}/MapApi/incident/${queryString}`);
     return response.data;
   } catch (error) {
     logger.error('[Signalement] Erreur récupération incidents:', error.response?.status, error.response?.data);
@@ -49,10 +49,10 @@ export const getIncidentsService = async (page = null, pageSize = null, search =
 
 
 /**
- * Récupère les incidents résolus
+ * Récupère les signalements résolus
  * @returns {Promise<Object>} - { count, next, previous, results }
  */
-export const getResolvedIncidentsService = async () => {
+export const getResolvedSignalementsService = async () => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.get(
@@ -61,18 +61,18 @@ export const getResolvedIncidentsService = async () => {
 
     return response.data;
   } catch (error) {
-    logger.error('[Signalement] Erreur récupération incidents résolus:', error.response?.status, error.response?.data);
+    logger.error('[Signalement] Erreur récupération signalements résolus:', error.response?.status, error.response?.data);
     throw error;
   }
 };
 
 
 /**
- * Récupère les détails d'un incident spécifique
- * @param {number} id - ID de l'incident
- * @returns {Promise<Object>} Détails de l'incident
+ * Récupère les détails d'un signalement spécifique
+ * @param {number} id - ID de l'signalement
+ * @returns {Promise<Object>} Détails de l'signalement
  */
-export const getIncidentService = async (id) => {
+export const getSignalementService = async (id) => {
   try {
     const axios = authService.createAuthenticatedAxios();
 
@@ -90,8 +90,8 @@ export const getIncidentService = async (id) => {
 
 
 /**
- * Crée un nouvel incident
- * @param {Object} incidentData - Données de l'incident
+ * Crée un nouvel signalement
+ * @param {Object} incidentData - Données de l'signalement
  * @param {string} incidentData.title - Titre
  * @param {string} incidentData.zone - Zone (requis)
  * @param {string} incidentData.description - Description
@@ -104,7 +104,7 @@ export const getIncidentService = async (id) => {
  * @param {File} incidentData.audio - Fichier audio
  * @returns {Promise<Object>} Signalement créé
  */
-export const createIncidentService = async (incidentData) => {
+export const createSignalementService = async (incidentData) => {
   try {
     const axios = authService.createAuthenticatedAxios();
 
@@ -134,12 +134,12 @@ export const createIncidentService = async (incidentData) => {
 };
 
 /**
- * Met à jour un incident
- * @param {number} id - ID de l'incident
+ * Met à jour un signalement
+ * @param {number} id - ID de l'signalement
  * @param {Object} updates - Données à mettre à jour
  * @returns {Promise<Object>} Signalement mis à jour
  */
-export const updateIncidentService = async (id, updates) => {
+export const updateSignalementService = async (id, updates) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.put(
@@ -155,11 +155,11 @@ export const updateIncidentService = async (id, updates) => {
 };
 
 /**
- * Supprime un incident (soft delete)
- * @param {number} id - ID de l'incident
+ * Supprime un signalement (soft delete)
+ * @param {number} id - ID de l'signalement
  * @returns {Promise<void>}
  */
-export const deleteIncidentService = async (id) => {
+export const deleteSignalementService = async (id) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     await axios.delete(`${API_URL_BASE}/MapApi/${INCIDENT_URL}/${id}`);
@@ -171,15 +171,15 @@ export const deleteIncidentService = async (id) => {
 };
 
 /**
- * Prendre en charge un incident (devenir leader)
- * @param {number} incidentId 
+ * Prendre en charge un signalement (devenir leader)
+ * @param {number} signalementId 
  * @returns 
  */
-export const takeInChargeIncidentService = async (incidentId, data = null) => {
+export const takeInChargeSignalementService = async (signalementId, data = null) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.post(
-      `${API_URL_BASE}/MapApi/${INCIDENT_URL}s/${incidentId}/take_in_charge/`,
+      `${API_URL_BASE}/MapApi/${INCIDENT_URL}s/${signalementId}/take_in_charge/`,
       data
     );
 
@@ -191,11 +191,11 @@ export const takeInChargeIncidentService = async (incidentId, data = null) => {
 };
 
 /**
- * Récupère les incidents par zone
+ * Récupère les signalements par zone
  * @param {string} zone - Nom de la zone
- * @returns {Promise<Array>} Liste des incidents
+ * @returns {Promise<Array>} Liste des signalements
  */
-export const getIncidentsByZoneService = async (zone) => {
+export const getSignalementsByZoneService = async (zone) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.get(
@@ -204,17 +204,17 @@ export const getIncidentsByZoneService = async (zone) => {
 
     return response.data?.results || response.data || [];
   } catch (error) {
-    logger.error('[Signalement] Erreur récupération incidents par zone:', error.response?.status, error.response?.data);
+    logger.error('[Signalement] Erreur récupération signalements par zone:', error.response?.status, error.response?.data);
     throw error;
   }
 };
 
 /**
- * Récupère les incidents par catégorie
+ * Récupère les signalements par catégorie
  * @param {number} categoryId - ID de la catégorie
- * @returns {Promise<Array>} Liste des incidents
+ * @returns {Promise<Array>} Liste des signalements
  */
-export const getIncidentsByCategoryService = async (categoryId) => {
+export const getSignalementsByCategoryService = async (categoryId) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.get(
@@ -223,17 +223,17 @@ export const getIncidentsByCategoryService = async (categoryId) => {
 
     return response.data?.results || response.data || [];
   } catch (error) {
-    logger.error('[Signalement] Erreur récupération incidents par catégorie:', error.response?.status, error.response?.data);
+    logger.error('[Signalement] Erreur récupération signalements par catégorie:', error.response?.status, error.response?.data);
     throw error;
   }
 };
 
 /**
- * Récupère les incidents de l'organisation
- * @param {string} source - Source des incidents (agents|citizens|all, default: all)
- * @returns {Promise<Array>} Liste des incidents
+ * Récupère les signalements de l'organisation
+ * @param {string} source - Source des signalements (agents|citizens|all, default: all)
+ * @returns {Promise<Array>} Liste des signalements
  */
-export const getOrgIncidentsService = async (source = 'agents') => {
+export const getOrgSignalementsService = async (source = 'agents') => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.get(
@@ -245,21 +245,21 @@ export const getOrgIncidentsService = async (source = 'agents') => {
 
     return response.data?.results || response.data || [];
   } catch (error) {
-    logger.error('[Signalement] Erreur récupération incidents organisation:', error.response?.status, error.response?.data);
+    logger.error('[Signalement] Erreur récupération signalements organisation:', error.response?.status, error.response?.data);
     throw error;
   }
 };
 
 /**
- * Bascule la visibilité publique d'un incident
- * @param {number} incidentId - ID de l'incident
+ * Bascule la visibilité publique d'un signalement
+ * @param {number} signalementId - ID de l'signalement
  * @returns {Promise<Object>} - { status, message, data: { is_public } }
  */
-export const togglePublicIncidentService = async (incidentId) => {
+export const togglePublicSignalementService = async (signalementId) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.post(
-      `${API_URL_BASE}/MapApi/${INCIDENTS_URL}/${incidentId}/toggle-public/`
+      `${API_URL_BASE}/MapApi/${INCIDENTS_URL}/${signalementId}/toggle-public/`
     );
 
     return response.data;
@@ -270,34 +270,34 @@ export const togglePublicIncidentService = async (incidentId) => {
 };
 
 /**
- * Récupère les assignations d'incident a un agents
+ * Récupère les assignations d'signalement a un agents
  * @returns {Promise<Array>} 
  */
-export const getAssignIncidentToAgentService = async (incidentId = null, data = null) => {
+export const getAssignSignalementToAgentService = async (signalementId = null, data = null) => {
   try {
     const axios = authService.createAuthenticatedAxios();
-    if (incidentId) {
+    if (signalementId) {
       const payload = {
-        incident: incidentId,
+        incident: signalementId,
         user_id: data?.taken_by,
         deadline: data?.deadline,
         ...data
       };
       const response = await axios.post(
-        `${API_URL_BASE}/MapApi/agent/assigned-incidents/`,
+        `${API_URL_BASE}/MapApi/agent/assigned-signalements/`,
         payload
       );
       return response.data;
     }
 
     const response = await axios.get(
-      `${API_URL_BASE}/MapApi/agent/assigned-incidents/`
+      `${API_URL_BASE}/MapApi/agent/assigned-signalements/`
     );
 
     return response.data?.results || response.data || [];
   } catch (error) {
     logger.error(
-      `[Signalement] Erreur ${incidentId ? 'assignation' : 'récupération'} incidents assignés:`,
+      `[Signalement] Erreur ${signalementId ? 'assignation' : 'récupération'} signalements assignés:`,
       error.response?.status,
       error.response?.data
     );
@@ -305,28 +305,28 @@ export const getAssignIncidentToAgentService = async (incidentId = null, data = 
   }
 };
 /**
- * Assigne un incident à un ou plusieurs agents.
+ * Assigne un signalement à un ou plusieurs agents.
  *
- * `incidentId` est obligatoire. La version précédente l'acceptait à null et
+ * `signalementId` est obligatoire. La version précédente l'acceptait à null et
  * retombait sur une ligne référençant `response`, variable déclarée dans le
  * bloc `if` : tout appel sans identifiant levait un ReferenceError au lieu
  * d'une erreur exploitable. Reste d'un copier-coller depuis
- * getAssignIncidentToAgentService, dont la branche GET avait été retirée
+ * getAssignSignalementToAgentService, dont la branche GET avait été retirée
  * sans son `return`.
  *
- * @param {number|string} incidentId - ID de l'incident (requis)
+ * @param {number|string} signalementId - ID de l'signalement (requis)
  * @param {Object} data - Données d'assignation
  * @returns {Promise<Object>} Assignation créée
  */
-export const assignIncidentToAgentService = async (incidentId, data = null) => {
-  if (!incidentId) {
-    throw new Error('[Signalement] assignIncidentToAgentService : incidentId est requis');
+export const assignSignalementToAgentService = async (signalementId, data = null) => {
+  if (!signalementId) {
+    throw new Error('[Signalement] assignSignalementToAgentService : signalementId est requis');
   }
 
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.post(
-      `${API_URL_BASE}/MapApi/incidents/${incidentId}/assignments/`,
+      `${API_URL_BASE}/MapApi/incidents/${signalementId}/assignments/`,
       data
     );
     return response.data;
@@ -341,20 +341,20 @@ export const assignIncidentToAgentService = async (incidentId, data = null) => {
 };
 
 /**
- * Récupère les assignations (agents assignés) d'un incident spécifique
- * @param {number} incidentId - ID de l'incident
+ * Récupère les assignations (agents assignés) d'un signalement spécifique
+ * @param {number} signalementId - ID de l'signalement
  * @returns {Promise<Array>} Liste des assignations
  */
-export const getIncidentAssignmentsService = async (incidentId) => {
+export const getSignalementAssignmentsService = async (signalementId) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.get(
-      `${API_URL_BASE}/MapApi/incidents/${incidentId}/assignments/`
+      `${API_URL_BASE}/MapApi/incidents/${signalementId}/assignments/`
     );
     return response.data?.results || response.data || [];
   } catch (error) {
     logger.error(
-      `[Signalement] Erreur récupération assignations pour l'incident ${incidentId}:`,
+      `[Signalement] Erreur récupération assignations pour l'signalement ${signalementId}:`,
       error.response?.status,
       error.response?.data
     );
@@ -363,12 +363,12 @@ export const getIncidentAssignmentsService = async (incidentId) => {
 };
 
 /**
- * Clôture un incident (leader uniquement)
- * @param {number} incidentId - ID de l'incident
+ * Clôture un signalement (leader uniquement)
+ * @param {number} signalementId - ID de l'signalement
  * @param {Object} data - { resolution_start_date, resolution_end_date }
  * @returns {Promise<Object>} Signalement clôturé
  */
-export const closeIncidentService = async (incidentId, data) => {
+export const closeSignalementService = async (signalementId, data) => {
   try {
     const axios = authService.createAuthenticatedAxios();
 
@@ -385,7 +385,7 @@ export const closeIncidentService = async (incidentId, data) => {
     }
 
     const response = await axios.post(
-      `${API_URL_BASE}/MapApi/${INCIDENT_URL}s/${incidentId}/close/`,
+      `${API_URL_BASE}/MapApi/${INCIDENT_URL}s/${signalementId}/close/`,
       payload,
       { headers }
     );
@@ -398,10 +398,10 @@ export const closeIncidentService = async (incidentId, data) => {
 };
 
 /**
- * Récupère les incidents supprimés (corbeille)
- * @returns {Promise<Array>} Liste des incidents supprimés
+ * Récupère les signalements supprimés (corbeille)
+ * @returns {Promise<Array>} Liste des signalements supprimés
  */
-export const getTrashIncidentsService = async () => {
+export const getTrashSignalementsService = async () => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.get(
@@ -416,15 +416,15 @@ export const getTrashIncidentsService = async () => {
 };
 
 /**
- * Restaure un incident supprimé
- * @param {number} incidentId - ID de l'incident
+ * Restaure un signalement supprimé
+ * @param {number} signalementId - ID de l'signalement
  * @returns {Promise<Object>} Signalement restauré
  */
-export const restoreIncidentService = async (incidentId) => {
+export const restoreSignalementService = async (signalementId) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.post(
-      `${API_URL_BASE}/MapApi/${INCIDENT_URL}/${incidentId}/restore/`
+      `${API_URL_BASE}/MapApi/${INCIDENT_URL}/${signalementId}/restore/`
     );
 
     return response.data;
@@ -435,11 +435,11 @@ export const restoreIncidentService = async (incidentId) => {
 };
 
 /**
- * Récupère les prédictions d'un incident spécifique
- * @param {number|string} id - ID de l'incident
- * @returns {Promise<Object>} Prédictions de l'incident
+ * Récupère les prédictions d'un signalement spécifique
+ * @param {number|string} id - ID de l'signalement
+ * @returns {Promise<Object>} Prédictions de l'signalement
  */
-export const getIncidentPredictionService = async (id) => {
+export const getSignalementPredictionService = async (id) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.get(
@@ -454,39 +454,39 @@ export const getIncidentPredictionService = async (id) => {
 };
 
 /**
- * Formate un incident pour l'affichage
- * @param {Object} incident - Données brutes de l'incident
+ * Formate un signalement pour l'affichage
+ * @param {Object} signalement - Données brutes de l'signalement
  * @returns {Object} Signalement formaté
  */
-export const formatIncident = (incident) => {
-  if (!incident) return null;
+export const formatSignalement = (signalement) => {
+  if (!signalement) return null;
 
   return {
-    id: incident.id,
-    title: incident.title,
-    zone: incident.zone,
-    description: incident.description,
-    etat: incident.etat,
-    etatLabel: getEtatLabel(incident.etat),
-    progress: incident.progress || 0,
-    isPublic: incident.is_public,
-    isDeleted: incident.is_deleted,
-    createdAt: incident.created_at,
-    photo: incident.photo,
-    video: incident.video,
-    audio: incident.audio,
-    category: incident.category,
-    takenBy: incident.taken_by,
-    userId: incident.user_id,
-    resolutionStartDate: incident.resolution_start_date,
-    resolutionEndDate: incident.resolution_end_date,
-    reportedByAgent: incident.reported_by_agent
+    id: signalement.id,
+    title: signalement.title,
+    zone: signalement.zone,
+    description: signalement.description,
+    etat: signalement.etat,
+    etatLabel: getEtatLabel(signalement.etat),
+    progress: signalement.progress || 0,
+    isPublic: signalement.is_public,
+    isDeleted: signalement.is_deleted,
+    createdAt: signalement.created_at,
+    photo: signalement.photo,
+    video: signalement.video,
+    audio: signalement.audio,
+    category: signalement.category,
+    takenBy: signalement.taken_by,
+    userId: signalement.user_id,
+    resolutionStartDate: signalement.resolution_start_date,
+    resolutionEndDate: signalement.resolution_end_date,
+    reportedByAgent: signalement.reported_by_agent
   };
 };
 
 /**
  * Obtient le libellé d'un état
- * @param {string} etat - État de l'incident
+ * @param {string} etat - État de l'signalement
  * @returns {string} Libellé traduit
  */
 const getEtatLabel = (etat) => {
@@ -500,22 +500,22 @@ const getEtatLabel = (etat) => {
 };
 
 export default {
-  getIncidentsService,
-  getResolvedIncidentsService,
-  getIncidentService,
-  getIncidentPredictionService,
-  createIncidentService,
-  updateIncidentService,
-  deleteIncidentService,
-  getIncidentsByZoneService,
-  getIncidentsByCategoryService,
-  getOrgIncidentsService,
-  togglePublicIncidentService,
-  assignIncidentToAgentService,
-  getIncidentAssignmentsService,
-  takeInChargeIncidentService,
-  closeIncidentService,
-  getTrashIncidentsService,
-  restoreIncidentService,
-  formatIncident
+  getSignalementsService,
+  getResolvedSignalementsService,
+  getSignalementService,
+  getSignalementPredictionService,
+  createSignalementService,
+  updateSignalementService,
+  deleteSignalementService,
+  getSignalementsByZoneService,
+  getSignalementsByCategoryService,
+  getOrgSignalementsService,
+  togglePublicSignalementService,
+  assignSignalementToAgentService,
+  getSignalementAssignmentsService,
+  takeInChargeSignalementService,
+  closeSignalementService,
+  getTrashSignalementsService,
+  restoreSignalementService,
+  formatSignalement
 };

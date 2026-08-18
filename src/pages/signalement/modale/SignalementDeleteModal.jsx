@@ -1,6 +1,6 @@
 import { Trash } from 'iconsax-react';
 import { useSignalementModalContext } from './SignalementModalContext';
-import { deleteIncidentService } from '../service/signalement_service';
+import { deleteSignalementService } from '../service/signalement_service';
 import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
 import { logger } from '../../../utils/logger';
 
@@ -13,7 +13,7 @@ export const SignalementDeleteModal = () => {
     deleteAlert,
     setDeleteAlert,
     closeDeleteModal,
-    mutateIncidents
+    mutateSignalements
   } = useSignalementModalContext();
 
   if (!deleteModal.open || !deleteModal.incident) return null;
@@ -24,16 +24,16 @@ export const SignalementDeleteModal = () => {
     setIsDeleting(true);
     setDeleteAlert({ type: null, message: null });
     try {
-      await deleteIncidentService(deleteModal.incident.id);
+      await deleteSignalementService(deleteModal.incident.id);
       setDeleteAlert({ type: 'success', message: 'Signalement supprimé avec succès !' });
-      mutateIncidents();
+      mutateSignalements();
       setTimeout(() => closeDeleteModal(), 2000);
     } catch (err) {
       logger.error('[SignalementDeleteModal] Erreur lors de la suppression:', err);
       const msg =
         err?.response?.data?.detail ||
         err?.response?.data?.message ||
-        'Une erreur est survenue lors de la suppression de l\'incident.';
+        'Une erreur est survenue lors de la suppression de l\'signalement.';
       setDeleteAlert({ type: 'danger', message: msg });
     } finally {
       setIsDeleting(false);
@@ -44,7 +44,7 @@ export const SignalementDeleteModal = () => {
     <OffcanvasModal
       onClose={closeDeleteModal}
       isClosing={Boolean(deleteClosing)}
-      title="Supprimer l'incident"
+      title="Supprimer l'signalement"
       role="alertdialog"
       tone="danger"
       size="sm"
@@ -80,7 +80,7 @@ export const SignalementDeleteModal = () => {
 
         <p className="am-delete-title">Confirmer la suppression</p>
         <p className="am-delete-text">
-          Vous êtes sur le point de supprimer l&apos;incident{' '}
+          Vous êtes sur le point de supprimer l&apos;signalement{' '}
           <strong>&quot;{deleteModal.incident.title || 'Sans titre'}&quot;</strong>.
           Cette action est <strong>irréversible</strong>.
         </p>

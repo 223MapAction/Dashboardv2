@@ -5,26 +5,26 @@ import { BlurryImage } from '../atoms/BlurryImage';
 import { OffcanvasModal } from '../molecules/OffcanvasModal';
 
 /**
- * Fiche detaillee d'un incident, ouverte depuis une demande ou une suggestion.
+ * Fiche detaillee d'un signalement, ouverte depuis une demande ou une suggestion.
  *
  * Existait en deux exemplaires identiques au nom pres :
- * CollabIncidentDetailModal et SuggestIncidentDetailModal.
+ * CollabSignalementDetailModal et SuggestSignalementDetailModal.
  */
-export const RequestSignalementDetailModal = ({ incident, onClose }) => {
+export const RequestSignalementDetailModal = ({ signalement, onClose }) => {
   const [videoLoaded, setVideoLoaded] = useState(false);
 
-  if (!incident) return null;
+  if (!signalement) return null;
 
-  const details = incident.incidentDetails || {};
-  const prediction = incident.predictionDetails || {};
-  const titre = details.title || "Details de l'incident";
+  const details = signalement.incidentDetails || {};
+  const prediction = signalement.predictionDetails || {};
+  const titre = details.title || "Details de l'signalement";
 
   return (
     <OffcanvasModal
       onClose={onClose}
       title={titre}
       subtitle={prediction.incident_type ? (
-        <span className="incident-detail-badge-pill context-danger">
+        <span className="signalement-detail-badge-pill context-danger">
           {prediction.incident_type}
         </span>
       ) : null}
@@ -41,7 +41,7 @@ export const RequestSignalementDetailModal = ({ incident, onClose }) => {
                       <h4 className='body-large mb-1'>Image de le signalement</h4>
                       <BlurryImage
                         src={details.photo}
-                        alt="Aperçu de l'incident"
+                        alt="Aperçu de l'signalement"
                         style={{
                           width: '100%',
                           maxHeight: '240px',

@@ -88,8 +88,8 @@ export const CollaborationDetail = () => {
     }
   );
 
-  // Récupérer l'incidentId depuis la collaboration
-  const incidentId = collaborationData?.incident;
+  // Récupérer l'signalementId depuis la collaboration
+  const signalementId = collaborationData?.incident;
 
   // Toute la discussion — chargement pagine, temps reel, redaction, pieces
   // jointes, enregistrement vocal, edition — vit dans son propre hook. Elle ne
@@ -107,13 +107,13 @@ export const CollaborationDetail = () => {
     startEditMessage, cancelEditMessage, handleEditMessage, savingEdit,
     handleDeleteMessage, deletingMessageId,
     formatMessageTime,
-  } = useDiscussion(incidentId);
-  const isIncidentResolved = collaborationData?.incident_details?.etat === 'resolved';
+  } = useDiscussion(signalementId);
+  const isSignalementResolved = collaborationData?.incident_details?.etat === 'resolved';
 
-  // Utiliser useSWR pour charger les tâches de l'incident (sans polling, géré par WebSockets)
+  // Utiliser useSWR pour charger les tâches de l'signalement (sans polling, géré par WebSockets)
   const { data: tasksData, isLoading: tasksLoading, mutate: mutateTasks } = useSWR(
-    incidentId ? `tasks-${incidentId}` : null,
-    () => getTasksService(incidentId),
+    signalementId ? `tasks-${signalementId}` : null,
+    () => getTasksService(signalementId),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: true
@@ -131,7 +131,7 @@ export const CollaborationDetail = () => {
   /**
    * Image ouverte en plein écran, ou null. { src, alt }
    *
-   * Une photo d'incident se lit souvent sur un téléphone, en plein soleil :
+   * Une photo d'signalement se lit souvent sur un téléphone, en plein soleil :
    * le détail qui compte (une fissure, une plaque, un niveau d'eau) est
    * invisible dans une vignette. La visionneuse partagée gère le pincement,
    * le glissé et la molette — on la réutilise plutôt que d'ouvrir une
@@ -169,7 +169,7 @@ export const CollaborationDetail = () => {
     id: collaborationData.id,
     userRole: collaborationData.role,
     title: collaborationData.incident_details?.title || collaborationData.incident_title || `Signalement #${collaborationData.incident}`,
-    incidentId: collaborationData.incident,
+    signalementId: collaborationData.incident,
     userId: collaborationData.user,
     status: collaborationData.status,
     createdAt: collaborationData.created_at,
@@ -233,7 +233,7 @@ export const CollaborationDetail = () => {
     editTaskTitle, setEditTaskTitle, editTaskDescription, setEditTaskDescription,
     editTaskStartDate, setEditTaskStartDate, editTaskDeadline, setEditTaskDeadline,
     editTaskSaving, startEditTask, cancelEditTask, saveEditTask,
-  } = useTaches({ incidentId, collaboration, tasksData, mutateTasks });
+  } = useTaches({ signalementId, collaboration, tasksData, mutateTasks });
 
   // Suggerer des organisations partenaires, et cloturer le signalement : deux
   // parcours complets, chacun avec ses etats de modale, ses champs et son envoi.
@@ -254,7 +254,7 @@ export const CollaborationDetail = () => {
   const {
     showCloseModal,
     closeModalShowing,
-    openCloseModal, closeCloseModal, handleCloseIncident,
+    openCloseModal, closeCloseModal, handleCloseSignalement,
     resolutionStartDate, setResolutionStartDate,
     resolutionEndDate, setResolutionEndDate,
     resolutionFile, setResolutionFile,
@@ -640,7 +640,7 @@ export const CollaborationDetail = () => {
                     {collaboration?.organisation} • {collaboration?.location}
                   </p>
                 </div>
-                {isIncidentResolved ? (
+                {isSignalementResolved ? (
                   <div className="collab-detail-closed-badge" style={{ backgroundColor: 'var(--color-success)', color: 'var(--color-surface)' }}>
                     <TickCircle size={16} variant="Bold" color="var(--color-surface)" />
                     Signalement Résolu
@@ -651,9 +651,9 @@ export const CollaborationDetail = () => {
                     onClick={openCloseModal}
                     className='btn btn-success'
                     disabled={hasUnresolvedOrFailedTasks}
-                    title={hasUnresolvedOrFailedTasks ? (currentTasks.length === 0 ? "Vous devez créer au moins une tâche avant de résoudre l'incident." : "Toutes les tâches doivent être complétées et aucune ne doit avoir échoué pour résoudre l'incident.") : "Résoudre l'incident"}
+                    title={hasUnresolvedOrFailedTasks ? (currentTasks.length === 0 ? "Vous devez créer au moins une tâche avant de résoudre l'signalement." : "Toutes les tâches doivent être complétées et aucune ne doit avoir échoué pour résoudre l'signalement.") : "Résoudre l'signalement"}
                   >
-                    Résoudre l'incident
+                    Résoudre l'signalement
                   </button>
                 )}
               </header>
@@ -675,7 +675,7 @@ export const CollaborationDetail = () => {
                             alt={collaboration?.title}
                             onClick={() => setImageAZoomer({
                               src: collaboration?.image,
-                              alt: collaboration?.title || "Photo de l'incident",
+                              alt: collaboration?.title || "Photo de l'signalement",
                             })}
                           />
                         </div>
@@ -859,7 +859,7 @@ export const CollaborationDetail = () => {
                           </div>
                         ) : (
                           <div className="collab-detail-meta-val" style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-body-small)', fontStyle: 'italic' }}>
-                            Aucune prédiction IA disponible pour cet incident.
+                            Aucune prédiction IA disponible pour cet signalement.
                           </div>
                         )}
                       </div>
@@ -929,7 +929,7 @@ export const CollaborationDetail = () => {
                       </div>
 
                       {/* Bouton suggérer/inviter des organisations */}
-                      {!isIncidentResolved && (
+                      {!isSignalementResolved && (
                         <div className="collab-detail-info-block" style={{ marginTop: 'var(--spacing-4)' }}>
                           <button
                             type="button"
@@ -1246,7 +1246,7 @@ export const CollaborationDetail = () => {
                           <div ref={messagesEndRef} />
                         </div>
 
-                        {!isIncidentResolved && (
+                        {!isSignalementResolved && (
                           <div className="collab-discussion-input">
                             <div className="collab-discussion-input-wrapper">
                               {attachedFile && (
@@ -1386,7 +1386,7 @@ export const CollaborationDetail = () => {
                     <div className="collab-detail-section">
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-4)' }}>
                         <h3 className="collab-detail-section-title" style={{ margin: 0 }}>Tâches</h3>
-                        {!isIncidentResolved && (
+                        {!isSignalementResolved && (
                           <button
                             type="button"
                             className="collab-task-create-btn"
@@ -1436,7 +1436,7 @@ export const CollaborationDetail = () => {
                                       }
                                     }}
                                     className="collab-task-checkbox"
-                                    disabled={task.failed || isIncidentResolved}
+                                    disabled={task.failed || isSignalementResolved}
                                   />
                                   <span className="collab-task-checkmark">
                                     <TickCircle size={18} variant="Bold" color="var(--color-surface)" />
@@ -1446,14 +1446,14 @@ export const CollaborationDetail = () => {
                                 <div
                                   className="collab-task-content"
                                   onClick={() => {
-                                    if (!task.completed && !task.failed && !isIncidentResolved) {
+                                    if (!task.completed && !task.failed && !isSignalementResolved) {
                                       setExpandedProofTask(prev => prev === task.id ? null : task.id);
                                       setExpandedFailureTask(null);
                                       setFailureReason('');
                                     }
                                   }}
                                   style={{
-                                    cursor: (!task.completed && !task.failed && !isIncidentResolved) ? 'pointer' : 'default',
+                                    cursor: (!task.completed && !task.failed && !isSignalementResolved) ? 'pointer' : 'default',
                                     flex: 1
                                   }}
                                 >
@@ -1518,7 +1518,7 @@ export const CollaborationDetail = () => {
                                   </div>
                                 </div>
 
-                                {!task.completed && !task.failed && !isIncidentResolved && (
+                                {!task.completed && !task.failed && !isSignalementResolved && (
                                   <button
                                     type="button"
                                     className="collab-task-fail-btn"
@@ -1543,7 +1543,7 @@ export const CollaborationDetail = () => {
                                   </button>
                                 )}
 
-                                {task.failed && !isIncidentResolved && (
+                                {task.failed && !isSignalementResolved && (
                                   <button
                                     type="button"
                                     className="collab-task-reset-btn"
@@ -1554,7 +1554,7 @@ export const CollaborationDetail = () => {
                                   </button>
                                 )}
 
-                                {!isIncidentResolved && (
+                                {!isSignalementResolved && (
                                   <button
                                     type="button"
                                     className="collab-task-delete-btn"
@@ -2045,7 +2045,7 @@ export const CollaborationDetail = () => {
                                         </div>
                                       )}
                                     </>
-                                  ) : !isIncidentResolved && (
+                                  ) : !isSignalementResolved && (
                                     <label className="collab-task-proof-btn" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: 'var(--font-size-caption)' }}>
                                       <DocumentUpload size={14} variant="Bold" color="var(--color-primary-text)" />
                                       Ajouter une preuve
@@ -2110,7 +2110,7 @@ export const CollaborationDetail = () => {
                 isOpen={taskToDelete !== null}
                 onClose={() => setTaskToDelete(null)}
                 taskId={taskToDelete?.id}
-                incidentId={collaborationData?.incident}
+                signalementId={collaborationData?.incident}
                 onConfirm={async () => {
                   const taskId = taskToDelete?.id;
                   if (taskId) {
@@ -2269,16 +2269,16 @@ export const CollaborationDetail = () => {
         </div>
       </div>
 
-      {/* Modal de résolution d'incident */}
+      {/* Modal de résolution d'signalement */}
       {showCloseModal && (
         // Deux notions distinctes se ressemblent ici :
         //   closeModalShowing → animation du panneau (sémantique inversée)
-        //   isClosing         → clôture de l'incident en cours (soumission)
+        //   isClosing         → clôture de l'signalement en cours (soumission)
         <OffcanvasModal
           onClose={closeCloseModal}
           isClosing={!closeModalShowing}
-          title="Résoudre l'incident"
-          ariaLabel="Résoudre l'incident"
+          title="Résoudre l'signalement"
+          ariaLabel="Résoudre l'signalement"
           closeVariant="plain"
           closeDisabled={isClosing}
           footer={
@@ -2294,7 +2294,7 @@ export const CollaborationDetail = () => {
               <button
                 type="button"
                 className="am-btn am-btn--primary"
-                onClick={handleCloseIncident}
+                onClick={handleCloseSignalement}
                 disabled={isClosing || !resolutionStartDate || !resolutionEndDate}
               >
                 {isClosing ? (
@@ -2304,7 +2304,7 @@ export const CollaborationDetail = () => {
                   </>
                 ) : (
                   <>
-                    Resoudre cet incident
+                    Resoudre cet signalement
                   </>
                 )}
               </button>
@@ -2324,7 +2324,7 @@ export const CollaborationDetail = () => {
               )}
 
               <p style={{ marginBottom: 'var(--spacing-4)', color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-body)' }}>
-                Veuillez renseigner les dates de début et de fin de résolution de l'incident.
+                Veuillez renseigner les dates de début et de fin de résolution de l'signalement.
               </p>
 
               <div className="am-field">
@@ -2373,7 +2373,7 @@ export const CollaborationDetail = () => {
 
               <div className='alert alert-info'>
                 <p style={{ margin: 0, color: 'var(--color-info-text)', fontSize: 'var(--font-size-body)', lineHeight: '1.5' }}>
-                  <strong>Attention :</strong> Cette action est irréversible. Une fois l'incident résolu, il ne pourra plus être modifié.
+                  <strong>Attention :</strong> Cette action est irréversible. Une fois l'signalement résolu, il ne pourra plus être modifié.
                 </p>
               </div>
             </div>
@@ -2382,7 +2382,7 @@ export const CollaborationDetail = () => {
       <AgentReportsModal
         isOpen={showReportsModal}
         onClose={() => setShowReportsModal(false)}
-        incidentId={collaboration?.incidentId}
+        signalementId={collaboration?.signalementId}
         incidentTitle={collaboration?.title}
       />
     </CollaborationDetailProvider>

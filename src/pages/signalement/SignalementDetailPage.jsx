@@ -27,7 +27,7 @@ export const SignalementDetailPage = () => {
   };
 
   return (
-    <div className="incident-page">
+    <div className="signalement-page">
       <Sidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
@@ -35,16 +35,16 @@ export const SignalementDetailPage = () => {
         onCollapsedChange={setSidebarCollapsed}
       />
 
-      <div className={`incident-page-main ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+      <div className={`signalement-page-main ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
         <Header
           onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
           sidebarCollapsed={sidebarCollapsed}
         />
 
-        <div className="incident-workspace">
+        <div className="signalement-workspace">
           {/* On rend le composant détail existant. Il gère déjà useSWR pour charger ses données. */}
           <SignalementDetail
-            incident={incidentFromState || { id: id }}
+            signalement={incidentFromState || { id: id }}
             onBack={handleBack}
             isLoading={false}
           />

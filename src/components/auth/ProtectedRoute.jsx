@@ -6,7 +6,7 @@ import { logger } from '../../utils/logger';
 /**
  * Composant qui protège les routes en vérifiant l'authentification et les autorisations.
  * Si l'utilisateur n'est pas connecté, redirige vers /login.
- * Si l'utilisateur tente d'accéder à une route non autorisée (ex: admin accédant à incidents),
+ * Si l'utilisateur tente d'accéder à une route non autorisée (ex: admin accédant à signalements),
  * le renvoie vers la dernière route autorisée visitée.
  */
 export const ProtectedRoute = ({ children }) => {

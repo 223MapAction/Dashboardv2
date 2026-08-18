@@ -11,9 +11,9 @@ import {
   ShimmerCircularImage,
   ShimmerButton
 } from 'react-shimmer-effects';
-import { takeInChargeIncidentService, getIncidentService, getIncidentPredictionService } from '../../service/signalement_service';
+import { takeInChargeSignalementService, getSignalementService, getSignalementPredictionService } from '../../service/signalement_service';
 import { requestCollaborationService, getCollaborationsService } from '../../service/collaboration_service';
-import { getIncidentChatHistoryService, sendIncidentChatMessageService } from '../../service/chat_service';
+import { getSignalementChatHistoryService, sendSignalementChatMessageService } from '../../service/chat_service';
 import { authService } from '../../../auth/services/authService';
 import { suggestCollaborationPartnerService } from '../../../collaboration-detail/service/collab_detail_service';
 import {
@@ -49,7 +49,7 @@ import {
   Send2
 } from 'iconsax-react';
 import './signalement-detail.css';
-import { IncidentDetailSkeleton } from './SqueletteDetail';
+import { SignalementDetailSkeleton } from './SqueletteDetail';
 import { ROLE_OPTIONS, ORG_ROLE_OPTIONS } from './roles';
 import { useLecteurAudio } from './useLecteurAudio';
 import {
@@ -77,7 +77,7 @@ const formatMessageTime = (dateStr) => {
   }
 };
 
-// Étapes du statut d'un incident (selon l'API)
+// Étapes du statut d'un signalement (selon l'API)
 const INCIDENT_STATUS_STEPS = [
   { id: 'declared', label: 'Déclaré', icon: Danger },
   { id: 'taken_into_account', label: 'Pris en compte', icon: ClipboardTick },
@@ -93,7 +93,7 @@ const formatTime = (seconds) => {
 };
 
 
-export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
+export const SignalementDetail = ({ signalement, onBack, isLoading = false }) => {
   // Voir utils/gestesCarte : sur ecran tactile, un doigt fait defiler la fiche
   // et deux doigts pilotent la carte. On passe par la reference et non par
   // `onLoad`, qui ne se declenche pas de facon fiable avec react-map-gl v8.
@@ -111,11 +111,11 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
   }, []);
 
   // Utiliser useSWR pour rafraîchir les données automatiquement
-  const { data: swrIncident, mutate, isLoading: isSwrLoading, error: swrError } = useSWR(
-    incident?.id ? `/incidents/${incident.id}` : null,
-    () => getIncidentService(incident.id),
+  const { data: swrSignalement, mutate, isLoading: isSwrLoading, error: swrError } = useSWR(
+    signalement?.id ? `/incidents/${signalement.id}` : null,
+    () => getSignalementService(signalement.id),
     {
-      fallbackData: incident,
+      fallbackData: signalement,
     }
   );
 
@@ -129,12 +129,12 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
     }
   );
 
-  const isCurrentlyLoading = isLoading || isSwrLoading || (incident?.id && !swrIncident?.title);
+  const isCurrentlyLoading = isLoading || isSwrLoading || (signalement?.id && !swrSignalement?.title);
 
-  // Récupérer la prédiction de l'incident
+  // Récupérer la prédiction de l'signalement
   const { data: prediction, isLoading: isLoadingPrediction, error: predictionError } = useSWR(
-    incident?.id ? `/Incidentprediction/${incident.id}` : null,
-    () => getIncidentPredictionService(incident.id),
+    signalement?.id ? `/Incidentprediction/${signalement.id}` : null,
+    () => getSignalementPredictionService(signalement.id),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
@@ -152,7 +152,7 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
   const pred = (Array.isArray(prediction) && prediction.length > 0) ? prediction[0] : (prediction || null);
 
   // Utiliser les données de SWR fusionnées avec les props initiales pour conserver les champs déjà mappés (ex: organisation_name)
-  const currentIncident = swrIncident ? { ...incident, ...swrIncident } : incident;
+  const currentSignalement = swrSignalement ? { ...signalement, ...swrSignalement } : signalement;
 
   // Récupérer l'ID de l'utilisateur connecté
   const currentUserId = sessionStorage.getItem('user_id');
@@ -161,46 +161,46 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
     audioRef, isPlaying, setIsPlaying, currentTime, duration,
     togglePlay, onAudioTimeUpdate, onAudioLoaded, onAudioEnded,
     seekAudio, seekAudioClavier,
-  } = useLecteurAudio(incident?.id);
+  } = useLecteurAudio(signalement?.id);
 
   // Valeurs par défaut pour les champs manquants
-  const safeIncident = currentIncident ? {
-    title: currentIncident.title || 'Signalement sans titre',
-    badges: currentIncident.badges || [{ label: 'EN COURS', variant: 'in-progress' }],
-    image: currentIncident?.image || currentIncident?.photo,
-    description: currentIncident.description || 'Aucune description disponible',
-    fullDescription: currentIncident.fullDescription || currentIncident.description || 'Aucune description disponible',
-    type: currentIncident.type || currentIncident.zone || 'Non spécifié',
-    location: currentIncident.location || currentIncident.zone || 'Localisation non spécifiée',
-    coordinates: currentIncident.coordinates || (() => {
-      const lat = parseFloat(currentIncident.lattitude);
-      const lng = parseFloat(currentIncident.longitude);
+  const safeSignalement = currentSignalement ? {
+    title: currentSignalement.title || 'Signalement sans titre',
+    badges: currentSignalement.badges || [{ label: 'EN COURS', variant: 'in-progress' }],
+    image: currentSignalement?.image || currentSignalement?.photo,
+    description: currentSignalement.description || 'Aucune description disponible',
+    fullDescription: currentSignalement.fullDescription || currentSignalement.description || 'Aucune description disponible',
+    type: currentSignalement.type || currentSignalement.zone || 'Non spécifié',
+    location: currentSignalement.location || currentSignalement.zone || 'Localisation non spécifiée',
+    coordinates: currentSignalement.coordinates || (() => {
+      const lat = parseFloat(currentSignalement.lattitude);
+      const lng = parseFloat(currentSignalement.longitude);
       // Vérifier que les coordonnées sont des nombres valides
       if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
         return { lat, lng };
       }
       return null;
     })(),
-    video: currentIncident.video || null,
-    startDate: currentIncident.startDate || currentIncident.created_at ? new Date(currentIncident.created_at).toLocaleDateString('fr-FR') : 'Non spécifié',
-    endDate: currentIncident.endDate || 'En cours',
-    participantsCount: currentIncident.participantsCount || 0,
-    etat: currentIncident.etat || 'declared',
-    aiAnalysis: currentIncident.aiAnalysis || {
+    video: currentSignalement.video || null,
+    startDate: currentSignalement.startDate || currentSignalement.created_at ? new Date(currentSignalement.created_at).toLocaleDateString('fr-FR') : 'Non spécifié',
+    endDate: currentSignalement.endDate || 'En cours',
+    participantsCount: currentSignalement.participantsCount || 0,
+    etat: currentSignalement.etat || 'declared',
+    aiAnalysis: currentSignalement.aiAnalysis || {
       text: "Analyse en cours...",
-      audio: currentIncident.audio || null
+      audio: currentSignalement.audio || null
     },
-    participants: currentIncident.participants || [],
-    extraParticipants: currentIncident.extraParticipants || 0,
-    // Déterminer si l'utilisateur connecté est propriétaire de l'incident
+    participants: currentSignalement.participants || [],
+    extraParticipants: currentSignalement.extraParticipants || 0,
+    // Déterminer si l'utilisateur connecté est propriétaire de l'signalement
     isOwner: currentUserId ? (
-      currentIncident.taken_by
-        ? (typeof currentIncident.taken_by === 'object'
-          ? parseInt(currentIncident.taken_by.id) === parseInt(currentUserId)
-          : parseInt(currentIncident.taken_by) === parseInt(currentUserId))
+      currentSignalement.taken_by
+        ? (typeof currentSignalement.taken_by === 'object'
+          ? parseInt(currentSignalement.taken_by.id) === parseInt(currentUserId)
+          : parseInt(currentSignalement.taken_by) === parseInt(currentUserId))
         : false
     ) : false,
-    ...currentIncident
+    ...currentSignalement
   } : null;
 
   const [joinOpen, setJoinOpen] = useState(false);
@@ -225,7 +225,7 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
   const chatMessagesEndRef = useRef(null);
 
   const [messages, setMessages] = useState([
-    { id: 1, sender: 'bot', text: 'Bonjour ! Je suis l\'assistant IA Vision. Comment puis-je vous aider avec cet incident ?' }
+    { id: 1, sender: 'bot', text: 'Bonjour ! Je suis l\'assistant IA Vision. Comment puis-je vous aider avec cet signalement ?' }
   ]);
 
   const [hasMore, setHasMore] = useState(false);
@@ -234,8 +234,8 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
 
   // SWR pour charger l'historique du chatbot
   const { data: chatHistory, mutate: mutateChatHistory } = useSWR(
-    chatOpen && safeIncident?.id ? `chat-history-${safeIncident.id}-initial` : null,
-    () => getIncidentChatHistoryService(safeIncident.id, 4),
+    chatOpen && safeSignalement?.id ? `chat-history-${safeSignalement.id}-initial` : null,
+    () => getSignalementChatHistoryService(safeSignalement.id, 4),
     { revalidateOnFocus: false }
   );
 
@@ -254,21 +254,21 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
         shouldScrollToBottomRef.current = true;
       } else {
         setMessages([
-          { id: 1, sender: 'bot', text: 'Bonjour ! Je suis l\'assistant IA Vision. Comment puis-je vous aider avec cet incident ?' }
+          { id: 1, sender: 'bot', text: 'Bonjour ! Je suis l\'assistant IA Vision. Comment puis-je vous aider avec cet signalement ?' }
         ]);
       }
     }
   }, [chatHistory]);
 
   const loadMoreMessages = async () => {
-    if (!hasMore || isLoadingMore || !safeIncident?.id || messages.length === 0) return;
+    if (!hasMore || isLoadingMore || !safeSignalement?.id || messages.length === 0) return;
 
     setIsLoadingMore(true);
     try {
       const oldestMessageId = messages[0]?.id;
       if (!oldestMessageId) return;
 
-      const data = await getIncidentChatHistoryService(safeIncident.id, 12, oldestMessageId);
+      const data = await getSignalementChatHistoryService(safeSignalement.id, 12, oldestMessageId);
 
       if (data?.history && data.history.length > 0) {
         const formattedOlder = data.history.map((msg, index) => ({
@@ -346,7 +346,7 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
 
   // Gérer le timeout de 1min30
   useEffect(() => {
-    if (isCurrentlyLoading && incident) {
+    if (isCurrentlyLoading && signalement) {
       // Démarrer le timer de 90 secondes
       timeoutRef.current = setTimeout(() => {
         setLoadingTimeout(true);
@@ -365,7 +365,7 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [isCurrentlyLoading, incident]);
+  }, [isCurrentlyLoading, signalement]);
 
   // Fonction pour recharger les données
   const handleRefresh = () => {
@@ -376,7 +376,7 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!chatMessage.trim()) return;
-    if (!safeIncident?.id) return;
+    if (!safeSignalement?.id) return;
 
     const userText = chatMessage.trim();
     setChatMessage('');
@@ -389,7 +389,7 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
     setIsTyping(true);
 
     try {
-      const response = await sendIncidentChatMessageService(safeIncident.id, userText);
+      const response = await sendSignalementChatMessageService(safeSignalement.id, userText);
 
       // Mettre à jour l'historique avec la réponse de l'API
       if (response?.history) {
@@ -412,9 +412,9 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
       const status = err?.response?.status;
       let msg = "Une erreur est survenue lors de l'envoi de votre message.";
       if (status === 400) {
-        msg = "La prédiction de l'incident doit être terminée (avec des résultats) pour pouvoir interagir avec l'assistant.";
+        msg = "La prédiction de l'signalement doit être terminée (avec des résultats) pour pouvoir interagir avec l'assistant.";
       } else if (status === 404) {
-        msg = "L'incident n'a pas été trouvé.";
+        msg = "L'signalement n'a pas été trouvé.";
       } else if (status === 502) {
         msg = "Le service d'intelligence artificielle est temporairement indisponible, mais votre message a bien été enregistré.";
       } else if (err?.response?.data?.detail) {
@@ -445,8 +445,8 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
   const openJoinModal = () => {
     setJoinClosing(false);
     setJoinOpen(true);
-    const isInternal = safeIncident?.take_in_charge_mode === 'internal' || safeIncident?.take_in_charge_mode === 'interne';
-    if (safeIncident?.etat === 'declared' && !isInternal) {
+    const isInternal = safeSignalement?.take_in_charge_mode === 'internal' || safeSignalement?.take_in_charge_mode === 'interne';
+    if (safeSignalement?.etat === 'declared' && !isInternal) {
       setSelfRole('leader');
       setWorkMode('collaboration');
     } else {
@@ -513,7 +513,7 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
 
     try {
       // Si l'utilisateur est propriétaire ou a un rôle accepté de contributeur, envoyer les invitations
-      if (safeIncident.isOwner || hasAcceptedRole) {
+      if (safeSignalement.isOwner || hasAcceptedRole) {
         if (invitedOrgs.length === 0) {
           setAlertType('warning');
           setAlertMessage('Veuillez sélectionner au moins une organisation à inviter.');
@@ -528,9 +528,9 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
         for (const org of invitedOrgs) {
           try {
             const roleStr = org.role === 'observateur' ? 'observer' : 'contributor';
-            const commentStr = org.comment || `Invitation à rejoindre l'incident en tant que ${org.role}`;
-            await suggestCollaborationPartnerService(safeIncident.id, {
-              incident: safeIncident.id,
+            const commentStr = org.comment || `Invitation à rejoindre l'signalement en tant que ${org.role}`;
+            await suggestCollaborationPartnerService(safeSignalement.id, {
+              incident: safeSignalement.id,
               suggested_organisation: org.id,
               suggested_role: roleStr,
               justification: commentStr
@@ -548,7 +548,7 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
               if (data.non_field_errors && Array.isArray(data.non_field_errors)) {
                 const msg = data.non_field_errors[0];
                 errorMsg = msg.includes('unique set')
-                  ? 'Cette organisation a déjà été invitée ou suggérée pour cet incident.'
+                  ? 'Cette organisation a déjà été invitée ou suggérée pour cet signalement.'
                   : msg;
               } else if (data.detail) {
                 errorMsg = data.detail;
@@ -562,7 +562,7 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
                   const val = data[keys[0]];
                   const msg = Array.isArray(val) ? val[0] : String(val);
                   errorMsg = msg.includes('unique set')
-                    ? 'Cette organisation a déjà été invitée ou suggérée pour cet incident.'
+                    ? 'Cette organisation a déjà été invitée ou suggérée pour cet signalement.'
                     : msg;
                 } else {
                   errorMsg = err.message || 'Erreur inconnue';
@@ -613,26 +613,26 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
         return;
       }
 
-      // Vérifier si l'incident est déjà pris en charge
-      const incidentEtat = safeIncident?.etat;
+      // Vérifier si l'signalement est déjà pris en charge
+      const incidentEtat = safeSignalement?.etat;
       const isNotTakenInCharge = incidentEtat === 'declared';
 
       if (isNotTakenInCharge && selfRole === 'leader') {
-        // Si l'incident n'est pas pris en charge et que le rôle choisi est leader, prendre en charge (devenir leader)
-        const result = await takeInChargeIncidentService(safeIncident.id, {
+        // Si l'signalement n'est pas pris en charge et que le rôle choisi est leader, prendre en charge (devenir leader)
+        const result = await takeInChargeSignalementService(safeSignalement.id, {
           mode: workMode === 'interne' ? 'internal' : 'collaborative',
           role: 'leader'
         });
         if (result.status == "success") {
-          // L'incident reste public (l'utilisateur le gère simplement en interne avec ses équipes)
+          // L'signalement reste public (l'utilisateur le gère simplement en interne avec ses équipes)
           setAlertType('success');
-          setAlertMessage('Vous êtes maintenant le leader de cet incident !');
+          setAlertMessage('Vous êtes maintenant le leader de cet signalement !');
 
           // Rafraîchir les données avec useSWR
           await mutate();
         } else {
           setAlertType('danger');
-          setAlertMessage('Erreur lors de la prise en charge de l\'incident');
+          setAlertMessage('Erreur lors de la prise en charge de l\'signalement');
         }
 
         // Fermer le modal après 1.2 secondes
@@ -641,9 +641,9 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
           setIsSubmitting(false);
         }, 1200);
       } else {
-        // Si l'incident est déjà pris en charge, OU s'il n'est pas pris en charge mais que l'utilisateur choisit d'être contributeur ou observateur
+        // Si l'signalement est déjà pris en charge, OU s'il n'est pas pris en charge mais que l'utilisateur choisit d'être contributeur ou observateur
         const collaborationData = {
-          incident: safeIncident.id,
+          incident: safeSignalement.id,
           role: selfRole === 'contributeur' ? 'contributor' : selfRole === 'leader' ? 'leader' : 'observer',
           motivation: motif,
           user: currentUserId ? parseInt(currentUserId) : null
@@ -656,7 +656,7 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
         setAlertMessage(
           isNotTakenInCharge
             ? 'Votre demande de collaboration a été envoyée !'
-            : 'Votre demande a été envoyée au leader de l\'incident !'
+            : 'Votre demande a été envoyée au leader de l\'signalement !'
         );
 
         // Fermer le modal après 1.2 secondes
@@ -722,18 +722,18 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
         </section>
       );
     }
-    return <IncidentDetailSkeleton />;
+    return <SignalementDetailSkeleton />;
   }
 
   if (swrError?.response?.status === 404) {
     return (
       <NotFound
-        message="Désolé, l'incident demandé n'existe pas, a été supprimé ou vous n'avez pas l'autorisation d'y accéder."
+        message="Désolé, l'signalement demandé n'existe pas, a été supprimé ou vous n'avez pas l'autorisation d'y accéder."
       />
     );
   }
 
-  if (!incident) {
+  if (!signalement) {
     return (
       <section className="project-detail empty">
         <div className="project-detail-empty">
@@ -745,12 +745,12 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
   }
 
 
-  const currentStatus = getStatusBadge(safeIncident);
-  const modeBadge = getModeBadge(safeIncident);
+  const currentStatus = getStatusBadge(safeSignalement);
+  const modeBadge = getModeBadge(safeSignalement);
 
 
-  const userRoleBadge = getUserRoleBadge(safeIncident);
-  const userRoleVal = safeIncident?.role || safeIncident?.userRole;
+  const userRoleBadge = getUserRoleBadge(safeSignalement);
+  const userRoleVal = safeSignalement?.role || safeSignalement?.userRole;
   const hasParticipantRole = userRoleVal && (
     userRoleVal.toLowerCase() === 'observer' ||
     userRoleVal.toLowerCase() === 'observateur' ||
@@ -784,25 +784,25 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
     return { isMe, name };
   };
 
-  const takingOrg = getTakingOrg(safeIncident);
+  const takingOrg = getTakingOrg(safeSignalement);
 
-  const isCollaborativeMode = safeIncident?.take_in_charge_mode === 'collaborative' || safeIncident?.take_in_charge_mode === 'collaboratif';
+  const isCollaborativeMode = safeSignalement?.take_in_charge_mode === 'collaborative' || safeSignalement?.take_in_charge_mode === 'collaboratif';
 
   const collabList = Array.isArray(collaborations)
     ? collaborations
     : Array.isArray(collaborations?.results)
       ? collaborations.results
       : [];
-  const collabRequest = collabList.find(c => c.incident === safeIncident?.id);
+  const collabRequest = collabList.find(c => c.incident === safeSignalement?.id);
   const hasPendingRequest = collabRequest && collabRequest.status?.toLowerCase() === 'pending';
 
   // Vérifier si l'utilisateur a une demande de collaboration acceptée
   const hasAcceptedRole = collabRequest && (collabRequest.status?.toLowerCase() === 'accepted' || collabRequest.status?.toLowerCase() === 'in-progress');
 
   const showInvolvementButton = (
-    safeIncident?.etat !== 'resolved' && (
-      !safeIncident?.take_in_charge_mode ||
-      safeIncident?.etat === 'declared' ||
+    safeSignalement?.etat !== 'resolved' && (
+      !safeSignalement?.take_in_charge_mode ||
+      safeSignalement?.etat === 'declared' ||
       (takingOrg && !takingOrg.isMe && !hasParticipantRole) ||
       (isCollaborativeMode && takingOrg?.isMe) ||
       (hasAcceptedRole && isCollaborativeMode)
@@ -815,7 +815,7 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
     joinClosing,
     joinShowing,
     closeJoinModal,
-    safeIncident,
+    safeSignalement,
     handleJoinSubmit,
     alertMessage,
     alertType,
@@ -862,7 +862,7 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
             >
               <ArrowLeft2 size={20} variant="Linear" color="var(--color-text-primary)" />
             </button>
-            <h2 className="detail-title" style={{ color: 'var(--color-text-primary)' }}>{safeIncident.title}</h2>
+            <h2 className="detail-title" style={{ color: 'var(--color-text-primary)' }}>{safeSignalement.title}</h2>
 
           </div>
           <div className="detail-title-block   gap-2 mt-0 d-flex flex-wrap justify-content-between w-100" >
@@ -926,9 +926,9 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
               )}
 
               {/* Badge de gravité */}
-              {safeIncident.severity && (
+              {safeSignalement.severity && (
                 <BadgeGravite
-                  incident={safeIncident}
+                  signalement={safeSignalement}
                   variante="plein"
                   className="detail-severity-badge-custom"
                 />
@@ -961,7 +961,7 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
               )}
             </div>
 
-            {/* Bouton Prendre en compte / Inviter - Masqué si l'incident est géré en interne par nous ou si l'utilisateur a déjà un rôle */}
+            {/* Bouton Prendre en compte / Inviter - Masqué si l'signalement est géré en interne par nous ou si l'utilisateur a déjà un rôle */}
             {showInvolvementButton && (
               <button
                 type="button"
@@ -1008,10 +1008,10 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
                 ) : (
                   <>
                     <UserAdd size={18} variant="Bold" color="var(--color-surface)" />
-                    {safeIncident.isOwner || hasAcceptedRole
+                    {safeSignalement.isOwner || hasAcceptedRole
                       ? 'Inviter des organisations'
-                      : safeIncident?.etat === 'declared'
-                        ? "Agir sur cet incident"
+                      : safeSignalement?.etat === 'declared'
+                        ? "Agir sur cet signalement"
                         : "Rejoindre l'action"
                     }
                   </>
@@ -1023,19 +1023,19 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
           <div className="detail-meta" style={{ marginTop: '8px' }}>
             <div className="detail-meta-item">
               <Location size={14} variant="Bold" color="var(--color-text-muted)" />
-              <span>{safeIncident.zone || safeIncident.location}</span>
+              <span>{safeSignalement.zone || safeSignalement.location}</span>
             </div>
             <div className="detail-meta-item">
               <Calendar size={14} variant="Bold" color="var(--color-text-muted)" />
-              <span>Déclaré le {safeIncident.startDate}</span>
+              <span>Déclaré le {safeSignalement.startDate}</span>
             </div>
 
           </div>
         </div>
 
-        <div className="incident-dark-dashboard">
+        <div className="signalement-dark-dashboard">
           {/* Banner pour la collaboration sans leader */}
-          {safeIncident?.take_in_charge_mode && (safeIncident.take_in_charge_mode === 'collaborative' || safeIncident.take_in_charge_mode === 'collaboratif') && !safeIncident.taken_by && (
+          {safeSignalement?.take_in_charge_mode && (safeSignalement.take_in_charge_mode === 'collaborative' || safeSignalement.take_in_charge_mode === 'collaboratif') && !safeSignalement.taken_by && (
             <div style={{
               gridColumn: '1 / -1',
               padding: '16px 20px',
@@ -1059,7 +1059,7 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
           )}
 
           {/* Banner pour le travail en interne */}
-          {safeIncident?.take_in_charge_mode && (safeIncident.take_in_charge_mode === 'internal' || safeIncident.take_in_charge_mode === 'interne') && (() => {
+          {safeSignalement?.take_in_charge_mode && (safeSignalement.take_in_charge_mode === 'internal' || safeSignalement.take_in_charge_mode === 'interne') && (() => {
             if (!takingOrg) return null;
 
             return (
@@ -1080,11 +1080,11 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
                 <div style={{ fontSize: 'var(--font-size-body)', fontWeight: '500' }}>
                   {takingOrg.isMe ? (
                     <span>
-                      <strong>Signalement géré en interne :</strong> Votre organisation travaille actuellement sur cet incident en interne avec ses propres équipes.
+                      <strong>Signalement géré en interne :</strong> Votre organisation travaille actuellement sur cet signalement en interne avec ses propres équipes.
                     </span>
                   ) : (
                     <span>
-                      <strong>Signalement géré en interne :</strong> L'organisation <strong>{takingOrg.name}</strong> a pris en charge cet incident et travaille dessus en interne avec ses propres équipes.
+                      <strong>Signalement géré en interne :</strong> L'organisation <strong>{takingOrg.name}</strong> a pris en charge cet signalement et travaille dessus en interne avec ses propres équipes.
                     </span>
                   )}
                 </div>
@@ -1100,18 +1100,18 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
               <div className="dark-card-title">
                 PHOTO DE L'INCIDENT
               </div>
-              <div className="incident-image-container"
+              <div className="signalement-image-container"
                 style={{
                   position: 'relative',
                   overflow: 'hidden', borderRadius: '8px',
                   minHeight: '180px',
                   backgroundColor: 'var(--color-border)'
                 }}>
-                {safeIncident.image ? (
+                {safeSignalement.image ? (
                   <BlurryImage
-                    src={safeIncident.image}
+                    src={safeSignalement.image}
                     alt="Signalement"
-                    className="incident-actual-image clickable"
+                    className="signalement-actual-image clickable"
                     onClick={() => setIsImageModalOpen(true)}
                   />
                 ) : (
@@ -1123,7 +1123,7 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
             </div>
 
             {/* Audio */}
-            {safeIncident.aiAnalysis?.audio && (() => {
+            {safeSignalement.aiAnalysis?.audio && (() => {
               const progressPercent = duration ? (currentTime / duration) * 100 : 0;
               return (
                 <div className="dark-card" style={{ marginBottom: '20px', padding: '16px' }}>
@@ -1165,7 +1165,7 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
                     </div>
                     <audio
                       ref={audioRef}
-                      src={safeIncident.aiAnalysis.audio}
+                      src={safeSignalement.aiAnalysis.audio}
                       onPlay={() => setIsPlaying(true)}
                       onPause={() => setIsPlaying(false)}
                       onTimeUpdate={onAudioTimeUpdate}
@@ -1183,16 +1183,16 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
               <div className="dark-card-title">
                 COORDONNÉES GPS
               </div>
-              {safeIncident.coordinates ? (
+              {safeSignalement.coordinates ? (
                 <>
                   <div className="gps-inputs">
                     <div className="dark-input-group">
                       <label>Latitude</label>
-                      <input type="text" className="dark-input" value={safeIncident.coordinates.lat} readOnly />
+                      <input type="text" className="dark-input" value={safeSignalement.coordinates.lat} readOnly />
                     </div>
                     <div className="dark-input-group">
                       <label>Longitude</label>
-                      <input type="text" className="dark-input" value={safeIncident.coordinates.lng} readOnly />
+                      <input type="text" className="dark-input" value={safeSignalement.coordinates.lng} readOnly />
                     </div>
                   </div>
                   {/* Mini-carte détaillée */}
@@ -1200,14 +1200,14 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
                     <Map
                       ref={carteDetailRef}
                       initialViewState={{
-                        longitude: safeIncident.coordinates.lng,
-                        latitude: safeIncident.coordinates.lat,
+                        longitude: safeSignalement.coordinates.lng,
+                        latitude: safeSignalement.coordinates.lat,
                         zoom: 14
                       }}
                       style={{ width: '100%', height: '100%' }}
                       mapStyle={detailMapStyle === 'satellite' && MAPBOX_SATELLITE_STYLE ? MAPBOX_SATELLITE_STYLE : OSM_STYLE}
                     >
-                      <Marker longitude={safeIncident.coordinates.lng} latitude={safeIncident.coordinates.lat} anchor="bottom">
+                      <Marker longitude={safeSignalement.coordinates.lng} latitude={safeSignalement.coordinates.lat} anchor="bottom">
                         <div className="project-map-marker">
                           <Location size={24} variant="Bold" color="var(--color-danger)" />
                         </div>
@@ -1282,20 +1282,20 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
                 DESCRIPTION
               </div>
               <p style={{ fontSize: 'var(--font-size-body)', color: 'var(--color-text-secondary)', lineHeight: '1.6', margin: 0 }}>
-                {safeIncident.description && safeIncident.description.trim()
-                  ? safeIncident.description
-                  : 'Aucune description disponible pour cet incident.'}
+                {safeSignalement.description && safeSignalement.description.trim()
+                  ? safeSignalement.description
+                  : 'Aucune description disponible pour cet signalement.'}
               </p>
             </div>
 
             {/* Organisations impliquées */}
-            {((safeIncident.taken_by_organisation || safeIncident.taken_by_name || (safeIncident.acting_organisations && safeIncident.acting_organisations.length > 0)) && (
+            {((safeSignalement.taken_by_organisation || safeSignalement.taken_by_name || (safeSignalement.acting_organisations && safeSignalement.acting_organisations.length > 0)) && (
               <div className="dark-card" style={{ marginBottom: '20px', padding: '16px' }}>
                 <div className="dark-card-title" style={{ marginBottom: '12px' }}>
                   ORGANISATIONS IMPLIQUÉES
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {(safeIncident.taken_by_organisation || safeIncident.taken_by_name) && (
+                  {(safeSignalement.taken_by_organisation || safeSignalement.taken_by_name) && (
                     <div>
                       <span style={{ fontSize: 'var(--font-size-micro)', color: 'var(--color-text-muted)', fontWeight: '600', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
                         Prise en charge par
@@ -1313,22 +1313,22 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
                           fontWeight: 'bold',
                           fontSize: 'var(--font-size-caption)'
                         }}>
-                          {(safeIncident.taken_by_organisation?.name || safeIncident.taken_by_name || 'O')[0].toUpperCase()}
+                          {(safeSignalement.taken_by_organisation?.name || safeSignalement.taken_by_name || 'O')[0].toUpperCase()}
                         </span>
                         <span style={{ fontSize: 'var(--font-size-body)', fontWeight: '500', color: 'var(--color-text-primary)' }}>
-                          {safeIncident.taken_by_organisation?.name || safeIncident.taken_by_name}
+                          {safeSignalement.taken_by_organisation?.name || safeSignalement.taken_by_name}
                         </span>
                       </div>
                     </div>
                   )}
 
-                  {safeIncident.acting_organisations && safeIncident.acting_organisations.length > 0 && (
+                  {safeSignalement.acting_organisations && safeSignalement.acting_organisations.length > 0 && (
                     <div>
                       <span style={{ fontSize: 'var(--font-size-micro)', color: 'var(--color-text-muted)', fontWeight: '600', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
-                        Organisations actives sur le terrain ({safeIncident.acting_organisations.length})
+                        Organisations actives sur le terrain ({safeSignalement.acting_organisations.length})
                       </span>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                        {safeIncident.acting_organisations.map((org, index) => (
+                        {safeSignalement.acting_organisations.map((org, index) => (
                           <div key={org.id || index} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', backgroundColor: 'rgba(var(--rgb-surface), 0.02)', borderRadius: '6px', border: '1px solid rgba(var(--rgb-surface), 0.05)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
 
@@ -1338,7 +1338,7 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
                               </span>
                             </div>
                             {org.relation && (
-                              <span className={`incident-badge-glow body-small `} style={{ color: "var(--color-text-secondary)" }} >
+                              <span className={`signalement-badge-glow body-small `} style={{ color: "var(--color-text-secondary)" }} >
                                 {org.relation === 'leader' ? 'Leader' : org.relation === 'co-leader' ? 'Co-Leader' : 'Partenaire'}
                               </span>
                             )}
@@ -1356,12 +1356,12 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
               <div className="dark-card-title">
                 VIDÉO DE L'INCIDENT
               </div>
-              {safeIncident.video ? (
+              {safeSignalement.video ? (
                 <div style={{ position: 'relative', width: '100%', borderRadius: '8px', overflow: 'hidden', backgroundColor: 'rgba(var(--rgb-ombre), 1)', aspectRatio: '16/9' }}>
                   <video
                     controls
                     style={{ width: '100%', height: '100%', display: 'block', objectFit: 'contain' }}
-                    src={safeIncident.video}
+                    src={safeSignalement.video}
                   >
                     Votre navigateur ne supporte pas la lecture vidéo.
                   </video>
@@ -1423,7 +1423,7 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
                   <MagicStar size={48} variant="Bold" color="var(--color-text-muted)" style={{ opacity: 0.6 }} />
                   <h3 style={{ margin: 0, fontSize: 'var(--font-size-h3)', color: 'var(--color-text-primary)' }}>Aucune Prédiction IA</h3>
                   <p style={{ fontSize: 'var(--font-size-body-small)', color: 'var(--color-text-secondary)', lineHeight: '1.6', maxWidth: '320px', margin: 0 }}>
-                    L'analyse prédictive, satellite et de vulnérabilité sociale n'a pas encore été générée pour cet incident.
+                    L'analyse prédictive, satellite et de vulnérabilité sociale n'a pas encore été générée pour cet signalement.
                   </p>
                   {predictionError && (
                     <div style={{
@@ -1454,24 +1454,24 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
                     </div>
                     {/* Statut stepper - SUIVI DE L'INCIDENT */}
                     {(() => {
-                      const currentIndex = INCIDENT_STATUS_STEPS.findIndex(s => s.id === safeIncident.etat);
+                      const currentIndex = INCIDENT_STATUS_STEPS.findIndex(s => s.id === safeSignalement.etat);
                       const validIndex = currentIndex === -1 ? 0 : currentIndex;
                       return (
                         <div className="dark-card" style={{ marginBottom: '20px', padding: '16px' }}>
                           <div className="dark-card-title">
                             SUIVI DE L'INCIDENT
                           </div>
-                          <div className="incident-status-stepper">
-                            <div className="incident-status-bar">
+                          <div className="signalement-status-stepper">
+                            <div className="signalement-status-bar">
                               {INCIDENT_STATUS_STEPS.map((step, idx) => (
-                                <div key={step.id} className={`incident-status-segment ${idx < validIndex ? 'is-done' : ''} ${idx === validIndex ? 'is-current' : ''}`} />
+                                <div key={step.id} className={`signalement-status-segment ${idx < validIndex ? 'is-done' : ''} ${idx === validIndex ? 'is-current' : ''}`} />
                               ))}
                             </div>
-                            <div className="incident-status-steps">
+                            <div className="signalement-status-steps">
                               {INCIDENT_STATUS_STEPS.map((step, idx) => (
-                                <div key={step.id} className={`incident-status-step ${idx < validIndex ? 'is-done' : ''} ${idx === validIndex ? 'is-current' : ''}`}>
-                                  <span className="incident-status-dot" />
-                                  <span className="incident-status-label">{step.label.toUpperCase()}</span>
+                                <div key={step.id} className={`signalement-status-step ${idx < validIndex ? 'is-done' : ''} ${idx === validIndex ? 'is-current' : ''}`}>
+                                  <span className="signalement-status-dot" />
+                                  <span className="signalement-status-label">{step.label.toUpperCase()}</span>
                                 </div>
                               ))}
                             </div>
@@ -1936,7 +1936,7 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
                   Chat indisponible
                 </h4>
                 <p style={{ fontSize: 'var(--font-size-body-small)', lineHeight: '1.6' }}>
-                  Le chat n'est pas disponible pour cet incident car aucune prédiction/analyse n'a encore été générée.
+                  Le chat n'est pas disponible pour cet signalement car aucune prédiction/analyse n'a encore été générée.
                 </p>
               </div>
             ) : (
@@ -2019,12 +2019,12 @@ export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
         )}
 
         {/* Modal Rejoindre l'action / Inviter des organisations */}
-        <InviteOrgModal key={"InviteOrgModalIncident"} />
+        <InviteOrgModal key={"InviteOrgModalSignalement"} />
         {/* Modal pour afficher l'image en grand */}
-        {isImageModalOpen && safeIncident.image && (
+        {isImageModalOpen && safeSignalement.image && (
           <ImageViewer
-            src={safeIncident.image}
-            alt={safeIncident.title || 'Photo du signalement'}
+            src={safeSignalement.image}
+            alt={safeSignalement.title || 'Photo du signalement'}
             onClose={() => setIsImageModalOpen(false)}
           />
         )}

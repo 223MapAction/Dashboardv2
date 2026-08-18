@@ -11,16 +11,16 @@ afterEach(cleanup);
 
 describe('BadgeGravite', () => {
   it('affiche le niveau decide par le serveur', () => {
-    render(<BadgeGravite incident={{ severity: 'medium' }} />);
+    render(<BadgeGravite signalement={{ severity: 'medium' }} />);
     expect(screen.getByText('Gravité moyenne')).toBeTruthy();
   });
 
   it('donne a chaque niveau sa propre classe de couleur', () => {
-    const { rerender } = render(<BadgeGravite incident={{ severity: 'high' }} />);
+    const { rerender } = render(<BadgeGravite signalement={{ severity: 'high' }} />);
     const vus = new Set();
 
     ['high', 'medium', 'low'].forEach((niveau) => {
-      rerender(<BadgeGravite incident={{ severity: niveau }} />);
+      rerender(<BadgeGravite signalement={{ severity: niveau }} />);
       const modificateur = classes(screen.getByText(/^Gravité /))
         .find((c) => c.startsWith('badge-gravite--') && !c.endsWith('discret'));
       vus.add(modificateur);
@@ -31,8 +31,8 @@ describe('BadgeGravite', () => {
     expect(vus.size).toBe(3);
   });
 
-  it('ne peint jamais « faible » comme un incident resolu', () => {
-    render(<BadgeGravite incident={{ severity: 'low' }} />);
+  it('ne peint jamais « faible » comme un signalement resolu', () => {
+    render(<BadgeGravite signalement={{ severity: 'low' }} />);
     const badge = screen.getByText('Gravité faible');
     // Le vert et le bleu appartiennent aux etats « resolu » sur la carte : un
     // badge vert sur un signalement se lit « c'est regle », pas « peu grave ».
@@ -41,20 +41,20 @@ describe('BadgeGravite', () => {
   });
 
   it('applique la variante demandee sans perdre le niveau', () => {
-    render(<BadgeGravite incident={{ severity: 'high' }} variante="plein" />);
+    render(<BadgeGravite signalement={{ severity: 'high' }} variante="plein" />);
     const badge = screen.getByText('Gravité élevée');
     expect(classes(badge)).toEqual(
       expect.arrayContaining(['badge-gravite--plein', 'badge-gravite--high'])
     );
   });
 
-  it('ne rend rien sans incident, plutot que de planter la liste', () => {
-    const { container } = render(<BadgeGravite incident={null} />);
+  it('ne rend rien sans signalement, plutot que de planter la liste', () => {
+    const { container } = render(<BadgeGravite signalement={null} />);
     expect(container.innerHTML).toBe('');
   });
 
   it('retombe sur « faible » quand la gravite est absente', () => {
-    render(<BadgeGravite incident={{ id: 'x' }} />);
+    render(<BadgeGravite signalement={{ id: 'x' }} />);
     expect(screen.getByText('Gravité faible')).toBeTruthy();
   });
 });

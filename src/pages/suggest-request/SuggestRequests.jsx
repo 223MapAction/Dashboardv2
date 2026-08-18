@@ -103,7 +103,7 @@ const CardSkeleton = () => (
     {[...Array(4)].map((_, i) => (
       <div
         key={i}
-        className="incident-group-card"
+        className="signalement-group-card"
         style={{ pointerEvents: 'none', border: '1px solid var(--color-border)' }}
       >
         <div style={{ display: 'flex', gap: '16px', padding: '16px 20px', alignItems: 'center' }}>
@@ -145,7 +145,7 @@ export const SuggestRequests = ({ embedded = false }) => {
   const [showInfoBanner, setShowInfoBanner] = useState(true);
 
   // Modals
-  const [selectedIncident, setSelectedIncident] = useState(null);
+  const [selectedSignalement, setSelectedSignalement] = useState(null);
   const [decisionRequest, setDecisionRequest] = useState(null);
   const [decisionAction, setDecisionAction] = useState(null);
   const [decisionError, setDecisionError] = useState(null);
@@ -265,7 +265,7 @@ export const SuggestRequests = ({ embedded = false }) => {
               motif: data.justification || data.motivation || '',
               status: newStatus,
               submittedAt: data.created_at || new Date().toISOString(),
-              incidentId: data.incident,
+              signalementId: data.incident,
               apiId: reqId,
               incidentDetails: { id: data.incident, title: data.incident_title },
               userFullName: data.sender_name,
@@ -336,7 +336,7 @@ export const SuggestRequests = ({ embedded = false }) => {
           status: item.status || 'pending',
           submittedAt: item.created_at || new Date().toISOString(),
           respondedAt: item.updated_at || null,
-          incidentId: item.incident,
+          signalementId: item.incident,
           apiId: item.id,
           incidentDetails: details,
           incidentZone: item.incident_zone || details?.zone,
@@ -363,7 +363,7 @@ export const SuggestRequests = ({ embedded = false }) => {
         status: item.status || 'pending',
         submittedAt: item.created_at || new Date().toISOString(),
         respondedAt: item.updated_at || null,
-        incidentId: item.incident,
+        signalementId: item.incident,
         apiId: item.id,
         incidentDetails: details,
         incidentZone: item.incident_zone || details?.zone,
@@ -394,7 +394,7 @@ export const SuggestRequests = ({ embedded = false }) => {
         status: item.status || 'pending',
         submittedAt: item.created_at || new Date().toISOString(),
         respondedAt: item.updated_at || null,
-        incidentId: item.incident,
+        signalementId: item.incident,
         apiId: item.id,
         incidentDetails: details,
         incidentZone: item.incident_zone || details?.zone,
@@ -466,12 +466,12 @@ export const SuggestRequests = ({ embedded = false }) => {
 
     try {
       const suggestionId = decisionRequest.apiId;
-      const incidentId = decisionRequest.incidentId;
+      const signalementId = decisionRequest.signalementId;
 
       if (action === 'accept') {
-        await acceptPartnerSuggestionService(incidentId, suggestionId);
+        await acceptPartnerSuggestionService(signalementId, suggestionId);
       } else {
-        await rejectPartnerSuggestionService(incidentId, suggestionId);
+        await rejectPartnerSuggestionService(signalementId, suggestionId);
       }
 
       mutateSuggestions();
@@ -533,7 +533,7 @@ export const SuggestRequests = ({ embedded = false }) => {
           <div>
             <h1 className="requests-title">Demandes de collaboration</h1>
             <p className="requests-subtitle">
-              Gérez vos demandes de participation et suivez les rôles associés aux incidents.
+              Gérez vos demandes de participation et suivez les rôles associés aux signalements.
             </p>
           </div>
         </div>
@@ -618,7 +618,7 @@ export const SuggestRequests = ({ embedded = false }) => {
           </p>
         </div>
       ) : (
-        <div className="incident-centric-list">
+        <div className="signalement-centric-list">
           {filtered.map((req) => {
             const meta = STATUS_META[req.status];
             const isSuggestion = req.type === 'suggestion';
@@ -626,11 +626,11 @@ export const SuggestRequests = ({ embedded = false }) => {
             const imgUrl = req.projectImage ? getStableImageUrl(req.apiId || req.id, req.projectImage) : '';
 
             return (
-              <section key={req.id} className="incident-group-card">
-                <header className="incident-group-header">
+              <section key={req.id} className="signalement-group-card">
+                <header className="signalement-group-header">
                   {/* Thumbnail */}
                   <div
-                    className="incident-group-thumb"
+                    className="signalement-group-thumb"
                     style={imgUrl ? { backgroundImage: `url("${imgUrl}")` } : {}}
                   >
                     {meta && (
@@ -647,7 +647,7 @@ export const SuggestRequests = ({ embedded = false }) => {
                   </div>
 
                   {/* Content */}
-                  <div className="incident-group-title-section">
+                  <div className="signalement-group-title-section">
                     {/* Type + date */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', fontSize: 'var(--font-size-caption)' }}>
                       <span style={{
@@ -670,7 +670,7 @@ export const SuggestRequests = ({ embedded = false }) => {
                     </div>
 
                     {/* Title */}
-                    <h3 className="incident-group-title" style={{ margin: 0, fontSize: 'var(--font-size-body-large)', fontWeight: 700 }}>
+                    <h3 className="signalement-group-title" style={{ margin: 0, fontSize: 'var(--font-size-body-large)', fontWeight: 700 }}>
                       {req.projectTitle}
                     </h3>
 
@@ -723,7 +723,7 @@ export const SuggestRequests = ({ embedded = false }) => {
                   </div>
 
                   {/* Actions */}
-                  <div className="incident-group-summary-side" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div className="signalement-group-summary-side" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     {showActions && (
                       <>
                         <button
@@ -757,10 +757,10 @@ export const SuggestRequests = ({ embedded = false }) => {
 
                     <button
                       type="button"
-                      className="incident-group-toggle"
-                      onClick={() => setSelectedIncident(req)}
+                      className="signalement-group-toggle"
+                      onClick={() => setSelectedSignalement(req)}
                       aria-label="Voir détails"
-                      title="Voir l'incident"
+                      title="Voir l'signalement"
                     >
                       <ArrowRight2 size={18} variant="Linear" color="var(--color-text-secondary)" />
                     </button>
@@ -785,10 +785,10 @@ export const SuggestRequests = ({ embedded = false }) => {
       )}
 
       {/* Signalement Detail Modal */}
-      {selectedIncident && (
+      {selectedSignalement && (
         <RequestSignalementDetailModal
-          incident={selectedIncident}
-          onClose={() => setSelectedIncident(null)}
+          signalement={selectedSignalement}
+          onClose={() => setSelectedSignalement(null)}
         />
       )}
     </>

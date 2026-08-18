@@ -13,7 +13,7 @@ const DELAI_INITIAL = 3000;
 const DELAI_MAX = 30000;
 
 /**
- * Maintient une connexion WebSocket sur un canal d'incident, avec
+ * Maintient une connexion WebSocket sur un canal d'signalement, avec
  * reconnexion automatique a delai croissant.
  *
  * Ce code existait en double dans la page de detail de collaboration — une
@@ -21,13 +21,13 @@ const DELAI_MAX = 30000;
  * reconnexion ecrite deux fois. Deux copies d'un mecanisme de reprise reseau,
  * c'est une de trop : la correction d'un defaut n'atteint qu'une moitie.
  *
- * @param {number|string|null} incidentId aucune connexion tant qu'il est absent
+ * @param {number|string|null} signalementId aucune connexion tant qu'il est absent
  * @param {string} canal segment d'URL, par exemple 'discussion' ou 'tasks'
  * @param {Function} onMessage appelee a chaque message recu
  * @param {{ socketRef?: object }} [options] ref optionnelle exposant la socket
  *        courante a du code appelant qui veut emettre
  */
-export function useSocketSignalement(incidentId, canal, onMessage, options = {}) {
+export function useSocketSignalement(signalementId, canal, onMessage, options = {}) {
   const { socketRef } = options;
 
   // La fonction de reception est souvent recreee a chaque rendu par
@@ -44,7 +44,7 @@ export function useSocketSignalement(incidentId, canal, onMessage, options = {})
   });
 
   useEffect(() => {
-    if (!incidentId) return undefined;
+    if (!signalementId) return undefined;
 
     const baseWs = API_URL_BASE.replace(/^http/, 'ws');
     const token = authService.getAccessToken();
@@ -57,7 +57,7 @@ export function useSocketSignalement(incidentId, canal, onMessage, options = {})
 
     const connecter = () => {
       if (arrete) return;
-      socket = new WebSocket(`${baseWs}/ws/incidents/${incidentId}/${canal}/${requete}`);
+      socket = new WebSocket(`${baseWs}/ws/incidents/${signalementId}/${canal}/${requete}`);
       if (socketRef) socketRef.current = socket;
 
       socket.onopen = () => {
@@ -83,5 +83,5 @@ export function useSocketSignalement(incidentId, canal, onMessage, options = {})
       socket?.close();
       if (socketRef) socketRef.current = null;
     };
-  }, [incidentId, canal, socketRef]);
+  }, [signalementId, canal, socketRef]);
 }

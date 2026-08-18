@@ -23,7 +23,7 @@ const BY_SEVERITY_API = {
 };
 
 describe('gravite — la decision du backend prime', () => {
-  it('lit le champ severity de l\'incident', () => {
+  it('lit le champ severity de l\'signalement', () => {
     expect(gravite(INCIDENT_API)).toBe('medium');
   });
 
@@ -50,7 +50,7 @@ describe('gravite — la decision du backend prime', () => {
     expect(gravite({ severity: 'catastrophique', base_severity: 6 })).toBe('medium');
   });
 
-  it('ne casse pas sur un incident absent', () => {
+  it('ne casse pas sur un signalement absent', () => {
     expect(gravite(null)).toBe('low');
   });
 });
@@ -83,13 +83,13 @@ describe('repartition depuis l\'API', () => {
 
 describe('repartition calculee localement', () => {
   it('compte et repartit en pourcentages', () => {
-    const incidents = [
+    const signalements = [
       { severity: 'high' },
       { severity: 'medium' },
       { severity: 'medium' },
       { severity: 'low' }
     ];
-    const r = repartitionGravite(incidents);
+    const r = repartitionGravite(signalements);
     expect(r.medium).toEqual({ count: 2, percentage: 50 });
     expect(r.high).toEqual({ count: 1, percentage: 25 });
     expect(r.low).toEqual({ count: 1, percentage: 25 });

@@ -3,14 +3,14 @@ import { API_URL_BASE } from '../../../config/api_url_base';
 import { logger } from '../../../utils/logger';
 
 /**
- * Récupère toutes les tâches d'un incident
- * @param {number} incidentId - ID de l'incident
+ * Récupère toutes les tâches d'un signalement
+ * @param {number} signalementId - ID de l'signalement
  * @returns {Promise<Array>} Liste des tâches
  */
-export const getTasksService = async (incidentId) => {
+export const getTasksService = async (signalementId) => {
   try {
     const axios = authService.createAuthenticatedAxios();
-    const response = await axios.get(`${API_URL_BASE}/MapApi/incidents/${incidentId}/tasks/`);
+    const response = await axios.get(`${API_URL_BASE}/MapApi/incidents/${signalementId}/tasks/`);
 
     return response?.data?.results || response?.data || [];
   } catch (error) {
@@ -22,14 +22,14 @@ export const getTasksService = async (incidentId) => {
 
 /**
  * Récupère les détails d'une tâche spécifique
- * @param {number} incidentId - ID de l'incident
+ * @param {number} signalementId - ID de l'signalement
  * @param {number} taskId - ID de la tâche
  * @returns {Promise<Object>} Détails de la tâche
  */
-export const getTaskService = async (incidentId, taskId) => {
+export const getTaskService = async (signalementId, taskId) => {
   try {
     const axios = authService.createAuthenticatedAxios();
-    const response = await axios.get(`${API_URL_BASE}/MapApi/incidents/${incidentId}/tasks/${taskId}/`);
+    const response = await axios.get(`${API_URL_BASE}/MapApi/incidents/${signalementId}/tasks/${taskId}/`);
 
     return response.data;
   } catch (error) {
@@ -39,8 +39,8 @@ export const getTaskService = async (incidentId, taskId) => {
 };
 
 /**
- * Crée une nouvelle tâche pour un incident
- * @param {number} incidentId - ID de l'incident
+ * Crée une nouvelle tâche pour un signalement
+ * @param {number} signalementId - ID de l'signalement
  * @param {Object} taskData - Données de la tâche
  * @param {string} taskData.title - Titre de la tâche (requis)
  * @param {string} taskData.description - Description de la tâche
@@ -49,11 +49,11 @@ export const getTaskService = async (incidentId, taskId) => {
  * @param {number} taskData.assigned_to - ID de l'utilisateur assigné
  * @returns {Promise<Object>} Tâche créée
  */
-export const createTaskService = async (incidentId, taskData) => {
+export const createTaskService = async (signalementId, taskData) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.post(
-      `${API_URL_BASE}/MapApi/incidents/${incidentId}/tasks/`,
+      `${API_URL_BASE}/MapApi/incidents/${signalementId}/tasks/`,
       taskData
     );
 
@@ -66,12 +66,12 @@ export const createTaskService = async (incidentId, taskData) => {
 
 /**
  * Marque une tâche comme terminée
- * @param {number} incidentId - ID de l'incident
+ * @param {number} signalementId - ID de l'signalement
  * @param {number} taskId - ID de la tâche
  * @param {File} proofs - Fichier de preuve (image/vidéo) - requis
  * @returns {Promise<Object>} Tâche mise à jour
  */
-export const completeTaskService = async (incidentId, taskId, proofs) => {
+export const completeTaskService = async (signalementId, taskId, proofs) => {
   try {
     const axios = authService.createAuthenticatedAxios();
 
@@ -90,7 +90,7 @@ export const completeTaskService = async (incidentId, taskId, proofs) => {
     }
 
     const response = await axios.post(
-      `${API_URL_BASE}/MapApi/incidents/${incidentId}/tasks/${taskId}/complete/`,
+      `${API_URL_BASE}/MapApi/incidents/${signalementId}/tasks/${taskId}/complete/`,
       formData,
       {
         headers: {
@@ -108,16 +108,16 @@ export const completeTaskService = async (incidentId, taskId, proofs) => {
 
 /**
  * Marque une tâche comme échouée
- * @param {number} incidentId - ID de l'incident
+ * @param {number} signalementId - ID de l'signalement
  * @param {number} taskId - ID de la tâche
  * @param {string} failureReason - Raison de l'échec (requis)
  * @returns {Promise<Object>} Tâche mise à jour
  */
-export const failTaskService = async (incidentId, taskId, failureReason) => {
+export const failTaskService = async (signalementId, taskId, failureReason) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.post(
-      `${API_URL_BASE}/MapApi/incidents/${incidentId}/tasks/${taskId}/fail/`,
+      `${API_URL_BASE}/MapApi/incidents/${signalementId}/tasks/${taskId}/fail/`,
       { failure_reason: failureReason }
     );
 
@@ -130,16 +130,16 @@ export const failTaskService = async (incidentId, taskId, failureReason) => {
 
 /**
  * Met à jour une tâche (fonction générique)
- * @param {number} incidentId - ID de l'incident
+ * @param {number} signalementId - ID de l'signalement
  * @param {number} taskId - ID de la tâche
  * @param {Object} updates - Données à mettre à jour
  * @returns {Promise<Object>} Tâche mise à jour
  */
-export const updateTaskService = async (incidentId, taskId, updates) => {
+export const updateTaskService = async (signalementId, taskId, updates) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.patch(
-      `${API_URL_BASE}/MapApi/incidents/${incidentId}/tasks/${taskId}/`,
+      `${API_URL_BASE}/MapApi/incidents/${signalementId}/tasks/${taskId}/`,
       updates
     );
 
@@ -152,14 +152,14 @@ export const updateTaskService = async (incidentId, taskId, updates) => {
 
 /**
  * Supprime une tâche
- * @param {number} incidentId - ID de l'incident
+ * @param {number} signalementId - ID de l'signalement
  * @param {number} taskId - ID de la tâche
  * @returns {Promise<void>}
  */
-export const deleteTaskService = async (incidentId, taskId) => {
+export const deleteTaskService = async (signalementId, taskId) => {
   try {
     const axios = authService.createAuthenticatedAxios();
-    await axios.delete(`${API_URL_BASE}/MapApi/incidents/${incidentId}/tasks/${taskId}/`);
+    await axios.delete(`${API_URL_BASE}/MapApi/incidents/${signalementId}/tasks/${taskId}/`);
 
   } catch (error) {
     logger.error('[Task] Erreur suppression tâche:', error?.response?.status, error?.response?.data);

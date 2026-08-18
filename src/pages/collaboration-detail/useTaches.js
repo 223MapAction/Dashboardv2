@@ -17,7 +17,7 @@ import { logger } from '../../utils/logger';
  * composant de page. Il ne depend que du signalement, de la collaboration
  * courante et de deux fonctions de rafraichissement SWR.
  */
-export function useTaches({ incidentId, collaboration, tasksData, mutateTasks }) {
+export function useTaches({ signalementId, collaboration, tasksData, mutateTasks }) {
   // La socket des taches sert aussi a emettre vers les autres participants :
   // on garde une reference dessus, pas seulement un abonnement.
   const tasksSocketRef = useRef(null);
@@ -72,7 +72,7 @@ export function useTaches({ incidentId, collaboration, tasksData, mutateTasks })
   // ce mecanisme etait ecrit deux fois ici, une par canal, donc corriger un
   // defaut n'en reparait qu'une moitie. Il ne reste que ce que ce canal fait
   // vraiment de ses messages.
-  useSocketSignalement(incidentId, 'tasks', (event) => {
+  useSocketSignalement(signalementId, 'tasks', (event) => {
     try {
       const data = JSON.parse(event.data);
 
@@ -162,11 +162,11 @@ export function useTaches({ incidentId, collaboration, tasksData, mutateTasks })
     try {
       if (task.completed || task.status === 'completed') {
         // Remettre en cours via patch
-        await updateTaskService(incidentId, taskId, { status: 'in_progress' });
+        await updateTaskService(signalementId, taskId, { status: 'in_progress' });
       } else {
         // Marquer comme complétée (sans preuve)
         const formData = new FormData();
-        await completeTaskService(incidentId, taskId, formData);
+        await completeTaskService(signalementId, taskId, formData);
       }
       await mutateTasks();
     } catch (err) {
@@ -179,7 +179,7 @@ export function useTaches({ incidentId, collaboration, tasksData, mutateTasks })
     setFailureSaving(true);
     setFailureAlert(null);
     try {
-      await failTaskService(incidentId, taskId, { failure_reason: reason });
+      await failTaskService(signalementId, taskId, { failure_reason: reason });
       await mutateTasks();
       setFailureAlert({ type: 'success', message: 'Tâche marquée comme échouée avec succès.' });
       setTimeout(() => {
@@ -208,7 +208,7 @@ export function useTaches({ incidentId, collaboration, tasksData, mutateTasks })
   // Remettre une tâche à "en cours" via API
   const resetTaskStatus = async (taskId) => {
     try {
-      await updateTaskService(incidentId, taskId, { status: 'in_progress' });
+      await updateTaskService(signalementId, taskId, { status: 'in_progress' });
       await mutateTasks();
     } catch (err) {
       logger.error('[resetTaskStatus] Erreur:', err);
@@ -229,7 +229,7 @@ export function useTaches({ incidentId, collaboration, tasksData, mutateTasks })
         // Pour les documents (PDF, Word, Excel, etc.)
         formData.append('proof_image', file);
       }
-      await completeTaskService(incidentId, taskId, formData);
+      await completeTaskService(signalementId, taskId, formData);
       await mutateTasks();
       setProofUploadSuccess('Preuve téléversée et tâche terminée avec succès !');
       return true;
@@ -321,7 +321,7 @@ export function useTaches({ incidentId, collaboration, tasksData, mutateTasks })
       // Créer chaque tâche séquentiellement/en parallèle via l'API
       await Promise.all(
         draftTasks.map(task =>
-          createTaskService(incidentId, {
+          createTaskService(signalementId, {
             title: task.title,
             description: task.description || null,
             start_date: task.start_date || null,
@@ -388,7 +388,7 @@ export function useTaches({ incidentId, collaboration, tasksData, mutateTasks })
     }, { revalidate: false });
 
     try {
-      await deleteTaskService(incidentId, taskId);
+      await deleteTaskService(signalementId, taskId);
       notifyTaskChange('delete', taskId);
     } catch (err) {
       logger.error('[deleteTask] Erreur:', err);
@@ -453,7 +453,7 @@ export function useTaches({ incidentId, collaboration, tasksData, mutateTasks })
 
     setEditTaskSaving(true);
     try {
-      await updateTaskService(incidentId, taskId, {
+      await updateTaskService(signalementId, taskId, {
         title: editTaskTitle.trim(),
         description: editTaskDescription.trim() || null,
         start_date: editTaskStartDate || null,
