@@ -111,7 +111,7 @@
   font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
   color: var(--color-surface);
-  background-color: var(--color-severity-high);
+  background-color: var(--color-danger);
   border-radius: var(--radius-full);
   border: 2px solid var(--color-surface);
 }
@@ -135,7 +135,7 @@
   font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
   color: var(--color-surface);
-  background-color: var(--color-severity-high);
+  background-color: var(--color-danger);
   border-radius: var(--radius-full);
   border: 2px solid var(--color-surface);
 }
@@ -452,11 +452,11 @@
 }
 
 .profile-menu-item.logout {
-  color: var(--color-severity-high-text);
+  color: var(--color-danger-text);
 }
 
 .profile-menu-item.logout svg {
-  fill: var(--color-severity-high);
+  fill: var(--color-danger);
 }
 
 .profile-menu-item.logout:hover {
@@ -464,7 +464,7 @@
 }
 
 .profile-menu-item.logout:hover svg {
-  fill: var(--color-severity-high);
+  fill: var(--color-danger);
 }
 
 /* === RESPONSIVE === */

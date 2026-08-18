@@ -51,9 +51,28 @@
      dessous du seuil WCAG AA de 4.5:1. Illisible sur un écran de téléphone en
      plein soleil, le contexte des agents de terrain. */
   --color-text-muted: #697282;
-  --color-severity-low: #22C55E;
-  --color-severity-medium: #F59E0B;
+  /* ── Échelle de gravité ─────────────────────────────────────────────────────
+     TROIS niveaux — ceux que le serveur émet —, donc trois teintes DISTINCTES.
+     Les seuils et les libellés vivent dans src/utils/gravite.js ; ici, seules
+     les couleurs.
+
+     Cette règle avait été perdue : « faible » valait #22C55E, le vert exact de
+     --color-success, alors que sur la carte le vert signifie déjà « résolu par
+     moi » ; du coup le CSS des marqueurs peignait « faible » en --color-warning,
+     c'est-à-dire dans la même couleur que « moyenne ».
+
+     L'échelle est rouge → orange → jaune, sans vert ni bleu (réservés aux états
+     « résolu »). Les écarts perceptuels (CIE dE76) sont mesurés : élevée↔moyenne
+     34.6, moyenne↔faible 42.4, élevée↔faible 71.9. Une rampe a été écartée sur
+     ce critère : la paire #F59E0B/#EAB308 tombait à 16.4, deux nuances qu'on ne
+     sépare pas d'un coup d'œil sur une carte.
+
+     La gravité ne réutilise plus --color-danger / --color-warning : ce sont des
+     couleurs de STATUT. Les faire coïncider est ce qui avait permis à la dérive
+     de passer inaperçue. */
   --color-severity-high: #EF4444;
+  --color-severity-medium: #F97316;
+  --color-severity-low: #EAB308;
   --color-success: #22C55E;
   --color-warning: #F59E0B;
   --color-danger: #EF4444;
@@ -79,9 +98,12 @@
   --color-warning-text: #9E6606;
   --color-danger-text: #E21313;
   --color-info-text: #1E78AC;
-  --color-severity-low-text: #17833F;
-  --color-severity-medium-text: #9E6606;
+  /* Mêmes teintes, assombries au minimum pour franchir 4.5:1 face au blanc :
+     4.84, 5.64 et 4.77. Le jaune vif ne plafonne qu'à 1.92:1 — il ne peut donc
+     jamais porter du texte, seulement une pastille. */
   --color-severity-high-text: #E21313;
+  --color-severity-medium-text: #B24408;
+  --color-severity-low-text: #8F6E00;
 
   /* ── Fonds pâles de statut ──────────────────────────────────────────────────
      Chaque couleur sémantique se décline en trois usages : un aplat vif
@@ -93,6 +115,13 @@
   --color-success-surface: #DCFCE7;
   --color-warning-surface: #FEF3C7;
   --color-danger-surface: #FEE2E2;
+
+  /* Troisième palier de l'échelle de gravité. Sans lui, les cartes « moyenne »
+     et « faible » des statistiques partageaient --color-warning-surface, ce qui
+     rejouait la collision au niveau des bordures. */
+  --color-severity-high-surface: #FEE2E2;
+  --color-severity-medium-surface: #FFEDD5;
+  --color-severity-low-surface: #FEF9C3;
 
   /* ── Accent violet ──────────────────────────────────────────────────────────
      Le violet porte les statuts qui ne sont ni un succès, ni une alerte, ni une
@@ -376,12 +405,16 @@ h2,
   font-weight: var(--font-weight-medium);
 }
 
+/* Une variation en hausse est un SUCCÈS, pas une gravité faible. Ces deux
+   règles empruntaient l'échelle de gravité parce qu'elle était verte et rouge —
+   un emprunt qui tenait par coïncidence, et qui aurait teint les hausses en
+   jaune dès que « faible » a cessé d'être vert. */
 .metric-delta.positive {
-  color: var(--color-severity-low-text);
+  color: var(--color-success-text);
 }
 
 .metric-delta.negative {
-  color: var(--color-severity-high-text);
+  color: var(--color-danger-text);
 }
 
 /* === CARDS (MOLECULES) === */
@@ -452,12 +485,22 @@ h2,
 
 }
 
-.activity-item.severity-low {
-  border-left-color: var(--color-severity-low);
-}
-
+/* Les trois niveaux, pas deux : « moyenne » n'avait aucune regle et retombait
+   sur la bordure par defaut — or c'est aujourd'hui le seul niveau que le serveur
+   attribue. Ces classes ne servent que dans ActivityFeed, qui n'est monte nulle
+   part pour l'instant (le tableau de bord affiche ActivityPanel) ; la lacune
+   etait donc invisible, et le serait restee jusqu'au jour ou l'on branche ce
+   composant. */
 .activity-item.severity-high {
   border-left-color: var(--color-severity-high);
+}
+
+.activity-item.severity-medium {
+  border-left-color: var(--color-severity-medium);
+}
+
+.activity-item.severity-low {
+  border-left-color: var(--color-severity-low);
 }
 
 .activity-icon {
@@ -1077,6 +1120,18 @@ button.blurry-image-container {
   outline-color: var(--color-surface) !important;
 }
 
+/* Ces champs ont déjà leur propre indicateur de focus (bordure + halo
+   colorés sur le conteneur, au clic comme au clavier) : l'anneau générique
+   ci-dessus s'ajoutait par-dessus au lieu de le remplacer, doublant le
+   contour. Les navigateurs déclenchent :focus-visible sur un champ texte
+   même au clic souris (contrairement aux boutons/liens) — d'où le doublon
+   visible dès qu'on clique dans une recherche, pas seulement au clavier. */
+.am-filtres-recherche input:focus-visible,
+.agents-search input:focus-visible,
+.field-input input:focus-visible {
+  outline: none !important;
+}
+
 /* ── 2. Mouvement réduit ─────────────────────────────────────────────────────
    Respecte le réglage système des utilisateurs sensibles au mouvement
    (troubles vestibulaires, migraines). On ne supprime pas les transitions —
@@ -1237,7 +1292,24 @@ p {
   --font-size-h3: clamp(16px, 1.4vw + 12px, 18px);
 }
 /* --font-size-micro n'est pas fluide : c'est le plancher de lisibilité, il ne
-   doit jamais descendre sous 11 px, donc il n'y a rien à interpoler. */
+   doit jamais descendre sous 11 px, donc il n'y a rien à interpoler.
+
+   En revanche le bas de l'échelle ne s'adaptait PAS du tout au téléphone : les
+   titres rétrécissaient avec la fenêtre pendant que les libellés, les légendes
+   et les compteurs restaient figés à 13, 12 et 11 px. Or c'est l'inverse qu'il
+   faut. Un titre se devine à moitié lu ; un libellé de filtre ou une date de
+   tâche, non — il faut le lire caractère par caractère, souvent à bout de bras
+   et en plein soleil. Sur téléphone on remonte donc le texte courant d'un
+   cran, sans toucher aux titres (déjà fluides ci-dessus) : la hiérarchie est
+   conservée, chaque niveau reste distinct de son voisin. */
+@media (max-width: 767.98px) {
+  :root {
+    --font-size-body: 15px;
+    --font-size-body-small: 14px;
+    --font-size-caption: 13px;
+    --font-size-micro: 12px;
+  }
+}
 
 /* ── 13. Gouttières adaptatives ──────────────────────────────────────────────
    Sur 320-360 px, 32 px de marge de chaque côté consomment 20 % de la largeur
@@ -1247,6 +1319,24 @@ p {
     --spacing-6: 16px;
     --spacing-7: 20px;
     --spacing-8: 24px;
+  }
+}
+
+/* ── 14. Zoom automatique d'iOS sur les champs de saisie ─────────────────────
+   Safari sur iPhone zoome la page dès qu'on touche un champ dont le texte fait
+   moins de 16 px : la mise en page saute, le champ visé se retrouve ailleurs,
+   et il faut ensuite dézoomer à la main. Nos champs héritaient de body-small,
+   caption ou body — 13 à 15 px selon l'écran, donc tous concernés.
+
+   Le seuil de 16 px est fixé par le navigateur : ce n'est pas une préférence,
+   on ne peut pas le negocier. `!important` est nécessaire parce que les règles
+   de page ciblent les champs par une classe (`.am-filtres-recherche input`),
+   qui l'emporte sur un sélecteur d'élément. */
+@media (max-width: 767.98px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+  select,
+  textarea {
+    font-size: 16px !important;
   }
 }
 

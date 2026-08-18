@@ -1,4 +1,5 @@
 import React from 'react';
+import { gravite } from '../../utils/gravite';
 
 export const ActivityFeed = ({ activities = [] }) => {
   return (
@@ -6,7 +7,9 @@ export const ActivityFeed = ({ activities = [] }) => {
       {activities.map((activity, index) => (
         <div 
           key={index} 
-          className={`activity-item ${activity.severity === 'low' ? 'severity-low' : 'severity-high'}`}
+          // Trois niveaux et non un test binaire : « tout ce qui n'est pas
+          // faible » repliait « moyenne » sur la couleur de « elevee ».
+          className={`activity-item severity-${gravite(activity)}`}
         >
           <div className="activity-icon">
             {activity.severity === 'low' ? (
