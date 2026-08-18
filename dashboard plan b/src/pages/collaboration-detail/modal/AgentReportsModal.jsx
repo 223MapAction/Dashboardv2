@@ -6,6 +6,7 @@ import { getFieldReportsService } from '../../collaboration/service/collaboratio
 import { BlurryImage } from '../../../components/atoms/BlurryImage';
 
 import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
+import { ImageViewer } from '../../../components/molecules/ImageViewer';
 const formatDate = (isoString) => {
   if (!isoString) return 'Non spécifiée';
   try {
@@ -40,6 +41,8 @@ export const AgentReportsModal = ({ isOpen, onClose, incidentId, incidentTitle }
     }
   }, [isOpen]);
 
+  /** Photo de rapport ouverte en plein écran, ou null. { src, alt } */
+  const [imageAZoomer, setImageAZoomer] = useState(null);
   const [reportsList, setReportsList] = useState([]);
   const [nextUrl, setNextUrl] = useState(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -262,6 +265,10 @@ export const AgentReportsModal = ({ isOpen, onClose, incidentId, incidentTitle }
                         <BlurryImage
                           src={report.photo}
                           alt="Preuve du rapport"
+                          onClick={() => setImageAZoomer({
+                            src: report.photo,
+                            alt: 'Preuve du rapport',
+                          })}
                           style={{
                             width: '100%',
                             height: '100%',
@@ -308,6 +315,15 @@ export const AgentReportsModal = ({ isOpen, onClose, incidentId, incidentTitle }
             Fermer
           </button>
         </div>
+
+        {/* La visionneuse se rend dans un portail, au-dessus de cette modale. */}
+        {imageAZoomer && (
+          <ImageViewer
+            src={imageAZoomer.src}
+            alt={imageAZoomer.alt}
+            onClose={() => setImageAZoomer(null)}
+          />
+        )}
       </OffcanvasModal>
   );
 };
