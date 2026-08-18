@@ -64,6 +64,7 @@ import { BlurryImage } from '../../../../components/atoms/BlurryImage';
 
 
 import { ImageViewer } from '../../../../components/molecules/ImageViewer';
+import { BadgeGravite } from '../../../../components/atoms/BadgeGravite';
 const formatMessageTime = (dateStr) => {
   if (!dateStr) return '';
   try {
@@ -938,37 +939,11 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
 
               {/* Badge de gravité */}
               {safeIncident.severity && (
-                <span className="detail-severity-badge-custom" style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  padding: '4px 12px',
-                  borderRadius: '20px',
-                  fontSize: 'var(--font-size-caption)',
-                  fontWeight: '600',
-                  backgroundColor: (() => {
-                    if (safeIncident.severity === 'high') return 'rgba(var(--rgb-danger), 0.12)';
-                    if (safeIncident.severity === 'medium') return 'rgba(var(--rgb-warning), 0.12)';
-                    return 'rgba(var(--rgb-success), 0.12)';
-                  })(),
-                  color: (() => {
-                    if (safeIncident.severity === 'high') return 'var(--color-danger)';
-                    if (safeIncident.severity === 'medium') return 'var(--color-warning)';
-                    return 'var(--color-success)';
-                  })(),
-                  border: `1px solid ${(() => {
-                    if (safeIncident.severity === 'high') return 'rgba(var(--rgb-danger), 0.3)';
-                    if (safeIncident.severity === 'medium') return 'rgba(var(--rgb-warning), 0.3)';
-                    return 'rgba(var(--rgb-success), 0.3)';
-                  })()}`,
-                  whiteSpace: 'nowrap',
-                  marginLeft: '8px'
-                }}>
-                  {(() => {
-                    if (safeIncident.severity === 'high') return 'GRAVITÉ ÉLEVÉE';
-                    if (safeIncident.severity === 'medium') return 'GRAVITÉ MOYENNE';
-                    return 'GRAVITÉ FAIBLE';
-                  })()}
-                </span>
+                <BadgeGravite
+                  incident={safeIncident}
+                  variante="plein"
+                  className="detail-severity-badge-custom"
+                />
               )}
 
               {/* Badge de demande de collaboration envoyée */}
