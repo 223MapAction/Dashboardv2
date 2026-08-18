@@ -21,6 +21,7 @@ import {
   sendMessageService,
   updateDiscussionMessageService,
   deleteDiscussionMessageService,
+  getMessageActionErrorMessage,
   formatMessage
 } from './service/collab_detail_service';
 import { createSuggestionService } from '../suggest-request/service/suggest_service';
@@ -685,6 +686,8 @@ export const CollaborationDetail = () => {
   const [editingMessageText, setEditingMessageText] = useState('');
   const [savingEdit, setSavingEdit] = useState(false);
   const [deletingMessageId, setDeletingMessageId] = useState(null);
+  const [messageActionError, setMessageActionError] = useState('');
+  const [confirmDeleteMessageId, setConfirmDeleteMessageId] = useState(null);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
   const audioInputRef = useRef(null);
@@ -1645,39 +1648,72 @@ export const CollaborationDetail = () => {
     }
   };
 
+  // PATCH /MapApi/discussion/message/{id}/ — auteur du message ou super-admin,
+  // refusé par l'API si l'incident est résolu.
   const handleEditMessage = async (msgId) => {
-    if (!editingMessageText.trim()) return;
+    const text = editingMessageText.trim();
+    if (!text) return;
+
     setSavingEdit(true);
+    setMessageActionError('');
     try {
-      await updateDiscussionMessageService(incidentId, msgId, editingMessageText.trim());
-      await mutateMessages();
+      const updated = await updateDiscussionMessageService(msgId, text);
+      // La liste affichée vient de allMessages (état local alimenté par SWR + WS),
+      // on l'actualise donc directement.
+      setAllMessages((prev) =>
+        (Array.isArray(prev) ? prev : []).map((m) =>
+          m.id === msgId ? { ...m, ...(updated || {}), message: updated?.message ?? text } : m
+        )
+      );
       setEditingMessageId(null);
       setEditingMessageText('');
     } catch (err) {
       console.error('[handleEditMessage] Erreur:', err);
+      setMessageActionError(getMessageActionErrorMessage(err, 'modifier'));
     } finally {
       setSavingEdit(false);
     }
   };
 
+  // DELETE /MapApi/discussion/message/{id}/ — mêmes règles d'accès.
   const handleDeleteMessage = async (msgId) => {
     setDeletingMessageId(msgId);
+    setMessageActionError('');
     try {
-      await deleteDiscussionMessageService(incidentId, msgId);
-      await mutateMessages();
+      await deleteDiscussionMessageService(msgId);
+      setAllMessages((prev) =>
+        (Array.isArray(prev) ? prev : []).filter((m) => m.id !== msgId)
+      );
+      setConfirmDeleteMessageId(null);
+      if (editingMessageId === msgId) {
+        setEditingMessageId(null);
+        setEditingMessageText('');
+      }
     } catch (err) {
       console.error('[handleDeleteMessage] Erreur:', err);
+      setMessageActionError(getMessageActionErrorMessage(err, 'supprimer'));
     } finally {
       setDeletingMessageId(null);
     }
   };
 
+  const requestDeleteMessage = (msgId) => {
+    setMessageActionError('');
+    setConfirmDeleteMessageId(msgId);
+  };
+
+  const cancelDeleteMessage = () => {
+    setConfirmDeleteMessageId(null);
+  };
+
   const startEditMessage = (msg) => {
+    setMessageActionError('');
     setEditingMessageId(msg.id);
     setEditingMessageText(msg.message || '');
   };
 
   const cancelEditMessage = () => {
+    setMessageActionError('');
     setEditingMessageId(null);
     setEditingMessageText('');
   };
@@ -2384,7 +2420,10 @@ export const CollaborationDetail = () => {
                             messages.map((msg) => {
                               const currentUser = authService.getCurrentUser();
                               const isSuperAdmin = currentUser?.web_role === 'super_admin' || currentUser?.web_role === 'org_admin';
-                              const canEditOrDelete = msg.isMe || isSuperAdmin;
+                              // L'API réserve modif/suppression à l'auteur (ou super-admin)
+                              // et les interdit si l'incident est résolu.
+                              const canEditOrDelete = (msg.isMe || isSuperAdmin) && !isIncidentResolved;
+                              const isConfirmingDelete = confirmDeleteMessageId === msg.id;
                               const isEditing = editingMessageId === msg.id;
                               const isDeleting = deletingMessageId === msg.id;
                               const renderAvatar = (isMe) => (
@@ -2552,7 +2591,39 @@ export const CollaborationDetail = () => {
                                     <div className="collab-message-time">
                                       {formatMessageTime(msg.timestamp)}
                                     </div>
-                                    {canEditOrDelete && !isEditing && msg.message && (
+                                    {canEditOrDelete && !isEditing && msg.message && isConfirmingDelete && (
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <span style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>
+                                          Supprimer ce message ?
+                                        </span>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDeleteMessage(msg.id)}
+                                          disabled={isDeleting}
+                                          style={{
+                                            background: 'none', border: 'none', padding: 0,
+                                            cursor: isDeleting ? 'not-allowed' : 'pointer',
+                                            fontSize: '11px', fontWeight: 600,
+                                            color: 'var(--color-danger)', opacity: isDeleting ? 0.5 : 1
+                                          }}
+                                        >
+                                          {isDeleting ? 'Suppression…' : 'Oui'}
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={cancelDeleteMessage}
+                                          disabled={isDeleting}
+                                          style={{
+                                            background: 'none', border: 'none', padding: 0,
+                                            cursor: 'pointer', fontSize: '11px',
+                                            color: 'var(--color-text-muted)'
+                                          }}
+                                        >
+                                          Non
+                                        </button>
+                                      </div>
+                                    )}
+                                    {canEditOrDelete && !isEditing && msg.message && !isConfirmingDelete && (
                                       <div style={{ display: 'flex', gap: '4px' }}>
                                         <button
                                           type="button"
@@ -2568,7 +2639,7 @@ export const CollaborationDetail = () => {
                                         </button>
                                         <button
                                           type="button"
-                                          onClick={() => handleDeleteMessage(msg.id)}
+                                          onClick={() => requestDeleteMessage(msg.id)}
                                           disabled={isDeleting}
                                           title="Supprimer"
                                           style={{
@@ -2598,6 +2669,31 @@ export const CollaborationDetail = () => {
                           )}
                           <div ref={messagesEndRef} />
                         </div>
+
+                        {messageActionError && (
+                          <div
+                            role="alert"
+                            style={{
+                              margin: '0 16px 8px', padding: '8px 12px', borderRadius: '8px',
+                              background: 'rgba(220, 53, 69, 0.1)', color: 'var(--color-danger)',
+                              fontSize: '12px', display: 'flex', alignItems: 'center',
+                              justifyContent: 'space-between', gap: '8px'
+                            }}
+                          >
+                            <span>{messageActionError}</span>
+                            <button
+                              type="button"
+                              onClick={() => setMessageActionError('')}
+                              style={{
+                                background: 'none', border: 'none', cursor: 'pointer',
+                                color: 'inherit', fontSize: '14px', lineHeight: 1, padding: 0
+                              }}
+                              aria-label="Fermer"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        )}
 
                         {!isCollabClosed(collaboration?.id) && !isIncidentResolved && (
                           <div className="collab-discussion-input">

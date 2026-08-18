@@ -229,21 +229,49 @@ export const sendMessageService = async (incidentId, data) => {
 };
 
 /**
- * Modifier un message de discussion
- * PATCH /MapApi/discussion/<incidentId>/<messageId>/
- * @param {string} incidentId - ID de l'incident
- * @param {string} messageId - ID du message
- * @param {string} message - Nouveau contenu du message
- * @returns {Promise<Object>} Message modifié
+ * Récupère le détail d'un message de discussion
+ * GET /MapApi/discussion/message/{id}/
+ * Accès réservé à l'auteur du message (sender) ou au super-admin.
+ * @param {number|string} messageId - ID du message
+ * @returns {Promise<Object>} Message
  */
-export const updateDiscussionMessageService = async (incidentId, messageId, message) => {
+export const getDiscussionMessageService = async (messageId) => {
   try {
     const axios = authService.createAuthenticatedAxios();
-    const response = await axios.patch(
-      `${API_URL_BASE}/MapApi/${DISCUSSION_URL}/${incidentId}/${messageId}/`,
-      { message },
-      { headers: { 'Content-Type': 'application/json' } }
+    const response = await axios.get(
+      `${API_URL_BASE}/MapApi/${DISCUSSION_URL}/message/${messageId}/`
     );
+    console.log('[Discussion] Détail message:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('[Discussion] Erreur détail message:', error?.response?.status, error?.response?.data);
+    throw error;
+  }
+};
+
+/**
+ * Modifier un message de discussion
+ * PUT (remplacement) ou PATCH (partiel) /MapApi/discussion/message/{id}/
+ * Interdit si l'incident est résolu, et réservé à l'auteur ou au super-admin.
+ * @param {number|string} messageId - ID du message
+ * @param {Object|string} data - Nouveau contenu (string) ou objet de champs
+ * @param {Object} [options]
+ * @param {boolean} [options.partial=true] - true => PATCH, false => PUT
+ * @returns {Promise<Object>} Message modifié
+ */
+export const updateDiscussionMessageService = async (messageId, data, options = {}) => {
+  const { partial = true } = options;
+  const payload = typeof data === 'string' ? { message: data } : data;
+
+  try {
+    const axios = authService.createAuthenticatedAxios();
+    const url = `${API_URL_BASE}/MapApi/${DISCUSSION_URL}/message/${messageId}/`;
+    const config = { headers: { 'Content-Type': 'application/json' } };
+
+    const response = partial
+      ? await axios.patch(url, payload, config)
+      : await axios.put(url, payload, config);
+
     console.log('[Discussion] Message modifié:', response.data);
     return response.data;
   } catch (error) {
@@ -254,20 +282,49 @@ export const updateDiscussionMessageService = async (incidentId, messageId, mess
 
 /**
  * Supprimer un message de discussion
- * DELETE /MapApi/discussion/<incidentId>/<messageId>/
- * @param {string} incidentId - ID de l'incident
- * @param {string} messageId - ID du message
+ * DELETE /MapApi/discussion/message/{id}/
+ * Interdit si l'incident est résolu, et réservé à l'auteur ou au super-admin.
+ * @param {number|string} messageId - ID du message
  * @returns {Promise<void>}
  */
-export const deleteDiscussionMessageService = async (incidentId, messageId) => {
+export const deleteDiscussionMessageService = async (messageId) => {
   try {
     const axios = authService.createAuthenticatedAxios();
-    await axios.delete(`${API_URL_BASE}/MapApi/${DISCUSSION_URL}/${incidentId}/${messageId}/`);
+    await axios.delete(`${API_URL_BASE}/MapApi/${DISCUSSION_URL}/message/${messageId}/`);
     console.log('[Discussion] Message supprimé:', messageId);
   } catch (error) {
     console.error('[Discussion] Erreur suppression message:', error?.response?.status, error?.response?.data);
     throw error;
   }
+};
+
+/**
+ * Traduit une erreur d'action sur un message en message lisible pour l'utilisateur.
+ * @param {Error} error - Erreur axios
+ * @param {string} action - 'modifier' | 'supprimer'
+ * @returns {string}
+ */
+export const getMessageActionErrorMessage = (error, action = 'modifier') => {
+  const status = error?.response?.status;
+  const data = error?.response?.data;
+
+  const detail = typeof data === 'string'
+    ? data
+    : data?.detail || data?.message || data?.error
+      || (data && typeof data === 'object'
+        ? Object.values(data).flat().filter(v => typeof v === 'string')[0]
+        : null);
+
+  if (status === 403) {
+    return detail || `Vous n'êtes pas autorisé à ${action} ce message.`;
+  }
+  if (status === 400) {
+    return detail || `Impossible de ${action} ce message : l'incident est peut-être résolu.`;
+  }
+  if (status === 404) {
+    return "Ce message n'existe plus.";
+  }
+  return detail || `Une erreur est survenue lors de la tentative de ${action} le message.`;
 };
 
 /**
