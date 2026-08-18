@@ -183,8 +183,8 @@ Pages à instrumenter, dans cet ordre :
 
 1. `/mes-interventions`
 2. `/impact`
-3. `/incidents`
-4. `/incidents/:id`
+3. `/signalements`
+4. `/signalements/:id`
 
 Relevés par page :
 
@@ -224,9 +224,9 @@ SWR passe la clé au fetcher, donc le service reçoit la chaîne
 `'collaborations'` comme objet de paramètres, puis l'étale :
 `params: { scope: 'self', ...'collaborations' }` produit treize paramètres
 parasites indexés. L'appel charge par ailleurs toutes les collaborations pour
-une page de détail d'un seul incident.
+une page de détail d'un seul signalement.
 *Correction envisagée si confirmé* : fetcher explicite, et restriction du
-périmètre à l'incident courant si l'API le permet.
+périmètre au signalement courant si l'API le permet.
 
 **H4 — Payloads surdimensionnés.**
 `organisation_service.jsx:33` demande `page_size=1000`.
@@ -238,7 +238,7 @@ affiche réellement.
 
 `pages/collaboration/Collaboration.jsx` est déjà optimisé : préchargement de la
 page suivante (lignes 207-213), `dedupingInterval` de 5 minutes sur la liste
-d'incidents du filtre (ligne 116), clés SWR complètes incluant tous les filtres.
+de signalements du filtre (ligne 116), clés SWR complètes incluant tous les filtres.
 Ce traitement n'a été appliqué qu'à cette page. Il sert de modèle si la mesure
 justifie de l'étendre.
 

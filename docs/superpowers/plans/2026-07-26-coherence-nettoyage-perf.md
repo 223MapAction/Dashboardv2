@@ -138,12 +138,12 @@ describe('canAccessPath', () => {
   });
 
   it('autorise les sous-chemins des routes permises', () => {
-    expect(canAccessPath(orgAdmin, '/incidents/42')).toBe(true);
+    expect(canAccessPath(orgAdmin, '/signalements/42')).toBe(true);
     expect(canAccessPath(orgAdmin, '/collaboration-detail/7')).toBe(true);
   });
 
   it('ne confond pas un préfixe avec un segment de chemin', () => {
-    expect(canAccessPath(orgAdmin, '/incidents-archives')).toBe(false);
+    expect(canAccessPath(orgAdmin, '/signalements-archives')).toBe(false);
   });
 
   it('refuse tout à un rôle inconnu', () => {
@@ -233,7 +233,7 @@ const RESTRICTED_PATHS = [
   '/dashboard',
   '/collaboration',
   '/collaboration-detail',
-  '/incidents',
+  '/signalements',
   '/mes-interventions',
   '/agents',
   '/profile',
@@ -257,8 +257,8 @@ export const getAccessibleNavIds = (user) => {
 
 /**
  * Cet utilisateur peut-il ouvrir ce chemin ?
- * La comparaison se fait par segment : '/incidents-archives' ne passe pas
- * pour une autorisation sur '/incidents'.
+ * La comparaison se fait par segment : '/signalements-archives' ne passe pas
+ * pour une autorisation sur '/signalements'.
  */
 export const canAccessPath = (user, path) => {
   if (!isKnownWebRole(user)) return false;
@@ -354,7 +354,7 @@ par :
 
 ```js
   const isSuperAdmin = checkSuperAdmin(user);
-  // « admin » ici = peut piloter les incidents sans être super_admin.
+  // « admin » ici = peut piloter les signalements sans être super_admin.
   const isAdmin = !isSuperAdmin && getAccessibleNavIds(user).includes('incidents');
 ```
 
@@ -533,9 +533,9 @@ Dans l'onglet Chrome déjà authentifié sur `localhost` :
 
 1. Ouvrir la console, exécuter `sessionStorage.setItem('access_token', 'jeton-invalide')`.
 2. Ouvrir l'onglet Réseau, filtrer sur `MapApi`.
-3. Naviguer vers `/incidents`.
+3. Naviguer vers `/signalements`.
 
-Expected : une requête en 401, **exactement un** `POST /MapApi/token/refresh/`, puis le rejeu réussi de la requête d'origine en 200. La liste des incidents s'affiche. Aucune boucle de requêtes.
+Expected : une requête en 401, **exactement un** `POST /MapApi/token/refresh/`, puis le rejeu réussi de la requête d'origine en 200. La liste des signalements s'affiche. Aucune boucle de requêtes.
 
 Si le refresh token est lui aussi expiré, le résultat attendu est une redirection vers `/login` — pas une boucle.
 
@@ -600,7 +600,7 @@ Expected : aucune nouvelle erreur.
 
 - [ ] **Step 4 : Vérifier les pages concernées dans le navigateur**
 
-Recharger `/collaboration`, `/impact`, `/incidents`, `/trash`.
+Recharger `/collaboration`, `/impact`, `/signalements`, `/trash`.
 Expected : les quatre pages s'affichent normalement, avec leurs données réelles issues de l'API.
 
 - [ ] **Step 5 : Commit**
@@ -654,7 +654,7 @@ bug d'origine.
 
 - [ ] **Step 3 : Mesurer les quatre pages**
 
-Pour chacune de `/mes-interventions`, `/impact`, `/incidents`, `/incidents/:id` :
+Pour chacune de `/mes-interventions`, `/impact`, `/signalements`, `/signalements/:id` :
 
 1. Vider le cache réseau, filtrer sur `MapApi`.
 2. Naviguer vers la page.
@@ -669,8 +669,8 @@ Créer `docs/superpowers/plans/2026-07-26-mesures-perf.md` avec ce tableau rempl
 |---|---|---|---|---|
 | /mes-interventions | | | | |
 | /impact | | | | |
-| /incidents | | | | |
-| /incidents/:id | | | | |
+| /signalements | | | | |
+| /signalements/:id | | | | |
 
 ## Verdict par hypothèse
 
@@ -752,9 +752,9 @@ Vérifier dans l'onglet Réseau : l'URL de `/MapApi/collaborations/dashboard/` n
 
 `MesInterventions.jsx:473` rend `<IncidentAgentsStack incident={incident} />` dans le `.map()` de la liste, et chaque instance porte son propre `useSWR` (ligne 110). Une requête par ligne affichée.
 
-Correctif : remonter la récupération au niveau de la liste, avec un seul `useSWR` qui agrège les assignations de tous les incidents affichés via `Promise.all`, puis passer le résultat aux lignes en prop. `IncidentAgentsStack` devient un composant purement présentationnel recevant `assignments`.
+Correctif : remonter la récupération au niveau de la liste, avec un seul `useSWR` qui agrège les assignations de tous les signalements affichés via `Promise.all`, puis passer le résultat aux lignes en prop. `IncidentAgentsStack` devient un composant purement présentationnel recevant `assignments`.
 
-Le détail de l'implémentation dépend de la structure exacte relevée à la Task 6 : si l'API expose un endpoint acceptant plusieurs identifiants d'incident, le préférer à `Promise.all`. Vérifier ce point dans les relevés avant d'écrire le code.
+Le détail de l'implémentation dépend de la structure exacte relevée à la Task 6 : si l'API expose un endpoint acceptant plusieurs identifiants de signalement, le préférer à `Promise.all`. Vérifier ce point dans les relevés avant d'écrire le code.
 
 Vérifier : le nombre de requêtes sur `/mes-interventions` passe de N+1 à la valeur mesurée attendue, et les avatars s'affichent toujours correctement.
 
