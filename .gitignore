@@ -31,3 +31,4 @@ lerna-debug.log*
 
 # Contexte local Claude Code (ne pas versionner)
 CLAUDE.md
+node_modules

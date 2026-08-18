@@ -1,61 +1,158 @@
-# Dashboard Map Action Mali
+# Map Action — Dashboard
 
-Dashboard de gestion des actions humanitaires et environnementales au Mali.
+Tableau de bord web de Map Action, plateforme de gestion des incidents
+environnementaux et humanitaires au Mali.
 
-## 🚀 Installation
+La plateforme relie trois acteurs : les **citoyens**, qui signalent un
+incident depuis l'application mobile ; les **agents de terrain**, qui
+interviennent ; et les **organisations**, qui pilotent la réponse. Ce dépôt
+contient l'outil des organisations — celui qui reçoit les signalements,
+assigne les missions et suit leur impact.
+
+## Fonctionnalités
+
+| Page | Rôle |
+|---|---|
+| Dashboard | Vue d'ensemble et carte des incidents |
+| Incidents | Liste et détail des signalements reçus |
+| Mes interventions | Missions assignées à l'utilisateur connecté |
+| Collaboration | Partenariats entre organisations, discussion, tâches |
+| Organisations | Gestion des organisations partenaires |
+| Agents | Gestion des agents rattachés à une organisation |
+| Impact | Statistiques sur les interventions réalisées |
+| Corbeille | Éléments supprimés, récupérables |
+| Profil | Compte de l'utilisateur connecté |
+
+## Prérequis
+
+- **Node.js 20 ou plus** — la version utilisée par la CI et le déploiement.
+- Un accès à une instance de l'**API Map Action** (voir plus bas). Ce
+  dashboard est un client : il ne fonctionne pas seul.
+
+## Installation et démarrage
 
 ```bash
-npm install
+git clone https://github.com/223MapAction/map-action-dashboard.git
+cd map-action-dashboard
+npm ci
+cp .env.example .env
 ```
 
-## ⚙️ Configuration
-
-### Variables d'environnement
-
-Créez un fichier `.env` à la racine du projet (voir `.env.example`) :
-
-```env
-REACT_APP_MAPBOX_TOKEN=votre_token_mapbox_ici
-```
-
-**Obtenir un token Mapbox :**
-1. Créez un compte gratuit sur [https://account.mapbox.com/](https://account.mapbox.com/)
-2. Allez dans la section "Access tokens"
-3. Copiez votre token public (commence par `pk.`)
-4. Collez-le dans votre fichier `.env`
-
-⚠️ **Important** : Ne commitez JAMAIS votre fichier `.env` avec un vrai token !
-
-## 🏃 Démarrage
+Renseignez ensuite `VITE_API_BASE_URL` dans `.env`, puis :
 
 ```bash
 npm run dev
 ```
 
-L'application sera accessible sur `http://localhost:5173`
+L'application démarre sur `http://localhost:5173`.
 
-## 📦 Build
+> Si `VITE_API_BASE_URL` est absente, l'application refuse de démarrer et
+> indique quoi faire. C'est volontaire : aucune valeur par défaut ne pointe
+> vers la production, pour qu'un poste mal configuré n'écrive jamais dans
+> les données réelles sans que personne ne s'en aperçoive.
+
+## Variables d'environnement
+
+Toutes sont décrites dans [`.env.example`](./.env.example).
+
+| Variable | Requise | Rôle |
+|---|---|---|
+| `VITE_API_BASE_URL` | **Oui** | Adresse de l'API Map Action. Sert aussi de base aux WebSocket : le préfixe `ws://` ou `wss://` en est déduit, il n'y a rien d'autre à configurer. |
+| `VITE_OSM_TILE_URLS` | Non | Serveur de tuiles OpenStreetMap. Par défaut, les tuiles publiques `openstreetmap.fr`. À renseigner pour auto-héberger ses tuiles. |
+| `VITE_MAPBOX_TOKEN` | Non | Active le fond de carte satellite. Sans jeton, la carte fonctionne avec OpenStreetMap et le bouton « Satellite » n'apparaît pas. |
+| `VITE_BASE_PATH` | Non | Préfixe d'URL si l'application n'est pas servie à la racine d'un domaine. Le déploiement GitHub Pages le renseigne automatiquement. |
+
+`.env` n'est jamais versionné.
+
+## Dépendance à l'API
+
+Le dashboard consomme l'API [`map-action-api`](https://github.com/223MapAction/map-action-api)
+(routes `/MapApi/…`). Il n'implémente aucune logique métier côté serveur :
+authentification, incidents, collaborations et statistiques viennent tous de
+l'API.
+
+Pour un déploiement autonome, faites tourner votre propre instance de l'API
+et pointez `VITE_API_BASE_URL` dessus.
+
+## Premier compte
+
+**Les comptes ne se créent pas depuis ce dashboard**, mais côté API. Chaque
+utilisateur porte un champ `web_role` qui gouverne son accès :
+
+| `web_role` | Accès |
+|---|---|
+| `super_admin` | Toutes les pages |
+| `org_admin` | Son organisation : dashboard, collaboration, incidents, interventions, agents, impact, profil |
+| `bureau_agent` | Idem `org_admin` |
+
+Un rôle absent ou inconnu est refusé et l'utilisateur est déconnecté — il n'y
+a **aucune attribution de rôle par défaut**, et notamment jamais de
+`super_admin` implicite. Voir [`src/utils/permissions.js`](./src/utils/permissions.js)
+et [`src/components/auth/ProtectedRoute.jsx`](./src/components/auth/ProtectedRoute.jsx).
+
+Les agents de terrain utilisent l'application mobile, pas ce dashboard.
+
+## Commandes
 
 ```bash
-npm run build
+npm run dev      # serveur de développement
+npm run lint     # ESLint
+npm run test     # tests (Vitest)
+npm run build    # build de production, dans dist/
+npm run preview  # sert le build de production localement
 ```
 
-## 🛠️ Technologies
+## Déploiement
 
-- React 18
-- Vite
-- Mapbox GL JS
-- React Map GL
-- Iconsax React
-- React DatePicker
+Chaque push sur `main` déclenche
+[`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml), qui
+construit l'application et la publie sur GitHub Pages.
 
-## 📄 Licence
+Deux secrets se règlent dans **Settings → Secrets and variables → Actions** :
 
-Ce dépôt est distribué sous licence **AGPL-3.0** — voir le fichier
-[LICENSE](./LICENSE) à la racine.
+- `VITE_API_BASE_URL` — requis, sinon le site publié refuse de démarrer ;
+- `VITE_MAPBOX_TOKEN` — facultatif.
+
+Pour héberger ailleurs, `npm run build` produit un `dist/` statique à servir
+par n'importe quel serveur web. Si l'application n'est pas à la racine du
+domaine, renseignez `VITE_BASE_PATH` au moment du build.
+
+## Architecture
+
+- **React 19** et **Vite**, routage avec **React Router v7** ([`src/App.jsx`](./src/App.jsx)).
+- **Cartographie : MapLibre GL** via `react-map-gl/maplibre`, sur des tuiles
+  OpenStreetMap ouvertes. Aucune dépendance obligatoire à un service payant.
+- Formulaires avec `react-hook-form` et `yup`, données via `axios` et `swr`,
+  graphiques avec `recharts`.
+- Chaque domaine métier vit dans `src/pages/<domaine>/`, avec son propre
+  dossier `service/` pour les appels API.
+- L'accès aux pages est contrôlé par
+  [`ProtectedRoute`](./src/components/auth/ProtectedRoute.jsx), qui s'appuie
+  sur `web_role`.
+- La journalisation passe par [`src/utils/logger.js`](./src/utils/logger.js) :
+  masquage des champs sensibles et silence complet en production. La règle
+  ESLint `no-console` empêche de le contourner.
+
+## Contribuer
+
+Les vérifications tournent automatiquement sur chaque pull request : lint,
+tests, build et audit des dépendances
+([`.github/workflows/ci.yml`](./.github/workflows/ci.yml)). Lancez-les en
+local avant d'ouvrir une PR.
+
+## Licence
+
+Distribué sous licence **AGPL-3.0** — voir [LICENSE](./LICENSE).
 
 Copyright (C) 2026 Map Action Mali.
 
-Les ressources non logicielles (logo, images, sons) appartiennent à
-Map Action Mali et ne sont pas couvertes par l'AGPL-3.0 : voir
+Le logo, les images et les sons appartiennent à Map Action Mali et ne sont
+pas couverts par l'AGPL-3.0. Les fonds de carte relèvent de leurs
+fournisseurs respectifs. Détail dans
 [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md).
+
+## Les autres composants de Map Action
+
+- [`map-action-api`](https://github.com/223MapAction/map-action-api) — l'API dont ce dashboard est le client
+- [`map-action-mobile`](https://github.com/223MapAction/map-action-mobile) — l'application des citoyens et des agents de terrain
+- [`map-action-ai-service`](https://github.com/223MapAction/map-action-ai-service) — le service d'analyse
