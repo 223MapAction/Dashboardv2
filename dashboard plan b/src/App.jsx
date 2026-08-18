@@ -6,7 +6,7 @@ import { ProtectedRoute } from './components/auth';
 import { FrontiereChargementPage } from './components/atoms/FrontiereChargementPage';
 import { ChargementPage } from './components/atoms/ChargementPage';
 
-// Les pages protégées sont chargées à la demande : sans ça, mapbox-gl et
+// Les pages protégées sont chargées à la demande : sans ça, maplibre-gl et
 // recharts partent dans le bundle initial et se téléchargent dès le login.
 // Les pages exportent des named exports, d'où le remap vers `default`.
 const Dashboard = lazy(() => import('./pages/dashboard').then((m) => ({ default: m.Dashboard })));
