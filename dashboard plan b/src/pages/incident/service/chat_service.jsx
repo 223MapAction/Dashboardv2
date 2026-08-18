@@ -1,5 +1,6 @@
 import { authService } from '../../auth/services/authService';
 import { API_URL_BASE } from '../../../config/api_url_base';
+import { logger } from '../../../utils/logger';
 
 /**
  * Récupère l'historique de discussion (chatbot) pour un incident donné
@@ -18,10 +19,9 @@ export const getIncidentChatHistoryService = async (incidentId, limit, before) =
       `${API_URL_BASE}/MapApi/incidents/${incidentId}/chat/`,
       { params }
     );
-    console.log(`[ChatService] Historique de discussion pour incident ${incidentId}:`, response.data);
     return response.data;
   } catch (error) {
-    console.error(`[ChatService] Erreur récupération historique chat (incident ${incidentId}):`, error.response?.status, error.response?.data);
+    logger.error(`[ChatService] Erreur récupération historique chat (incident ${incidentId}):`, error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -40,10 +40,9 @@ export const sendIncidentChatMessageService = async (incidentId, message) => {
       `${API_URL_BASE}/MapApi/incidents/${incidentId}/chat/`,
       { message }
     );
-    console.log(`[ChatService] Message envoyé pour incident ${incidentId}:`, response.data);
     return response.data;
   } catch (error) {
-    console.error(`[ChatService] Erreur envoi message chat (incident ${incidentId}):`, error.response?.status, error.response?.data);
+    logger.error(`[ChatService] Erreur envoi message chat (incident ${incidentId}):`, error.response?.status, error.response?.data);
     throw error;
   }
 };

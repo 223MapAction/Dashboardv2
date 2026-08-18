@@ -8,6 +8,7 @@ import { getNotifications, markNotificationAsRead } from './service/notification
 import { BlurryImage } from '../atoms/BlurryImage';
 import { API_URL_BASE } from '../../config/api_url_base';
 import './header.css';
+import { logger } from '../../utils/logger';
 
 export const Header = ({ onMenuToggle, user }) => {
   const navigate = useNavigate();
@@ -31,8 +32,6 @@ export const Header = ({ onMenuToggle, user }) => {
   }, [notificationsData]);
 
   useEffect(() => {
-    console.log('[NOTIFICATIONS] Liste actuelle des notifications:', notifications);
-    console.log('[NOTIFICATIONS] unread_count depuis API:', notificationsData?.unread_count);
   }, [notifications, notificationsData]);
 
   // Synchroniser nextUrl quand les données SWR changent
@@ -62,12 +61,10 @@ export const Header = ({ onMenuToggle, user }) => {
 
       socket.onopen = () => {
         delay = 3000;
-        console.log('[WS-Notifications] Connecté aux notifications');
       };
       socket.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          console.log('[WS-Notifications] Message reçu en temps réel:', data);
           if (data.event === 'notification' || data.message) {
             // Jouer le son de notification
             try {
@@ -100,7 +97,7 @@ export const Header = ({ onMenuToggle, user }) => {
             }, { revalidate: false });
           }
         } catch (e) {
-          console.error('[WS-Notifications] Erreur parsing message:', e);
+          logger.error('[WS-Notifications] Erreur parsing message:', e);
         }
       };
       socket.onerror = () => socket.close();
@@ -152,7 +149,7 @@ export const Header = ({ onMenuToggle, user }) => {
 
       setNextNotificationsUrl(data.next || null);
     } catch (error) {
-      console.error('[HEADER] Erreur chargement notifications supplémentaires:', error);
+      logger.error('[HEADER] Erreur chargement notifications supplémentaires:', error);
     } finally {
       setIsLoadingMoreNotifications(false);
     }
@@ -215,7 +212,7 @@ export const Header = ({ onMenuToggle, user }) => {
           return Array.isArray(prev) ? updated : { ...prev, results: updated, unread_count: newUnreadCount };
         }, { revalidate: false });
       } catch (error) {
-        console.error('[HEADER] Erreur marquage notification:', error);
+        logger.error('[HEADER] Erreur marquage notification:', error);
       }
     }
   };

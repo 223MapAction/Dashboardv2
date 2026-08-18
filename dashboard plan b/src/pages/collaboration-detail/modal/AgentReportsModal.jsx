@@ -7,6 +7,7 @@ import { BlurryImage } from '../../../components/atoms/BlurryImage';
 
 import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
 import { ImageViewer } from '../../../components/molecules/ImageViewer';
+import { logger } from '../../../utils/logger';
 const formatDate = (isoString) => {
   if (!isoString) return 'Non spécifiée';
   try {
@@ -80,7 +81,7 @@ export const AgentReportsModal = ({ isOpen, onClose, incidentId, incidentTitle }
         setNextUrl(data.next || null);
       }
     } catch (err) {
-      console.error('[AgentReportsModal] Erreur chargement rapports:', err);
+      logger.error('[AgentReportsModal] Erreur chargement rapports:', err);
     } finally {
       setIsLoadingMore(false);
     }

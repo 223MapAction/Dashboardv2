@@ -1,5 +1,6 @@
 import { authService } from '../../auth/services/authService';
 import { API_URL_BASE } from '../../../config/api_url_base';
+import { logger } from '../../../utils/logger';
 
 
 /**
@@ -40,10 +41,9 @@ export const getOrgInternalIncidentsService = async (filters = {}) => {
     const response = await axios.get(`${API_URL_BASE}/MapApi/org-incidents/`, {
       params
     });
-    console.log('[MesInterventions] Incidents internes de l\'organisation récupérés:', params, response.data);
     return response.data;
   } catch (error) {
-    console.error('[MesInterventions] Erreur récupération incidents internes org:', error.response?.status, error.response?.data);
+    logger.error('[MesInterventions] Erreur récupération incidents internes org:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -57,10 +57,9 @@ export const toggleIncidentPublicService = async (incidentId) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.post(`${API_URL_BASE}/MapApi/incidents/${incidentId}/toggle-public/`);
-    console.log('[MesInterventions] Visibilité publique basculée:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[MesInterventions] Erreur basculement visibilité publique:', error.response?.status, error.response?.data);
+    logger.error('[MesInterventions] Erreur basculement visibilité publique:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -88,10 +87,9 @@ export const getFieldReportsService = async (filters = {}) => {
     }
 
     const response = await axios.get(url, { params });
-    console.log('[FieldReport] Rapports récupérés:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[FieldReport] Erreur récupération rapports:', error?.response?.status, error?.response?.data);
+    logger.error('[FieldReport] Erreur récupération rapports:', error?.response?.status, error?.response?.data);
     throw error;
   }
 };

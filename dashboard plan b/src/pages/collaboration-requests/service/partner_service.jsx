@@ -1,5 +1,6 @@
 import { authService } from '../../auth/services/authService';
 import { API_URL_BASE } from '../../../config/api_url_base';
+import { logger } from '../../../utils/logger';
 
 // ─────────────────────────────────────────────────────────
 // SUGGESTIONS DE PARTENAIRES
@@ -17,10 +18,9 @@ export const listPartnerSuggestionsService = async (params = {}) => {
         const response = await axios.get(`${API_URL_BASE}/MapApi/collaboration/`, {
             params: { scope: 'received', ...params }
         });
-        console.log('[PartnerSuggestion] Suggestions récupérées:', response.data);
         return response?.data?.results || response?.data || [];
     } catch (error) {
-        console.error('[PartnerSuggestion] Erreur liste suggestions:', error?.response?.status, error?.response?.data);
+        logger.error('[PartnerSuggestion] Erreur liste suggestions:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -40,10 +40,9 @@ export const createPartnerSuggestionService = async (incidentId, data) => {
     try {
         const axios = authService.createAuthenticatedAxios();
         const response = await axios.post(`${API_URL_BASE}/MapApi/incidents/${incidentId}/suggestions/`, data);
-        console.log('[PartnerSuggestion] Suggestion créée:', response.data);
         return response?.data || {};
     } catch (error) {
-        console.error('[PartnerSuggestion] Erreur création suggestion:', error?.response?.status, error?.response?.data);
+        logger.error('[PartnerSuggestion] Erreur création suggestion:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -59,10 +58,9 @@ export const getPartnerSuggestionService = async (incidentId, suggestionId) => {
     try {
         const axios = authService.createAuthenticatedAxios();
         const response = await axios.get(`${API_URL_BASE}/MapApi/incidents/${incidentId}/suggestions/${suggestionId}/`);
-        console.log('[PartnerSuggestion] Détail suggestion:', response.data);
         return response?.data || {};
     } catch (error) {
-        console.error('[PartnerSuggestion] Erreur détail suggestion:', error?.response?.status, error?.response?.data);
+        logger.error('[PartnerSuggestion] Erreur détail suggestion:', error?.response?.status, error?.response?.data);
         throw error;
     }
 
@@ -81,10 +79,9 @@ export const acceptPartnerSuggestionService = async (incidentId, suggestionId) =
         const response = await axios.post(
             `${API_URL_BASE}/MapApi/incidents/${incidentId}/suggestions/${suggestionId}/accept/`
         );
-        console.log('[PartnerSuggestion] Suggestion acceptée:', response.data);
         return response?.data || {};
     } catch (error) {
-        console.error('[PartnerSuggestion] Erreur acceptation suggestion:', error?.response?.status, error?.response?.data);
+        logger.error('[PartnerSuggestion] Erreur acceptation suggestion:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -102,10 +99,9 @@ export const rejectPartnerSuggestionService = async (incidentId, suggestionId) =
         const response = await axios.post(
             `${API_URL_BASE}/MapApi/incidents/${incidentId}/suggestions/${suggestionId}/reject/`
         );
-        console.log('[PartnerSuggestion] Suggestion rejetée:', response.data);
         return response?.data || {};
     } catch (error) {
-        console.error('[PartnerSuggestion] Erreur rejet suggestion:', error?.response?.status, error?.response?.data);
+        logger.error('[PartnerSuggestion] Erreur rejet suggestion:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -119,10 +115,9 @@ export const getMyPendingReceivedSuggestionsService = async () => {
     try {
         const axios = authService.createAuthenticatedAxios();
         const response = await axios.get(`${API_URL_BASE}/MapApi/my-suggestions/received/?status=pending`);
-        console.log('[PartnerSuggestion] Suggestions reçues en attente:', response.data);
         return response?.data?.results || response?.data || [];
     } catch (error) {
-        console.error('[PartnerSuggestion] Erreur suggestions reçues en attente:', error?.response?.status, error?.response?.data);
+        logger.error('[PartnerSuggestion] Erreur suggestions reçues en attente:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -136,10 +131,9 @@ export const getMyActiveCollaborationsService = async () => {
     try {
         const axios = authService.createAuthenticatedAxios();
         const response = await axios.get(`${API_URL_BASE}/MapApi/collaborations/dashboard/?status=in-progress`);
-        console.log('[Collaboration] Collabs en cours:', response.data);
         return response?.data?.results || response?.data || [];
     } catch (error) {
-        console.error('[Collaboration] Erreur collabs en cours:', error?.response?.status, error?.response?.data);
+        logger.error('[Collaboration] Erreur collabs en cours:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -153,10 +147,9 @@ export const getMyPendingContributorInvitationsService = async () => {
     try {
         const axios = authService.createAuthenticatedAxios();
         const response = await axios.get(`${API_URL_BASE}/MapApi/collaboration/?status=pending&role=contributor`);
-        console.log('[Collaboration] Invitations contributeur en attente:', response.data);
         return response?.data?.results || response?.data || [];
     } catch (error) {
-        console.error('[Collaboration] Erreur invitations en attente:', error?.response?.status, error?.response?.data);
+        logger.error('[Collaboration] Erreur invitations en attente:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -171,10 +164,9 @@ export const getAcceptedIncidentSuggestionsService = async (incidentId) => {
     try {
         const axios = authService.createAuthenticatedAxios();
         const response = await axios.get(`${API_URL_BASE}/MapApi/incidents/${incidentId}/suggestions/?status=accepted`);
-        console.log(`[PartnerSuggestion] Suggestions acceptées pour l'incident ${incidentId}:`, response.data);
         return response?.data?.results || response?.data || [];
     } catch (error) {
-        console.error(`[PartnerSuggestion] Erreur suggestions acceptées incident ${incidentId}:`, error?.response?.status, error?.response?.data);
+        logger.error(`[PartnerSuggestion] Erreur suggestions acceptées incident ${incidentId}:`, error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -189,10 +181,9 @@ export const getIncidentCollaborationsService = async (incidentId) => {
     try {
         const axios = authService.createAuthenticatedAxios();
         const response = await axios.get(`${API_URL_BASE}/MapApi/collaboration/?incident_id=${incidentId}`);
-        console.log(`[Collaboration] Collabs de l'incident ${incidentId}:`, response.data);
         return response?.data?.results || response?.data || [];
     } catch (error) {
-        console.error(`[Collaboration] Erreur collabs incident ${incidentId}:`, error?.response?.status, error?.response?.data);
+        logger.error(`[Collaboration] Erreur collabs incident ${incidentId}:`, error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -212,10 +203,9 @@ export const listDemandeDeCollaborationsService = async (params = {}) => {
     try {
         const axios = authService.createAuthenticatedAxios();
         const response = await axios.get(`${API_URL_BASE}/MapApi/collaboration/`, { params });
-        console.log('[Collaboration] Liste des collaborations:', response.data);
         return response?.data?.results || response?.data || [];
     } catch (error) {
-        console.error('[Collaboration] Erreur liste collaborations:', error?.response?.status, error?.response?.data);
+        logger.error('[Collaboration] Erreur liste collaborations:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -234,10 +224,9 @@ export const getCollaborationDashboardService = async (params = {}) => {
     try {
         const axios = authService.createAuthenticatedAxios();
         const response = await axios.get(`${API_URL_BASE}/MapApi/collaborations/dashboard/`, { params });
-        console.log('[Collaboration] Dashboard récupéré:', response.data);
         return response?.data;
     } catch (error) {
-        console.error('[Collaboration] Erreur dashboard:', error?.response?.status, error?.response?.data);
+        logger.error('[Collaboration] Erreur dashboard:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -252,10 +241,9 @@ export const getCollaborationDetailService = async (id) => {
     try {
         const axios = authService.createAuthenticatedAxios();
         const response = await axios.get(`${API_URL_BASE}/MapApi/collaboration/${id}/`);
-        console.log('[Collaboration] Détail collaboration:', response.data);
         return response?.data || {};
     } catch (error) {
-        console.error('[Collaboration] Erreur détail collaboration:', error?.response?.status, error?.response?.data);
+        logger.error('[Collaboration] Erreur détail collaboration:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -271,10 +259,9 @@ export const updateCollaborationDetailService = async (id, data) => {
     try {
         const axios = authService.createAuthenticatedAxios();
         const response = await axios.patch(`${API_URL_BASE}/MapApi/collaboration/${id}/`, data);
-        console.log('[Collaboration] Collaboration modifiée:', response.data);
         return response?.data || {};
     } catch (error) {
-        console.error('[Collaboration] Erreur modification collaboration:', error?.response?.status, error?.response?.data);
+        logger.error('[Collaboration] Erreur modification collaboration:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -289,10 +276,9 @@ export const deleteCollaborationDetailService = async (id) => {
     try {
         const axios = authService.createAuthenticatedAxios();
         const response = await axios.delete(`${API_URL_BASE}/MapApi/collaboration/${id}/`);
-        console.log('[Collaboration] Collaboration supprimée:', response.data);
         return response?.data || {};
     } catch (error) {
-        console.error('[Collaboration] Erreur suppression collaboration:', error?.response?.status, error?.response?.data);
+        logger.error('[Collaboration] Erreur suppression collaboration:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -307,10 +293,9 @@ export const acceptCollaborationService = async (collaborationId) => {
     try {
         const axios = authService.createAuthenticatedAxios();
         const response = await axios.post(`${API_URL_BASE}/MapApi/collaboration/${collaborationId}/accept/`);
-        console.log('[Collaboration] Collaboration acceptée:', response.data);
         return response?.data || {};
     } catch (error) {
-        console.error('[Collaboration] Erreur acceptation collaboration:', error?.response?.status, error?.response?.data);
+        logger.error('[Collaboration] Erreur acceptation collaboration:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -325,10 +310,9 @@ export const rejectCollaborationService = async (collaborationId) => {
     try {
         const axios = authService.createAuthenticatedAxios();
         const response = await axios.post(`${API_URL_BASE}/MapApi/collaboration/${collaborationId}/reject/`);
-        console.log('[Collaboration] Collaboration rejetée:', response.data);
         return response?.data || {};
     } catch (error) {
-        console.error('[Collaboration] Erreur rejet collaboration:', error?.response?.status, error?.response?.data);
+        logger.error('[Collaboration] Erreur rejet collaboration:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };

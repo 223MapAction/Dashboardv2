@@ -1,5 +1,6 @@
 import { authService } from '../../auth/services/authService';
 import { API_URL_BASE } from '../../../config/api_url_base';
+import { logger } from '../../../utils/logger';
 
 
 const COLLABORATION_URL = "collaboration"
@@ -16,7 +17,7 @@ export const getCollaborationsService = async (params = {}) => {
 
     return response?.data;
   } catch (error) {
-    console.error('[Collaboration] Erreur récupération collaborations:', error?.response?.status, error?.response?.data);
+    logger.error('[Collaboration] Erreur récupération collaborations:', error?.response?.status, error?.response?.data);
     throw error;
   }
 };
@@ -31,10 +32,9 @@ export const getCollaborationService = async (id) => {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.get(`${API_URL_BASE}/MapApi/${COLLABORATION_URL}/${id}/`);
 
-    console.log('[Collaboration] Collaboration récupérée:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Collaboration] Erreur récupération collaboration:', error?.response?.status, error?.response?.data);
+    logger.error('[Collaboration] Erreur récupération collaboration:', error?.response?.status, error?.response?.data);
     throw error;
   }
 };
@@ -55,10 +55,9 @@ export const createCollaborationService = async (collaborationData) => {
       collaborationData
     );
 
-    console.log('[Collaboration] Collaboration créée:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Collaboration] Erreur création collaboration:', error?.response?.status, error?.response?.data);
+    logger.error('[Collaboration] Erreur création collaboration:', error?.response?.status, error?.response?.data);
     throw error?.response?.data || error;
   }
 };
@@ -75,10 +74,9 @@ export const acceptCollaborationService = async (id) => {
       `${API_URL_BASE}/MapApi/${COLLABORATION_URL}/${id}/accept/`
     );
 
-    console.log('[Collaboration] Collaboration acceptée:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Collaboration] Erreur acceptation collaboration:', error?.response?.status, error?.response?.data);
+    logger.error('[Collaboration] Erreur acceptation collaboration:', error?.response?.status, error?.response?.data);
     throw error?.response?.data || error;
   }
 };
@@ -95,10 +93,9 @@ export const rejectCollaborationService = async (id) => {
       `${API_URL_BASE}/MapApi/${COLLABORATION_URL}/${id}/reject/`
     );
 
-    console.log('[Collaboration] Collaboration rejetée:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Collaboration] Erreur rejet collaboration:', error?.response?.status, error?.response?.data);
+    logger.error('[Collaboration] Erreur rejet collaboration:', error?.response?.status, error?.response?.data);
     throw error?.response?.data || error;
   }
 };
@@ -119,10 +116,9 @@ export const getOrganisationMembersService = async (orgId) => {
       `${API_URL_BASE}/MapApi/organisations/${orgId}/members/`
     );
 
-    console.log('[Organisation] Membres récupérés:', response.data);
     return response?.data?.results || response?.data || [];
   } catch (error) {
-    console.error('[Organisation] Erreur récupération membres:', error?.response?.status, error?.response?.data);
+    logger.error('[Organisation] Erreur récupération membres:', error?.response?.status, error?.response?.data);
     throw error;
   }
 };
@@ -143,10 +139,9 @@ export const addOrganisationStaffMemberService = async (orgId, memberData) => {
       memberData
     );
 
-    console.log('[Organisation] Membre ajouté:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Organisation] Erreur ajout membre:', error?.response?.status, error?.response?.data);
+    logger.error('[Organisation] Erreur ajout membre:', error?.response?.status, error?.response?.data);
     throw error?.response?.data || error;
   }
 };
@@ -167,10 +162,9 @@ export const updateOrganisationMemberService = async (orgId, userId, roleData) =
       roleData
     );
 
-    console.log('[Organisation] Rôle membre mis à jour:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Organisation] Erreur mise à jour membre:', error?.response?.status, error?.response?.data);
+    logger.error('[Organisation] Erreur mise à jour membre:', error?.response?.status, error?.response?.data);
     throw error?.response?.data || error;
   }
 };
@@ -188,10 +182,9 @@ export const removeOrganisationMemberService = async (orgId, userId) => {
       `${API_URL_BASE}/MapApi/organisations/${orgId}/members/${userId}/`
     );
 
-    console.log('[Organisation] Membre retiré:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Organisation] Erreur suppression membre:', error?.response?.status, error?.response?.data);
+    logger.error('[Organisation] Erreur suppression membre:', error?.response?.status, error?.response?.data);
     throw error?.response?.data || error;
   }
 };
@@ -238,10 +231,9 @@ export const createFieldReportService = async (reportData) => {
       { headers }
     );
 
-    console.log('[FieldReport] Rapport créé:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[FieldReport] Erreur création rapport:', error?.response?.status, error?.response?.data);
+    logger.error('[FieldReport] Erreur création rapport:', error?.response?.status, error?.response?.data);
     throw error?.response?.data || error;
   }
 };
@@ -272,10 +264,9 @@ export const getFieldReportsService = async (filters = {}) => {
     }
 
     const response = await axios.get(url, { params });
-    console.log('[FieldReport] Rapports récupérés:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[FieldReport] Erreur récupération rapports:', error?.response?.status, error?.response?.data);
+    logger.error('[FieldReport] Erreur récupération rapports:', error?.response?.status, error?.response?.data);
     throw error;
   }
 };

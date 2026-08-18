@@ -3,6 +3,7 @@ import useSWR from 'swr';
 import { People, Eye } from 'iconsax-react';
 import { getOrganisationsService, formatOrganisation } from '../organisations/service/organisation_service';
 import { createSuggestionService } from '../suggest-request/service/suggest_service';
+import { logger } from '../../utils/logger';
 
 /**
  * Suggerer des organisations partenaires sur une collaboration : la liste des
@@ -30,7 +31,7 @@ export function useSuggestionsOrganisations(collaboration) {
         const rawOrgs = await getOrganisationsService();
         return (rawOrgs || []).map(org => formatOrganisation(org)).filter(Boolean);
       } catch (err) {
-        console.error('[CollaborationDetail] Erreur chargement organisations list:', err);
+        logger.error('[CollaborationDetail] Erreur chargement organisations list:', err);
         return [];
       }
     },

@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { mutate } from 'swr';
 import { API_URL_BASE } from '../../../config/api_url_base';
+import { logger } from '../../../utils/logger';
 
 const API_URL = API_URL_BASE;
 
@@ -55,11 +56,9 @@ export const authService = {
         }
       );
 
-      console.log('[AUTH] Réponse user_retrieve:', userResponse.status, userResponse.data);
 
       const userData = userResponse.data.data || userResponse.data;
 
-      console.log('[AUTH] Données user:', userData);
 
       // 3. Stockage dans sessionStorage
       sessionStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, access);
@@ -77,10 +76,10 @@ export const authService = {
         tokens: { access, refresh },
       };
     } catch (error) {
-      console.error('[AUTH] Erreur complète:', error);
-      console.error('[AUTH] Status:', error.response?.status);
-      console.error('[AUTH] Data:', error.response?.data);
-      console.error('[AUTH] Headers:', error.response?.headers);
+      logger.error('[AUTH] Erreur complète:', error);
+      logger.error('[AUTH] Status:', error.response?.status);
+      logger.error('[AUTH] Data:', error.response?.data);
+      logger.error('[AUTH] Headers:', error.response?.headers);
 
       if (error.response?.status === 401) {
         throw {
@@ -110,7 +109,6 @@ export const authService = {
       sessionStorage.removeItem(key);
     });
 
-    console.log('[AUTH] ✅ Déconnexion effectuée - Caches SWR et sessionStorage effacés');
   },
 
   /**
@@ -162,7 +160,7 @@ export const authService = {
       sessionStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, access);
       return access;
     } catch (error) {
-      console.error('Token refresh error:', error);
+      logger.error('Token refresh error:', error);
       authService.logout();
       return null;
     }
@@ -175,12 +173,10 @@ export const authService = {
    */
   requestPasswordReset: async (email) => {
     try {
-      console.log('[AUTH] Demande de réinitialisation pour:', email);
       const response = await axios.post(`${API_URL}/MapApi/password_reset`, { email });
-      console.log('[AUTH] Réponse requestPasswordReset:', response.data);
       return response.data;
     } catch (error) {
-      console.error('[AUTH] Erreur requestPasswordReset:', error);
+      logger.error('[AUTH] Erreur requestPasswordReset:', error);
       throw error.response?.data || error.message || 'Erreur lors de l\'envoi de l\'e-mail';
     }
   },
@@ -192,16 +188,14 @@ export const authService = {
    */
   confirmPasswordReset: async ({ email, code, new_password }) => {
     try {
-      console.log('[AUTH] Confirmation réinitialisation pour:', email);
       const response = await axios.post(`${API_URL}/MapApi/password_reset/`, {
         email,
         code,
         new_password,
       });
-      console.log('[AUTH] Réponse confirmPasswordReset:', response.data);
       return response.data;
     } catch (error) {
-      console.error('[AUTH] Erreur confirmPasswordReset:', error);
+      logger.error('[AUTH] Erreur confirmPasswordReset:', error);
       throw error.response?.data || error.message || 'Erreur lors de la réinitialisation';
     }
   },
@@ -218,7 +212,6 @@ export const authService = {
         throw new Error('Utilisateur non authentifié');
       }
 
-      console.log('[AUTH] Changement de mot de passe');
       const response = await axios.put(
         `${API_URL}/MapApi/change_password/`,
         { old_password, new_password },
@@ -228,10 +221,9 @@ export const authService = {
           },
         }
       );
-      console.log('[AUTH] Réponse changePassword:', response.data);
       return response.data;
     } catch (error) {
-      console.error('[AUTH] Erreur changePassword:', error);
+      logger.error('[AUTH] Erreur changePassword:', error);
       throw error.response?.data || error.message || 'Erreur lors du changement de mot de passe';
     }
   },

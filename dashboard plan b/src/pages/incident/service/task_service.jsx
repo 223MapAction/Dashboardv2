@@ -1,5 +1,6 @@
 import { authService } from '../../auth/services/authService';
 import { API_URL_BASE } from '../../../config/api_url_base';
+import { logger } from '../../../utils/logger';
 
 /**
  * Récupère toutes les tâches d'un incident
@@ -11,10 +12,9 @@ export const getTasksService = async (incidentId) => {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.get(`${API_URL_BASE}/MapApi/incidents/${incidentId}/tasks/`);
 
-    console.log('[Task] Tâches récupérées:', response.data);
     return response?.data?.results || response?.data || [];
   } catch (error) {
-    console.error('[Task] Erreur récupération tâches:', error?.response?.status, error?.response?.data);
+    logger.error('[Task] Erreur récupération tâches:', error?.response?.status, error?.response?.data);
     throw error;
   }
   
@@ -31,10 +31,9 @@ export const getTaskService = async (incidentId, taskId) => {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.get(`${API_URL_BASE}/MapApi/incidents/${incidentId}/tasks/${taskId}/`);
 
-    console.log('[Task] Tâche récupérée:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Task] Erreur récupération tâche:', error?.response?.status, error?.response?.data);
+    logger.error('[Task] Erreur récupération tâche:', error?.response?.status, error?.response?.data);
     throw error;
   }
 };
@@ -58,10 +57,9 @@ export const createTaskService = async (incidentId, taskData) => {
       taskData
     );
 
-    console.log('[Task] Tâche créée:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Task] Erreur création tâche:', error?.response?.status, error?.response?.data);
+    logger.error('[Task] Erreur création tâche:', error?.response?.status, error?.response?.data);
     throw error?.response?.data || error;
   }
 };
@@ -101,10 +99,9 @@ export const completeTaskService = async (incidentId, taskId, proofs) => {
       }
     );
 
-    console.log('[Task] Tâche complétée:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Task] Erreur complétion tâche:', error?.response?.status, error?.response?.data);
+    logger.error('[Task] Erreur complétion tâche:', error?.response?.status, error?.response?.data);
     throw error?.response?.data || error;
   }
 };
@@ -124,10 +121,9 @@ export const failTaskService = async (incidentId, taskId, failureReason) => {
       { failure_reason: failureReason }
     );
 
-    console.log('[Task] Tâche marquée comme échouée:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Task] Erreur échec tâche:', error?.response?.status, error?.response?.data);
+    logger.error('[Task] Erreur échec tâche:', error?.response?.status, error?.response?.data);
     throw error?.response?.data || error;
   }
 };
@@ -147,10 +143,9 @@ export const updateTaskService = async (incidentId, taskId, updates) => {
       updates
     );
 
-    console.log('[Task] Tâche mise à jour:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Task] Erreur mise à jour tâche:', error?.response?.status, error?.response?.data);
+    logger.error('[Task] Erreur mise à jour tâche:', error?.response?.status, error?.response?.data);
     throw error?.response?.data || error;
   }
 };
@@ -166,9 +161,8 @@ export const deleteTaskService = async (incidentId, taskId) => {
     const axios = authService.createAuthenticatedAxios();
     await axios.delete(`${API_URL_BASE}/MapApi/incidents/${incidentId}/tasks/${taskId}/`);
 
-    console.log('[Task] Tâche supprimée:', taskId);
   } catch (error) {
-    console.error('[Task] Erreur suppression tâche:', error?.response?.status, error?.response?.data);
+    logger.error('[Task] Erreur suppression tâche:', error?.response?.status, error?.response?.data);
     throw error?.response?.data || error;
   }
 };

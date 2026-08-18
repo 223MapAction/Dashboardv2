@@ -1,6 +1,7 @@
 
 import { authService } from '../../auth/services/authService';
 import { API_URL_BASE } from '../../../config/api_url_base';
+import { logger } from '../../../utils/logger';
 
 
 
@@ -38,11 +39,10 @@ export const getIncidentsService = async (page = null, pageSize = null, search =
       `${API_URL_BASE}/MapApi/incident/${queryString}`
     );
 
-    console.warn('[Incident]url Incidents récupérés:', `${API_URL_BASE}/MapApi/incident/${queryString}`);
-    console.log('[Incident] Incidents récupérés:', response.data);
+    logger.warn('[Incident]url Incidents récupérés:', `${API_URL_BASE}/MapApi/incident/${queryString}`);
     return response.data;
   } catch (error) {
-    console.error('[Incident] Erreur récupération incidents:', error.response?.status, error.response?.data);
+    logger.error('[Incident] Erreur récupération incidents:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -59,10 +59,9 @@ export const getResolvedIncidentsService = async () => {
       `${API_URL_BASE}/MapApi/incidentResolved/`
     );
 
-    console.log('[Incident] Incidents résolus récupérés:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Incident] Erreur récupération incidents résolus:', error.response?.status, error.response?.data);
+    logger.error('[Incident] Erreur récupération incidents résolus:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -82,11 +81,9 @@ export const getIncidentService = async (id) => {
       `${API_URL_BASE}/MapApi/${INCIDENT_URL}/${id}`
     );
 
-    console.log('[Incident]url Incidents récupérés:', `${API_URL_BASE}/MapApi/${INCIDENT_URL}/${id}/`);
-    console.log('[Incident] Incident récupéré:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Incident] Erreur récupération incident:', error.response?.status, error.response?.data);
+    logger.error('[Incident] Erreur récupération incident:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -129,10 +126,9 @@ export const createIncidentService = async (incidentData) => {
       }
     );
 
-    console.log('[Incident] Incident créé:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Incident] Erreur création incident:', error.response?.status, error.response?.data);
+    logger.error('[Incident] Erreur création incident:', error.response?.status, error.response?.data);
     throw error?.response?.data || error;
   }
 };
@@ -151,10 +147,9 @@ export const updateIncidentService = async (id, updates) => {
       updates
     );
 
-    console.log('[Incident] Incident mis à jour:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Incident] Erreur mise à jour incident:', error.response?.status, error.response?.data);
+    logger.error('[Incident] Erreur mise à jour incident:', error.response?.status, error.response?.data);
     throw error?.response?.data || error;
   }
 };
@@ -169,9 +164,8 @@ export const deleteIncidentService = async (id) => {
     const axios = authService.createAuthenticatedAxios();
     await axios.delete(`${API_URL_BASE}/MapApi/${INCIDENT_URL}/${id}`);
 
-    console.log('[Incident] Incident supprimé:', id);
   } catch (error) {
-    console.error('[Incident] Erreur suppression incident:', error.response?.status, error.response?.data);
+    logger.error('[Incident] Erreur suppression incident:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -191,7 +185,7 @@ export const takeInChargeIncidentService = async (incidentId, data = null) => {
 
     return response.data;
   } catch (error) {
-    console.error('[Prise en charge Incident] Erreur:', error.response?.status, error.response?.data);
+    logger.error('[Prise en charge Incident] Erreur:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -208,10 +202,9 @@ export const getIncidentsByZoneService = async (zone) => {
       `${API_URL_BASE}/MapApi/${INCIDENT_URL}/zone/${zone}/`
     );
 
-    console.log('[Incident] Incidents par zone récupérés:', response.data);
     return response.data?.results || response.data || [];
   } catch (error) {
-    console.error('[Incident] Erreur récupération incidents par zone:', error.response?.status, error.response?.data);
+    logger.error('[Incident] Erreur récupération incidents par zone:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -228,10 +221,9 @@ export const getIncidentsByCategoryService = async (categoryId) => {
       `${API_URL_BASE}/MapApi/${INCIDENT_URL}/category/${categoryId}/`
     );
 
-    console.log('[Incident] Incidents par catégorie récupérés:', response.data);
     return response.data?.results || response.data || [];
   } catch (error) {
-    console.error('[Incident] Erreur récupération incidents par catégorie:', error.response?.status, error.response?.data);
+    logger.error('[Incident] Erreur récupération incidents par catégorie:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -251,10 +243,9 @@ export const getOrgIncidentsService = async (source = 'agents') => {
       }
     );
 
-    console.log('[Incident] Incidents organisation récupérés:', response.data);
     return response.data?.results || response.data || [];
   } catch (error) {
-    console.error('[Incident] Erreur récupération incidents organisation:', error.response?.status, error.response?.data);
+    logger.error('[Incident] Erreur récupération incidents organisation:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -271,10 +262,9 @@ export const togglePublicIncidentService = async (incidentId) => {
       `${API_URL_BASE}/MapApi/${INCIDENTS_URL}/${incidentId}/toggle-public/`
     );
 
-    console.log('[Incident] Visibilité basculée:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Incident] Erreur basculement visibilité:', error.response?.status, error.response?.data);
+    logger.error('[Incident] Erreur basculement visibilité:', error.response?.status, error.response?.data);
     throw error?.response?.data || error;
   }
 };
@@ -293,12 +283,10 @@ export const getAssignIncidentToAgentService = async (incidentId = null, data = 
         deadline: data?.deadline,
         ...data
       };
-      console.log('[Incident] Envoi assignation via assignIncidentToAgentService:', payload);
       const response = await axios.post(
         `${API_URL_BASE}/MapApi/agent/assigned-incidents/`,
         payload
       );
-      console.log('[Incident] Incident assigné:', response.data);
       return response.data;
     }
 
@@ -306,10 +294,9 @@ export const getAssignIncidentToAgentService = async (incidentId = null, data = 
       `${API_URL_BASE}/MapApi/agent/assigned-incidents/`
     );
 
-    console.log('[Incident] Incidents assignés récupérés:', response.data);
     return response.data?.results || response.data || [];
   } catch (error) {
-    console.error(
+    logger.error(
       `[Incident] Erreur ${incidentId ? 'assignation' : 'récupération'} incidents assignés:`,
       error.response?.status,
       error.response?.data
@@ -344,7 +331,7 @@ export const assignIncidentToAgentService = async (incidentId, data = null) => {
     );
     return response.data;
   } catch (error) {
-    console.error(
+    logger.error(
       '[Incident] Erreur assignation incident:',
       error.response?.status,
       error.response?.data
@@ -364,10 +351,9 @@ export const getIncidentAssignmentsService = async (incidentId) => {
     const response = await axios.get(
       `${API_URL_BASE}/MapApi/incidents/${incidentId}/assignments/`
     );
-    console.log('[Incident] Assignations de l\'incident récupérées:', response.data);
     return response.data?.results || response.data || [];
   } catch (error) {
-    console.error(
+    logger.error(
       `[Incident] Erreur récupération assignations pour l'incident ${incidentId}:`,
       error.response?.status,
       error.response?.data
@@ -404,10 +390,9 @@ export const closeIncidentService = async (incidentId, data) => {
       { headers }
     );
 
-    console.log('[Incident] Incident clôturé:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Incident] Erreur clôture incident:', error.response?.status, error.response?.data);
+    logger.error('[Incident] Erreur clôture incident:', error.response?.status, error.response?.data);
     throw error?.response?.data || error;
   }
 };
@@ -423,10 +408,9 @@ export const getTrashIncidentsService = async () => {
       `${API_URL_BASE}/MapApi/${INCIDENTS_URL}/trash/`
     );
 
-    console.log('[Incident] Incidents corbeille récupérés:', response.data);
     return response.data?.results || response.data || [];
   } catch (error) {
-    console.error('[Incident] Erreur récupération corbeille:', error.response?.status, error.response?.data);
+    logger.error('[Incident] Erreur récupération corbeille:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -443,10 +427,9 @@ export const restoreIncidentService = async (incidentId) => {
       `${API_URL_BASE}/MapApi/${INCIDENT_URL}/${incidentId}/restore/`
     );
 
-    console.log('[Incident] Incident restauré:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Incident] Erreur restauration incident:', error.response?.status, error.response?.data);
+    logger.error('[Incident] Erreur restauration incident:', error.response?.status, error.response?.data);
     throw error?.response?.data || error;
   }
 };
@@ -463,10 +446,9 @@ export const getIncidentPredictionService = async (id) => {
       `${API_URL_BASE}/MapApi/Incidentprediction/${id}/`
     );
 
-    console.log('[Incident] Prédiction récupérée:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Incident] Erreur récupération prédiction:', error.response?.status, error.response?.data);
+    logger.error('[Incident] Erreur récupération prédiction:', error.response?.status, error.response?.data);
     throw error;
   }
 };

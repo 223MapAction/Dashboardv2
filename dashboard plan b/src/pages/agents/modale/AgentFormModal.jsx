@@ -230,7 +230,6 @@ export const AgentFormModal = () => {
       mutateAgents();
       setTimeout(() => closeFormModal(), 2000);
     } catch (err) {
-      console.log("[AGENTS] Error caught:", err?.response?.status, err?.response?.data);
       const backendData = err?.response?.data;
       
       if (err?.response?.status === 400 && backendData && typeof backendData === 'object') {

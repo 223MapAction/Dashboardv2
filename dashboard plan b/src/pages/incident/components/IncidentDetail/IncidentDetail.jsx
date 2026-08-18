@@ -66,6 +66,7 @@ import { BlurryImage } from '../../../../components/atoms/BlurryImage';
 
 import { ImageViewer } from '../../../../components/molecules/ImageViewer';
 import { BadgeGravite } from '../../../../components/atoms/BadgeGravite';
+import { logger } from '../../../../utils/logger';
 const formatMessageTime = (dateStr) => {
   if (!dateStr) return '';
   try {
@@ -138,11 +139,8 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
       onError: (err) => {
-        console.error('[IncidentDetail] Erreur chargement prédiction:', err);
-        // Si erreur 404, c'est normal (pas de prédiction encore)
-        if (err?.response?.status === 404) {
-          console.log('[IncidentDetail] Aucune prédiction disponible pour cet incident');
-        }
+        // Un 404 est normal : la prédiction n'est pas encore calculée.
+        logger.error('[IncidentDetail] Erreur chargement prédiction:', err);
       },
       // Ne pas retry indéfiniment en cas d'erreur
       shouldRetryOnError: false,
@@ -270,7 +268,6 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
       const oldestMessageId = messages[0]?.id;
       if (!oldestMessageId) return;
 
-      console.log(`[Chat] Chargement des messages plus anciens avant l'id: ${oldestMessageId}`);
       const data = await getIncidentChatHistoryService(safeIncident.id, 12, oldestMessageId);
 
       if (data?.history && data.history.length > 0) {
@@ -287,7 +284,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
         setHasMore(false);
       }
     } catch (err) {
-      console.error('[Chat] Erreur chargement messages anciens:', err);
+      logger.error('[Chat] Erreur chargement messages anciens:', err);
     } finally {
       setIsLoadingMore(false);
     }
@@ -411,7 +408,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
       }
       mutateChatHistory();
     } catch (err) {
-      console.error('[Chat] Erreur envoi message:', err);
+      logger.error('[Chat] Erreur envoi message:', err);
       const status = err?.response?.status;
       let msg = "Une erreur est survenue lors de l'envoi de votre message.";
       if (status === 400) {
@@ -532,22 +529,16 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
           try {
             const roleStr = org.role === 'observateur' ? 'observer' : 'contributor';
             const commentStr = org.comment || `Invitation à rejoindre l'incident en tant que ${org.role}`;
-            console.log("inviter des organisation ",{incident: safeIncident.id,
-              suggested_organisation: org.id,
-              suggested_role: roleStr,
-              justification: commentStr});
-            
-            const result = await suggestCollaborationPartnerService(safeIncident.id, {
+            await suggestCollaborationPartnerService(safeIncident.id, {
               incident: safeIncident.id,
               suggested_organisation: org.id,
               suggested_role: roleStr,
               justification: commentStr
             
             });
-            console.log('Invitation envoyée:', result);
             successCount++;
           } catch (err) {
-            console.error('Erreur envoi suggestion:', err);
+            logger.error('Erreur envoi suggestion:', err);
             errorCount++;
 
             // Récupérer le message d'erreur explicite
@@ -582,7 +573,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
             }
 
             errorMessages.push(errorMsg);
-            console.error('Message d\'erreur:', errorMsg);
+            logger.error('Message d\'erreur:', errorMsg);
           }
         }
 
@@ -632,7 +623,6 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
           mode: workMode === 'interne' ? 'internal' : 'collaborative',
           role: 'leader'
         });
-        console.log('Incident pris en charge:', result);
         if (result.status == "success") {
           // L'incident reste public (l'utilisateur le gère simplement en interne avec ses équipes)
           setAlertType('success');
@@ -659,8 +649,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
           user: currentUserId ? parseInt(currentUserId) : null
         };
 
-        const result = await requestCollaborationService(collaborationData);
-        console.log('Demande de collaboration envoyée:', result);
+        await requestCollaborationService(collaborationData);
         await mutate();
         mutateCollaborations();
         setAlertType('success');
@@ -677,7 +666,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
         }, 1200);
       }
     } catch (error) {
-      console.error('Erreur lors de la soumission:', error);
+      logger.error('Erreur lors de la soumission:', error);
 
       // Gérer les erreurs spécifiques
       setAlertType('danger');

@@ -61,6 +61,7 @@ import {
   formatRole,
   getRoleBadgeClass,
 } from './formatage';
+import { logger } from '../../utils/logger';
 
 
 export const CollaborationDetail = () => {
@@ -86,14 +87,6 @@ export const CollaborationDetail = () => {
       revalidateOnFocus: false
     }
   );
-
-  console.log("[COLLAB_DETAIL] SWR Debug:", {
-    idFromUrl: id,
-    collaborationData,
-    collaborationError,
-    isLoading
-  });
-
 
   // Récupérer l'incidentId depuis la collaboration
   const incidentId = collaborationData?.incident;
@@ -1850,7 +1843,7 @@ export const CollaborationDetail = () => {
                                             }, 1500);
                                           }
                                         } catch (err) {
-                                          console.error(err);
+                                          logger.error(err);
                                         } finally {
                                           setUploadingProofTask(null);
                                         }

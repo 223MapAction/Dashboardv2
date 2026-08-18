@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { closeIncidentService } from '../incident/service/incident_service';
+import { logger } from '../../utils/logger';
 
 /**
  * Cloture d'un signalement depuis sa collaboration : dates de resolution,
@@ -69,7 +70,7 @@ export function useClotureIncident(collaboration, mutateCollaboration) {
         mutateCollaboration(); // Recharger uniquement les données SWR au lieu de la page entière
       }, 2000);
     } catch (err) {
-      console.error('[CloseIncident] Erreur:', err);
+      logger.error('[CloseIncident] Erreur:', err);
       const errorMsg = err?.detail || err?.message || 'Erreur lors de la résolution de l\'incident.';
       setCloseAlert({ type: 'danger', message: errorMsg });
     } finally {

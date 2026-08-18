@@ -1,5 +1,6 @@
 import { authService } from '../../../pages/auth/services/authService';
 import { API_URL_BASE } from '../../../config/api_url_base';
+import { logger } from '../../../utils/logger';
 
 /**
  * Récupère toutes les notifications de l'utilisateur
@@ -18,7 +19,7 @@ export const getNotifications = async (urlOrPageSize) => {
     const response = await axios.get(url);
     return response.data;
   } catch (error) {
-    console.error('[NOTIFICATIONS] Erreur:', error.response?.status, error.response?.data);
+    logger.error('[NOTIFICATIONS] Erreur:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -35,7 +36,7 @@ export const markNotificationAsRead = async (notificationId) => {
     );
     return response.data;
   } catch (error) {
-    console.error('[NOTIFICATIONS] Erreur marquage lu:', error);
+    logger.error('[NOTIFICATIONS] Erreur marquage lu:', error);
     throw error;
   }
 };
@@ -51,7 +52,7 @@ export const markAllNotificationsAsRead = async () => {
     );
     return response.data;
   } catch (error) {
-    console.error('[NOTIFICATIONS] Erreur marquage toutes lues:', error);
+    logger.error('[NOTIFICATIONS] Erreur marquage toutes lues:', error);
     throw error;
   }
 };

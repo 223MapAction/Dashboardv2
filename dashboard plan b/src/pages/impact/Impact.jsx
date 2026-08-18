@@ -26,6 +26,7 @@ import Pagination from '../../components/molecules/Pagination';
 import './impact.css';
 import { useReinitialisationSurChangement } from '../../hooks/useReinitialisationSurChangement';
 import { gravite, libelleGravite, couleurTexteGravite } from '../../utils/gravite';
+import { logger } from '../../utils/logger';
 
 const EMPTY_ARRAY = [];
 
@@ -104,8 +105,8 @@ export const Impact = () => {
   );
 
   useEffect(() => {
-    if (apiError) console.error('[Impact] Erreur API impact:', apiError);
-    if (incidentsError) console.error('[Impact] Erreur API incidents:', incidentsError);
+    if (apiError) logger.error('[Impact] Erreur API impact:', apiError);
+    if (incidentsError) logger.error('[Impact] Erreur API incidents:', incidentsError);
   }, [apiError, incidentsError]);
 
   // Utiliser les vraies données ou fallback sur MOCK

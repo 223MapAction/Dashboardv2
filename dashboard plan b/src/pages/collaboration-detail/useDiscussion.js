@@ -9,6 +9,7 @@ import {
   deleteDiscussionMessageService,
   formatMessage,
 } from './service/collab_detail_service';
+import { logger } from '../../utils/logger';
 
 /**
  * Toute la discussion d'une collaboration : chargement pagine, temps reel,
@@ -89,7 +90,6 @@ export function useDiscussion(incidentId) {
       setAllMessages(apiResults);
       setHasMoreMessages(rawMessagesData.has_more || false);
       setNextBeforeId(rawMessagesData.next_before || null);
-      console.log('[Chat] Chargement initial:', apiResults.length, 'messages, has_more:', rawMessagesData.has_more);
 
       // Scroller vers le bas après le chargement initial
       setTimeout(() => {
@@ -102,7 +102,6 @@ export function useDiscussion(incidentId) {
       );
 
       if (newMessages.length > 0) {
-        console.log('[Chat] Nouveaux messages reçus:', newMessages.length);
         setAllMessages(prev => {
           const prevArray = Array.isArray(prev) ? prev : [];
           return [...prevArray, ...newMessages];
@@ -129,7 +128,6 @@ export function useDiscussion(incidentId) {
     if (!hasMoreMessages || isLoadingMoreMessages || !nextBeforeId || !incidentId) return;
 
     setIsLoadingMoreMessages(true);
-    console.log('[Chat] Chargement de plus de messages avant ID:', nextBeforeId);
 
     try {
       const data = await getDiscussionMessagesService(incidentId, {
@@ -147,10 +145,9 @@ export function useDiscussion(incidentId) {
         });
         setHasMoreMessages(data.has_more || false);
         setNextBeforeId(data.next_before || null);
-        console.log('[Chat] Chargé', data.results.length, 'messages supplémentaires, has_more:', data.has_more);
       }
     } catch (err) {
-      console.error('[Chat] Erreur chargement messages supplémentaires:', err);
+      logger.error('[Chat] Erreur chargement messages supplémentaires:', err);
     } finally {
       setIsLoadingMoreMessages(false);
     }
@@ -186,7 +183,7 @@ export function useDiscussion(incidentId) {
   // Formater les messages pour l'affichage
   const messages = useMemo(() => {
     if (!Array.isArray(allMessages)) {
-      console.warn('[Chat] allMessages n\'est pas un tableau:', allMessages);
+      logger.warn('[Chat] allMessages n\'est pas un tableau:', allMessages);
       return [];
     }
     return allMessages.map(msg => {
@@ -279,7 +276,7 @@ export function useDiscussion(incidentId) {
         setRecordingTime((prev) => prev + 1);
       }, 1000);
     } catch (err) {
-      console.error("Erreur d'accès au microphone:", err);
+      logger.error("Erreur d'accès au microphone:", err);
       alert("Impossible d'accéder au microphone. Veuillez vérifier vos permissions.");
     }
   };
@@ -326,7 +323,7 @@ export function useDiscussion(incidentId) {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
-      console.error('Erreur lors du téléchargement:', error);
+      logger.error('Erreur lors du téléchargement:', error);
       window.open(url, '_blank');
     } finally {
       setDownloadingMsgId(null);
@@ -381,7 +378,7 @@ export function useDiscussion(incidentId) {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
     } catch (err) {
-      console.error('[sendMessage] Erreur envoi message:', err);
+      logger.error('[sendMessage] Erreur envoi message:', err);
     } finally {
       setSendingMessage(false);
     }
@@ -396,7 +393,7 @@ export function useDiscussion(incidentId) {
       setEditingMessageId(null);
       setEditingMessageText('');
     } catch (err) {
-      console.error('[handleEditMessage] Erreur:', err);
+      logger.error('[handleEditMessage] Erreur:', err);
     } finally {
       setSavingEdit(false);
     }
@@ -408,7 +405,7 @@ export function useDiscussion(incidentId) {
       await deleteDiscussionMessageService(incidentId, msgId);
       await mutateMessages();
     } catch (err) {
-      console.error('[handleDeleteMessage] Erreur:', err);
+      logger.error('[handleDeleteMessage] Erreur:', err);
     } finally {
       setDeletingMessageId(null);
     }

@@ -2,6 +2,7 @@ import { Trash } from 'iconsax-react';
 import { useIncidentModalContext } from './IncidentModalContext';
 import { deleteIncidentService } from '../service/incident_service';
 import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
+import { logger } from '../../../utils/logger';
 
 export const IncidentDeleteModal = () => {
   const {
@@ -28,7 +29,7 @@ export const IncidentDeleteModal = () => {
       mutateIncidents();
       setTimeout(() => closeDeleteModal(), 2000);
     } catch (err) {
-      console.error('[IncidentDeleteModal] Erreur lors de la suppression:', err);
+      logger.error('[IncidentDeleteModal] Erreur lors de la suppression:', err);
       const msg =
         err?.response?.data?.detail ||
         err?.response?.data?.message ||

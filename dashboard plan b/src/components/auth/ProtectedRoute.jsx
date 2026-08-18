@@ -1,6 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { authService } from '../../pages/auth/services/authService';
 import { canAccessPath, isKnownWebRole } from '../../utils/permissions';
+import { logger } from '../../utils/logger';
 
 /**
  * Composant qui protège les routes en vérifiant l'authentification et les autorisations.
@@ -21,7 +22,7 @@ export const ProtectedRoute = ({ children }) => {
 
   // Un rôle web non reconnu n'a rien à faire dans le dashboard.
   if (!isKnownWebRole(user)) {
-    console.warn(`[ProtectedRoute] Accès refusé : web_role "${user?.web_role}" non autorisé.`);
+    logger.warn(`[ProtectedRoute] Accès refusé : web_role "${user?.web_role}" non autorisé.`);
     authService.logout();
     return (
       <Navigate
@@ -36,7 +37,7 @@ export const ProtectedRoute = ({ children }) => {
 
   if (!canAccessPath(user, currentPath)) {
     const lastSafePath = sessionStorage.getItem('last_safe_path') || '/dashboard';
-    console.warn(`[ProtectedRoute] Accès refusé à ${currentPath}. Redirection vers ${lastSafePath}`);
+    logger.warn(`[ProtectedRoute] Accès refusé à ${currentPath}. Redirection vers ${lastSafePath}`);
     return <Navigate to={lastSafePath} replace />;
   }
 

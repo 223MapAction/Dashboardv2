@@ -41,6 +41,7 @@ import { RequestDecisionModal } from '../../components/collaboration/RequestDeci
 import { authService } from '../auth/services/authService';
 import { API_URL_BASE } from '../../config/api_url_base';
 import '../../styles/collaboration-requests.css';
+import { logger } from '../../utils/logger';
 
 const STATUS_META = {
   pending: {
@@ -135,18 +136,15 @@ export const CollaborationRequests = ({
     const isOwner = takenBy && takenBy === myId;
 
     if (!isLeader && !isOwner) {
-    /*   console.log */('[shouldShowAcceptForReq] Pas leader ni propriétaire — bouton masqué. Mon rôle:', userCollab?.role, '| Status:', userCollab?.status);
       return false;
     }
 
     // Vérifier que la demande ne vient pas de moi-même
     const reqUserId = req.userId ? String(req.userId).toLowerCase() : '';
     if (reqUserId && reqUserId === myId) {
-      // console.log('[shouldShowAcceptForReq] Ma propre demande — bouton masqué');
       return false;
     }
 
-    // console.log('[shouldShowAcceptForReq] Je suis leader/propriétaire, demande d\'un tiers — bouton affiché. Demandeur:', req.userFullName || req.userEmail);
     return true;
   };
   const [showInfoBanner, setShowInfoBanner] = useState(true);
@@ -256,13 +254,11 @@ export const CollaborationRequests = ({
 
       socket.onopen = () => {
         delay = 3000;
-        console.log('[WS-Collaborations] Connecté aux collaborations');
       };
 
       socket.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          console.log('[WS-Collaborations] Message reçu:', data);
 
           if (data) {
             const reqId = data.id;
@@ -328,7 +324,7 @@ export const CollaborationRequests = ({
             mutatePendingInvitations();
           }
         } catch (e) {
-          console.error('[WS-Collaborations] Erreur parsing message:', e);
+          logger.error('[WS-Collaborations] Erreur parsing message:', e);
         }
       };
 
@@ -423,7 +419,7 @@ export const CollaborationRequests = ({
       }
       closeDecision();
     } catch (err) {
-      console.error('[Decision] Erreur lors du traitement:', err);
+      logger.error('[Decision] Erreur lors du traitement:', err);
       const msg =
         err?.response?.data?.detail ||
         err?.response?.data?.message ||

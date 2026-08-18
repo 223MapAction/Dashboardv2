@@ -237,7 +237,6 @@ const MesInterventionsContent = () => {
 
   const handleRowClick = (incident) => {
     const collabId = incident?.my_collaboration?.id;
-    console.log("l'id de la collaboration : ", collabId);
     // return
     navigate(`/collaboration-detail/${collabId}`, {
       state: { from: '/mes-interventions' }

@@ -1,5 +1,6 @@
 import { authService } from '../../auth/services/authService';
 import { API_URL_BASE } from '../../../config/api_url_base';
+import { logger } from '../../../utils/logger';
 
 /**
  * Récupère tous les membres d'une organisation avec filtrage
@@ -34,10 +35,9 @@ export const getOrganisationMembersService = async (organisationId, search = '',
             url,
             { params }
         );
-        console.log('[Members] Membres récupérés:', response.data);
         return response.data;
     } catch (error) {
-        console.error('[Members] Erreur récupération membres:', error?.response?.status, error?.response?.data);
+        logger.error('[Members] Erreur récupération membres:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -50,10 +50,9 @@ export const getAgentsStatsService = async () => {
     try {
         const axios = authService.createAuthenticatedAxios();
         const response = await axios.get(`${API_URL_BASE}/MapApi/agents/stats/`);
-        console.log('[Members] Stats agents récupérées:', response.data);
         return response.data;
     } catch (error) {
-        console.error('[Members] Erreur récupération stats agents:', error?.response?.status, error?.response?.data);
+        logger.error('[Members] Erreur récupération stats agents:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -72,10 +71,9 @@ export const createOrganisationAgentService = async (organisationId, agentData) 
             agentData,
             { headers: { 'Content-Type': 'application/json' } }
         );
-        console.log('[Members] Agent créé:', response.data);
         return response.data;
     } catch (error) {
-        console.error('[Members] Erreur création agent:', error?.response?.status, error?.response?.data);
+        logger.error('[Members] Erreur création agent:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -94,10 +92,9 @@ export const addOrganisationStaffMemberService = async (organisationId, data) =>
             data,
             { headers: { 'Content-Type': 'application/json' } }
         );
-        console.log('[Members] Staff ajouté:', response.data);
         return response.data;
     } catch (error) {
-        console.error('[Members] Erreur ajout staff:', error?.response?.status, error?.response?.data);
+        logger.error('[Members] Erreur ajout staff:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -117,10 +114,9 @@ export const updateOrganisationMemberService = async (organisationId, userId, da
             data,
             { headers: { 'Content-Type': 'application/json' } }
         );
-        console.log('[Members] Membre mis à jour:', response.data);
         return response.data;
     } catch (error) {
-        console.error('[Members] Erreur mise à jour membre:', error?.response?.status, error?.response?.data);
+        logger.error('[Members] Erreur mise à jour membre:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -137,11 +133,10 @@ export const removeOrganisationMemberService = async (organisationId, userId) =>
         const response = await axios.delete(
             `${API_URL_BASE}/MapApi/organisations/${organisationId}/members/${userId}/`
         );
-        console.log('[Members] Membre retiré:', response.data);
       
         return response.data;
     } catch (error) {
-        console.error('[Members] Erreur retrait membre:', error?.response?.status, error?.response?.data);
+        logger.error('[Members] Erreur retrait membre:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };

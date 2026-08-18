@@ -21,7 +21,6 @@ export const Login = ({ onLogin }) => {
     setIsLoading(true);
     setError('');
 
-    console.log('[LOGIN] Credentials envoyés:', { email, password: password });
 
     try {
       const result = await authService.login({ email, password });

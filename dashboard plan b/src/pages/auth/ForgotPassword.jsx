@@ -6,6 +6,7 @@ import logoMapAction from '../../assets/logo.webp';
 import loginBg from '../../assets/login_bg_1.webp';
 import './login.css';
 import './forgot-password.css';
+import { logger } from '../../utils/logger';
 
 export const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -20,15 +21,14 @@ export const ForgotPassword = () => {
     setError('');
 
     try {
-      const response = await authService.requestPasswordReset(email);
-      console.log('[FORGOT_PASSWORD] Succès:', response);
+      await authService.requestPasswordReset(email);
       setSuccess(true);
       // Rediriger vers la page de réinitialisation avec l'email
       setTimeout(() => {
         navigate(`/reset-password?email=${encodeURIComponent(email)}`);
       }, 2000);
     } catch (err) {
-      console.error('[FORGOT_PASSWORD] Erreur:', err);
+      logger.error('[FORGOT_PASSWORD] Erreur:', err);
       setError(
         err?.detail || 
         err?.message || 

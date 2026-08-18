@@ -26,6 +26,7 @@ import { getUserProfileService, updateUserProfileService } from './service/profi
 import { BlurryImage } from '../../components/atoms/BlurryImage';
 import './profile.css';
 import { BandeauErreur } from '../../components/molecules/BandeauErreur';
+import { logger } from '../../utils/logger';
 
 const TABS = [
   { id: 'personal', label: 'Informations personnelles', icon: User },
@@ -40,7 +41,7 @@ const getInitialProfile = () => {
       return JSON.parse(userStr);
     }
   } catch (error) {
-    console.error('Erreur lors de la lecture du profil dans sessionStorage:', error);
+    logger.error('Erreur lors de la lecture du profil dans sessionStorage:', error);
   }
 
   // Fallback par défaut si aucune donnée utilisateur n'est trouvée
@@ -163,7 +164,7 @@ export const Profile = () => {
       setSavedFlash(true);
       setTimeout(() => setSavedFlash(false), 2400);
     } catch (err) {
-      console.error('Erreur lors de la modification du profil:', err);
+      logger.error('Erreur lors de la modification du profil:', err);
     } finally {
       setIsSaving(false);
     }

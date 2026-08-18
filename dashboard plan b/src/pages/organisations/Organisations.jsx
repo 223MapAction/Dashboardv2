@@ -282,7 +282,6 @@ export const Organisations = () => {
     setModalAlert({ type: null, message: null });
     try {
       const payload = buildPayload(form);
-      console.log('Sending payload to server:', payload);
 
       if (formModal.mode === 'create') {
         await createOrganisationService(payload);
@@ -355,7 +354,6 @@ export const Organisations = () => {
     e?.stopPropagation();
     setIsDeleting(true);
     setDeleteAlert({ type: null, message: null });
-    console.log(deleteModal.org);
 
     try {
       await deleteOrganisationService(deleteModal.org.id);

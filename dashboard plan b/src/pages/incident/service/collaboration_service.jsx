@@ -1,5 +1,6 @@
 import { authService } from '../../auth/services/authService';
 import { API_URL_BASE } from '../../../config/api_url_base';
+import { logger } from '../../../utils/logger';
 
 /**
  * Récupère toutes les collaborations de l'utilisateur
@@ -14,7 +15,7 @@ export const getCollaborationsService = async () => {
     
     return response.data?.results || response.data || [];
   } catch (error) {
-    console.error('[Liste Collaborations] Erreur:', error.response?.status, error.response?.data);
+    logger.error('[Liste Collaborations] Erreur:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -34,7 +35,7 @@ export const requestCollaborationService = async (data) => {
     
     return response.data;
   } catch (error) {
-    console.error('[Demander Collaboration] Erreur:', error.response?.status, error.response?.data);
+    logger.error('[Demander Collaboration] Erreur:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -54,7 +55,7 @@ export const acceptCollaborationService = async (collaborationId) => {
     
     return response.data;
   } catch (error) {
-    console.error('[Accepter Collaboration] Erreur:', error.response?.status, error.response?.data);
+    logger.error('[Accepter Collaboration] Erreur:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -74,7 +75,7 @@ export const declineCollaborationService = async (collaborationId) => {
     
     return response.data;
   } catch (error) {
-    console.error('[Refuser Collaboration] Erreur:', error.response?.status, error.response?.data);
+    logger.error('[Refuser Collaboration] Erreur:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -94,7 +95,7 @@ export const handleCollaborationService = async (collaborationId, action) => {
     
     return response.data;
   } catch (error) {
-    console.error('[Gérer Collaboration] Erreur:', error.response?.status, error.response?.data);
+    logger.error('[Gérer Collaboration] Erreur:', error.response?.status, error.response?.data);
     throw error;
   }
 };
