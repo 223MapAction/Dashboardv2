@@ -1,0 +1,1 @@
+import{P as e,z as t}from"./index-B55lgS2d.js";var n=t(e(),1);function r(e,t){let r=JSON.stringify(e),[i,a]=(0,n.useState)(r);r!==i&&(a(r),t())}export{r as t};
