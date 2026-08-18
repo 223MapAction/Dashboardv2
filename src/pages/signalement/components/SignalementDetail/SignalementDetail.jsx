@@ -11,7 +11,7 @@ import {
   ShimmerCircularImage,
   ShimmerButton
 } from 'react-shimmer-effects';
-import { takeInChargeIncidentService, getIncidentService, getIncidentPredictionService } from '../../service/incident_service';
+import { takeInChargeIncidentService, getIncidentService, getIncidentPredictionService } from '../../service/signalement_service';
 import { requestCollaborationService, getCollaborationsService } from '../../service/collaboration_service';
 import { getIncidentChatHistoryService, sendIncidentChatMessageService } from '../../service/chat_service';
 import { authService } from '../../../auth/services/authService';
@@ -48,7 +48,7 @@ import {
   Message,
   Send2
 } from 'iconsax-react';
-import './incident-detail.css';
+import './signalement-detail.css';
 import { IncidentDetailSkeleton } from './SqueletteDetail';
 import { ROLE_OPTIONS, ORG_ROLE_OPTIONS } from './roles';
 import { useLecteurAudio } from './useLecteurAudio';
@@ -58,7 +58,7 @@ import {
 } from './badges';
 import './dark-dashboard.css';
 import { getOrganisationsService, formatOrganisation } from '../../../organisations/service/organisation_service';
-import { IncidentDetailContext } from './IncidentDetailContext';
+import { SignalementDetailContext } from './SignalementDetailContext';
 import { InviteOrgModal } from './modal/InviteOrgModal';
 import { NotFound } from '../../../not-found';
 import { BlurryImage } from '../../../../components/atoms/BlurryImage';
@@ -93,7 +93,7 @@ const formatTime = (seconds) => {
 };
 
 
-export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
+export const SignalementDetail = ({ incident, onBack, isLoading = false }) => {
   // Voir utils/gestesCarte : sur ecran tactile, un doigt fait defiler la fiche
   // et deux doigts pilotent la carte. On passe par la reference et non par
   // `onLoad`, qui ne se declenche pas de facon fiable avec react-map-gl v8.
@@ -140,7 +140,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
       revalidateOnReconnect: false,
       onError: (err) => {
         // Un 404 est normal : la prédiction n'est pas encore calculée.
-        logger.error('[IncidentDetail] Erreur chargement prédiction:', err);
+        logger.error('[SignalementDetail] Erreur chargement prédiction:', err);
       },
       // Ne pas retry indéfiniment en cas d'erreur
       shouldRetryOnError: false,
@@ -165,7 +165,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
 
   // Valeurs par défaut pour les champs manquants
   const safeIncident = currentIncident ? {
-    title: currentIncident.title || 'Incident sans titre',
+    title: currentIncident.title || 'Signalement sans titre',
     badges: currentIncident.badges || [{ label: 'EN COURS', variant: 'in-progress' }],
     image: currentIncident?.image || currentIncident?.photo,
     description: currentIncident.description || 'Aucune description disponible',
@@ -671,11 +671,11 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
       // Gérer les erreurs spécifiques
       setAlertType('danger');
       if (error.response?.status === 400) {
-        setAlertMessage(error.response?.data?.message || 'Erreur : Incident déjà pris en charge ou données invalides');
+        setAlertMessage(error.response?.data?.message || 'Erreur : Signalement déjà pris en charge ou données invalides');
       } else if (error.response?.status === 403) {
         setAlertMessage('Vous n\'avez pas la permission d\'effectuer cette action');
       } else if (error.response?.status === 404) {
-        setAlertMessage('Incident non trouvé');
+        setAlertMessage('Signalement non trouvé');
       } else {
         setAlertMessage('Une erreur est survenue. Veuillez réessayer.');
       }
@@ -848,7 +848,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
   };
 
   return (
-    <IncidentDetailContext.Provider value={contextValue}>
+    <SignalementDetailContext.Provider value={contextValue}>
       <section className="project-detail" style={{ backgroundColor: 'var(--color-background)', minHeight: '100vh', padding: '0' }}>
         {/* Header */}
         <div className="detail-header" style={{ backgroundColor: 'var(--color-surface)', borderBottom: '1px solid var(--color-border)' }}>
@@ -2030,8 +2030,8 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
         )}
 
       </section>
-    </IncidentDetailContext.Provider>
+    </SignalementDetailContext.Provider>
   );
 };
 
-export default IncidentDetail;
+export default SignalementDetail;

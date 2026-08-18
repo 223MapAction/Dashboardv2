@@ -10,10 +10,10 @@ import { ShimmerThumbnail, ShimmerTitle, ShimmerText, ShimmerCircularImage } fro
 import { MesInterventionsModalProvider } from './MesInterventionsModalContext';
 import { useMesInterventionsModalContext } from './mesInterventionsModalContexte';
 import { MesInterventionsAssignModal } from './modal/MesInterventionsAssignModal';
-import { IncidentAgentsListModal } from './modal/IncidentAgentsListModal';
-import { IncidentReportsModal } from './modal/IncidentReportsModal';
+import { SignalementAgentsListModal } from './modal/SignalementAgentsListModal';
+import { SignalementReportsModal } from './modal/SignalementReportsModal';
 import { getOrgInternalIncidentsService } from './service/mes_interventions_service';
-import { getIncidentAssignmentsService } from '../incident/service/incident_service';
+import { getIncidentAssignmentsService } from '../signalement/service/signalement_service';
 import { BlurryImage } from '../../components/atoms/BlurryImage';
 import Pagination from '../../components/molecules/Pagination';
 import { ResponsiveTable } from '../../components/molecules/ResponsiveTable';
@@ -376,8 +376,8 @@ const MesInterventionsContent = () => {
 
       {/* Modales d'actions */}
       <MesInterventionsAssignModal />
-      <IncidentAgentsListModal />
-      <IncidentReportsModal />
+      <SignalementAgentsListModal />
+      <SignalementReportsModal />
     </div>
   );
 };

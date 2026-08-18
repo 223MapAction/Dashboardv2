@@ -25,7 +25,7 @@ const formatDate = (isoString) => {
   }
 };
 
-export const IncidentReportsModal = () => {
+export const SignalementReportsModal = () => {
   const {
     reportsModal,
     reportsClosing,
@@ -71,7 +71,7 @@ export const IncidentReportsModal = () => {
         setNextUrl(data.next || null);
       }
     } catch (err) {
-      logger.error('[IncidentReportsModal] Erreur chargement rapports:', err);
+      logger.error('[SignalementReportsModal] Erreur chargement rapports:', err);
     } finally {
       setIsLoadingMore(false);
     }
@@ -299,4 +299,4 @@ export const IncidentReportsModal = () => {
   );
 };
 
-export default IncidentReportsModal;
+export default SignalementReportsModal;

@@ -10,7 +10,7 @@
  * C'était pourtant ce qu'il faisait, à trois endroits et de trois façons :
  *
  *   MapContainer        3 niveaux, seuils >= 7 / >= 4
- *   incidentStatsHelper 3 niveaux, seuils >= 7 / >= 4      (copie de la 1re)
+ *   signalementStatsHelper 3 niveaux, seuils >= 7 / >= 4      (copie de la 1re)
  *   Impact              4 niveaux, seuils >= 7 / >= 5 / >= 3
  *
  * Un même incident pouvait donc être « moyen » sur la carte et « élevé » sur

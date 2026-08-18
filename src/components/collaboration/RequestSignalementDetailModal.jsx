@@ -10,7 +10,7 @@ import { OffcanvasModal } from '../molecules/OffcanvasModal';
  * Existait en deux exemplaires identiques au nom pres :
  * CollabIncidentDetailModal et SuggestIncidentDetailModal.
  */
-export const RequestIncidentDetailModal = ({ incident, onClose }) => {
+export const RequestSignalementDetailModal = ({ incident, onClose }) => {
   const [videoLoaded, setVideoLoaded] = useState(false);
 
   if (!incident) return null;
@@ -184,4 +184,4 @@ export const RequestIncidentDetailModal = ({ incident, onClose }) => {
   );
 };
 
-export default RequestIncidentDetailModal;
+export default RequestSignalementDetailModal;

@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react';
 import { TickCircle, CloseCircle, Activity, Location, Chart2, Warning2 } from 'iconsax-react';
-import './incident-stats.css';
+import './signalement-stats.css';
 import { lireRepartitionApi } from '../../../../utils/gravite';
 
-export const IncidentStats = ({ stats }) => {
+export const SignalementStats = ({ stats }) => {
   // 1. Statistiques de statut
   const statusStats = useMemo(() => {
     const total = stats?.total_alerts ?? 0;
@@ -189,4 +189,4 @@ export const IncidentStats = ({ stats }) => {
   );
 };
 
-export default IncidentStats;
+export default SignalementStats;

@@ -4,21 +4,21 @@ import { SearchNormal1 } from 'iconsax-react';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText, ShimmerCircularImage } from 'react-shimmer-effects';
 import { Eye, Edit2, Trash } from 'iconsax-react';
 import { BlurryImage } from '../../../../components/atoms/BlurryImage';
-import { useIncidentModalContext } from '../../modale/IncidentModalContext';
+import { useSignalementModalContext } from '../../modale/SignalementModalContext';
 import { authService } from '../../../auth/services/authService';
 import { isSuperAdmin as checkSuperAdmin, getAccessibleNavIds } from '../../../../utils/permissions';
 import { getCollaborationsService } from '../../service/collaboration_service';
 import Pagination from '../../../../components/molecules/Pagination';
 import { ResponsiveTable } from '../../../../components/molecules/ResponsiveTable';
 import { FiltersBar } from '../../../../components/molecules/FiltersBar';
-import './incident-list.css';
+import './signalement-list.css';
 
 import { TableActionsMenu } from '../../../../components/molecules/TableActionsMenu';
 import { BadgeGravite } from '../../../../components/atoms/BadgeGravite';
 import { gravite, couleurGravite } from '../../../../utils/gravite';
 // Composant shimmer pour le chargement (version table)
 
-export const IncidentList = ({
+export const SignalementList = ({
   incidents = [],
   onSelectIncident,
   selectedId,
@@ -32,7 +32,7 @@ export const IncidentList = ({
   pageSize,
   count
 }) => {
-  const { openDeleteModal, openAssignModal } = useIncidentModalContext();
+  const { openDeleteModal, openAssignModal } = useSignalementModalContext();
   const user = authService.getCurrentUser();
   const isSuperAdmin = checkSuperAdmin(user);
   // « admin » ici = peut piloter les incidents sans être super_admin.
@@ -447,4 +447,4 @@ export const IncidentList = ({
   );
 };
 
-export default IncidentList;
+export default SignalementList;

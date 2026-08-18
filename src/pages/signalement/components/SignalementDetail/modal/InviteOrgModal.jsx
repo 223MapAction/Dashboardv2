@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import useSWRInfinite from 'swr/infinite';
 import debounce from 'lodash.debounce';
-import { useIncidentDetail } from '../IncidentDetailContext';
+import { useIncidentDetail } from '../SignalementDetailContext';
 import {
   CloseCircle,
   SearchNormal1,

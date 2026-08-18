@@ -27,7 +27,7 @@ const DELAI_MAX = 30000;
  * @param {{ socketRef?: object }} [options] ref optionnelle exposant la socket
  *        courante a du code appelant qui veut emettre
  */
-export function useSocketIncident(incidentId, canal, onMessage, options = {}) {
+export function useSocketSignalement(incidentId, canal, onMessage, options = {}) {
   const { socketRef } = options;
 
   // La fonction de reception est souvent recreee a chaque rendu par

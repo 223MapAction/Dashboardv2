@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, cleanup } from '@testing-library/react';
-import { useSocketIncident } from './useSocketIncident';
+import { useSocketSignalement } from './useSocketSignalement';
 
 /** Fausse WebSocket : retient chaque instance et laisse le test declencher
  *  ouverture, message et fermeture a la main. */
@@ -18,7 +18,7 @@ class SocketFactice {
 }
 
 const Sonde = ({ incidentId, canal = 'discussion', onMessage = () => {}, socketRef }) => {
-  useSocketIncident(incidentId, canal, onMessage, { socketRef });
+  useSocketSignalement(incidentId, canal, onMessage, { socketRef });
   return null;
 };
 

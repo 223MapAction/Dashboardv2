@@ -1,12 +1,12 @@
 import { useState, useRef, useMemo } from 'react';
-import { useSocketIncident } from '../../hooks/useSocketIncident';
+import { useSocketSignalement } from '../../hooks/useSocketSignalement';
 import {
   createTaskService,
   completeTaskService,
   failTaskService,
   deleteTaskService,
   updateTaskService,
-} from '../incident/service/task_service';
+} from '../signalement/service/task_service';
 import { logger } from '../../utils/logger';
 
 /**
@@ -68,11 +68,11 @@ export function useTaches({ incidentId, collaboration, tasksData, mutateTasks })
   const [taskToDelete, setTaskToDelete] = useState(null);
 
   // Temps reel des taches. La connexion, la reconnexion a delai croissant et les
-  // codes sur lesquels il ne faut pas insister vivent dans useSocketIncident :
+  // codes sur lesquels il ne faut pas insister vivent dans useSocketSignalement :
   // ce mecanisme etait ecrit deux fois ici, une par canal, donc corriger un
   // defaut n'en reparait qu'une moitie. Il ne reste que ce que ce canal fait
   // vraiment de ses messages.
-  useSocketIncident(incidentId, 'tasks', (event) => {
+  useSocketSignalement(incidentId, 'tasks', (event) => {
     try {
       const data = JSON.parse(event.data);
 

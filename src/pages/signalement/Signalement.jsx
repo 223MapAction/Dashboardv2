@@ -4,12 +4,12 @@ import useSWR from 'swr';
 import debounce from 'lodash.debounce';
 import { useSidebarState } from '../../hooks/useSidebarState';
 import { Header, Sidebar } from '../../components/layout';
-import IncidentList from './components/IncidentList/IncidentList';
-import { getIncidentsService } from './service/incident_service';
-import IncidentModalContext from './modale/IncidentModalContext';
-import IncidentDeleteModal from './modale/IncidentDeleteModal';
-import IncidentAssignModal from './modale/IncidentAssignModal';
-import './incident.css';
+import SignalementList from './components/SignalementList/SignalementList';
+import { getIncidentsService } from './service/signalement_service';
+import SignalementModalContext from './modale/SignalementModalContext';
+import SignalementDeleteModal from './modale/SignalementDeleteModal';
+import SignalementAssignModal from './modale/SignalementAssignModal';
+import './signalement.css';
 import { useReinitialisationSurChangement } from '../../hooks/useReinitialisationSurChangement';
 import { BandeauErreur } from '../../components/molecules/BandeauErreur';
 import { logger } from '../../utils/logger';
@@ -77,7 +77,7 @@ const adaptIncidentData = (incident, currentUserId = null) => {
   };
 };
 
-export const Incident = () => {
+export const Signalement = () => {
   const navigate = useNavigate();
   const {
     isOpen: sidebarOpen,
@@ -212,7 +212,7 @@ export const Incident = () => {
   };
 
   return (
-    <IncidentModalContext.Provider value={contextValue}>
+    <SignalementModalContext.Provider value={contextValue}>
       <div className="incident-page">
         <Sidebar
           isOpen={sidebarOpen}
@@ -234,7 +234,7 @@ export const Incident = () => {
               message="Impossible de charger les signalements. La liste affichée peut ne plus être à jour."
             />
             {/* Liste des incidents (Pleine largeur) */}
-            <IncidentList
+            <SignalementList
               incidents={incidents}
               isLoading={isLoadingIncidents}
               onSelectIncident={(incident) => navigate(`/signalements/${incident.id}`, { state: { incident } })}
@@ -254,11 +254,11 @@ export const Incident = () => {
         </div>
 
         {/* Modales d'actions d'incidents */}
-        <IncidentAssignModal />
-        <IncidentDeleteModal />
+        <SignalementAssignModal />
+        <SignalementDeleteModal />
       </div>
-    </IncidentModalContext.Provider>
+    </SignalementModalContext.Provider>
   );
 };
 
-export default Incident;
+export default Signalement;

@@ -109,7 +109,7 @@ export const AgentReportsModal = ({ isOpen, onClose, incidentId, incidentTitle }
       onClose={handleClose}
       isClosing={isClosing}
       title="Rapports des agents"
-      subtitle={incidentTitle || `Incident #${incidentId}`}
+      subtitle={incidentTitle || `Signalement #${incidentId}`}
       ariaLabel="Liste des rapports de terrain des agents"
       closeVariant="plain"
     >

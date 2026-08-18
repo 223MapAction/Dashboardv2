@@ -1,10 +1,10 @@
 import { Trash } from 'iconsax-react';
-import { useIncidentModalContext } from './IncidentModalContext';
-import { deleteIncidentService } from '../service/incident_service';
+import { useSignalementModalContext } from './SignalementModalContext';
+import { deleteIncidentService } from '../service/signalement_service';
 import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
 import { logger } from '../../../utils/logger';
 
-export const IncidentDeleteModal = () => {
+export const SignalementDeleteModal = () => {
   const {
     deleteModal,
     deleteClosing,
@@ -14,7 +14,7 @@ export const IncidentDeleteModal = () => {
     setDeleteAlert,
     closeDeleteModal,
     mutateIncidents
-  } = useIncidentModalContext();
+  } = useSignalementModalContext();
 
   if (!deleteModal.open || !deleteModal.incident) return null;
 
@@ -29,7 +29,7 @@ export const IncidentDeleteModal = () => {
       mutateIncidents();
       setTimeout(() => closeDeleteModal(), 2000);
     } catch (err) {
-      logger.error('[IncidentDeleteModal] Erreur lors de la suppression:', err);
+      logger.error('[SignalementDeleteModal] Erreur lors de la suppression:', err);
       const msg =
         err?.response?.data?.detail ||
         err?.response?.data?.message ||
@@ -95,4 +95,4 @@ export const IncidentDeleteModal = () => {
   );
 };
 
-export default IncidentDeleteModal;
+export default SignalementDeleteModal;

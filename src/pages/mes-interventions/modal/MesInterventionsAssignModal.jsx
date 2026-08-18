@@ -5,7 +5,7 @@ import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { CloseCircle, TickCircle, SearchNormal1, UserTick, Profile } from 'iconsax-react';
 import { useMesInterventionsModalContext } from '../mesInterventionsModalContexte';
-import { assignIncidentToAgentService, getIncidentAssignmentsService } from '../../incident/service/incident_service';
+import { assignIncidentToAgentService, getIncidentAssignmentsService } from '../../signalement/service/signalement_service';
 import { getOrganisationMembersService } from '../../agents/service/members_service';
 import { authService } from '../../auth/services/authService';
 

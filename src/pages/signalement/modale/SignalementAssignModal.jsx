@@ -4,8 +4,8 @@ import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { CloseCircle, TickCircle, SearchNormal1, UserTick, Profile } from 'iconsax-react';
-import { useIncidentModalContext } from './IncidentModalContext';
-import { assignIncidentToAgentService, getIncidentAssignmentsService } from '../service/incident_service';
+import { useSignalementModalContext } from './SignalementModalContext';
+import { assignIncidentToAgentService, getIncidentAssignmentsService } from '../service/signalement_service';
 import { getOrganisationMembersService } from '../../agents/service/members_service';
 import { authService } from '../../auth/services/authService';
 
@@ -42,7 +42,7 @@ const formatDatetimeLocal = (isoString) => {
   }
 };
 
-export const IncidentAssignModal = () => {
+export const SignalementAssignModal = () => {
   const {
     assignModal,
     assignClosing,
@@ -52,7 +52,7 @@ export const IncidentAssignModal = () => {
     setAssignAlert,
     closeAssignModal,
     mutateIncidents
-  } = useIncidentModalContext();
+  } = useSignalementModalContext();
 
   const [searchQuery, setSearchQuery] = useState('');
   const bodyRef = useRef(null);
@@ -115,7 +115,7 @@ export const IncidentAssignModal = () => {
           };
         });
       } catch (err) {
-        logger.error(`[IncidentAssignModal] Erreur chargement agents org ${userOrgId}:`, err);
+        logger.error(`[SignalementAssignModal] Erreur chargement agents org ${userOrgId}:`, err);
         return [];
       }
     },
@@ -233,7 +233,7 @@ export const IncidentAssignModal = () => {
         });
       }, 1500);
     } catch (err) {
-      logger.error('[IncidentAssignModal] Erreur lors de l\'assignation:', err);
+      logger.error('[SignalementAssignModal] Erreur lors de l\'assignation:', err);
 
       if (err?.response?.status === 400 && err?.response?.data) {
         const serverErrors = err.response.data;
@@ -506,4 +506,4 @@ export const IncidentAssignModal = () => {
   );
 };
 
-export default IncidentAssignModal;
+export default SignalementAssignModal;
