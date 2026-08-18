@@ -49,6 +49,13 @@ npm run build
 - Iconsax React
 - React DatePicker
 
-## 📄 License
+## 📄 Licence
 
-Propriétaire - Map Action Mali
+Ce dépôt est distribué sous licence **AGPL-3.0** — voir le fichier
+[LICENSE](./LICENSE) à la racine.
+
+Copyright (C) 2026 Map Action Mali.
+
+Les ressources non logicielles (logo, images, sons) appartiennent à
+Map Action Mali et ne sont pas couvertes par l'AGPL-3.0 : voir
+[THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md).
