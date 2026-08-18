@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Trash, CloseCircle, TickCircle } from 'iconsax-react';
-import { deleteTaskService } from '../../incident/service/task_service';
+import { deleteTaskService } from '../../signalement/service/task_service';
 import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
 import { logger } from '../../../utils/logger';
 
@@ -10,7 +10,7 @@ export const DeleteTaskModal = ({
   onConfirm,
   taskTitle,
   taskId,
-  incidentId,
+  signalementId,
   isDeleting: propIsDeleting
 }) => {
   const [shouldRender, setShouldRender] = useState(isOpen);
@@ -54,7 +54,7 @@ export const DeleteTaskModal = ({
     setDeleteAlert(null);
     try {
       setLocalIsDeleting(true);
-      await deleteTaskService(incidentId, taskId);
+      await deleteTaskService(signalementId, taskId);
       if (onConfirm) {
         await onConfirm(taskId);
       }

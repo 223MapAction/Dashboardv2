@@ -40,9 +40,9 @@ export const getCollaborationService = async (id) => {
 };
 
 /**
- * Crée une demande de collaboration sur un incident
+ * Crée une demande de collaboration sur un signalement
  * @param {Object} collaborationData - Données de la collaboration
- * @param {number} collaborationData.incident_id - ID de l'incident (requis)
+ * @param {number} collaborationData.incident_id - ID de l'signalement (requis)
  * @param {string} collaborationData.motivation - Motivation de la demande
  * @param {string} collaborationData.role - Rôle demandé (contributor|observer, default: contributor)
  * @returns {Promise<Object>} Collaboration créée
@@ -194,9 +194,9 @@ export const removeOrganisationMemberService = async (orgId, userId) => {
 // ========================
 
 /**
- * Crée un rapport de terrain pour un incident
+ * Crée un rapport de terrain pour un signalement
  * @param {Object} reportData - Données du rapport (FormData recommandé pour les photos)
- * @param {number} reportData.incident_id - ID de l'incident (requis)
+ * @param {number} reportData.incident_id - ID de l'signalement (requis)
  * @param {string} reportData.visited_at - Date/heure de visite (requis)
  * @param {string} [reportData.notes] - Notes du rapport
  * @param {File} [reportData.photos] - Photo(s) jointe(s)
@@ -241,7 +241,7 @@ export const createFieldReportService = async (reportData) => {
 /**
  * Récupère la liste des rapports de terrain
  * @param {Object} [filters] - Filtres optionnels
- * @param {number} [filters.incident_id] - Filtrer par incident
+ * @param {number} [filters.incident_id] - Filtrer par signalement
  * @param {number} [filters.agent_id] - Filtrer par agent
  * @returns {Promise<Array>} Liste des rapports
  */
@@ -294,14 +294,14 @@ export const filterCollaborationsByRole = (collaborations, role) => {
 };
 
 /**
- * Filtre les collaborations par incident
+ * Filtre les collaborations par signalement
  * @param {Array} collaborations - Liste des collaborations
- * @param {number} incidentId - ID de l'incident
+ * @param {number} signalementId - ID de l'signalement
  * @returns {Array} Collaborations filtrées
  */
-export const filterCollaborationsByIncident = (collaborations, incidentId) => {
-  if (!incidentId) return collaborations;
-  return collaborations.filter(collab => collab.incident === incidentId || collab.incidentId === incidentId);
+export const filterCollaborationsBySignalement = (collaborations, signalementId) => {
+  if (!signalementId) return collaborations;
+  return collaborations.filter(collab => collab.incident === signalementId || collab.signalementId === signalementId);
 };
 
 /**
@@ -314,7 +314,7 @@ export const formatCollaboration = (collaboration) => {
 
   return {
     id: collaboration.id,
-    incidentId: collaboration.incident, // ID de l'incident (number)
+    signalementId: collaboration.incident, // ID de l'signalement (number)
     userId: collaboration.user, // ID de l'utilisateur (number)
     role: collaboration.role,
     roleLabel: getRoleLabel(collaboration.role),
@@ -400,25 +400,25 @@ export const getCollaborationsStats = (collaborations) => {
 };
 
 /**
- * Groupe les collaborations par incident
+ * Groupe les collaborations par signalement
  * @param {Array} collaborations - Liste des collaborations
- * @returns {Object} Collaborations groupées par incident
+ * @returns {Object} Collaborations groupées par signalement
  */
-export const groupCollaborationsByIncident = (collaborations) => {
+export const groupCollaborationsBySignalement = (collaborations) => {
   if (!collaborations || collaborations.length === 0) return {};
 
   return collaborations.reduce((acc, collab) => {
-    const incidentId = collab.incident || collab.incidentId;
-    if (!incidentId) return acc;
+    const signalementId = collab.incident || collab.signalementId;
+    if (!signalementId) return acc;
 
-    if (!acc[incidentId]) {
-      acc[incidentId] = {
-        incidentId: incidentId,
+    if (!acc[signalementId]) {
+      acc[signalementId] = {
+        signalementId: signalementId,
         collaborations: []
       };
     }
 
-    acc[incidentId].collaborations.push(collab);
+    acc[signalementId].collaborations.push(collab);
     return acc;
   }, {});
 };
@@ -432,10 +432,10 @@ export default {
   rejectCollaborationService,
   filterCollaborationsByStatus,
   filterCollaborationsByRole,
-  filterCollaborationsByIncident,
+  filterCollaborationsBySignalement,
   formatCollaboration,
   getCollaborationsStats,
-  groupCollaborationsByIncident,
+  groupCollaborationsBySignalement,
   // Organisation - Membres
   getOrganisationMembersService,
   addOrganisationStaffMemberService,

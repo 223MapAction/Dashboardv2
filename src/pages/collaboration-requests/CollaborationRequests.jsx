@@ -36,7 +36,7 @@ import {
   acceptCollaborationService,
   rejectCollaborationService
 } from './service/partner_service';
-import { RequestIncidentDetailModal } from '../../components/collaboration/RequestIncidentDetailModal';
+import { RequestSignalementDetailModal } from '../../components/collaboration/RequestSignalementDetailModal';
 import { RequestDecisionModal } from '../../components/collaboration/RequestDecisionModal';
 import { authService } from '../auth/services/authService';
 import { API_URL_BASE } from '../../config/api_url_base';
@@ -77,12 +77,12 @@ const getInitials = (name = '') =>
     .join('');
 
 const RequestCardSkeleton = () => (
-  <div className="incident-centric-list" style={{ marginTop: '8px' }}>
+  <div className="signalement-centric-list" style={{ marginTop: '8px' }}>
     {[...Array(3)].map((_, idx) => (
-      <section key={idx} className="incident-group-card" style={{ pointerEvents: 'none', border: '1px solid var(--color-border)' }}>
-        <header className="incident-group-header" style={{ display: 'flex', gap: '16px', padding: '16px 20px', alignItems: 'center' }}>
+      <section key={idx} className="signalement-group-card" style={{ pointerEvents: 'none', border: '1px solid var(--color-border)' }}>
+        <header className="signalement-group-header" style={{ display: 'flex', gap: '16px', padding: '16px 20px', alignItems: 'center' }}>
           <ShimmerThumbnail height={110} width={140} rounded style={{ margin: 0 }} />
-          <div className="incident-group-title-section" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div className="signalement-group-title-section" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <ShimmerText line={1} width={80} style={{ margin: 0 }} />
               <span style={{ color: 'var(--color-text-muted)' }}>•</span>
@@ -95,7 +95,7 @@ const RequestCardSkeleton = () => (
               <ShimmerThumbnail height={20} width={120} rounded style={{ margin: 0 }} />
             </div>
           </div>
-          <div className="incident-group-summary-side" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div className="signalement-group-summary-side" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <ShimmerThumbnail height={30} width={30} rounded style={{ margin: 0 }} />
           </div>
         </header>
@@ -119,7 +119,7 @@ export const CollaborationRequests = ({
 
 
   // Détermine si le bouton Accepter/Refuser doit s'afficher pour une requête
-  // Logique : l'utilisateur connecté est-il le leader de l'incident ?
+  // Logique : l'utilisateur connecté est-il le leader de l'signalement ?
   // Et la demande ne vient-elle pas de lui-même ?
   const shouldShowAcceptForReq = (req, userCollab) => {
     if (!req) return false;
@@ -128,7 +128,7 @@ export const CollaborationRequests = ({
 
     const myId = currUser.id ? String(currUser.id).toLowerCase() : '';
     
-    // Vérifier que l'utilisateur est leader de l'incident
+    // Vérifier que l'utilisateur est leader de l'signalement
     const isLeader = userCollab && userCollab.role?.toLowerCase() === 'leader' && userCollab.status === 'accepted';
     
     // Ou vérifier si l'utilisateur est le propriétaire initial (taken_by)
@@ -164,8 +164,8 @@ export const CollaborationRequests = ({
     setPage(1);
   }, [statusFilter, typeFilter, search]);
   
-  const [expandedIncident, setExpandedIncident] = useState(null);
-  const [selectedIncidentForModal, setSelectedIncidentForModal] = useState(null);
+  const [expandedSignalement, setExpandedSignalement] = useState(null);
+  const [selectedSignalementForModal, setSelectedSignalementForModal] = useState(null);
 
   // Modal de décision
   const [decisionRequest, setDecisionRequest] = useState(null);
@@ -294,18 +294,18 @@ export const CollaborationRequests = ({
                 id: `collab_ws_${reqId}`,
                 type: 'invitation',
                 direction: calculatedDirection,
-                projectTitle: data.incident_title || `Incident #${data.incident}`,
+                projectTitle: data.incident_title || `Signalement #${data.incident}`,
                 projectImage: '',
                 organisation: orgName,
                 organisationInitials: getInitials(orgName),
                 organisationColor: 'var(--color-warning)',
                 role: displayRole,
-                motif: data.justification || data.motivation || `${orgName} a demandé à collaborer sur «${data.incident_title || 'cet incident'}»`,
+                motif: data.justification || data.motivation || `${orgName} a demandé à collaborer sur «${data.incident_title || 'cet signalement'}»`,
                 status: newStatus,
                 submittedAt: data.created_at || new Date().toISOString(),
                 respondedAt: null,
                 response: null,
-                incidentId: data.incident,
+                signalementId: data.incident,
                 apiId: reqId,
                 incidentDetails: {
                   id: data.incident,
@@ -379,12 +379,12 @@ export const CollaborationRequests = ({
     try {
       if (typeof decisionRequest.id === 'string' && decisionRequest.id.startsWith('sug_received_')) {
         const suggestionId = decisionRequest.apiId;
-        const incidentId = decisionRequest.incidentId;
+        const signalementId = decisionRequest.signalementId;
 
         if (action === 'accept') {
-          await acceptPartnerSuggestionService(incidentId, suggestionId);
+          await acceptPartnerSuggestionService(signalementId, suggestionId);
         } else {
-          await rejectPartnerSuggestionService(incidentId, suggestionId);
+          await rejectPartnerSuggestionService(signalementId, suggestionId);
         }
         mutatePendingSuggestions();
         mutateActiveCollabs();
@@ -442,7 +442,7 @@ export const CollaborationRequests = ({
           id: `sug_received_${item.id}`,
           type: 'suggestion',
           direction: 'received',
-          projectTitle: details?.title || item.incident_title || (item.incident_id ? `Incident #${item.incident_id}` : 'Incident sans titre'),
+          projectTitle: details?.title || item.incident_title || (item.incident_id ? `Signalement #${item.incident_id}` : 'Signalement sans titre'),
           projectImage: projImg,
           organisation: orgName,
           organisationInitials: getInitials(orgName),
@@ -462,7 +462,7 @@ export const CollaborationRequests = ({
           submittedAt: item.created_at || new Date().toISOString(),
           respondedAt: item.updated_at || null,
           response: item.response_message || null,
-          incidentId: item.incident_id || item.incident,
+          signalementId: item.incident_id || item.incident,
           apiId: item.id,
           incidentDetails: details,
           predictionDetails: item.prediction_details,
@@ -475,7 +475,7 @@ export const CollaborationRequests = ({
       }),
       ...(activeCollabs?.results || []).map((item) => {
         const details = item.incident_details || item.incident_detail;
-        const projTitle = details?.title || item.incident_title || (item.incident_id ? `Incident #${item.incident_id}` : 'Incident sans titre');
+        const projTitle = details?.title || item.incident_title || (item.incident_id ? `Signalement #${item.incident_id}` : 'Signalement sans titre');
         const projImg = item?.incident_thumbnail || '';
 
         const currUser = authService.getCurrentUser();
@@ -524,7 +524,7 @@ export const CollaborationRequests = ({
           submittedAt: item.created_at || new Date().toISOString(),
           respondedAt: item.updated_at || null,
           response: null,
-          incidentId: details?.id || item.incident_id || item.incident,
+          signalementId: details?.id || item.incident_id || item.incident,
           apiId: item.id,
           incidentDetails: details,
           predictionDetails: item.prediction_details,
@@ -537,7 +537,7 @@ export const CollaborationRequests = ({
       }),
       ...(pendingInvitations || []).map((item) => {
         const details = item.incident_details || item.incident_detail;
-        const projTitle = details?.title || item.incident_title || (item.incident_id ? `Incident #${item.incident_id}` : 'Incident sans titre');
+        const projTitle = details?.title || item.incident_title || (item.incident_id ? `Signalement #${item.incident_id}` : 'Signalement sans titre');
         const projImg = item?.incident_thumbnail || '';
 
         const currUser = authService.getCurrentUser();
@@ -588,7 +588,7 @@ export const CollaborationRequests = ({
           submittedAt: item.created_at || new Date().toISOString(),
           respondedAt: null,
           response: null,
-          incidentId: details?.id || item.incident_id || item.incident,
+          signalementId: details?.id || item.incident_id || item.incident,
           apiId: item.id,
           incidentDetails: details,
           predictionDetails: item.prediction_details,
@@ -634,16 +634,16 @@ export const CollaborationRequests = ({
     );
   });
 
-  // Incident-centric grouping
-  const groupedIncidents = [];
+  // Signalement-centric grouping
+  const groupedSignalements = [];
   const incidentsMap = {};
 
   filtered.forEach((r) => {
-    const incidentId = r.incidentId || 'unknown';
-    if (!incidentsMap[incidentId]) {
-      incidentsMap[incidentId] = {
-        id: incidentId,
-        projectTitle: r.projectTitle || 'Incident sans titre',
+    const signalementId = r.signalementId || 'unknown';
+    if (!incidentsMap[signalementId]) {
+      incidentsMap[signalementId] = {
+        id: signalementId,
+        projectTitle: r.projectTitle || 'Signalement sans titre',
         projectImage: r.projectImage || '',
         leader: null,
         userCollab: null,
@@ -652,10 +652,10 @@ export const CollaborationRequests = ({
         incidentDetails: r.incidentDetails,
         predictionDetails: r.predictionDetails
       };
-      groupedIncidents.push(incidentsMap[incidentId]);
+      groupedSignalements.push(incidentsMap[signalementId]);
     }
 
-    const group = incidentsMap[incidentId];
+    const group = incidentsMap[signalementId];
     if (r.projectImage && !group.projectImage) {
       group.projectImage = r.projectImage;
     }
@@ -686,7 +686,7 @@ export const CollaborationRequests = ({
   });
 
   // Resolve leader presence
-  groupedIncidents.forEach((group) => {
+  groupedSignalements.forEach((group) => {
     if (group.userCollab && group.userCollab.role?.toLowerCase() === 'leader') {
       group.leader = {
         name: 'Vous',
@@ -743,7 +743,7 @@ export const CollaborationRequests = ({
           <div>
             <h1 className="requests-title">Demandes de collaboration</h1>
             <p className="requests-subtitle">
-              Gérez vos demandes de participation et suivez les rôles associés aux incidents.
+              Gérez vos demandes de participation et suivez les rôles associés aux signalements.
             </p>
           </div>
         </div>
@@ -820,52 +820,52 @@ export const CollaborationRequests = ({
         </div>
       )}
 
-      {/* Grouped Incident List */}
+      {/* Grouped Signalement List */}
       {isDataLoading ? (
         <RequestCardSkeleton />
-      ) : groupedIncidents.length === 0 ? (
+      ) : groupedSignalements.length === 0 ? (
         <div className="requests-empty">
           <p className='body-large' style={{ color: "var(--color-text-primary)" }}>Aucune collaboration ne correspond à vos critères.</p>
         </div>
       ) : (
-        <div className="incident-centric-list">
-          {groupedIncidents.map((incident) => {
-            const isExpanded = expandedIncident === incident.id;
-            const hasLeader = !!incident.leader;
-            // Déterminer si l'utilisateur connecté est le propriétaire de l'incident
+        <div className="signalement-centric-list">
+          {groupedSignalements.map((signalement) => {
+            const isExpanded = expandedSignalement === signalement.id;
+            const hasLeader = !!signalement.leader;
+            // Déterminer si l'utilisateur connecté est le propriétaire de l'signalement
             const currUser = authService.getCurrentUser();
-            const takenBy = incident.incidentDetails?.taken_by;
-            const isUserLeader = incident.leader?.isMe ||
+            const takenBy = signalement.incidentDetails?.taken_by;
+            const isUserLeader = signalement.leader?.isMe ||
               (currUser && takenBy && String(takenBy).toLowerCase() === String(currUser.id).toLowerCase());
 
             // Status details for user's own participation
-            const myCollab = incident.userCollab;
+            const myCollab = signalement.userCollab;
             const meta = myCollab ? STATUS_META[myCollab.status] : null;
             const myRoleKey = myCollab?.role?.toLowerCase() === 'leader' ? 'leader' :
               (myCollab?.role?.toLowerCase() === 'contributeur' || myCollab?.role?.toLowerCase() === 'contributor') ? 'contributor' : 'observer';
             const myRoleMeta = myCollab ? ROLE_META[myRoleKey] : null;
 
-            const pendingOthers = incident.otherCollabs.filter(c => c.status === 'pending');
+            const pendingOthers = signalement.otherCollabs.filter(c => c.status === 'pending');
 
-            const targetReq = incident.otherCollabs.find(oc => oc.status === 'pending' && shouldShowAcceptForReq(oc, myCollab))
-              || incident.suggestions.find(s => s.status === 'pending' && shouldShowAcceptForReq(s, myCollab));
+            const targetReq = signalement.otherCollabs.find(oc => oc.status === 'pending' && shouldShowAcceptForReq(oc, myCollab))
+              || signalement.suggestions.find(s => s.status === 'pending' && shouldShowAcceptForReq(s, myCollab));
 
             const pendingReqToAction = targetReq || (myCollab?.status === 'pending' && shouldShowAcceptForReq(myCollab, myCollab) ? myCollab : null);
             const showAcceptReject = !!pendingReqToAction;
 
             return (
               <section
-                key={incident.id}
-                className={`incident-group-card ${isExpanded ? 'is-expanded' : ''} ${hasLeader ? 'has-leader' : 'no-leader'}`}
+                key={signalement.id}
+                className={`signalement-group-card ${isExpanded ? 'is-expanded' : ''} ${hasLeader ? 'has-leader' : 'no-leader'}`}
               >
-                {/* Incident Group Header */}
+                {/* Signalement Group Header */}
                 <header
-                  className="incident-group-header"
-                  onClick={() => setExpandedIncident(isExpanded ? null : incident.id)}
+                  className="signalement-group-header"
+                  onClick={() => setExpandedSignalement(isExpanded ? null : signalement.id)}
                 >
                   <div
-                    className="incident-group-thumb"
-                    style={incident.projectImage ? { backgroundImage: `url("${incident.projectImage}")` } : {}}
+                    className="signalement-group-thumb"
+                    style={signalement.projectImage ? { backgroundImage: `url("${signalement.projectImage}")` } : {}}
                   >
                     {myCollab && meta && (
                       <span className={`request-status-badge ${meta.className}`} style={{
@@ -886,28 +886,28 @@ export const CollaborationRequests = ({
                     )}
                   </div>
 
-                  <div className="incident-group-title-section">
+                  <div className="signalement-group-title-section">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', fontSize: 'var(--font-size-caption)' }}>
                       <span style={{ fontWeight: 600, color: 'var(--color-text-primary)', fontSize: 'var(--font-size-body-small)' }}>
-                        {incident.userCollab?.direction === 'sent' ? (
+                        {signalement.userCollab?.direction === 'sent' ? (
                           <>
-                            Vous avez envoyé une demande de collaboration à <strong style={{ fontWeight: 800 }}>{incident.leader?.org || incident.organisation}</strong>
+                            Vous avez envoyé une demande de collaboration à <strong style={{ fontWeight: 800 }}>{signalement.leader?.org || signalement.organisation}</strong>
                           </>
                         ) : (
                           <>
-                            <strong style={{ fontWeight: 800 }}>{pendingReqToAction?.organisation || 'Une organisation'}</strong> a demandé à collaborer sur <strong style={{ fontWeight: 800 }}>«{incident.projectTitle}»</strong>
+                            <strong style={{ fontWeight: 800 }}>{pendingReqToAction?.organisation || 'Une organisation'}</strong> a demandé à collaborer sur <strong style={{ fontWeight: 800 }}>«{signalement.projectTitle}»</strong>
                           </>
                         )}
                       </span>
                       <span style={{ color: 'var(--color-text-muted)' }}>•</span>
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: 'var(--color-text-secondary)' }}>
                         <Location size={12} variant="Bold" color="currentColor" style={{ color: 'var(--color-text-secondary)' }} />
-                        {incident.incidentDetails?.zone || incident.incidentDetails?.location || 'Localisation non spécifiée'}
+                        {signalement.incidentDetails?.zone || signalement.incidentDetails?.location || 'Localisation non spécifiée'}
                       </span>
                     </div>
 
-                    <h3 className="incident-group-title" style={{ margin: 0, fontSize: 'var(--font-size-body-large)', fontWeight: 700 }}>
-                      {incident.projectTitle}
+                    <h3 className="signalement-group-title" style={{ margin: 0, fontSize: 'var(--font-size-body-large)', fontWeight: 700 }}>
+                      {signalement.projectTitle}
                     </h3>
 
                     <p style={{
@@ -921,10 +921,10 @@ export const CollaborationRequests = ({
                       lineClamp: 2,
                       overflow: 'hidden'
                     }}>
-                      {incident.incidentDetails?.description || 'Aucune description disponible.'}
+                      {signalement.incidentDetails?.description || 'Aucune description disponible.'}
                     </p>
 
-                    <div className="incident-group-status-badges" style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '4px' }}>
+                    <div className="signalement-group-status-badges" style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '4px' }}>
                       {/* User's own role badge if participating and NOT leader */}
                       {!isUserLeader && myCollab && myRoleMeta && (
                         <span className="my-participation-badge" style={{
@@ -947,8 +947,8 @@ export const CollaborationRequests = ({
                         </span>
                       )}
 
-                      {/* Display leader badge, but only if I am NOT the leader of this incident */}
-                      {!isUserLeader && incident.leader && (
+                      {/* Display leader badge, but only if I am NOT the leader of this signalement */}
+                      {!isUserLeader && signalement.leader && (
                         <span className="leader-badge" style={{
                           display: 'inline-flex',
                           alignItems: 'center',
@@ -962,15 +962,15 @@ export const CollaborationRequests = ({
                           border: 'none'
                         }}>
                           <Crown1 size={13} variant="Bold" color="currentColor" style={{ color: 'var(--color-warning-text)' }} />
-                          Leader : {incident.leader.org || incident.leader.name}
+                          Leader : {signalement.leader.org || signalement.leader.name}
                         </span>
                       )}
 
                       {(() => {
-                        // Si shouldShowAcceptForReq est vrai pour une demande de cet incident,
-                        // on affiche l'organisation du demandeur (l'utilisateur) au lieu de celle de l'incident.
-                        const targetReq = incident.otherCollabs.find(oc => oc.status === 'pending' && shouldShowAcceptForReq(oc, myCollab))
-                          || incident.suggestions.find(s => s.status === 'pending' && shouldShowAcceptForReq(s, myCollab));
+                        // Si shouldShowAcceptForReq est vrai pour une demande de cet signalement,
+                        // on affiche l'organisation du demandeur (l'utilisateur) au lieu de celle de l'signalement.
+                        const targetReq = signalement.otherCollabs.find(oc => oc.status === 'pending' && shouldShowAcceptForReq(oc, myCollab))
+                          || signalement.suggestions.find(s => s.status === 'pending' && shouldShowAcceptForReq(s, myCollab));
 
                         const orgToShow = targetReq
                           ? (targetReq.organisationName || targetReq.organisation)
@@ -999,7 +999,7 @@ export const CollaborationRequests = ({
                     </div>
                   </div>
 
-                  <div className="incident-group-summary-side" onClick={(e) => e.stopPropagation()}>
+                  <div className="signalement-group-summary-side" onClick={(e) => e.stopPropagation()}>
                     {/* Accept/Reject buttons */}
                     {showAcceptReject && pendingReqToAction && (
                       <div className="header-action-buttons" style={{ display: 'flex', gap: '8px', marginRight: '8px' }}>
@@ -1050,8 +1050,8 @@ export const CollaborationRequests = ({
 
                     <button
                       type="button"
-                      className={`incident-group-toggle ${isExpanded ? 'is-open' : ''}`}
-                      onClick={() => setExpandedIncident(isExpanded ? null : incident.id)}
+                      className={`signalement-group-toggle ${isExpanded ? 'is-open' : ''}`}
+                      onClick={() => setExpandedSignalement(isExpanded ? null : signalement.id)}
                       aria-label={isExpanded ? 'Réduire' : 'Développer'}
                     >
                       <ArrowRight2 size={18} variant="Linear" color="var(--color-text-secondary)" />
@@ -1062,8 +1062,8 @@ export const CollaborationRequests = ({
 
                 {/* Expanded content */}
                 {isExpanded && (
-                  <div className="incident-group-body">
-                    <div className="incident-details-grid">
+                  <div className="signalement-group-body">
+                    <div className="signalement-details-grid">
                       {/* Left: Your collaboration state details */}
                       <div className="grid-column my-collab-details">
                         <h4 className="detail-section-title">Votre participation</h4>
@@ -1080,7 +1080,7 @@ export const CollaborationRequests = ({
                                   <Clock size={16} variant="Bold" color="currentColor" style={{ color: 'var(--color-warning-text)' }} />
                                   {myCollab.incidentDetails?.etat === "taken_into_account" ? (
                                     <>
-                                      En attente de validation par le leader {incident.leader?.org && (<strong>({incident.leader.org})</strong>)}
+                                      En attente de validation par le leader {signalement.leader?.org && (<strong>({signalement.leader.org})</strong>)}
                                     </>
                                   ) : (
                                     <>
@@ -1093,7 +1093,7 @@ export const CollaborationRequests = ({
                                   {myCollab.role?.toLowerCase() === 'observer' || myCollab.role?.toLowerCase() === 'observateur' ? (
                                     <>Participation active en tant qu'observateur (Toujours approuvée).</>
                                   ) : hasLeader ? (
-                                    <>Approuvée par le leader (<strong>{incident.leader?.org || incident.leader?.name}</strong>).</>
+                                    <>Approuvée par le leader (<strong>{signalement.leader?.org || signalement.leader?.name}</strong>).</>
                                   ) : (
                                     <>Active (Auto-acceptée car aucun leader n'est désigné sur le signalement).</>
                                   )}
@@ -1116,10 +1116,10 @@ export const CollaborationRequests = ({
 
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSelectedIncidentForModal(incident);
+                            setSelectedSignalementForModal(signalement);
                           }}
                         >
-                          Voir incident
+                          Voir signalement
                         </button>
                       </div>
 
@@ -1153,12 +1153,12 @@ export const CollaborationRequests = ({
                           </>
                         ) : (
                           <>
-                            <h4 className="detail-section-title">Suggestions de partenaires ({incident.suggestions.length})</h4>
-                            {incident.suggestions.length === 0 ? (
+                            <h4 className="detail-section-title">Suggestions de partenaires ({signalement.suggestions.length})</h4>
+                            {signalement.suggestions.length === 0 ? (
                               <p className="no-actions-text">Aucune suggestion pour cet signalement.</p>
                             ) : (
-                              <div className="incident-suggestions-list">
-                                {incident.suggestions.map((sug) => (
+                              <div className="signalement-suggestions-list">
+                                {signalement.suggestions.map((sug) => (
                                   <div key={sug.id} className="sug-action-card">
                                     <div className="sug-card-header">
                                       <strong>{sug.organisation}</strong>
@@ -1202,11 +1202,11 @@ export const CollaborationRequests = ({
           initialAction={decisionAction}
         />
       )}
-      {/* Incident Detail Modal */}
-      {selectedIncidentForModal && (
-        <RequestIncidentDetailModal
-          incident={selectedIncidentForModal}
-          onClose={() => setSelectedIncidentForModal(null)}
+      {/* Signalement Detail Modal */}
+      {selectedSignalementForModal && (
+        <RequestSignalementDetailModal
+          signalement={selectedSignalementForModal}
+          onClose={() => setSelectedSignalementForModal(null)}
         />
       )}
       

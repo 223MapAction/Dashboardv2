@@ -228,7 +228,7 @@ export const Header = ({ onMenuToggle, user }) => {
         return <People {...iconProps} color="var(--color-primary-text)" />;
       case 'danger':
       case 'alert':
-      case 'incident':
+      case 'signalement':
         return <Danger {...iconProps} color="var(--color-danger-text)" />;
       default:
         return <InfoCircle {...iconProps} color="var(--color-warning-text)" />;
@@ -300,8 +300,8 @@ export const Header = ({ onMenuToggle, user }) => {
                         <div className="notification-message">
                           {formatNotificationMessage(notification.message)}
                           {notification.incident_title && (
-                            <span className="notification-incident-tag" style={{ display: 'block', fontSize: 'var(--font-size-micro)', color: 'var(--color-text-secondary)', marginTop: '2px', fontStyle: 'italic' }}>
-                              Incident : {notification.incident_title}
+                            <span className="notification-signalement-tag" style={{ display: 'block', fontSize: 'var(--font-size-micro)', color: 'var(--color-text-secondary)', marginTop: '2px', fontStyle: 'italic' }}>
+                              Signalement : {notification.incident_title}
                             </span>
                           )}
                         </div>

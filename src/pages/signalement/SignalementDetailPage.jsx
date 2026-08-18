@@ -1,0 +1,55 @@
+import React from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useSidebarState } from '../../hooks/useSidebarState';
+import { Header, Sidebar } from '../../components/layout';
+import { SignalementDetail } from './components/SignalementDetail/SignalementDetail';
+import './signalement.css';
+
+export const SignalementDetailPage = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const incidentFromState = location.state?.incident;
+  const {
+    isOpen: sidebarOpen,
+    setOpen: setSidebarOpen,
+    isCollapsed: sidebarCollapsed,
+    setCollapsed: setSidebarCollapsed,
+  } = useSidebarState();
+
+  const handleBack = () => {
+    const fromTab = location.state?.from;
+    if (fromTab) {
+      navigate(fromTab);
+    } else {
+      navigate('/signalements');
+    }
+  };
+
+  return (
+    <div className="signalement-page">
+      <Sidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        isCollapsed={sidebarCollapsed}
+        onCollapsedChange={setSidebarCollapsed}
+      />
+
+      <div className={`signalement-page-main ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+        <Header
+          onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
+          sidebarCollapsed={sidebarCollapsed}
+        />
+
+        <div className="signalement-workspace">
+          {/* On rend le composant détail existant. Il gère déjà useSWR pour charger ses données. */}
+          <SignalementDetail
+            signalement={incidentFromState || { id: id }}
+            onBack={handleBack}
+            isLoading={false}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};

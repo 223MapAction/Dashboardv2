@@ -13,7 +13,7 @@ const borner = (v, min, max) => Math.min(max, Math.max(min, v));
 /**
  * Visualiseur d'image plein écran, avec zoom et déplacement.
  *
- * Conçu d'abord pour le tactile : les agents consultent les photos d'incident
+ * Conçu d'abord pour le tactile : les agents consultent les photos d'signalement
  * depuis un téléphone. Le pincement, le glissé et le double-tap sont donc
  * traités au même titre que la molette et le clavier.
  *

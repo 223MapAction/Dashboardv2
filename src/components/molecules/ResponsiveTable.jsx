@@ -57,8 +57,8 @@ export const ResponsiveTable = ({
   // Chaque page garde ses propres styles de tableau. Sans ca, une seule
   // feuille de style s'appliquerait aux trois listes et les toucherait
   // toutes des qu'on en ajuste une.
-  classeTable = 'incident-table',
-  classeWrap = 'incident-table-wrap',
+  classeTable = 'signalement-table',
+  classeWrap = 'signalement-table-wrap',
   className = '',
 }) => {
   const compacte = useListeCompacte();
@@ -100,7 +100,7 @@ export const ResponsiveTable = ({
             {colonnes.map((c) => (
               <th key={c.id} className={c.classeEntete}>{c.entete}</th>
             ))}
-            {actions && <th className="incident-th-actions">Actions</th>}
+            {actions && <th className="signalement-th-actions">Actions</th>}
           </tr>
         </thead>
         <tbody>
@@ -233,7 +233,7 @@ const SqueletteTable = ({ colonnes, avecActions, nombre, classeTable, classeWrap
       <thead>
         <tr>
           {colonnes.map((c) => <th key={c.id} className={c.classeEntete}>{c.entete}</th>)}
-          {avecActions && <th className="incident-th-actions">Actions</th>}
+          {avecActions && <th className="signalement-th-actions">Actions</th>}
         </tr>
       </thead>
       <tbody>

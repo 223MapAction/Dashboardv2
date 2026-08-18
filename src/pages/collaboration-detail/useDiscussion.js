@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import useSWR from 'swr';
-import { useSocketIncident } from '../../hooks/useSocketIncident';
+import { useSocketSignalement } from '../../hooks/useSocketSignalement';
 import sendMessageSound from '../../assets/send_message.mp3';
 import {
   getDiscussionMessagesService,
@@ -20,9 +20,9 @@ import { logger } from '../../utils/logger';
  * aucun rapport avec elles : tout ce que ce hook consomme de l'exterieur,
  * c'est l'identifiant du signalement.
  *
- * @param {number|string|null} incidentId
+ * @param {number|string|null} signalementId
  */
-export function useDiscussion(incidentId) {
+export function useDiscussion(signalementId) {
   const [newMessage, setNewMessage] = useState('');
   const [attachedFile, setAttachedFile] = useState(null);
   const [attachedAudio, setAttachedAudio] = useState(null);
@@ -59,18 +59,18 @@ export function useDiscussion(incidentId) {
     allMessagesRef.current = Array.isArray(allMessages) ? allMessages : [];
   }, [allMessages]);
 
-  // Réinitialiser la pagination quand incidentId change
+  // Réinitialiser la pagination quand signalementId change
   useEffect(() => {
     setAllMessages([]);
     setHasMoreMessages(false);
     setNextBeforeId(null);
     allMessagesRef.current = [];
-  }, [incidentId]);
+  }, [signalementId]);
 
   // Charger les messages initiaux (10 plus récents) via SWR
   const { data: rawMessagesData, mutate: mutateMessages } = useSWR(
-    incidentId ? `discussion-${incidentId}` : null,
-    () => getDiscussionMessagesService(incidentId, { limit: 10 }),
+    signalementId ? `discussion-${signalementId}` : null,
+    () => getDiscussionMessagesService(signalementId, { limit: 10 }),
     {
       revalidateOnFocus: false
     }
@@ -116,8 +116,8 @@ export function useDiscussion(incidentId) {
 
   // Temps reel : a chaque notification du serveur, on redemande la page de
   // messages a SWR. L'effet ci-dessus se charge de n'ajouter que les nouveaux.
-  // La reconnexion et sa temporisation vivent dans useSocketIncident.
-  useSocketIncident(incidentId, 'discussion', () => mutateMessages());
+  // La reconnexion et sa temporisation vivent dans useSocketSignalement.
+  useSocketSignalement(signalementId, 'discussion', () => mutateMessages());
 
   // Fonction pour charger plus de messages (messages plus anciens)
   //
@@ -125,12 +125,12 @@ export function useDiscussion(incidentId) {
   // elle etait recreee a chaque rendu, l'effet se relancait donc en permanence
   // et l'ecouteur etait detache puis rattache sur chaque frappe de l'utilisateur.
   const loadMoreMessages = useCallback(async () => {
-    if (!hasMoreMessages || isLoadingMoreMessages || !nextBeforeId || !incidentId) return;
+    if (!hasMoreMessages || isLoadingMoreMessages || !nextBeforeId || !signalementId) return;
 
     setIsLoadingMoreMessages(true);
 
     try {
-      const data = await getDiscussionMessagesService(incidentId, {
+      const data = await getDiscussionMessagesService(signalementId, {
         limit: 10,
         before: nextBeforeId
       });
@@ -151,7 +151,7 @@ export function useDiscussion(incidentId) {
     } finally {
       setIsLoadingMoreMessages(false);
     }
-  }, [hasMoreMessages, isLoadingMoreMessages, nextBeforeId, incidentId]);
+  }, [hasMoreMessages, isLoadingMoreMessages, nextBeforeId, signalementId]);
 
   // Détecter le scroll vers le haut pour charger plus de messages
   useEffect(() => {
@@ -337,17 +337,17 @@ export function useDiscussion(incidentId) {
     setSendingMessage(true);
     try {
       if (attachedAudio) {
-        await sendMessageService(incidentId, {
+        await sendMessageService(signalementId, {
           message: newMessage.trim(),
           audio: attachedAudio
         });
       } else if (attachedFile) {
-        await sendMessageService(incidentId, {
+        await sendMessageService(signalementId, {
           message: newMessage.trim(),
           attachment: attachedFile
         });
       } else {
-        await sendMessageService(incidentId, {
+        await sendMessageService(signalementId, {
           message: newMessage.trim()
         });
       }
@@ -388,7 +388,7 @@ export function useDiscussion(incidentId) {
     if (!editingMessageText.trim()) return;
     setSavingEdit(true);
     try {
-      await updateDiscussionMessageService(incidentId, msgId, editingMessageText.trim());
+      await updateDiscussionMessageService(signalementId, msgId, editingMessageText.trim());
       await mutateMessages();
       setEditingMessageId(null);
       setEditingMessageText('');
@@ -402,7 +402,7 @@ export function useDiscussion(incidentId) {
   const handleDeleteMessage = async (msgId) => {
     setDeletingMessageId(msgId);
     try {
-      await deleteDiscussionMessageService(incidentId, msgId);
+      await deleteDiscussionMessageService(signalementId, msgId);
       await mutateMessages();
     } catch (err) {
       logger.error('[handleDeleteMessage] Erreur:', err);

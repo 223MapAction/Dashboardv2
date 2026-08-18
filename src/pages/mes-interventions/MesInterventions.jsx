@@ -10,10 +10,10 @@ import { ShimmerThumbnail, ShimmerTitle, ShimmerText, ShimmerCircularImage } fro
 import { MesInterventionsModalProvider } from './MesInterventionsModalContext';
 import { useMesInterventionsModalContext } from './mesInterventionsModalContexte';
 import { MesInterventionsAssignModal } from './modal/MesInterventionsAssignModal';
-import { IncidentAgentsListModal } from './modal/IncidentAgentsListModal';
-import { IncidentReportsModal } from './modal/IncidentReportsModal';
-import { getOrgInternalIncidentsService } from './service/mes_interventions_service';
-import { getIncidentAssignmentsService } from '../incident/service/incident_service';
+import { SignalementAgentsListModal } from './modal/SignalementAgentsListModal';
+import { SignalementReportsModal } from './modal/SignalementReportsModal';
+import { getOrgInternalSignalementsService } from './service/mes_interventions_service';
+import { getSignalementAssignmentsService } from '../signalement/service/signalement_service';
 import { BlurryImage } from '../../components/atoms/BlurryImage';
 import Pagination from '../../components/molecules/Pagination';
 import { ResponsiveTable } from '../../components/molecules/ResponsiveTable';
@@ -33,8 +33,8 @@ const getInitials = (name = '') =>
     .join('');
 
 // Adaptation des données pour l'affichage
-const adaptIncidentData = (incident) => {
-  if (!incident) return null;
+const adaptSignalementData = (signalement) => {
+  if (!signalement) return null;
 
   const getBadgeFromEtat = (etat) => {
     const badges = {
@@ -47,24 +47,24 @@ const adaptIncidentData = (incident) => {
   };
 
   return {
-    ...incident,
-    location: incident.zone || incident.location || 'Localisation non spécifiée',
-    type: incident.zone || incident.type || 'Non spécifié',
-    image: incident.photo || incident.image || '',
-    startDate: incident.created_at ? new Date(incident.created_at).toLocaleDateString('fr-FR') : 'Non spécifié',
-    endDate: incident.resolution_end_date ? new Date(incident.resolution_end_date).toLocaleDateString('fr-FR') : 'En cours',
-    badge: getBadgeFromEtat(incident.etat),
-    progressValue: incident.progress || 0,
-    is_public: incident.is_public ?? false
+    ...signalement,
+    location: signalement.zone || signalement.location || 'Localisation non spécifiée',
+    type: signalement.zone || signalement.type || 'Non spécifié',
+    image: signalement.photo || signalement.image || '',
+    startDate: signalement.created_at ? new Date(signalement.created_at).toLocaleDateString('fr-FR') : 'Non spécifié',
+    endDate: signalement.resolution_end_date ? new Date(signalement.resolution_end_date).toLocaleDateString('fr-FR') : 'En cours',
+    badge: getBadgeFromEtat(signalement.etat),
+    progressValue: signalement.progress || 0,
+    is_public: signalement.is_public ?? false
   };
 };
 
 
-const IncidentAgentsStack = ({ incident }) => {
+const SignalementAgentsStack = ({ signalement }) => {
   const { openAgentsModal } = useMesInterventionsModalContext();
   const { data: assignmentsData, isLoading } = useSWR(
-    incident ? `incident_assignments_${incident.id}` : null,
-    () => getIncidentAssignmentsService(incident.id)
+    signalement ? `incident_assignments_${signalement.id}` : null,
+    () => getSignalementAssignmentsService(signalement.id)
   );
 
   const incidentAgents = useMemo(() => {
@@ -116,7 +116,7 @@ const IncidentAgentsStack = ({ incident }) => {
       className="avatar-stack"
       onClick={(e) => {
         e.stopPropagation();
-        openAgentsModal(incident);
+        openAgentsModal(signalement);
       }}
       title="Voir la liste des agents assignés"
       style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
@@ -181,7 +181,7 @@ const MesInterventionsContent = () => {
   const {
     openAssignModal,
     openReportsModal,
-    setMutateIncidents
+    setMutateSignalements
   } = useMesInterventionsModalContext();
 
   const {
@@ -209,8 +209,8 @@ const MesInterventionsContent = () => {
   }, [statusFilter]);
 
   const { data, error: erreurInterventions, isLoading, mutate } = useSWR(
-    ['/MapApi/org-incidents', sourceFilter, mappedStatus, search, page],
-    () => getOrgInternalIncidentsService({
+    ['/MapApi/org-signalements', sourceFilter, mappedStatus, search, page],
+    () => getOrgInternalSignalementsService({
       sourceFilter,
       status: mappedStatus,
       search,
@@ -220,23 +220,23 @@ const MesInterventionsContent = () => {
   );
 
   React.useEffect(() => {
-    if (setMutateIncidents) {
-      setMutateIncidents(() => mutate);
+    if (setMutateSignalements) {
+      setMutateSignalements(() => mutate);
     }
-  }, [mutate, setMutateIncidents]);
+  }, [mutate, setMutateSignalements]);
 
-  const incidents = useMemo(() => {
+  const signalements = useMemo(() => {
     const rawList = data?.results || (Array.isArray(data) ? data : []);
-    return rawList.map(adaptIncidentData);
+    return rawList.map(adaptSignalementData);
   }, [data]);
 
-  // Fonction pour ouvrir les rapports d'un incident
-  const handleOpenReports = (incident) => {
-    openReportsModal(incident);
+  // Fonction pour ouvrir les rapports d'un signalement
+  const handleOpenReports = (signalement) => {
+    openReportsModal(signalement);
   };
 
-  const handleRowClick = (incident) => {
-    const collabId = incident?.my_collaboration?.id;
+  const handleRowClick = (signalement) => {
+    const collabId = signalement?.my_collaboration?.id;
     // return
     navigate(`/collaboration-detail/${collabId}`, {
       state: { from: '/mes-interventions' }
@@ -248,26 +248,26 @@ const MesInterventionsContent = () => {
   // et ce fichier redescend sous les 400 lignes.
   const colonnes = creerColonnesInterventions({
     onOuvrirRapports: handleOpenReports,
-    RenduEquipe: IncidentAgentsStack,
+    RenduEquipe: SignalementAgentsStack,
   });
 
-  const actionsDe = (incident) => (
+  const actionsDe = (signalement) => (
     <>
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <TableActionsMenu
-                ariaLabel={`Actions sur ${incident.title || 'cette intervention'}`}
+                ariaLabel={`Actions sur ${signalement.title || 'cette intervention'}`}
                 actions={[
                   {
                     id: 'detail',
                     label: 'Voir le détail',
                     icon: Eye,
-                    onSelect: () => handleGoToIncidentDetail(incident),
+                    onSelect: () => handleGoToSignalementDetail(signalement),
                   },
                   {
                     id: 'team',
                     label: "Gérer l'équipe",
                     icon: People,
-                    onSelect: () => openAssignModal(incident),
+                    onSelect: () => openAssignModal(signalement),
                   },
                 ]}
               />
@@ -275,9 +275,9 @@ const MesInterventionsContent = () => {
     </>
   );
 
-  const handleGoToIncidentDetail = (incident) => {
-    navigate(`/signalements/${incident.id}`, {
-      state: { incident, from: '/mes-interventions' }
+  const handleGoToSignalementDetail = (signalement) => {
+    navigate(`/signalements/${signalement.id}`, {
+      state: { signalement, from: '/mes-interventions' }
     });
   };
 
@@ -306,7 +306,7 @@ const MesInterventionsContent = () => {
           <header className="mes-interventions-header">
             <h1 className="mes-interventions-title">Mes interventions</h1>
             <p className="mes-interventions-subtitle">
-              Retrouvez la liste complète des incidents qui vous ont été assignés personnellement et suivez leur avancement.
+              Retrouvez la liste complète des signalements qui vous ont été assignés personnellement et suivez leur avancement.
             </p>
           </header>
 
@@ -336,13 +336,13 @@ const MesInterventionsContent = () => {
               reinitialiserRecherche();
               setSourceFilter('agents_or_internal'); setStatusFilter('');
             }}
-            resultats={data?.count ?? incidents.length}
+            resultats={data?.count ?? signalements.length}
             nomResultat="intervention"
           />
           </div>
 
           {/* Affichage des données / Chargement */}
-          {!isLoading && incidents.length === 0 ? (
+          {!isLoading && signalements.length === 0 ? (
             <div className="mes-interventions-empty">
               <p className="h1 mb-p pb-0">Aucun signalement</p>
               <p className="mt-2">Aucun signalement assigné ne correspond à vos critères.</p>
@@ -351,7 +351,7 @@ const MesInterventionsContent = () => {
             <>
               <ResponsiveTable
                 colonnes={colonnes}
-                donnees={incidents || []}
+                donnees={signalements || []}
                 cleDe={(i) => i.id}
                 actions={actionsDe}
                 onLigneClick={handleRowClick}
@@ -376,8 +376,8 @@ const MesInterventionsContent = () => {
 
       {/* Modales d'actions */}
       <MesInterventionsAssignModal />
-      <IncidentAgentsListModal />
-      <IncidentReportsModal />
+      <SignalementAgentsListModal />
+      <SignalementReportsModal />
     </div>
   );
 };

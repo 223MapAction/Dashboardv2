@@ -2,7 +2,7 @@
  * Échelle de gravité — source unique côté frontend.
  *
  * ── TROIS NIVEAUX, PARCE QUE C'EST CE QUE LE SERVEUR ÉMET ───────────────────
- * `high`, `medium`, `low`. Pas un de plus : l'API en fait foi. Chaque incident
+ * `high`, `medium`, `low`. Pas un de plus : l'API en fait foi. Chaque signalement
  * arrive avec un champ `severity` déjà calculé (« severity: "medium" »), et
  * l'endpoint dashboard-stats renvoie un `by_severity` agrégé sur ces trois
  * clés. Le frontend LIT cette décision, il ne la recalcule pas.
@@ -10,10 +10,10 @@
  * C'était pourtant ce qu'il faisait, à trois endroits et de trois façons :
  *
  *   MapContainer        3 niveaux, seuils >= 7 / >= 4
- *   incidentStatsHelper 3 niveaux, seuils >= 7 / >= 4      (copie de la 1re)
+ *   signalementStatsHelper 3 niveaux, seuils >= 7 / >= 4      (copie de la 1re)
  *   Impact              4 niveaux, seuils >= 7 / >= 5 / >= 3
  *
- * Un même incident pouvait donc être « moyen » sur la carte et « élevé » sur
+ * Un même signalement pouvait donc être « moyen » sur la carte et « élevé » sur
  * Impact — et les deux pouvaient contredire le `severity` du serveur. Le calcul
  * local à partir de `base_severity` ne subsiste ici que comme REPLI, pour les
  * charges utiles où `severity` est absent (certaines réponses de prédiction).
@@ -55,7 +55,7 @@ export const couleurGravite = (cle) => `var(--color-severity-${cle})`;
 export const couleurTexteGravite = (cle) => `var(--color-severity-${cle}-text)`;
 
 /**
- * Lit le niveau de gravité d'un incident.
+ * Lit le niveau de gravité d'un signalement.
  *
  * Trois sources, dans l'ordre de confiance :
  *   1. `severity`, la décision du backend — le cas normal ;
@@ -64,21 +64,21 @@ export const couleurTexteGravite = (cle) => `var(--color-severity-${cle}-text)`;
  *   3. les badges, pour les charges utiles anciennes qui n'ont ni l'un ni
  *      l'autre.
  *
- * @param {Object} incident
+ * @param {Object} signalement
  * @param {Object} [prediction] détails de prédiction, quand l'appelant les a
- *   déjà sous la main séparément de l'incident (cas de la page Impact)
+ *   déjà sous la main séparément de l'signalement (cas de la page Impact)
  * @returns {'high'|'medium'|'low'}
  */
-export const gravite = (incident, prediction = null) => {
-  if (!incident) return CLE_PAR_DEFAUT;
+export const gravite = (signalement, prediction = null) => {
+  if (!signalement) return CLE_PAR_DEFAUT;
 
   // La décision du serveur prime toujours.
-  if (CLES_GRAVITE.includes(incident.severity)) return incident.severity;
+  if (CLES_GRAVITE.includes(signalement.severity)) return signalement.severity;
 
   const note =
-    incident.base_severity ??
+    signalement.base_severity ??
     prediction?.base_severity ??
-    incident.incident_details?.prediction_details?.base_severity;
+    signalement.incident_details?.prediction_details?.base_severity;
 
   if (note !== undefined && note !== null) {
     const valeur = parseFloat(note);
@@ -90,18 +90,18 @@ export const gravite = (incident, prediction = null) => {
     }
   }
 
-  const badges = (incident.badges || []).map((b) => b?.variant);
+  const badges = (signalement.badges || []).map((b) => b?.variant);
   if (badges.includes('critical') || badges.includes('high') || badges.includes('expert-needed')) return 'high';
   if (badges.includes('in-progress') || badges.includes('medium')) return 'medium';
   return CLE_PAR_DEFAUT;
 };
 
 /**
- * Répartition d'une liste d'incidents par niveau.
+ * Répartition d'une liste d'signalements par niveau.
  * @returns {Object} { high: {count, percentage}, medium: …, low: … }
  */
-export const repartitionGravite = (incidents) => {
-  const liste = Array.isArray(incidents) ? incidents : [];
+export const repartitionGravite = (signalements) => {
+  const liste = Array.isArray(signalements) ? signalements : [];
   const compteurs = Object.fromEntries(CLES_GRAVITE.map((c) => [c, 0]));
 
   liste.forEach((inc) => {

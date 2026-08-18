@@ -12,43 +12,43 @@ import { DocumentText } from 'iconsax-react';
  * horizontal sur telephone. ResponsiveTable en fait un tableau au-dessus de
  * 900px et des cartes en dessous ; `priorite` dit ou chacune se pose.
  *
- * @param {Function} onOuvrirRapports (incident) => void
+ * @param {Function} onOuvrirRapports (signalement) => void
  * @param {Function} RenduEquipe      composant affichant les agents assignes
  */
 export const creerColonnesInterventions = ({ onOuvrirRapports, RenduEquipe }) => [
   {
     id: 'signalement', entete: 'Signalement', priorite: 'titre',
-    rendu: (incident) => (
+    rendu: (signalement) => (
       <>
           <div className="mes-interventions-main-cell">
             <BlurryImage
-              src={incident.image}
-              alt={incident.title}
+              src={signalement.image}
+              alt={signalement.title}
               className="mes-interventions-img"
             />
             <div>
               <span className="mes-interventions-row-title">
-                {incident.title || 'Sans titre'}
+                {signalement.title || 'Sans titre'}
               </span>
               <span className="mes-interventions-row-desc">
-                {incident.description
-                  ? incident.description.substring(0, 80) +
-                  (incident.description.length > 80 ? '...' : '')
+                {signalement.description
+                  ? signalement.description.substring(0, 80) +
+                  (signalement.description.length > 80 ? '...' : '')
                   : 'Aucune description disponible.'}
               </span>
             </div>
           </div>
       </>
     ),
-    renduCarte: (incident) => (
+    renduCarte: (signalement) => (
       <>
         <span className="mes-interventions-row-title">
-          {incident.title || 'Sans titre'}
+          {signalement.title || 'Sans titre'}
         </span>
-        {incident.description && (
+        {signalement.description && (
           <span className="mes-interventions-row-desc">
-            {incident.description.substring(0, 80)}
-            {incident.description.length > 80 ? '…' : ''}
+            {signalement.description.substring(0, 80)}
+            {signalement.description.length > 80 ? '…' : ''}
           </span>
         )}
       </>
@@ -56,29 +56,29 @@ export const creerColonnesInterventions = ({ onOuvrirRapports, RenduEquipe }) =>
   },
   {
     id: 'localisation', entete: 'Localisation', priorite: 'sousTitre',
-    rendu: (incident) => (
+    rendu: (signalement) => (
       <>
-          {incident.location || 'Inconnue'}
+          {signalement.location || 'Inconnue'}
       </>
     ),
   },
   {
     id: 'mode', entete: 'Mode', priorite: 'detail',
-    rendu: (incident) => (
+    rendu: (signalement) => (
       <>
-          {incident.take_in_charge_mode && (
-            <span className={`take-in-charge-tag ${incident.take_in_charge_mode}`} style={{
+          {signalement.take_in_charge_mode && (
+            <span className={`take-in-charge-tag ${signalement.take_in_charge_mode}`} style={{
               display: 'inline-flex',
               alignItems: 'center',
               padding: '4px 10px',
               borderRadius: '12px',
               fontSize: 'var(--font-size-micro)',
               fontWeight: '600',
-              backgroundColor: (incident.take_in_charge_mode === 'internal' || incident.take_in_charge_mode === 'interne') ? 'rgba(var(--rgb-primary), 0.12)' : 'rgba(var(--rgb-accent), 0.12)',
-              color: (incident.take_in_charge_mode === 'internal' || incident.take_in_charge_mode === 'interne') ? 'var(--color-primary)' : 'var(--color-accent)',
-              border: (incident.take_in_charge_mode === 'internal' || incident.take_in_charge_mode === 'interne') ? '1px solid rgba(var(--rgb-primary), 0.3)' : '1px solid rgba(var(--rgb-accent), 0.3)'
+              backgroundColor: (signalement.take_in_charge_mode === 'internal' || signalement.take_in_charge_mode === 'interne') ? 'rgba(var(--rgb-primary), 0.12)' : 'rgba(var(--rgb-accent), 0.12)',
+              color: (signalement.take_in_charge_mode === 'internal' || signalement.take_in_charge_mode === 'interne') ? 'var(--color-primary)' : 'var(--color-accent)',
+              border: (signalement.take_in_charge_mode === 'internal' || signalement.take_in_charge_mode === 'interne') ? '1px solid rgba(var(--rgb-primary), 0.3)' : '1px solid rgba(var(--rgb-accent), 0.3)'
             }}>
-              {(incident.take_in_charge_mode === 'internal' || incident.take_in_charge_mode === 'interne') ? 'Interne' : 'Collaboratif'}
+              {(signalement.take_in_charge_mode === 'internal' || signalement.take_in_charge_mode === 'interne') ? 'Interne' : 'Collaboratif'}
             </span>
           ) || (
               <span style={{ color: 'var(--color-text-muted)', fontStyle: 'italic' }}>Non spécifié</span>
@@ -88,37 +88,37 @@ export const creerColonnesInterventions = ({ onOuvrirRapports, RenduEquipe }) =>
   },
   {
     id: 'declaration', entete: 'Date de déclaration', priorite: 'detail',
-    rendu: (incident) => (
+    rendu: (signalement) => (
       <>
-          {incident.startDate}
+          {signalement.startDate}
       </>
     ),
   },
   {
     id: 'resolution', entete: 'Date de résolution', priorite: 'detail',
-    rendu: (incident) => (
+    rendu: (signalement) => (
       <>
-          {incident.endDate === 'En cours' ? (
+          {signalement.endDate === 'En cours' ? (
             <span className="mes-interventions-date-badge is-pending">En cours</span>
           ) : (
-            <span className="mes-interventions-date-badge is-resolved">{incident.endDate}</span>
+            <span className="mes-interventions-date-badge is-resolved">{signalement.endDate}</span>
           )}
       </>
     ),
   },
   {
     id: 'progression', entete: 'Progression', priorite: 'marquant',
-    rendu: (incident) => (
+    rendu: (signalement) => (
       <>
           <div className="mes-interventions-progress-container">
             <div className="mes-interventions-progress-bar-bg">
               <div
                 className="mes-interventions-progress-bar-fill"
-                style={{ width: `${incident.progressValue}%` }}
+                style={{ width: `${signalement.progressValue}%` }}
               />
             </div>
             <span className="mes-interventions-progress-label">
-              {incident.progressValue}%
+              {signalement.progressValue}%
             </span>
           </div>
       </>
@@ -126,23 +126,23 @@ export const creerColonnesInterventions = ({ onOuvrirRapports, RenduEquipe }) =>
   },
   {
     id: 'equipe', entete: 'Équipe terrain', priorite: 'detail',
-    rendu: (incident) => (
+    rendu: (signalement) => (
       <>
-          <RenduEquipe incident={incident} />
+          <RenduEquipe signalement={signalement} />
       </>
     ),
   },
   {
     id: 'rapports', entete: 'Rapports', priorite: 'detail',
-    rendu: (incident) => (
+    rendu: (signalement) => (
       <>
           {(() => {
-            const reportsCount = incident?.reports_count || 0;
+            const reportsCount = signalement?.reports_count || 0;
             return (
               <button
                 type="button"
                 className="rapport-count-btn"
-                onClick={(e) => { e.stopPropagation(); onOuvrirRapports(incident); }}
+                onClick={(e) => { e.stopPropagation(); onOuvrirRapports(signalement); }}
                 disabled={reportsCount === 0}
                 title={reportsCount > 0 ? `Voir les ${reportsCount} rapport(s)` : 'Aucun rapport'}
               >
@@ -159,12 +159,12 @@ export const creerColonnesInterventions = ({ onOuvrirRapports, RenduEquipe }) =>
     // L'adaptateur fournit toujours un badge aujourd'hui. Le garde-fou est
     // la parce qu'une cellule qui leve fait disparaitre la liste entiere :
     // un champ manquant ne doit couter qu'un libelle par defaut.
-    rendu: (incident) => (
+    rendu: (signalement) => (
       <>
-          <span className={`mes-interventions-badge-glow variant-${incident.badge?.variant ?? 'in-progress'}`}
+          <span className={`mes-interventions-badge-glow variant-${signalement.badge?.variant ?? 'in-progress'}`}
             style={{ width: "max-content" }}
           >
-            {incident.badge?.label ?? 'EN COURS'}
+            {signalement.badge?.label ?? 'EN COURS'}
           </span>
       </>
     ),
@@ -172,5 +172,5 @@ export const creerColonnesInterventions = ({ onOuvrirRapports, RenduEquipe }) =>
 ];
 
 /** Le bandeau de carte : la photo du signalement. */
-export const mediaIntervention = (incident) =>
-  (incident.image ? <BlurryImage src={incident.image} alt={incident.title || 'Photo du signalement'} /> : null);
+export const mediaIntervention = (signalement) =>
+  (signalement.image ? <BlurryImage src={signalement.image} alt={signalement.title || 'Photo du signalement'} /> : null);

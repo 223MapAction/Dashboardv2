@@ -20,7 +20,7 @@ window.matchMedia = (media) => ({
   addEventListener: () => {}, removeEventListener: () => {},
 });
 
-const EquipeFactice = ({ incident }) => <span>équipe:{incident.id}</span>;
+const EquipeFactice = ({ signalement }) => <span>équipe:{signalement.id}</span>;
 
 const INTERVENTION = {
   id: 'i1',
