@@ -11,7 +11,7 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -24,17 +24,21 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-        working-directory: ./dashboard
 
       - name: Build
         env:
+          # Obligatoire : src/config/api_url_base.js refuse de se charger sans
+          # elle, pour qu'aucun deploiement ne vise la production par accident.
+          # A renseigner dans Settings > Secrets and variables > Actions.
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+          # Optionnel : active seulement le fond de carte satellite. Sans lui,
+          # la carte fonctionne avec les tuiles OpenStreetMap ouvertes.
           VITE_MAPBOX_TOKEN: ${{ secrets.VITE_MAPBOX_TOKEN }}
         run: npm run build
-        working-directory: ./dashboard
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dashboard/dist
+          publish_dir: ./dist
           cname: false
