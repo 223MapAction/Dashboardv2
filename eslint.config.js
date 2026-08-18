@@ -47,4 +47,12 @@ export default defineConfig([
       'no-console': 'off',
     },
   },
+  {
+    // Les fichiers de configuration tournent sous Node, pas dans le
+    // navigateur : sans ces globales, `process` y est signale comme indefini.
+    files: ['*.config.js'],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
 ])
