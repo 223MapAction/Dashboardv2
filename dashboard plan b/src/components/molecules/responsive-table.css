@@ -33,15 +33,7 @@
    un badge demande de s'arreter sur chaque carte. Elle ne porte jamais
    l'information seule : le badge de gravite reste present dans la carte, pour
    qui distingue mal les couleurs. */
-.rt-carte::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 3px;
-  background-color: var(--rt-accent, transparent);
-}
+ 
 
 /* ── Bandeau photo ─────────────────────────────────────────────────────────
    Sur un signalement environnemental, la photo dit ce qui se passe mieux

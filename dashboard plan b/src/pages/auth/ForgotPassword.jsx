@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Sms } from 'iconsax-react';
 import { authService } from './services/authService';
 import logoMapAction from '../../assets/logo.webp';
-import loginBg from '../../assets/login_bg.webp';
+import loginBg from '../../assets/login_bg_1.webp';
 import './login.css';
 import './forgot-password.css';
 
@@ -132,12 +132,11 @@ export const ForgotPassword = () => {
         </div>
       </div>
 
-      {/* Colonne droite - Image */}
-      <div
-        className="login-hero"
-        style={{ backgroundImage: `url(${loginBg})` }}
-        aria-hidden="true"
-      />
+      {/* Colonne droite - Image (meme structure que Login : une balise <img>
+          en object-fit, et non un background, sinon rien ne la recadre) */}
+      <div className="login-hero" aria-hidden="true">
+        <img src={loginBg} alt="" className="login-hero-image" />
+      </div>
     </div>
   );
 };

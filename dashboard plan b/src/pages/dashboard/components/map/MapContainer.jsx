@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useSWR from 'swr';
-import Map, { Marker, Popup, NavigationControl } from 'react-map-gl/mapbox';
+import { activerGestesCooperatifs } from '../../../../utils/gestesCarte';
+import { NIVEAUX_GRAVITE, gravite, couleurGravite } from '../../../../utils/gravite';
+import Map, { Marker, Popup } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
 import { getIncidentService } from '../../../incident/service/incident_service';
@@ -15,27 +17,6 @@ import { useReinitialisationSurChangement } from '../../../../hooks/useReinitial
 
 // Token Mapbox depuis les variables d'environnement
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
-
-// Détermine la sévérité d'un incident à partir de sa sévérité directe, base_severity (0 à 10) ou de ses badges
-const getSeverity = (project) => {
-  if (project.severity === 'high' || project.severity === 'medium' || project.severity === 'low') {
-    return project.severity;
-  }
-
-  const baseSeverity = project.base_severity ?? project.incident_details?.prediction_details?.base_severity;
-  if (baseSeverity !== undefined && baseSeverity !== null) {
-    const val = parseFloat(baseSeverity);
-    if (val >= 7) return 'high';
-    if (val >= 4) return 'medium';
-    return 'low';
-  }
-
-  // Repli sur les badges si base_severity est absent
-  const badges = (project.badges || []).map((b) => b.variant);
-  if (badges.includes('critical') || badges.includes('high') || badges.includes('expert-needed')) return 'high';
-  if (badges.includes('in-progress') || badges.includes('medium')) return 'medium';
-  return 'low';
-};
 
 // Calcule la classe de couleur du marqueur en fonction de son statut et de l'utilisateur connecté
 const getMarkerColorClass = (incident, currentUserId) => {
@@ -55,11 +36,11 @@ const getMarkerColorClass = (incident, currentUserId) => {
     return 'resolved-others'; // Bleu
   }
 
-  // Si l'incident est actif, sa couleur dépend de sa sévérité (sans bleu ni vert)
-  const severity = getSeverity(incident);
-  if (severity === 'high') return 'active-high'; // Rouge
-  if (severity === 'medium') return 'active-medium'; // Orange
-  return 'active-low'; // Jaune
+  // Si l'incident est actif, sa couleur dépend de sa gravité (sans bleu ni vert).
+  // Les niveaux viennent de utils/gravite.js, qui lit le champ `severity` decide
+  // par le serveur. La carte les recalculait avec ses propres seuils, si bien
+  // qu'un incident pouvait etre « moyen » ici et « eleve » sur la page Impact.
+  return `active-${gravite(incident)}`;
 };
 
 const INCIDENT_STATUS_STEPS = [
@@ -186,6 +167,22 @@ export const MapContainer = () => {
   const [hasMorePages, setHasMorePages] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const loadedPagesRef = useRef(new Set());
+  const carteRef = useRef(null);
+
+  // On passe par la reference et non par `onLoad` : cet evenement ne se
+  // declenche pas de facon fiable ici — verifie, la carte s'affiche sans qu'il
+  // parte jamais. La reference, elle, est posee des le montage.
+  useEffect(() => {
+    let annule = false;
+    const essayer = () => {
+      if (annule) return;
+      const carte = carteRef.current?.getMap?.();
+      if (carte) { activerGestesCooperatifs(carte); return; }
+      setTimeout(essayer, 300);
+    };
+    essayer();
+    return () => { annule = true; };
+  }, []);
 
   // Déterminer le scope en fonction des filtres
   const getScope = () => {
@@ -207,7 +204,7 @@ export const MapContainer = () => {
   });
 
   // Charger une page d'incidents
-  const { isLoading: isLoadingPage } = useSWR(
+  const { data: pageData, isLoading: isLoadingPage } = useSWR(
     ownershipFilter === 'mine'
       ? (currentPage === 1 ? '/org-incidents' : null) // Pour "mine", utiliser l'ancien endpoint
       : `/map-incidents-${scope}-${countryFilter || 'all'}-page-${currentPage}`,
@@ -226,47 +223,51 @@ export const MapContainer = () => {
       if (countryFilter) {
         params.country = countryFilter;
       }
-      console.log('[MAP] Chargement incidents avec params:', params);
       return getIncidentsFilteredService(params);
     },
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
-      onSuccess: (data) => {
-        if (!data) return;
-
-        // Créer une clé unique incluant scope, pays et page pour éviter les conflits
-        const pageKey = `${scope}-${countryFilter || 'all'}-${currentPage}`;
-
-        // Éviter de charger la même page deux fois
-        if (loadedPagesRef.current.has(pageKey)) return;
-        loadedPagesRef.current.add(pageKey);
-
-        const results = data.results || (Array.isArray(data) ? data : []);
-
-        setAllIncidents(prev => {
-          // Éviter les doublons basés sur l'ID
-          const existingIds = new Set(prev.map(inc => inc.id));
-          const newIncidents = results.filter(inc => !existingIds.has(inc.id));
-          return [...prev, ...newIncidents];
-        });
-
-        // Vérifier s'il y a plus de pages
-        if (ownershipFilter === 'mine') {
-          // Pour "mine", pas de pagination
-          setHasMorePages(false);
-        } else {
-          setHasMorePages(!!data.next);
-        }
-
-        setIsLoadingMore(false);
-      },
       onError: (err) => {
         console.error('[MAP] Erreur chargement incidents:', err);
         setIsLoadingMore(false);
       }
     }
   );
+
+  // L'accumulation se fait ici, à partir de `data`, et non plus dans le
+  // `onSuccess` de SWR.
+  //
+  // `onSuccess` ne se déclenche qu'au retour d'une requête réseau. Quand on
+  // quittait le tableau de bord puis qu'on y revenait, SWR servait sa valeur en
+  // cache sans refetch — donc sans `onSuccess` — tandis que `allIncidents`,
+  // qui est un état de composant, repartait à zéro au remontage. La carte
+  // restait vide alors que la donnée était là, dans le cache.
+  //
+  // Un effet sur `data` couvre les deux cas : réponse réseau ET valeur servie
+  // depuis le cache au montage.
+  /* eslint-disable react-hooks/set-state-in-effect --
+     On synchronise ici une source exterieure a React (le cache SWR) vers un
+     accumulateur local : c'est l'usage prevu d'un effet. Le garde-fou
+     `loadedPagesRef` empeche toute boucle, une page deja integree est ignoree. */
+  useEffect(() => {
+    if (!pageData) return;
+
+    const pageKey = `${scope}-${countryFilter || 'all'}-${currentPage}`;
+    if (loadedPagesRef.current.has(pageKey)) return;
+    loadedPagesRef.current.add(pageKey);
+
+    const results = pageData.results || (Array.isArray(pageData) ? pageData : []);
+
+    setAllIncidents((prev) => {
+      const dejaLa = new Set(prev.map((inc) => inc.id));
+      return [...prev, ...results.filter((inc) => !dejaLa.has(inc.id))];
+    });
+
+    setHasMorePages(ownershipFilter === 'mine' ? false : !!pageData.next);
+    setIsLoadingMore(false);
+  }, [pageData, scope, countryFilter, currentPage, ownershipFilter]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Fonction pour charger la page suivante
   const loadMoreIncidents = useCallback(() => {
@@ -438,16 +439,8 @@ export const MapContainer = () => {
           </div>
         )}
 
-        {/* scrollZoom={false} : la carte occupe 77% de la hauteur visible, donc
-            elle interceptait la molette et on ne pouvait plus faire defiler le
-            tableau de bord.
-
-            `cooperativeGestures` etait bien passe ici, mais react-map-gl v8 ne
-            le transmet pas a Mapbox — verifie a l'execution, ni la classe ni le
-            voile que Mapbox ajoute dans ce mode n'apparaissaient. Couper le zoom
-            a la molette et donner des boutons explicites produit le meme
-            resultat, sans dependre d'une option ignoree. */}
         <Map
+          ref={carteRef}
           initialViewState={{
             longitude: center.lng,
             latitude: center.lat,
@@ -456,7 +449,7 @@ export const MapContainer = () => {
           mapboxAccessToken={MAPBOX_TOKEN}
           style={{ width: '100%', height: '100%' }}
           mapStyle={MAP_STYLES[activeStyle].style}
-          scrollZoom={false}
+          cooperativeGestures={true}
           touchZoomRotate={true}
           touchPitch={true}
           minZoom={2}
@@ -468,10 +461,6 @@ export const MapContainer = () => {
             }
           }}
         >
-          {/* Le zoom passe par ces boutons, la molette etant rendue au
-              defilement de la page. Le pincement et le double-clic marchent
-              toujours. */}
-          <NavigationControl position="top-right" showCompass={false} />
 
           {/* Markers d'incidents — un par position, pas un par incident */}
           {!isMapLoading && incidentGroups.map((groupe) => {
@@ -625,28 +614,20 @@ export const MapContainer = () => {
           {statusFilter === 'active' ? (
             <>
               <p className="map-legend-title">Gravité</p>
+              {/* Legende derivee de l'echelle, pas recopiee : c'est une liste
+                  ecrite a la main qui avait fini par afficher deux fois la meme
+                  pastille pour deux niveaux differents. La carte reste la
+                  reference — les autres vues s'alignent sur ces couleurs. */}
               <div className="map-legend-list">
-                <div className="map-legend-item">
-                  <span
-                    className="map-legend-dot"
-                    style={{ backgroundColor: 'var(--color-severity-high)' }}
-                  />
-                  Élevée
-                </div>
-                <div className="map-legend-item">
-                  <span
-                    className="map-legend-dot"
-                    style={{ backgroundColor: 'var(--color-warning)' }}
-                  />
-                  Moyenne
-                </div>
-                <div className="map-legend-item">
-                  <span
-                    className="map-legend-dot"
-                    style={{ backgroundColor: 'var(--color-severity-medium)' }}
-                  />
-                  Faible
-                </div>
+                {NIVEAUX_GRAVITE.map(({ cle, libelle }) => (
+                  <div className="map-legend-item" key={cle}>
+                    <span
+                      className="map-legend-dot"
+                      style={{ backgroundColor: couleurGravite(cle) }}
+                    />
+                    {libelle}
+                  </div>
+                ))}
               </div>
             </>
           ) : (
@@ -663,7 +644,7 @@ export const MapContainer = () => {
                 <div className="map-legend-item">
                   <span
                     className="map-legend-dot"
-                    style={{ backgroundColor: 'var(--color-severity-low)' }}
+                    style={{ backgroundColor: 'var(--color-success)' }}
                   />
                   Par moi
                 </div>
@@ -692,7 +673,7 @@ export const MapContainer = () => {
                   alignItems: 'center',
                   gap: '8px',
                   padding: '8px 16px',
-                  fontSize: '13px',
+                  fontSize: 'var(--font-size-body-small)',
                   fontWeight: '600',
                   borderRadius: '20px',
                   boxShadow: '0 2px 8px rgba(var(--rgb-ombre), 0.15)',
@@ -911,7 +892,7 @@ export const MapContainer = () => {
                                     backgroundColor: p.color,
                                     width: '40px',
                                     height: '40px',
-                                    fontSize: '0.85rem'
+                                    fontSize: 'var(--font-size-body-small)'
                                   }}
                                 >
                                   {p.initials}
@@ -927,7 +908,7 @@ export const MapContainer = () => {
                                     backgroundColor: 'var(--color-text-muted)',
                                     width: '40px',
                                     height: '40px',
-                                    fontSize: '0.85rem'
+                                    fontSize: 'var(--font-size-body-small)'
                                   }}
                                 >
                                   +{selectedIncident.extraParticipants}

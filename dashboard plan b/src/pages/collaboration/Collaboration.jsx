@@ -12,6 +12,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import {
   SearchNormal1,
   ArrowDown2,
+  Filter,
   Calendar,
   CalendarRemove,
   Location,
@@ -89,7 +90,6 @@ export const Collaboration = () => {
     saisie: searchInput,
     setSaisie: setSearchInput,
     recherche: search,
-    reinitialiser: reinitialiserRecherche,
   } = useRechercheDebouncee();
   const [roleFilter, setRoleFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('accepted');
@@ -97,6 +97,29 @@ export const Collaboration = () => {
   const [incidentFilter, setIncidentFilter] = useState('');
   const [dateRange, setDateRange] = useState([null, null]);
   const [dateFrom, dateTo] = dateRange;
+
+  // Role, signalement, acceptation et periode sont repliés derriere « Plus de
+  // filtres » : cette page etait la seule de l'app a afficher 3 menus
+  // deroulants + un selecteur de dates + 3 pastilles en permanence, contre 1 a
+  // 2 filtres ailleurs. On garde la recherche et les pastilles (les plus
+  // utilisees) toujours visibles, et on replie le reste.
+  //
+  // Le panneau s'ouvre tout seul si un filtre replie est deja actif (ex. lien
+  // partage avec ?incident=...) : sinon l'utilisateur verrait une liste
+  // filtree sans savoir pourquoi, ni comment revenir en arriere.
+  const filtresAvancesActifs =
+    statusFilter !== 'all' || Boolean(roleFilter) || Boolean(incidentFilter) ||
+    Boolean(dateFrom) || Boolean(dateTo);
+  const [filtresAvancesOuverts, setFiltresAvancesOuverts] = useState(filtresAvancesActifs);
+  // On n'ouvre le panneau QUE lorsque filtresAvancesActifs passe de faux a
+  // vrai : si l'utilisateur l'a replie a la main, on ne le rouvre pas tout
+  // seul a chaque changement d'un filtre deja actif.
+  useReinitialisationSurChangement([filtresAvancesActifs], () => {
+    if (filtresAvancesActifs) setFiltresAvancesOuverts(true);
+  });
+  const nbFiltresAvancesActifs = [
+    statusFilter !== 'all', Boolean(roleFilter), Boolean(incidentFilter), Boolean(dateFrom) || Boolean(dateTo),
+  ].filter(Boolean).length;
 
 
   // Retour a la premiere page des qu'un filtre change.
@@ -658,77 +681,19 @@ export const Collaboration = () => {
             {/* Contenu conditionnel */}
             {activeTab === 'collaborations' ? (
               <>
-                {/* Toolbar */}
+                {/* Toolbar — fixe au defilement : voir .collab-filtres-fixes.
+                    Pas de bouton « Effacer » : chaque filtre a deja sa propre
+                    sortie (une pastille qu'on reclique, un menu qu'on remet a
+                    « Tous », une croix sur la periode) ; un bouton qui les
+                    remet TOUS a zero d'un coup, a cote, ne fait que reinitialiser
+                    par erreur ce qu'on venait de choisir expres. */}
+                <div className="collab-filtres-fixes">
                 <FiltersBar
                   recherche={searchInput}
                   onRecherche={setSearchInput}
                   placeholder="Rechercher un titre, une organisation, un lieu…"
-                  selects={[
-                    { id: 'statut', valeur: statusFilter, onChange: setStatusFilter,
-                      ariaLabel: 'Filtrer par statut', neutre: 'all',
-                      options: [
-                        { value: 'all', label: 'Tous les statuts' },
-                        { value: 'accepted', label: 'Acceptée' },
-                        { value: 'pending', label: 'En attente' },
-                        { value: 'declined', label: 'Refusée' },
-                      ] },
-                    { id: 'role', valeur: roleFilter, onChange: setRoleFilter,
-                      ariaLabel: 'Filtrer par rôle', tousLabel: 'Tous les rôles',
-                      options: [
-                        { value: 'leader', label: 'Leader' },
-                        { value: 'contributor', label: 'Contributeur' },
-                        { value: 'observer', label: 'Observateur' },
-                      ] },
-                    { id: 'signalement', valeur: incidentFilter, onChange: setIncidentFilter,
-                      ariaLabel: 'Filtrer par signalement', tousLabel: 'Tous les signalements',
-                      options: incidentsList.map((inc) => ({ value: inc.id, label: inc.title })) },
-                  ]}
-                  onEffacer={() => {
-                    reinitialiserRecherche();
-                    setStatusFilter('all'); setRoleFilter(''); setIncidentFilter('');
-                    setLocalStatusFilter('all'); resetDateRange();
-                  }}
-                  actifSupplementaire={localStatusFilter !== 'all' || Boolean(dateFrom) || Boolean(dateTo)}
+                  actifSupplementaire={localStatusFilter !== 'all' || filtresAvancesActifs}
                 >
-                    <div className="collab-date-range">
-                      <Calendar size={16} variant="Bold" color="var(--color-primary-text)" />
-                      <span className="collab-date-label">Période :</span>
-                      <DatePicker
-                        selectsRange
-                        startDate={dateFrom}
-                        endDate={dateTo}
-                        onChange={(update) => setDateRange(update)}
-                        locale="fr"
-                        dateFormat="dd MMM yyyy"
-                        placeholderText={
-                          isMobile ? 'Période…' : 'Sélectionner une période…'
-                        }
-                        isClearable={false}
-                        monthsShown={isMobile ? 1 : 2}
-                        withPortal={isMobile}
-                        shouldCloseOnSelect={!isMobile}
-                        className="collab-date-input"
-                        calendarClassName="collab-datepicker"
-                        popperClassName="collab-datepicker-popper"
-                        portalId="collab-datepicker-portal"
-                      />
-                      {(dateFrom || dateTo) && (
-                        <button
-                          type="button"
-                          className="collab-date-clear"
-                          onClick={resetDateRange}
-                          aria-label="Réinitialiser la période"
-                          title="Réinitialiser"
-                        >
-                          <CalendarRemove
-                            size={16}
-                            variant="Bold"
-                            color="var(--color-danger-text)"
-                          />
-                        </button>
-                      )}
-                    </div>
-
                     <button
                       type="button"
                       className={`collab-filter-pill ${localStatusFilter === 'all' ? 'is-active' : ''}`}
@@ -758,7 +723,111 @@ export const Collaboration = () => {
                       </span>
                     </button>
 
+                    <button
+                      type="button"
+                      className={`collab-filtres-avances-toggle ${filtresAvancesOuverts ? 'is-active' : ''}`}
+                      onClick={() => setFiltresAvancesOuverts((v) => !v)}
+                      aria-expanded={filtresAvancesOuverts}
+                    >
+                      <Filter size={16} variant="Linear" color="currentColor" />
+                      Plus de filtres
+                      {nbFiltresAvancesActifs > 0 && (
+                        <span className="collab-filtres-avances-badge">{nbFiltresAvancesActifs}</span>
+                      )}
+                      <ArrowDown2
+                        size={14}
+                        variant="Linear"
+                        color="currentColor"
+                        style={{ transform: filtresAvancesOuverts ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }}
+                      />
+                    </button>
+
+                    {filtresAvancesOuverts && (
+                      <div className="collab-filtres-avances-panneau">
+                        <div className="am-filtres-select">
+                          <select
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                            aria-label="Filtrer par statut"
+                          >
+                            <option value="all">Tous les statuts</option>
+                            <option value="accepted">Acceptée</option>
+                            <option value="pending">En attente</option>
+                            <option value="declined">Refusée</option>
+                          </select>
+                          <ArrowDown2 size={14} variant="Linear" color="currentColor" aria-hidden="true" />
+                        </div>
+
+                        <div className="am-filtres-select">
+                          <select
+                            value={roleFilter}
+                            onChange={(e) => setRoleFilter(e.target.value)}
+                            aria-label="Filtrer par rôle"
+                          >
+                            <option value="">Tous les rôles</option>
+                            <option value="leader">Leader</option>
+                            <option value="contributor">Contributeur</option>
+                            <option value="observer">Observateur</option>
+                          </select>
+                          <ArrowDown2 size={14} variant="Linear" color="currentColor" aria-hidden="true" />
+                        </div>
+
+                        <div className="am-filtres-select">
+                          <select
+                            value={incidentFilter}
+                            onChange={(e) => setIncidentFilter(e.target.value)}
+                            aria-label="Filtrer par signalement"
+                          >
+                            <option value="">Tous les signalements</option>
+                            {incidentsList.map((inc) => (
+                              <option key={inc.id} value={inc.id}>{inc.title}</option>
+                            ))}
+                          </select>
+                          <ArrowDown2 size={14} variant="Linear" color="currentColor" aria-hidden="true" />
+                        </div>
+
+                        <div className="collab-date-range">
+                          <Calendar size={16} variant="Bold" color="var(--color-primary-text)" />
+                          <span className="collab-date-label">Période :</span>
+                          <DatePicker
+                            selectsRange
+                            startDate={dateFrom}
+                            endDate={dateTo}
+                            onChange={(update) => setDateRange(update)}
+                            locale="fr"
+                            dateFormat="dd MMM yyyy"
+                            placeholderText={
+                              isMobile ? 'Période…' : 'Sélectionner une période…'
+                            }
+                            isClearable={false}
+                            monthsShown={isMobile ? 1 : 2}
+                            withPortal={isMobile}
+                            shouldCloseOnSelect={!isMobile}
+                            className="collab-date-input"
+                            calendarClassName="collab-datepicker"
+                            popperClassName="collab-datepicker-popper"
+                            portalId="collab-datepicker-portal"
+                          />
+                          {(dateFrom || dateTo) && (
+                            <button
+                              type="button"
+                              className="collab-date-clear"
+                              onClick={resetDateRange}
+                              aria-label="Réinitialiser la période"
+                              title="Réinitialiser"
+                            >
+                              <CalendarRemove
+                                size={16}
+                                variant="Bold"
+                                color="var(--color-danger-text)"
+                              />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
                 </FiltersBar>
+                </div>
 
                 {/* État de chargement avec react-shimmer-effects */}
                 {isLoading && (

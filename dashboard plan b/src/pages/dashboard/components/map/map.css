@@ -5,6 +5,14 @@
 /* Container map - vignette d'alerte */
 .map-container {
   position: relative;
+  /* La carte vit dans une page qui defile verticalement. Sans cette regle, le
+     navigateur peut arbitrer un geste tactile qui commence sur la carte (le
+     revendiquer pour son propre defilement/zoom de page) avant meme que
+     Mapbox ne le recoive — le pincement a deux doigts en est la victime la
+     plus frequente. `touch-action: none` cede TOUS les gestes tactiles a
+     Mapbox, qui gere deja lui-meme le glisser (dragPan) et le pincement
+     (touchZoomRotate) ; le navigateur n'a plus besoin d'intervenir ici. */
+  touch-action: none;
 }
 
 .map-container::after {
@@ -80,27 +88,31 @@
   }
 }
 
-/* Pulsation plus rapide pour les incidents de sévérité élevée */
+/* Pulsation plus rapide pour les incidents de gravité élevée */
 .incident-marker.severity-active-high .incident-marker-pulse {
   animation-duration: 1.2s;
 }
 
 /* Couleurs par sévérité active et statut de résolution */
+/* Ces trois règles pointent vers l'échelle de gravité, plus vers les couleurs
+   de statut. « Faible » annonçait déjà « Jaune » en commentaire mais peignait
+   --color-warning, soit exactement la couleur de « moyenne » : le commentaire
+   disait l'intention, la valeur avait dérivé. */
 .incident-marker.severity-active-high .incident-marker-dot,
 .incident-marker.severity-active-high .incident-marker-pulse {
-  background-color: var(--color-danger);
+  background-color: var(--color-severity-high);
   /* Rouge */
 }
 
 .incident-marker.severity-active-medium .incident-marker-dot,
 .incident-marker.severity-active-medium .incident-marker-pulse {
-  background-color: var(--color-warning);
+  background-color: var(--color-severity-medium);
   /* Orange */
 }
 
 .incident-marker.severity-active-low .incident-marker-dot,
 .incident-marker.severity-active-low .incident-marker-pulse {
-  background-color: var(--color-warning);
+  background-color: var(--color-severity-low);
   /* Jaune */
 }
 
@@ -1273,10 +1285,15 @@
   background: var(--color-text-secondary);
 }
 
-.incident-group-item.severity-active-high .incident-group-dot { background: var(--color-danger); }
-.incident-group-item.severity-active-medium .incident-group-dot { background: var(--color-warning); }
-.incident-group-item.severity-active-low .incident-group-dot { background: var(--color-primary); }
-.incident-group-item.severity-resolved-others .incident-group-dot { background: var(--color-success); }
+/* La liste d'un groupe de marqueurs doit reprendre EXACTEMENT les couleurs des
+   marqueurs eux-mêmes, sinon un même incident change de couleur selon qu'on le
+   regarde sur la carte ou dans la liste. Trois écarts s'y étaient glissés :
+   « faible » y était bleu (la couleur de « résolu par d'autres »), et les deux
+   états résolus partageaient le même vert. */
+.incident-group-item.severity-active-high .incident-group-dot { background: var(--color-severity-high); }
+.incident-group-item.severity-active-medium .incident-group-dot { background: var(--color-severity-medium); }
+.incident-group-item.severity-active-low .incident-group-dot { background: var(--color-severity-low); }
+.incident-group-item.severity-resolved-others .incident-group-dot { background: var(--color-primary); }
 .incident-group-item.severity-resolved-mine .incident-group-dot { background: var(--color-success); }
 
 .incident-group-label {

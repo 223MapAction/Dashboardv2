@@ -754,7 +754,8 @@ export const CollaborationRequests = ({
       )}
 
 
-      {/* Toolbar */}
+      {/* Toolbar — fixe au defilement : voir .requests-filtres-fixes. */}
+      <div className="requests-filtres-fixes">
       <FiltersBar
         recherche={searchInput}
         onRecherche={setSearchInput}
@@ -771,7 +772,7 @@ export const CollaborationRequests = ({
             onClick={() => setStatusFilter('all')}
           >
             Toutes
-            
+
           </button>
           <button
             type="button"
@@ -780,7 +781,7 @@ export const CollaborationRequests = ({
           >
             <Clock size={14} variant="Bold" color="currentColor" style={{ color: 'currentColor' }} />
             En attente
-            
+
           </button>
           <button
             type="button"
@@ -789,11 +790,12 @@ export const CollaborationRequests = ({
           >
             <CloseCircle size={14} variant="Bold" color="currentColor" style={{ color: 'currentColor' }} />
             Refusées
-            
+
           </button>
 
         </div>
       </FiltersBar>
+      </div>
 
 
       {/* Collapsible Info Banner (Scenarios 2 & 3 Explanation) */}

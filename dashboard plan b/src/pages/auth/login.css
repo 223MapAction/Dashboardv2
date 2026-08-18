@@ -96,7 +96,14 @@
   gap: var(--spacing-2);
   padding: var(--spacing-3) var(--spacing-4);
   background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
+  /* --color-border (#E2E8F0) ne tient que 1.23:1 sur blanc — bien en dessous
+     du seuil WCAG 1.4.11 de 3:1 pour la limite d'un composant d'interface. Au
+     repos, le champ n'avait donc aucun contour visible ; seul le focus (bleu,
+     fort contraste) le revelait. #8B96A5 est le premier gris de la meme
+     famille bleu-gris a franchir 3:1, propre a ce champ : --color-border sert
+     aussi de simple separateur decoratif ailleurs dans l'app (23 fichiers),
+     ou l'assombrir n'apporterait rien et alourdirait l'interface. */
+  border: 1px solid #8B96A5;
   border-radius: var(--radius-md);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -214,13 +221,20 @@
 /* ===== Colonne droite (image) ===== */
 .login-hero {
   flex: 1;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
   min-height: 100vh;
   min-height: 100dvh;
- 
   position: relative;
+  overflow: hidden;
+}
+
+.login-hero-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
 }
 
 .login-hero::after {

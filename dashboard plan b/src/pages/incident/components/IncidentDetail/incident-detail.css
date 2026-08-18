@@ -386,6 +386,11 @@
   border-radius: var(--radius-md);
   overflow: hidden;
   background-color: var(--color-background);
+  /* Meme raison que sur la carte du tableau de bord (map.css) : cette
+     mini-carte vit dans une fiche qui defile, et sans cette regle le
+     navigateur peut arbitrer le geste tactile a sa place, au detriment du
+     pincement a deux doigts. */
+  touch-action: none;
 }
 
 .project-detail .project-map-marker {
@@ -1515,3 +1520,11 @@
   }
 }
 
+
+/* Le badge de gravite s'aligne sur ses voisins de la meme rangee, qui se
+   separent par une marge et non par un `gap` du conteneur. Sans cette regle il
+   se collerait au badge de statut : le style en ligne qu'il portait avant
+   d'etre extrait dans le composant BadgeGravite comprenait cette marge. */
+.detail-severity-badge-custom {
+  margin-left: var(--spacing-2);
+}

@@ -467,7 +467,8 @@ export const Organisations = () => {
                 </div>
               </div>
 
-              {/* ── Toolbar ── */}
+              {/* ── Toolbar — fixe au defilement : voir .orgs-filtres-fixes. ── */}
+              <div className="orgs-filtres-fixes">
               <FiltersBar
                 recherche={searchInput}
                 onRecherche={setSearchInput}
@@ -490,6 +491,7 @@ export const Organisations = () => {
                 resultats={filtered.length}
                 nomResultat="organisation"
               />
+              </div>
 
               {/* ── Tableau ── */}
               {filtered.length === 0 && !swrLoading ? (

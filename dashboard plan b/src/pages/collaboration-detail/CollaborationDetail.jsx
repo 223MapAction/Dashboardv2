@@ -48,6 +48,7 @@ import {
   DocumentText
 } from 'iconsax-react';
 import { OffcanvasModal } from '../../components/molecules/OffcanvasModal';
+import { ImageViewer } from '../../components/molecules/ImageViewer';
 import './collaboration-detail.css';
 import { CustomAudioPlayer } from './LecteurAudio';
 import {
@@ -133,6 +134,17 @@ export const CollaborationDetail = () => {
   // États pour la navigation mobile
   const [isMobile, setIsMobile] = useState(false);
   const [activeTab, setActiveTab] = useState('details'); // 'details' | 'chat' | 'tasks'
+
+  /**
+   * Image ouverte en plein écran, ou null. { src, alt }
+   *
+   * Une photo d'incident se lit souvent sur un téléphone, en plein soleil :
+   * le détail qui compte (une fissure, une plaque, un niveau d'eau) est
+   * invisible dans une vignette. La visionneuse partagée gère le pincement,
+   * le glissé et la molette — on la réutilise plutôt que d'ouvrir une
+   * seconde fois une image simplement plus grande.
+   */
+  const [imageAZoomer, setImageAZoomer] = useState(null);
 
 
 
@@ -663,7 +675,16 @@ export const CollaborationDetail = () => {
 
                       {collaboration?.image && (
                         <div className="collab-detail-image">
-                          <BlurryImage src={collaboration?.image} alt={collaboration?.title} />
+                          {/* onClick suffit : BlurryImage se rend alors comme un
+                              bouton, avec l'intitulé « Agrandir : … ». */}
+                          <BlurryImage
+                            src={collaboration?.image}
+                            alt={collaboration?.title}
+                            onClick={() => setImageAZoomer({
+                              src: collaboration?.image,
+                              alt: collaboration?.title || "Photo de l'incident",
+                            })}
+                          />
                         </div>
                       )}
 
@@ -1919,7 +1940,7 @@ export const CollaborationDetail = () => {
                                               type="button"
                                               aria-label="Agrandir la photo de preuve"
                                               onClick={() => {
-                                                setActiveProofPreview({ type: 'image', url: proofUrl });
+                                                setImageAZoomer({ src: proofUrl, alt: 'Preuve de complétion' });
                                               }}
                                               style={{
                                                 cursor: 'pointer',
@@ -2194,35 +2215,22 @@ export const CollaborationDetail = () => {
                       ×
                     </button>
 
-                    {/* Corps du modal */}
+                    {/* Corps du modal — vidéo uniquement : les photos passent
+                        desormais par la visionneuse, qui sait zoomer. */}
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', borderRadius: '12px', minHeight: '400px', backgroundColor: 'rgba(var(--rgb-ombre), 1)', width: '100%' }}>
-                      {activeProofPreview.type === 'image' ? (
-                        <BlurryImage
-                          src={activeProofPreview.url}
-                          alt="Aperçu Preuve"
-                          style={{
-                            maxWidth: '100%',
-                            maxHeight: '75vh',
-                            minHeight: '400px',
-                            objectFit: 'contain',
-                            display: 'block'
-                          }}
-                        />
-                      ) : (
-                        <video
-                          src={activeProofPreview.url}
-                          controls
-                          autoPlay
-                          style={{
-                            maxWidth: '100%',
-                            maxHeight: '75vh',
-                            minHeight: '400px',
-                            width: 'auto',
-                            height: 'auto',
-                            display: 'block'
-                          }}
-                        />
-                      )}
+                      <video
+                        src={activeProofPreview.url}
+                        controls
+                        autoPlay
+                        style={{
+                          maxWidth: '100%',
+                          maxHeight: '75vh',
+                          minHeight: '400px',
+                          width: 'auto',
+                          height: 'auto',
+                          display: 'block'
+                        }}
+                      />
                     </div>
 
                     <div style={{ marginTop: '12px', color: 'rgba(var(--rgb-surface), 0.7)', fontSize: 'var(--font-size-body-small)', display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -2231,6 +2239,16 @@ export const CollaborationDetail = () => {
                     </div>
                   </div>
                 </div>
+              )}
+
+              {/* Visionneuse plein écran : zoom molette, pincement tactile,
+                  glissé, Échap pour fermer. */}
+              {imageAZoomer && (
+                <ImageViewer
+                  src={imageAZoomer.src}
+                  alt={imageAZoomer.alt}
+                  onClose={() => setImageAZoomer(null)}
+                />
               )}
 
               <style>{`

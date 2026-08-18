@@ -311,7 +311,9 @@ const MesInterventionsContent = () => {
             </p>
           </header>
 
-          {/* Filtres et Barre de recherche */}
+          {/* Filtres et Barre de recherche — fixe au defilement : voir
+              .mes-interventions-filtres-fixes. */}
+          <div className="mes-interventions-filtres-fixes">
           <FiltersBar
             recherche={searchInput}
             onRecherche={setSearchInput}
@@ -338,6 +340,7 @@ const MesInterventionsContent = () => {
             resultats={data?.count ?? incidents.length}
             nomResultat="intervention"
           />
+          </div>
 
           {/* Affichage des données / Chargement */}
           {!isLoading && incidents.length === 0 ? (

@@ -4,8 +4,15 @@
 
 .dashboard-layout {
   display: flex;
-  min-height: 100vh;
-  min-height: 100dvh;
+  /* height, pas min-height : c'est ce plafond qui force .dashboard-content à
+     se limiter à l'écran plus bas dans la chaîne flex. Un min-height laisse
+     le conteneur grandir sans fin pour englober son contenu — auquel cas rien
+     ne borne plus jamais le panneau interne, et son overflow-y:auto ne se
+     déclenche jamais. Comparé aux pages qui défilent correctement
+     (agents.css, collaboration.css, organisations.css, profile.css) : elles
+     utilisent toutes height ici, jamais min-height. */
+  height: 100vh;
+  height: 100dvh;
   background-color: var(--color-background);
 }
 
@@ -14,10 +21,20 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  /* Piège flexbox classique : un enfant flex a par défaut min-height:auto,
+     c'est-à-dire "ne jamais rétrécir sous la taille de mon contenu". Sans ce
+     0 explicite, .dashboard-content (juste en dessous) grandissait pour
+     englober tout son contenu au lieu de se limiter à l'écran — et son
+     overflow-y:auto ne se déclenchait donc jamais. Vérifié : avant ce
+     correctif, la boîte de contenu mesurait exactement la hauteur de son
+     contenu (scrollHeight === clientHeight), donc aucun défilement interne
+     n'était possible. */
+  min-height: 0;
 }
 
 .dashboard-content {
   flex: 1;
+  min-height: 0;
   padding: var(--spacing-4);
   overflow-y: auto;
 }
