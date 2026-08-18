@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+# Lecture seule : la CI ne publie rien, elle verifie.
+permissions:
+  contents: read
+
+jobs:
+  verifier:
+    name: Lint, tests, build et audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Recuperer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # `npm ci` et non `npm install` : l'installation suit le lockfile a la
+      # lettre et echoue s'il diverge de package.json. Une CI qui resoudrait
+      # les versions elle-meme testerait un arbre de dependances que personne
+      # n'a en local.
+      - name: Installer les dependances depuis le lockfile
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Tests
+        run: npm run test
+
+      # `src/config/api_url_base.js` refuse de se charger sans cette variable.
+      # Une adresse volontairement injoignable suffit : le build n'emet aucune
+      # requete, et cela garantit qu'aucune verification ne touche une
+      # instance reelle.
+      - name: Build de production
+        env:
+          VITE_API_BASE_URL: https://api.invalide.test
+        run: npm run build
+
+      # Bloque sur les vulnerabilites hautes et critiques. Les niveaux
+      # inferieurs sont signales dans le journal sans faire echouer la CI :
+      # les traiter en urgence detournerait l'attention des vraies alertes.
+      - name: Audit des dependances
+        run: npm audit --audit-level=high
