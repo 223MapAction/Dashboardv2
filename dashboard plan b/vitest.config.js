@@ -12,5 +12,13 @@ export default defineConfig({
     // fichier par fichier, via `// @vitest-environment jsdom` en tete.
     environment: 'node',
     include: ['src/**/*.test.{js,jsx}'],
+    env: {
+      // `src/config/api_url_base.js` refuse de se charger sans cette variable,
+      // pour qu'aucun deploiement ne vise la production par accident. Les
+      // tests n'emettent aucune requete reseau, mais importent des modules qui
+      // remontent jusqu'a ce fichier : sans valeur ici, ils dependraient d'un
+      // `.env` local et echoueraient en CI comme sur un clone frais.
+      VITE_API_BASE_URL: 'http://api.invalide.test',
+    },
   },
 });
