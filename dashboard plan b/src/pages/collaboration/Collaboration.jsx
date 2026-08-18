@@ -1,7 +1,8 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
+import { FiltersBar } from '../../components/molecules/FiltersBar';
+import { useRechercheDebouncee } from '../../hooks/useRechercheDebouncee';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import useSWR from 'swr';
-import debounce from 'lodash.debounce';
 import { useSidebarState } from '../../hooks/useSidebarState';
 import Pagination from '../../components/molecules/Pagination';
 import { getIncidentsService } from '../incident/service/incident_service';
@@ -81,8 +82,12 @@ export const Collaboration = () => {
   const [page, setPage] = useState(1);
   const pageSize = 20;
 
-  const [searchInput, setSearchInput] = useState('');
-  const [search, setSearch] = useState('');
+  const {
+    saisie: searchInput,
+    setSaisie: setSearchInput,
+    recherche: search,
+    reinitialiser: reinitialiserRecherche,
+  } = useRechercheDebouncee();
   const [roleFilter, setRoleFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('accepted');
   const [localStatusFilter, setLocalStatusFilter] = useState('all');
@@ -90,30 +95,34 @@ export const Collaboration = () => {
   const [dateRange, setDateRange] = useState([null, null]);
   const [dateFrom, dateTo] = dateRange;
 
-  // Debounce search input de 200ms
-  const debouncedSetSearch = useMemo(
-    () => debounce((val) => setSearch(val), 200),
-    []
-  );
-
-  useEffect(() => {
-    return () => {
-      debouncedSetSearch.cancel();
-    };
-  }, [debouncedSetSearch]);
 
   // Réinitialiser la page à 1 lors du changement de filtre
   useEffect(() => {
     setPage(1);
   }, [search, roleFilter, statusFilter, incidentFilter, dateFrom, dateTo, localStatusFilter]);
 
-  // Charger les incidents pour le filtre dropdown.
-  // La liste bouge peu : on la garde en cache 5 min pour éviter un appel à
-  // chaque montage de la page.
+  // Les cent signalements qui remplissent la liste déroulante du filtre.
+  //
+  // Mesuré à 9,7 s : c'est cher pour un menu, et cela partait jusqu'ici en même
+  // temps que les collaborations elles-mêmes, sur une API qui rend déjà la main
+  // lentement. On attend donc que le navigateur soit inoccupé — le contenu
+  // principal est affiché à ce moment-là, et la liste est prête bien avant
+  // qu'on ouvre le filtre.
+  //
+  // Différer plutôt que réduire : couper à vingt entrées rendrait le filtre
+  // menteur, puisqu'il ne proposerait plus tous les signalements existants.
+  const [filtreChargeable, setFiltreChargeable] = useState(false);
+  useEffect(() => {
+    const differer = window.requestIdleCallback || ((cb) => setTimeout(cb, 1200));
+    const annuler = window.cancelIdleCallback || clearTimeout;
+    const id = differer(() => setFiltreChargeable(true), { timeout: 4000 });
+    return () => annuler(id);
+  }, []);
+
   const { data: rawIncidents } = useSWR(
-    'incidents_dropdown_list',
+    filtreChargeable ? 'incidents_dropdown_list' : null,
     () => getIncidentsService(1, 100),
-    { dedupingInterval: 300000, revalidateIfStale: false }
+    { dedupingInterval: 300000, revalidateIfStale: false, revalidateOnFocus: false }
   );
   const incidentsList = useMemo(() => {
     return rawIncidents?.results || (Array.isArray(rawIncidents) ? rawIncidents : []);
@@ -197,27 +206,30 @@ export const Collaboration = () => {
   // Utiliser useSWR pour charger les collaborations
   const { data: swrData, error: swrError, isLoading, mutate } = useSWR(
     ['collaborations', page, search, roleFilter, statusFilter, incidentFilter, dateFrom, dateTo, localStatusFilter],
-    () => getCollaborationsService(buildParams(page))
+    () => getCollaborationsService(buildParams(page)),
+    // Cette route met 8 a 10 secondes. Les revalidations automatiques de SWR —
+    // au focus de la fenetre, a la reconnexion, ou parce que la donnee est
+    // jugee perimee — relancent donc un appel de 10 secondes sans que
+    // l'utilisateur ait rien demande. Mesure : un second appel identique
+    // partait exactement a la fin du premier. Le rafraichissement reste
+    // possible, mais seulement quand on revient sur l'onglet.
+    { revalidateOnFocus: false, revalidateOnReconnect: false, revalidateIfStale: false }
   );
 
-  // Précharger la page suivante dès que la page courante est affichée : le clic
-  // sur « suivant » lit alors le cache au lieu d'attendre le réseau.
-  const totalCount = swrData?.count || 0;
-  const hasNextPage = page * pageSize < totalCount;
-  useSWR(
-    hasNextPage
-      ? ['collaborations', page + 1, search, roleFilter, statusFilter, incidentFilter, dateFrom, dateTo, localStatusFilter]
-      : null,
-    () => getCollaborationsService(buildParams(page + 1)),
-    { revalidateIfStale: false, revalidateOnMount: true }
-  );
+  // Le prechargement de la page suivante est suspendu. Il avait du sens sur une
+  // route rapide ; mesuree entre 7 et 12 secondes, elle fait payer a chacun un
+  // appel lent pour un clic sur « suivant » qui n'arrivera peut-etre jamais.
+  // A remettre quand /MapApi/collaborations/dashboard/ aura ete profile.
 
-  // Revalider en fond au retour sur l'onglet, sans vider le cache : les cartes
-  // restent affichées pendant le rafraîchissement.
+  // Revalider en fond au RETOUR sur l'onglet. La version precedente testait la
+  // valeur de l'onglet et non son changement : elle se declenchait donc aussi
+  // au premier montage, redemandant ce que SWR venait tout juste de demander.
+  // Sur une route a 7-12 secondes, cela doublait le chargement de la page.
+  const ongletPrecedent = useRef(activeTab);
   useEffect(() => {
-    if (activeTab === 'collaborations') {
-      mutate();
-    }
+    const revient = ongletPrecedent.current !== 'collaborations' && activeTab === 'collaborations';
+    ongletPrecedent.current = activeTab;
+    if (revient) mutate();
   }, [activeTab, mutate]);
 
   let shimmerColor = "#acb7c6"
@@ -646,22 +658,37 @@ export const Collaboration = () => {
             {activeTab === 'collaborations' ? (
               <>
                 {/* Toolbar */}
-                <div className="collab-toolbar">
-                  <div className="collab-search">
-                    <SearchNormal1 size={18} variant="Linear" color="#6C7278" />
-                    <input
-                      type="text"
-                      placeholder="Rechercher par titre, organisation, lieu..."
-                      value={searchInput}
-                      onChange={(e) => {
-                        setSearchInput(e.target.value);
-                        debouncedSetSearch(e.target.value);
-                      }}
-                    />
-                  </div>
-
-                  <div className="collab-filters">
-                    {/* Filtre par période */}
+                <FiltersBar
+                  recherche={searchInput}
+                  onRecherche={setSearchInput}
+                  placeholder="Rechercher un titre, une organisation, un lieu…"
+                  selects={[
+                    { id: 'statut', valeur: statusFilter, onChange: setStatusFilter,
+                      ariaLabel: 'Filtrer par statut', neutre: 'all',
+                      options: [
+                        { value: 'all', label: 'Tous les statuts' },
+                        { value: 'accepted', label: 'Acceptée' },
+                        { value: 'pending', label: 'En attente' },
+                        { value: 'declined', label: 'Refusée' },
+                      ] },
+                    { id: 'role', valeur: roleFilter, onChange: setRoleFilter,
+                      ariaLabel: 'Filtrer par rôle', tousLabel: 'Tous les rôles',
+                      options: [
+                        { value: 'leader', label: 'Leader' },
+                        { value: 'contributor', label: 'Contributeur' },
+                        { value: 'observer', label: 'Observateur' },
+                      ] },
+                    { id: 'signalement', valeur: incidentFilter, onChange: setIncidentFilter,
+                      ariaLabel: 'Filtrer par signalement', tousLabel: 'Tous les signalements',
+                      options: incidentsList.map((inc) => ({ value: inc.id, label: inc.title })) },
+                  ]}
+                  onEffacer={() => {
+                    reinitialiserRecherche();
+                    setStatusFilter('all'); setRoleFilter(''); setIncidentFilter('');
+                    setLocalStatusFilter('all'); resetDateRange();
+                  }}
+                  actifSupplementaire={localStatusFilter !== 'all' || Boolean(dateFrom) || Boolean(dateTo)}
+                >
                     <div className="collab-date-range">
                       <Calendar size={16} variant="Bold" color="#3AA2DD" />
                       <span className="collab-date-label">Période :</span>
@@ -730,53 +757,7 @@ export const Collaboration = () => {
                       </span>
                     </button>
 
-                    <div className="collab-select">
-                      <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        aria-label="Filtrer par statut API"
-                      >
-                        <option value="all">Tous les statuts</option>
-                        <option value="accepted">Acceptée</option>
-                        <option value="pending">En attente</option>
-                        <option value="declined">Refusée</option>
-                      </select>
-                      <ArrowDown2 size={16} variant="Linear" color="#6C7278" />
-                    </div>
-
-                    <div className="collab-select">
-                      <select
-                        value={roleFilter}
-                        onChange={(e) => setRoleFilter(e.target.value)}
-                        aria-label="Filtrer par rôle API"
-                      >
-                        <option value="">Tous les rôles</option>
-                        <option value="leader">Leader</option>
-                        <option value="contributor">Contributeur</option>
-                        <option value="observer">Observateur</option>
-                      </select>
-                      <ArrowDown2 size={16} variant="Linear" color="#6C7278" />
-                    </div>
-
-                    <div className="collab-select">
-                      <select
-                        value={incidentFilter}
-                        onChange={(e) => setIncidentFilter(e.target.value)}
-                        aria-label="Filtrer par incident"
-                      >
-                        <option value="">Tous les incidents</option>
-                        {incidentsList.map((inc) => (
-                          <option key={inc.id} value={inc.id}>
-                            {inc.title}
-                          </option>
-                        ))}
-                      </select>
-                      <ArrowDown2 size={16} variant="Linear" color="#6C7278" />
-                    </div>
-                  </div>
-
-
-                </div>
+                </FiltersBar>
 
                 {/* État de chargement avec react-shimmer-effects */}
                 {isLoading && (
@@ -1378,7 +1359,7 @@ export const Collaboration = () => {
 
                   {myTasks.length === 0 ? (
                     <div className="my-tasks-empty">
-                      <TaskSquare size={32} variant="Linear" color="#9CA3AF" />
+                      <TaskSquare size={32} variant="Linear" color="var(--color-text-muted)" />
                       <p>Vous n'avez encore ajouté aucune tâche.</p>
                     </div>
                   ) : (
@@ -1703,7 +1684,7 @@ export const Collaboration = () => {
                       <div className="suggest-search-results">
                         {filteredOrgs.filter(o => !suggestedOrgs.find(s => s.id === o.id)).length === 0 ? (
                           <div className="suggest-search-empty">
-                            <Buildings2 size={20} variant="Linear" color="#9CA3AF" />
+                            <Buildings2 size={20} variant="Linear" color="var(--color-text-muted)" />
                             <span>Aucune organisation trouvée</span>
                           </div>
                         ) : (
@@ -1741,7 +1722,7 @@ export const Collaboration = () => {
 
                   {suggestedOrgs.length === 0 ? (
                     <div className="suggest-empty">
-                      <People size={28} variant="Linear" color="#9CA3AF" />
+                      <People size={28} variant="Linear" color="var(--color-text-muted)" />
                       <p>Aucune organisation sélectionnée pour le moment.</p>
                     </div>
                   ) : (

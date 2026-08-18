@@ -4,6 +4,7 @@
 .incident-page {
   display: flex;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   background-color: var(--color-background);
 }
@@ -14,6 +15,7 @@
   flex-direction: column;
   min-width: 0;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
 }
 
@@ -28,7 +30,7 @@
 /* ============================================
    MOBILE (< 1024px) - Bascule liste/détail
    ============================================ */
-@media (max-width: 1023px) {
+@media (max-width: 1023.98px) {
   .incident-workspace .project-list-section,
   .incident-workspace .project-detail {
     width: 100%;

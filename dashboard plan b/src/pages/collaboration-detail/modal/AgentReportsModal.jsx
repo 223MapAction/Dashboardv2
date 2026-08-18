@@ -5,6 +5,7 @@ import { ShimmerThumbnail, ShimmerText } from 'react-shimmer-effects';
 import { getFieldReportsService } from '../../collaboration/service/collaboration_service';
 import { BlurryImage } from '../../../components/atoms/BlurryImage';
 
+import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
 const formatDate = (isoString) => {
   if (!isoString) return 'Non spécifiée';
   try {
@@ -91,16 +92,7 @@ export const AgentReportsModal = ({ isOpen, onClose, incidentId, incidentTitle }
 
   if (!shouldRender) return null;
 
-  const panelClass = [
-    'am-offcanvas-panel',
-    isClosing ? 'am-offcanvas-panel--closing' : '',
-    isOpen && !isClosing ? 'am-offcanvas-panel--opening' : ''
-  ].filter(Boolean).join(' ');
 
-  const backdropClass = [
-    'am-offcanvas-backdrop',
-    isClosing ? 'am-offcanvas-backdrop--closing' : '',
-  ].filter(Boolean).join(' ');
 
   const displayedReports = (reportsList || []).filter(report => {
     const reportIncidentId = report.incident ?? report.incident_id;
@@ -109,31 +101,14 @@ export const AgentReportsModal = ({ isOpen, onClose, incidentId, incidentTitle }
   });
 
   return (
-    <>
-      <div className={backdropClass} onClick={handleClose} />
-      <div
-        className={panelClass}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Liste des rapports de terrain des agents"
-      >
-        {/* ── Header ─────────────────────────────────────── */}
-        <div className="am-offcanvas-header">
-          <div>
-            <h5 className="am-offcanvas-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              Rapports des agents
-            </h5>
-            <p className="text-muted" style={{ fontSize: '13px', margin: '4px 0 0 0', fontWeight: '500' }}>
-              {incidentTitle || `Incident #${incidentId}`}
-            </p>
-          </div>
-          <button
-            type="button"
-            className="btn-close"
-            onClick={handleClose}
-            aria-label="Fermer"
-          />
-        </div>
+    <OffcanvasModal
+      onClose={handleClose}
+      isClosing={isClosing}
+      title="Rapports des agents"
+      subtitle={incidentTitle || `Incident #${incidentId}`}
+      ariaLabel="Liste des rapports de terrain des agents"
+      closeVariant="plain"
+    >
 
         {/* ── Body ───────────────────────────────────────── */}
         <div className="am-offcanvas-body">
@@ -186,7 +161,7 @@ export const AgentReportsModal = ({ isOpen, onClose, incidentId, incidentTitle }
             </div>
           ) : displayedReports.length === 0 ? (
             <div className="d-flex flex-column align-items-center justify-content-center p-5 border rounded bg-light text-center" style={{ gap: '12px', borderStyle: 'dashed' }}>
-              <DocumentText size={48} variant="Linear" color="#9CA3AF" />
+              <DocumentText size={48} variant="Linear" color="var(--color-text-muted)" />
               <div>
                 <span className="fw-semibold d-block" style={{ fontSize: '14px', color: 'var(--color-text-primary)' }}>
                   Aucun rapport disponible
@@ -333,8 +308,7 @@ export const AgentReportsModal = ({ isOpen, onClose, incidentId, incidentTitle }
             Fermer
           </button>
         </div>
-      </div>
-    </>
+      </OffcanvasModal>
   );
 };
 

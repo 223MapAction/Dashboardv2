@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { FiltersBar } from '../../components/molecules/FiltersBar';
+import { useRechercheDebouncee } from '../../hooks/useRechercheDebouncee';
 import useSWR, { mutate } from 'swr';
 import Pagination from '../../components/molecules/Pagination';
 import { useSidebarState } from '../../hooks/useSidebarState';
@@ -26,7 +28,6 @@ import {
 import { Header, Sidebar } from '../../components/layout';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
 import {
-  getPartnerSuggestionService,
   getMyPendingReceivedSuggestionsService,
   acceptPartnerSuggestionService,
   rejectPartnerSuggestionService,
@@ -35,17 +36,17 @@ import {
   acceptCollaborationService,
   rejectCollaborationService
 } from './service/partner_service';
-import { CollabIncidentDetailModal } from './modal/CollabIncidentDetailModal';
-import { DecisionModal } from './modal/DecisionModal';
+import { RequestIncidentDetailModal } from '../../components/collaboration/RequestIncidentDetailModal';
+import { RequestDecisionModal } from '../../components/collaboration/RequestDecisionModal';
 import { authService } from '../auth/services/authService';
 import { API_URL_BASE } from '../../config/api_url_base';
-import './collaboration-requests.css';
+import '../../styles/collaboration-requests.css';
 
 const STATUS_META = {
   pending: {
     label: 'En attente',
     icon: Clock,
-    color: 'var(--color-warning)',
+    color: 'var(--color-warning-text)',
     className: 'status-pending'
   },
  
@@ -53,16 +54,16 @@ const STATUS_META = {
   declined: {
     label: 'Refusée',
     icon: CloseCircle,
-    color: 'var(--color-danger)',
+    color: 'var(--color-danger-text)',
     className: 'status-rejected'
   }
 };
 
 const ROLE_META = {
-  leader: { label: 'Leader', icon: Crown1, color: 'var(--color-warning)' },
-  contributeur: { label: 'Contributeur', icon: People, color: 'var(--color-primary)' },
+  leader: { label: 'Leader', icon: Crown1, color: 'var(--color-warning-text)' },
+  contributeur: { label: 'Contributeur', icon: People, color: 'var(--color-primary-text)' },
   observateur: { label: 'Observateur', icon: Eye, color: 'var(--color-text-secondary)' },
-  contributor: { label: 'Contributeur', icon: People, color: 'var(--color-primary)' },
+  contributor: { label: 'Contributeur', icon: People, color: 'var(--color-primary-text)' },
   observer: { label: 'Observateur', icon: Eye, color: 'var(--color-text-secondary)' }
 };
 
@@ -194,7 +195,12 @@ export const CollaborationRequests = ({
     return true;
   };
   const [showInfoBanner, setShowInfoBanner] = useState(true);
-  const [search, setSearch] = useState('');
+  const {
+    saisie: searchInput,
+    setSaisie: setSearchInput,
+    recherche: search,
+    reinitialiser: reinitialiserRecherche,
+  } = useRechercheDebouncee();
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [page, setPage] = useState(1);
@@ -508,7 +514,7 @@ export const CollaborationRequests = ({
           proposedCollaborators: (item.proposed_collaborators || []).map((pc) => ({
             name: pc.partner_name || 'Partenaire',
             initials: getInitials(pc.partner_name || 'PT'),
-            color: 'var(--color-success)',
+            color: 'var(--color-success-text)',
             role: pc.role || 'contributeur',
             comment: pc.justification || ''
           })),
@@ -747,7 +753,7 @@ export const CollaborationRequests = ({
       group.leader = {
         name: 'Vous',
         isMe: true,
-        color: 'var(--color-warning)'
+        color: 'var(--color-warning-text)'
       };
     }
     if (!group.leader) {
@@ -770,7 +776,7 @@ export const CollaborationRequests = ({
           name: isMe ? 'Vous' : (group.incidentDetails?.taken_by_name || takenByOrg.name || 'Leader'),
           org: takenByOrg.name,
           isMe,
-          color: 'var(--color-warning)'
+          color: 'var(--color-warning-text)'
         };
       }
     }
@@ -807,17 +813,15 @@ export const CollaborationRequests = ({
 
 
       {/* Toolbar */}
-      <div className="requests-toolbar">
-        <div className="requests-search">
-          <SearchNormal1 size={18} variant="Linear" color="currentColor" style={{ color: 'var(--color-text-secondary)' }} />
-          <input
-            type="text"
-            placeholder="Rechercher un incident, rôle, organisation…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-
+      <FiltersBar
+        recherche={searchInput}
+        onRecherche={setSearchInput}
+        placeholder="Rechercher un signalement, un rôle, une organisation…"
+        onEffacer={() => { reinitialiserRecherche(); setStatusFilter('all'); }}
+        actifSupplementaire={statusFilter !== 'all'}
+        resultats={filtered.length}
+        nomResultat="demande"
+      >
         <div className="requests-filters">
           <button
             type="button"
@@ -847,20 +851,21 @@ export const CollaborationRequests = ({
           </button>
 
         </div>
-      </div>
+      </FiltersBar>
+
 
       {/* Collapsible Info Banner (Scenarios 2 & 3 Explanation) */}
       {showInfoBanner && (
         <div className="collaboration-info-banner">
           <div className="info-banner-content">
-            <InfoCircle size={24} variant="Bold" className="info-banner-icon" style={{ color: 'var(--color-primary)' }} />
+            <InfoCircle size={24} variant="Bold" className="info-banner-icon" style={{ color: 'var(--color-primary-text)' }} />
             <div className="info-banner-text">
-              <h4>Règles de collaboration sur les Incidents</h4>
+              <h4>Règles de collaboration sur les Signalements</h4>
               <p>
-                <strong>1. Sans Leader :</strong> Si aucun leader n'a encore pris l'incident en charge, toute demande d'observation ou de contribution est <strong>automatiquement acceptée</strong>.
+                <strong>1. Sans Leader :</strong> Si aucun leader n'a encore pris le signalement en charge, toute demande d'observation ou de contribution est <strong>automatiquement acceptée</strong>.
               </p>
               <p>
-                <strong>2. Prise en charge par un Leader :</strong> Dès qu'une organisation prend en charge l'incident en tant que <strong>Leader</strong>, toutes les contributions existantes repassent en status <strong>"En attente"</strong> pour lui permettre de les valider manuellement. Les observateurs restent actifs.
+                <strong>2. Prise en charge par un Leader :</strong> Dès qu'une organisation prend en charge le signalement en tant que <strong>Leader</strong>, toutes les contributions existantes repassent en status <strong>"En attente"</strong> pour lui permettre de les valider manuellement. Les observateurs restent actifs.
               </p>
             </div>
           </div>
@@ -1014,11 +1019,11 @@ export const CollaborationRequests = ({
                           borderRadius: '4px',
                           fontSize: '11px',
                           fontWeight: '600',
-                          color: 'var(--color-warning)',
+                          color: 'var(--color-warning-text)',
                           backgroundColor: 'rgba(245, 158, 11, 0.12)',
                           border: 'none'
                         }}>
-                          <Crown1 size={13} variant="Bold" color="currentColor" style={{ color: 'var(--color-warning)' }} />
+                          <Crown1 size={13} variant="Bold" color="currentColor" style={{ color: 'var(--color-warning-text)' }} />
                           Leader : {incident.leader.org || incident.leader.name}
                         </span>
                       )}
@@ -1134,7 +1139,7 @@ export const CollaborationRequests = ({
                             <div className="scenario-explanation-box">
                               {myCollab.status === 'pending' ? (
                                 <p className="status-note status-pending">
-                                  <Clock size={16} variant="Bold" color="currentColor" style={{ color: 'var(--color-warning)' }} />
+                                  <Clock size={16} variant="Bold" color="currentColor" style={{ color: 'var(--color-warning-text)' }} />
                                   {myCollab.incidentDetails?.etat === "taken_into_account" ? (
                                     <>
                                       En attente de validation par le leader {incident.leader?.org && (<strong>({incident.leader.org})</strong>)}
@@ -1152,7 +1157,7 @@ export const CollaborationRequests = ({
                                   ) : hasLeader ? (
                                     <>Approuvée par le leader (<strong>{incident.leader?.org || incident.leader?.name}</strong>).</>
                                   ) : (
-                                    <>Active (Auto-acceptée car aucun leader n'est désigné sur l'incident).</>
+                                    <>Active (Auto-acceptée car aucun leader n'est désigné sur le signalement).</>
                                   )}
                                 </p>
                               ) : (
@@ -1165,7 +1170,7 @@ export const CollaborationRequests = ({
 
                           </div>
                         ) : (
-                          <p className="no-participation-text">Vous ne participez pas encore à cet incident.</p>
+                          <p className="no-participation-text">Vous ne participez pas encore à cet signalement.</p>
                         )}
                         <button
                           type="button"
@@ -1212,7 +1217,7 @@ export const CollaborationRequests = ({
                           <>
                             <h4 className="detail-section-title">Suggestions de partenaires ({incident.suggestions.length})</h4>
                             {incident.suggestions.length === 0 ? (
-                              <p className="no-actions-text">Aucune suggestion pour cet incident.</p>
+                              <p className="no-actions-text">Aucune suggestion pour cet signalement.</p>
                             ) : (
                               <div className="incident-suggestions-list">
                                 {incident.suggestions.map((sug) => (
@@ -1250,7 +1255,7 @@ export const CollaborationRequests = ({
 
       {/* Decision modal */}
       {decisionRequest && (
-        <DecisionModal
+        <RequestDecisionModal
           request={decisionRequest}
           onClose={closeDecision}
           onConfirm={handleConfirmDecision}
@@ -1261,7 +1266,7 @@ export const CollaborationRequests = ({
       )}
       {/* Incident Detail Modal */}
       {selectedIncidentForModal && (
-        <CollabIncidentDetailModal
+        <RequestIncidentDetailModal
           incident={selectedIncidentForModal}
           onClose={() => setSelectedIncidentForModal(null)}
         />

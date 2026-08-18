@@ -5,6 +5,7 @@
 .trash-page {
   display: flex;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   background-color: var(--color-background);
 }
@@ -15,6 +16,7 @@
   flex-direction: column;
   min-width: 0;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   transition: margin-left 0.3s ease;
 }
@@ -56,16 +58,11 @@
 }
 
 .trash-title {
-  font-size: var(--font-size-h2);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
   margin: 0 0 var(--spacing-1) 0;
   letter-spacing: var(--tracking-tight);
 }
 
 .trash-subtitle {
-  font-size: var(--font-size-body-small);
-  color: var(--color-text-secondary);
   margin: 0;
   line-height: 1.5;
 }
@@ -109,7 +106,7 @@
 
 .trash-view-btn.active {
   background-color: var(--color-surface);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   box-shadow: var(--shadow-sm);
 }
 
@@ -390,7 +387,7 @@
 /* ── Grille de cartes ────────────────────── */
 .trash-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
   gap: var(--spacing-4);
 }
 
@@ -486,22 +483,22 @@
 
 .trash-badge-declared {
   background-color: rgba(239, 68, 68, 0.1);
-  color: var(--color-danger);
+  color: var(--color-danger-text);
 }
 
 .trash-badge-in-progress {
   background-color: rgba(58, 162, 221, 0.1);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .trash-badge-taken {
   background-color: rgba(245, 158, 11, 0.1);
-  color: var(--color-warning);
+  color: var(--color-warning-text);
 }
 
 .trash-badge-resolved {
   background-color: rgba(34, 197, 94, 0.1);
-  color: var(--color-success);
+  color: var(--color-success-text);
 }
 
 .trash-card-type {
@@ -582,7 +579,7 @@
 }
 
 .trash-btn-restore {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   border-right: 1px solid var(--color-border);
 }
 
@@ -591,7 +588,7 @@
 }
 
 .trash-btn-delete {
-  color: var(--color-danger);
+  color: var(--color-danger-text);
 }
 
 .trash-btn-delete:hover {
@@ -708,7 +705,7 @@
   font-weight: var(--font-weight-semibold);
   font-family: var(--font-family);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
 .trash-modal-cancel {
@@ -728,7 +725,7 @@
 }
 
 .trash-modal-confirm:hover {
-  background-color: #DC2626;
+  background-color: var(--color-danger-text);
 }
 
 /* ── Toast ───────────────────────────────── */
@@ -788,7 +785,7 @@
 }
 
 /* ── Responsive ──────────────────────────── */
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
   .trash-content {
     padding: var(--spacing-4);
   }
@@ -887,12 +884,12 @@
 
   .trash-btn-restore svg {
     fill: var(--color-danger) !important;
-    color: var(--color-danger) !important;
+    color: var(--color-danger-text) !important;
   }
 
   .trash-btn-delete svg {
     fill: var(--color-danger) !important;
-    color: var(--color-danger) !important;
+    color: var(--color-danger-text) !important;
   }
 
   .trash-row-actions .trash-btn-restore,

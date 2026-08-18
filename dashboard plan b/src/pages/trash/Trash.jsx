@@ -9,6 +9,9 @@ import {
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
 import { getTrashIncidentsService, restoreIncidentService, deleteIncidentService } from '../incident/service/incident_service';
 import { BlurryImage } from '../../components/atoms/BlurryImage';
+import { FiltersBar } from '../../components/molecules/FiltersBar';
+import { useRechercheDebouncee } from '../../hooks/useRechercheDebouncee';
+import { OffcanvasModal } from '../../components/molecules/OffcanvasModal';
 import './trash.css';
 
 // Composant Shimmer Skeleton pour le chargement des incidents de la corbeille
@@ -104,7 +107,10 @@ const adaptTrashIncidentData = (incident) => {
     ...incident,
     title: incident.title || 'Sans titre',
     description: incident.description || 'Aucune description disponible',
-    image: incident.photo || 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=150',
+    // Pas de photo de remplacement : BlurryImage affiche son propre etat
+    // « aucune photo ». Une image de banque d'images faisait croire a une
+    // vraie photo du signalement, en plus d'appeler un CDN externe.
+    image: incident.photo || '',
     type: incident.zone || 'Non spécifié',
     location: incident.zone || 'Localisation non spécifiée',
     deletedAt: incident.created_at ? new Date(incident.created_at).toLocaleDateString('fr-FR') : 'Non spécifiée',
@@ -142,7 +148,12 @@ export const TrashPage = () => {
     return rawList.map(adaptTrashIncidentData);
   }, [incidentsData]);
 
-  const [search, setSearch] = useState('');
+  const {
+    saisie: searchInput,
+    setSaisie: setSearchInput,
+    recherche: search,
+    reinitialiser: reinitialiserRecherche,
+  } = useRechercheDebouncee();
   const [typeFilter, setTypeFilter] = useState('');
   const [toast, setToast] = useState(null);
   const [confirmId, setConfirmId] = useState(null);
@@ -356,7 +367,7 @@ export const TrashPage = () => {
           <button
             className="trash-btn-restore"
             onClick={() => handleRestore(incident.id)}
-            title="Restaurer cet incident"
+            title="Restaurer cet signalement"
           >
             <RotateLeft size={16} variant="Linear" color="var(--color-primary)" />
             Restaurer
@@ -398,8 +409,8 @@ export const TrashPage = () => {
 
           {/* ── État d'erreur ── */}
           {incidentsError && (
-            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-danger)' }}>
-              <p>Erreur lors du chargement des incidents supprimés.</p>
+            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-danger-text)' }}>
+              <p>Erreur lors du chargement des signalements supprimés.</p>
               <button
                 onClick={() => mutate()}
                 style={{ marginTop: '12px', padding: '8px 16px', cursor: 'pointer' }}
@@ -447,25 +458,22 @@ export const TrashPage = () => {
               </div>
 
               {/* ── Filtres ── */}
-              <div className="trash-filters">
-                <div className="trash-search">
-                  <SearchNormal1 size={16} variant="Linear" color="var(--color-text-muted)" />
-                  <input
-                    type="text"
-                    placeholder="Rechercher un incident..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                  />
-                </div>
-
-                <div className="trash-select-wrap">
-                  <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-                    <option value="">Tous les types</option>
-                    {types.map((t) => <option key={t} value={t}>{t}</option>)}
-                  </select>
-                  <ArrowDown2 size={14} variant="Linear" color="var(--color-text-muted)" />
-                </div>
-
+              <FiltersBar
+                recherche={searchInput}
+                onRecherche={setSearchInput}
+                placeholder="Rechercher un signalement, un lieu…"
+                selects={[{
+                  id: 'type',
+                  valeur: typeFilter,
+                  onChange: setTypeFilter,
+                  ariaLabel: 'Filtrer par type',
+                  tousLabel: 'Tous les types',
+                  options: types.map((t) => ({ value: t, label: t })),
+                }]}
+                onEffacer={() => { reinitialiserRecherche(); setTypeFilter(''); }}
+                resultats={filtered.length}
+                nomResultat="signalement"
+              >
                 <label className="trash-select-all">
                   <input
                     type="checkbox"
@@ -503,10 +511,7 @@ export const TrashPage = () => {
                   </button>
                 </div>
 
-                <span className="trash-count-label" style={{ marginLeft: 'var(--spacing-2)' }}>
-                  {filtered.length} résultat{filtered.length > 1 ? 's' : ''}
-                </span>
-              </div>
+              </FiltersBar>
 
               {/* ── Contenu ── */}
               {filtered.length === 0 ? (
@@ -515,7 +520,7 @@ export const TrashPage = () => {
                     <Trash size={48} variant="Linear" color="var(--color-border)" />
                   </div>
                   <p className="trash-empty-title">La corbeille est vide</p>
-                  <p className="trash-empty-sub">Aucun incident supprimé ne correspond à vos critères.</p>
+                  <p className="trash-empty-sub">Aucun signalement supprimé ne correspond à vos critères.</p>
                 </div>
               ) : viewMode === 'grid' ? (
                 <div className="trash-grid">
@@ -538,53 +543,18 @@ export const TrashPage = () => {
 
       {/* ── Modal confirmation ── */}
       {confirmId && (
-        <>
-          <div
-            className={[
-              'am-offcanvas-backdrop',
-              confirmClosing ? 'am-offcanvas-backdrop--closing' : '',
-            ].filter(Boolean).join(' ')}
-            onClick={closeConfirmModal}
-          />
-          <div
-            className={[
-              'am-offcanvas-panel',
-              'am-offcanvas-panel--sm',
-              confirmClosing ? 'am-offcanvas-panel--closing' : '',
-            ].filter(Boolean).join(' ')}
-            role="alertdialog"
-            aria-modal="true"
-            aria-label="Supprimer définitivement"
-          >
-            {/* Header */}
-            <div className="am-offcanvas-header am-offcanvas-header--danger">
-              <h5 className="am-offcanvas-title">Suppression définitive</h5>
-              <button
-                type="button"
-                className="btn-close btn-close-white"
-                onClick={closeConfirmModal}
-                aria-label="Fermer"
-              />
-            </div>
-
-            {/* Body */}
-            <div className="am-offcanvas-body am-offcanvas-body--centered">
-              <div className="am-delete-icon-wrap" aria-hidden="true">
-                <Trash size={32} variant="Bold" color="var(--color-danger)" />
-              </div>
-
-              <p className="am-delete-title">Confirmer la suppression</p>
-              <p className="am-delete-text">
-                Cette action est <strong>irréversible</strong>.<br />
-                {confirmId === 'batch'
-                  ? `Vous êtes sur le point de supprimer définitivement ${selected.size} incident(s) sélectionnés.`
-                  : "Vous êtes sur le point de supprimer définitivement cet incident."
-                } Ils ne pourront pas être récupérés.
-              </p>
-            </div>
-
-            {/* Footer */}
-            <div className="am-offcanvas-footer am-offcanvas-footer--col">
+        <OffcanvasModal
+          onClose={closeConfirmModal}
+          isClosing={Boolean(confirmClosing)}
+          title="Suppression définitive"
+          ariaLabel="Supprimer définitivement"
+          role="alertdialog"
+          tone="danger"
+          size="sm"
+          closeVariant="plain"
+          footerLayout="col"
+          footer={
+            <>
               <button
                 type="button"
                 className="am-btn am-btn--danger"
@@ -599,9 +569,24 @@ export const TrashPage = () => {
               >
                 Annuler
               </button>
+            </>
+          }
+        >
+          <div className="am-offcanvas-body am-offcanvas-body--centered">
+            <div className="am-delete-icon-wrap" aria-hidden="true">
+              <Trash size={32} variant="Bold" color="var(--color-danger)" />
             </div>
+
+            <p className="am-delete-title">Confirmer la suppression</p>
+            <p className="am-delete-text">
+              Cette action est <strong>irréversible</strong>.<br />
+              {confirmId === 'batch'
+                ? `Vous êtes sur le point de supprimer définitivement ${selected.size} incident(s) sélectionnés.`
+                : "Vous êtes sur le point de supprimer définitivement cet incident."
+              } Ils ne pourront pas être récupérés.
+            </p>
           </div>
-        </>
+        </OffcanvasModal>
       )}
 
       {/* ── Toast ── */}

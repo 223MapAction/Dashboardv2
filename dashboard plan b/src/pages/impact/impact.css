@@ -5,6 +5,7 @@
 .impact-layout {
   display: flex;
   min-height: 100vh;
+  min-height: 100dvh;
   background-color: var(--color-background);
 }
 
@@ -49,7 +50,7 @@
   width: 56px;
   height: 56px;
   border-radius: var(--radius-lg);
-  background: linear-gradient(135deg, var(--color-primary), #2C8DC2);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -58,16 +59,11 @@
 
 .impact-title {
   margin: 0 0 4px 0;
-  font-size: var(--font-size-h1);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
   letter-spacing: var(--tracking-tight);
 }
 
 .impact-subtitle {
   margin: 0;
-  font-size: var(--font-size-body-large);
-  color: var(--color-text-secondary);
 }
 
 /* --- Filters Section --- */
@@ -115,12 +111,12 @@
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .impact-period-btn:hover {
   border-color: var(--color-primary);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   background-color: var(--color-surface);
 }
 
@@ -134,7 +130,7 @@
 /* --- Core KPI Cards Grid --- */
 .impact-kpis {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
   gap: var(--spacing-4);
 }
 
@@ -334,19 +330,19 @@
   font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
 }
 
 .structure-chip:hover:not(:disabled) {
   border-color: var(--color-primary);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   background-color: var(--color-surface);
 }
 
 .structure-chip.active {
   background-color: rgba(58, 162, 221, 0.1);
   border-color: var(--color-primary);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   font-weight: var(--font-weight-bold);
 }
 
@@ -485,7 +481,7 @@
 
 .citizen-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
   gap: var(--spacing-4);
 }
 
@@ -634,7 +630,7 @@
 
 .impact-card-type {
   font-weight: var(--font-weight-bold);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
@@ -705,13 +701,13 @@
   border: 1px solid var(--color-border);
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
   align-self: center;
 }
 
 .impact-toggle:hover {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   border-color: var(--color-primary);
   background-color: rgba(58, 162, 221, 0.08);
   box-shadow: var(--shadow-sm);
@@ -719,7 +715,7 @@
 
 .impact-toggle.is-open {
   transform: rotate(90deg);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   border-color: var(--color-primary);
   background-color: rgba(58, 162, 221, 0.1);
 }
@@ -777,7 +773,7 @@
 }
 .impact-detail-card.is-direct .impact-detail-header {
   background-color: rgba(58, 162, 221, 0.08);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .impact-detail-card.is-indirect {
@@ -793,7 +789,7 @@
 }
 .impact-detail-card.is-structures .impact-detail-header {
   background-color: rgba(245, 158, 11, 0.08);
-  color: var(--color-warning);
+  color: var(--color-warning-text);
 }
 
 /* Header inside detail cards */
@@ -900,7 +896,7 @@
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   box-shadow: var(--shadow-sm);
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
 .impact-org-chip:hover {
@@ -909,13 +905,13 @@
 }
 
 /* Responsive grid modifications */
-@media (max-width: 992px) {
+@media (max-width: 991.98px) {
   .impact-detail-grid {
     grid-template-columns: 1fr;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
   .impact-card-main {
     flex-direction: column;
     align-items: stretch;
@@ -950,7 +946,7 @@
 
 .text-primary {
   background-color: rgba(58, 162, 221, 0.1);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .text-purple {
@@ -960,7 +956,7 @@
 
 .text-success {
   background-color: rgba(34, 197, 94, 0.1);
-  color: var(--color-success);
+  color: var(--color-success-text);
 }
 
 .scrollable-list {
@@ -970,13 +966,13 @@
 
 .bg-blue {
   background-color: rgba(58, 162, 221, 0.1) !important;
-  color: var(--color-primary) !important;
+  color: var(--color-primary-text) !important;
   border-color: var(--color-primary) !important;
 }
 
 .tasks-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
   gap: var(--spacing-3);
   margin-top: var(--spacing-2);
 }
@@ -1019,17 +1015,17 @@
 
 .task-badge.done {
   background-color: rgba(34, 197, 94, 0.12);
-  color: var(--color-success);
+  color: var(--color-success-text);
 }
 
 .task-badge.in_progress {
   background-color: rgba(58, 162, 221, 0.12);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .task-badge.failed {
   background-color: rgba(239, 68, 68, 0.12);
-  color: var(--color-danger);
+  color: var(--color-danger-text);
 }
 
 .task-badge.pending {
@@ -1068,7 +1064,7 @@
   gap: var(--spacing-5);
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1023.98px) {
   .impact-grid-performance {
     grid-template-columns: 1fr;
   }
@@ -1077,7 +1073,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
   .impact-filters-group {
     grid-template-columns: 1fr;
   }

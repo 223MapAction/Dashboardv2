@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { FiltersBar } from '../../components/molecules/FiltersBar';
+import { useRechercheDebouncee } from '../../hooks/useRechercheDebouncee';
 import useSWR from 'swr';
 import { useSidebarState } from '../../hooks/useSidebarState';
 import {
@@ -27,11 +29,11 @@ import {
   acceptPartnerSuggestionService,
   rejectPartnerSuggestionService
 } from './service/suggest_service';
-import { SuggestIncidentDetailModal } from './modal/SuggestIncidentDetailModal';
-import { SuggestDecisionModal } from './modal/SuggestDecisionModal';
+import { RequestIncidentDetailModal } from '../../components/collaboration/RequestIncidentDetailModal';
+import { RequestDecisionModal } from '../../components/collaboration/RequestDecisionModal';
 import { authService } from '../auth/services/authService';
 import { API_URL_BASE } from '../../config/api_url_base';
-import './collaboration-requests.css';
+import '../../styles/collaboration-requests.css';
 
 /* ──────────────────── Constants ──────────────────── */
 
@@ -39,21 +41,21 @@ const STATUS_META = {
   pending: {
     label: 'En attente',
     icon: Clock,
-    color: 'var(--color-warning)',
+    color: 'var(--color-warning-text)',
     className: 'status-pending'
   },
   declined: {
     label: 'Refusée',
     icon: CloseCircle,
-    color: 'var(--color-danger)',
+    color: 'var(--color-danger-text)',
     className: 'status-rejected'
   }
 };
 
 const ROLE_META = {
-  leader: { label: 'Leader', icon: Crown1, color: 'var(--color-warning)' },
-  contributeur: { label: 'Contributeur', icon: People, color: 'var(--color-primary)' },
-  contributor: { label: 'Contributeur', icon: People, color: 'var(--color-primary)' },
+  leader: { label: 'Leader', icon: Crown1, color: 'var(--color-warning-text)' },
+  contributeur: { label: 'Contributeur', icon: People, color: 'var(--color-primary-text)' },
+  contributor: { label: 'Contributeur', icon: People, color: 'var(--color-primary-text)' },
   observateur: { label: 'Observateur', icon: Eye, color: 'var(--color-text-secondary)' },
   observer: { label: 'Observateur', icon: Eye, color: 'var(--color-text-secondary)' }
 };
@@ -131,7 +133,12 @@ export const SuggestRequests = ({ embedded = false }) => {
   } = useSidebarState();
 
   /* ── State ── */
-  const [search, setSearch] = useState('');
+  const {
+    saisie: searchInput,
+    setSaisie: setSearchInput,
+    recherche: search,
+    reinitialiser: reinitialiserRecherche,
+  } = useRechercheDebouncee();
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [showInfoBanner, setShowInfoBanner] = useState(true);
@@ -554,17 +561,15 @@ export const SuggestRequests = ({ embedded = false }) => {
       )}
 
       {/* Toolbar */}
-      <div className="requests-toolbar">
-        <div className="requests-search">
-          <SearchNormal1 size={18} variant="Linear" color="currentColor" style={{ color: 'var(--color-text-secondary)' }} />
-          <input
-            type="text"
-            placeholder="Rechercher un incident, rôle, organisation…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-
+      <FiltersBar
+        recherche={searchInput}
+        onRecherche={setSearchInput}
+        placeholder="Rechercher un signalement, un rôle, une organisation…"
+        onEffacer={() => { reinitialiserRecherche(); setStatusFilter('all'); setTypeFilter('all'); }}
+        actifSupplementaire={statusFilter !== 'all' || typeFilter !== 'all'}
+        resultats={filtered.length}
+        nomResultat="suggestion"
+      >
         {/* Filtre par type */}
         <div className="requests-filters">
           {TYPE_FILTERS.map(({ key, label, icon: Icon }) => (
@@ -579,7 +584,6 @@ export const SuggestRequests = ({ embedded = false }) => {
             </button>
           ))}
         </div>
-
         {/* Filtre par statut */}
         <div className="requests-filters">
           {STATUS_FILTERS.map(({ key, label, icon: Icon }) => (
@@ -594,20 +598,21 @@ export const SuggestRequests = ({ embedded = false }) => {
             </button>
           ))}
         </div>
-      </div>
+      </FiltersBar>
+
 
       {/* Info banner */}
       {showInfoBanner && (
         <div className="collaboration-info-banner">
           <div className="info-banner-content">
-            <InfoCircle size={24} variant="Bold" className="info-banner-icon" style={{ color: 'var(--color-primary)' }} />
+            <InfoCircle size={24} variant="Bold" className="info-banner-icon" style={{ color: 'var(--color-primary-text)' }} />
             <div className="info-banner-text">
-              <h4>Règles de collaboration sur les Incidents</h4>
+              <h4>Règles de collaboration sur les Signalements</h4>
               <p>
-                <strong>1. Sans Leader :</strong> Si aucun leader n'a encore pris l'incident en charge, toute demande d'observation ou de contribution est <strong>automatiquement acceptée</strong>.
+                <strong>1. Sans Leader :</strong> Si aucun leader n'a encore pris le signalement en charge, toute demande d'observation ou de contribution est <strong>automatiquement acceptée</strong>.
               </p>
               <p>
-                <strong>2. Prise en charge par un Leader :</strong> Dès qu'une organisation prend en charge l'incident en tant que <strong>Leader</strong>, toutes les contributions existantes repassent en statut <strong>« En attente »</strong> pour validation manuelle. Les observateurs restent actifs.
+                <strong>2. Prise en charge par un Leader :</strong> Dès qu'une organisation prend en charge le signalement en tant que <strong>Leader</strong>, toutes les contributions existantes repassent en statut <strong>« En attente »</strong> pour validation manuelle. Les observateurs restent actifs.
               </p>
             </div>
           </div>
@@ -673,8 +678,8 @@ export const SuggestRequests = ({ embedded = false }) => {
                         backgroundColor: isSuggestion ? 'rgba(58,162,221,0.1)' : 'rgba(245,158,11,0.1)'
                       }}>
                         {isSuggestion
-                          ? <><MessageText1 size={12} variant="Bold" color="currentColor" style={{ color: 'var(--color-primary)' }} /> Suggestion</>
-                          : <><Import size={12} variant="Bold" color="currentColor" style={{ color: 'var(--color-warning)' }} /> Invitation</>
+                          ? <><MessageText1 size={12} variant="Bold" color="currentColor" style={{ color: 'var(--color-primary-text)' }} /> Suggestion</>
+                          : <><Import size={12} variant="Bold" color="currentColor" style={{ color: 'var(--color-warning-text)' }} /> Invitation</>
                         }
                       </span>
                       <span style={{ color: 'var(--color-text-muted)' }}>•</span>
@@ -789,7 +794,7 @@ export const SuggestRequests = ({ embedded = false }) => {
 
       {/* Decision Modal */}
       {decisionRequest && (
-        <SuggestDecisionModal
+        <RequestDecisionModal
           request={decisionRequest}
           onClose={closeDecision}
           onConfirm={handleConfirmDecision}
@@ -801,7 +806,7 @@ export const SuggestRequests = ({ embedded = false }) => {
 
       {/* Incident Detail Modal */}
       {selectedIncident && (
-        <SuggestIncidentDetailModal
+        <RequestIncidentDetailModal
           incident={selectedIncident}
           onClose={() => setSelectedIncident(null)}
         />

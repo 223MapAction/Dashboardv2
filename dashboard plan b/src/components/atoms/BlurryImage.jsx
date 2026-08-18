@@ -1,71 +1,106 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
+import { Gallery, GallerySlash } from 'iconsax-react';
 
 /**
- * BlurryImage - A premium image component that displays a blurred shimmer loading
- * placeholder and transitions smoothly to the full image once it is loaded.
+ * BlurryImage — affiche une image en la faisant apparaitre en fondu, avec un
+ * scintillement pendant le chargement.
+ *
+ * Le point important est qu'il y a **trois** etats a distinguer, pas deux :
+ *
+ *   vide       il n'y a pas de photo pour ce signalement — c'est normal
+ *   chargement la photo arrive
+ *   echec      la photo existe mais n'a pas pu etre recuperee
+ *
+ * Les afficher tous les trois comme un carre gris identique rendait un echec
+ * indiscernable d'un chargement qui n'en finit pas : sans `onError`, l'etat
+ * « charge » ne basculait jamais et le carre gris restait indefiniment.
+ * Chaque etat a maintenant son propre visuel, et un echec se reessaie d'un clic.
  */
 export const BlurryImage = ({
   src,
   alt = '',
   className = '',
   style = {},
-  placeholderColor = '#f1f5f9',
+  placeholderColor,
   onClick,
+  // Extraits explicitement : laisses dans `...props`, ils etaient repandus
+  // apres nos propres gestionnaires et les ecrasaient — un parent passant
+  // son `onLoad` empechait l'image de sortir de l'etat « chargement ».
+  onLoad: onLoadParent,
+  onError: onErrorParent,
+  loading: loadingParent,
+  style: styleParent,
   ...props
 }) => {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [currentSrc, setCurrentSrc] = useState('');
+  const [etat, setEtat] = useState('chargement');
+  const [essai, setEssai] = useState(0);
 
-  // Reset load state when source changes
-  useEffect(() => {
-    if (src) {
-      setIsLoaded(false);
-      setCurrentSrc(src);
-    } else {
-      setIsLoaded(false);
-      setCurrentSrc('');
+  // Reinitialisation quand la source change, faite pendant le rendu plutot
+  // que dans un effet. Un effet se serait declenche aussi au montage, et
+  // aurait donc annule l'etat calcule juste avant par le rappel de ref
+  // ci-dessous. Ce couplage a l'ordre des effets etait invisible dans le
+  // navigateur — il se rattrapait au rendu suivant — mais bien reel.
+  const [srcPrecedente, setSrcPrecedente] = useState(src);
+  if (src !== srcPrecedente) {
+    setSrcPrecedente(src);
+    setEtat('chargement');
+    setEssai(0);
+  }
+
+  // Une image deja en cache peut finir de charger AVANT que React n'attache
+  // son gestionnaire : l'evenement `load` passe alors inapercu et l'image
+  // reste indefiniment a opacite zero, derriere son scintillement. C'est ce
+  // qui faisait que certaines vignettes s'affichaient et d'autres non, sans
+  // logique apparente — les seules a echouer etaient celles deja vues.
+  // `complete` est la seule facon de rattraper un chargement deja termine ;
+  // on le lit au moment ou React nous donne l'element.
+  const attacherImage = useCallback((img) => {
+    if (img && img.complete) {
+      setEtat(img.naturalWidth > 0 ? 'charge' : 'echec');
     }
-  }, [src]);
+  }, []);
 
   const handleLoad = (e) => {
-    setIsLoaded(true);
-    if (props.onLoad) {
-      props.onLoad(e);
-    }
+    setEtat('charge');
+    onLoadParent?.(e);
   };
 
-  // If there's no src, render a static skeleton/placeholder block matching the dimensions
+  const handleError = (e) => {
+    setEtat('echec');
+    onErrorParent?.(e);
+  };
+
+  // Un clic sur une image en echec la reessaie. Le parametre de cache-busting
+  // force le navigateur a redemander plutot que de resservir son echec.
+  const reessayer = useCallback((e) => {
+    e.stopPropagation();
+    setEtat('chargement');
+    setEssai((n) => n + 1);
+  }, []);
+
+  const fond = placeholderColor ? { backgroundColor: placeholderColor } : undefined;
+
+  // Pas de source : ce n'est pas une erreur, c'est un signalement sans photo.
   if (!src) {
     return (
       <div
-        className={`
-          blurry-image-container blurry-image-placeholder-only ${className}`}
-        style={{
-          backgroundColor: placeholderColor,
-          ...style,
-          objectFit: "cover"
-        }}
+        className={`blurry-image-container blurry-image-vide ${className}`}
+        style={{ ...fond, ...style }}
         onClick={onClick}
-      />
+        role="img"
+        aria-label={alt || 'Aucune photo'}
+        title="Aucune photo"
+      >
+        <Gallery size="45%" variant="Linear" color="currentColor" aria-hidden="true" />
+      </div>
     );
   }
 
-  // Segment style properties: standard structural properties go to the wrapper,
-  // while object-fit and specific styling stays on the image.
   const wrapperStyles = {
     position: style.position || 'relative',
     overflow: 'hidden',
     display: style.display || 'inline-block',
-    width: style.width,
-    height: style.height,
-    borderRadius: style.borderRadius,
-    border: style.border,
-    margin: style.margin,
-    marginTop: style.marginTop,
-    marginBottom: style.marginBottom,
-    marginLeft: style.marginLeft,
-    marginRight: style.marginRight,
-    flexShrink: style.flexShrink,
+    ...fond,
     ...style,
   };
 
@@ -74,32 +109,42 @@ export const BlurryImage = ({
     height: '100%',
     objectFit: style.objectFit || 'cover',
     borderRadius: style.borderRadius,
-    ...props.style,
+    ...styleParent,
   };
+
+  if (etat === 'echec') {
+    return (
+      <button
+        type="button"
+        className={`blurry-image-container blurry-image-echec ${className}`}
+        style={wrapperStyles}
+        onClick={reessayer}
+        title="La photo n'a pas pu être chargée. Cliquez pour réessayer."
+      >
+        <GallerySlash size="45%" variant="Linear" color="currentColor" aria-hidden="true" />
+        <span className="sr-only">
+          {alt ? `${alt} : photo indisponible.` : 'Photo indisponible.'} Réessayer.
+        </span>
+      </button>
+    );
+  }
 
   return (
     <div className={`blurry-image-container ${className}`} style={wrapperStyles} onClick={onClick}>
-      {!isLoaded && (
-        <div
-          className="blurry-image-placeholder"
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: placeholderColor,
-            zIndex: 1,
-          }}
-        />
-      )}
+      {etat !== 'charge' && <div className="blurry-image-placeholder" aria-hidden="true" />}
       <img
-        src={currentSrc}
-        alt={alt}
-        className={`blurry-image-el ${isLoaded ? 'loaded' : ''}`}
-        onLoad={handleLoad}
-        style={imgStyles}
+        ref={attacherImage}
         {...props}
+        src={essai > 0 ? `${src}${src.includes('?') ? '&' : '?'}r=${essai}` : src}
+        alt={alt}
+        // Les vignettes hors ecran se disputaient les connexions avec celles
+        // que l'utilisateur regarde. Elles attendent maintenant leur tour.
+        loading={loadingParent || 'lazy'}
+        decoding="async"
+        className={`blurry-image-el ${etat === 'charge' ? 'loaded' : ''}`}
+        onLoad={handleLoad}
+        onError={handleError}
+        style={imgStyles}
       />
     </div>
   );

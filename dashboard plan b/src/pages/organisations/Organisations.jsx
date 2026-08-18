@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { useRechercheDebouncee } from '../../hooks/useRechercheDebouncee';
+import { FiltersBar } from '../../components/molecules/FiltersBar';
 import useSWR from 'swr';
-import debounce from 'lodash.debounce';
 import { useSidebarState } from '../../hooks/useSidebarState';
 import { Header, Sidebar } from '../../components/layout';
 import {
@@ -25,6 +26,9 @@ import DeleteOrganisationModal from './modal/DeleteOrganisationModal';
 import { BlurryImage } from '../../components/atoms/BlurryImage';
 import Pagination from '../../components/molecules/Pagination';
 
+import { ResponsiveTable } from '../../components/molecules/ResponsiveTable';
+import { COLONNES_ORGANISATIONS, mediaOrganisation, libellePays } from './colonnes';
+import { TableActionsMenu } from '../../components/molecules/TableActionsMenu';
 const COLOR_PALETTE = [
   '#EF4444', '#F97316', '#F59E0B', '#22C55E',
   '#3AA2DD', '#1E40AF', '#A855F7', '#EC4899',
@@ -56,44 +60,19 @@ export const Organisations = () => {
     setCollapsed: setSidebarCollapsed,
   } = useSidebarState();
 
-  const getSectorLabel = (sectorEn) => {
-    if (!sectorEn) return '';
-    const sectorObj = SECTORS.find((s) => s.en === sectorEn || s.fr === sectorEn);
-    return sectorObj ? sectorObj.fr : sectorEn;
-  };
-
-  const getTypeLabel = (typeEn) => {
-    if (!typeEn) return '';
-    const typeObj = TYPES.find((t) => t.en === typeEn || t.fr === typeEn);
-    return typeObj ? typeObj.fr : typeEn;
-  };
-
-  const getCountryLabel = (countryEn) => {
-    if (!countryEn) return '';
-    const countryObj = COUNTRIES.find((c) => c.en === countryEn || c.fr === countryEn);
-    return countryObj ? countryObj.fr : countryEn;
-  };
-
   const [page, setPage] = useState(1);
   const pageSize = 20;
 
-  const [searchInput, setSearchInput] = useState('');
-  const [search, setSearch] = useState('');
+  const {
+    saisie: searchInput,
+    setSaisie: setSearchInput,
+    recherche: search,
+    reinitialiser: reinitialiserRecherche,
+  } = useRechercheDebouncee();
   const [sectorFilter, setSectorFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
 
-  // Debounce search input de 200ms
-  const debouncedSetSearch = useMemo(
-    () => debounce((val) => setSearch(val), 200),
-    []
-  );
-
-  useEffect(() => {
-    return () => {
-      debouncedSetSearch.cancel();
-    };
-  }, [debouncedSetSearch]);
 
   // Reset page to 1 on filter/search change
   useEffect(() => {
@@ -125,6 +104,11 @@ export const Organisations = () => {
       sector: o.activity_sector || '',
       type: o.organisation_type || '',
       country: o.intervention_country || '',
+      // ATTENTION — ce n'est pas une ville. L'API ne renvoie aucun champ de
+      // localite ; `subdomain` a ete branche ici comme bouche-trou. La colonne
+      // « Localisation » affiche donc un identifiant technique du genre
+      // « direction_régionale_de_l'hydraulique_(ménaka) » a cote du pays.
+      // A remplacer des qu'un vrai champ ville existe cote backend.
       city: o.subdomain || '',
       phone: o.phone || '',
       email: o.email || '',
@@ -174,7 +158,7 @@ export const Organisations = () => {
       const matchSearch = !q || o.name.toLowerCase().includes(q)
         || o.acronym.toLowerCase().includes(q)
         || o.city.toLowerCase().includes(q)
-        || getCountryLabel(o.country).toLowerCase().includes(q)
+        || libellePays(o.country).toLowerCase().includes(q)
         || o.country.toLowerCase().includes(q);
       const matchSector = !sectorFilter || o.sector === sectorFilter;
       const matchStatus = !statusFilter || o.status === statusFilter;
@@ -199,7 +183,7 @@ export const Organisations = () => {
 
   // ── Ouvrir modal édition ─────────────────────────────────
   const openEdit = (org, e) => {
-    e.stopPropagation();
+    e?.stopPropagation();
     setForm({
       name: org.name,
       acronym: org.acronym,
@@ -236,7 +220,7 @@ export const Organisations = () => {
   };
 
   const removePhoto = (e) => {
-    e.stopPropagation();
+    e?.stopPropagation();
     setField('logo_url', null);
     setField('logo', null);
   };
@@ -356,7 +340,7 @@ export const Organisations = () => {
 
   // ── Supprimer ────────────────────────────────────────────
   const openDelete = (org, e) => {
-    e.stopPropagation();
+    e?.stopPropagation();
     setDeleteAlert({ type: null, message: null });
     setDeleteAnimating('opening');
     setDeleteModal({ open: true, org });
@@ -373,7 +357,7 @@ export const Organisations = () => {
   };
 
   const confirmDelete = async (e) => {
-    e.stopPropagation();
+    e?.stopPropagation();
     setIsDeleting(true);
     setDeleteAlert({ type: null, message: null });
     console.log(deleteModal.org);
@@ -407,6 +391,18 @@ export const Organisations = () => {
     deleteModal, setDeleteModal, deleteAnimating, isDeleting, deleteAlert,
     closeDeleteModal, confirmDelete
   };
+
+  const actionsDe = (org) => (
+    <div className="orgs-row-actions">
+      <TableActionsMenu
+        ariaLabel={`Actions sur ${org.name || 'cette organisation'}`}
+        actions={[
+          { id: 'edit', label: 'Modifier', icon: Edit2, onSelect: () => openEdit(org) },
+          { id: 'delete', label: 'Supprimer', icon: Trash, tone: 'danger', onSelect: () => openDelete(org) },
+        ]}
+      />
+    </div>
+  );
 
   return (
     <OrganisationsContext.Provider value={contextValue}>
@@ -465,100 +461,37 @@ export const Organisations = () => {
                   </div>
                   <div>
                     <div className="orgs-stat-value">{statsProjects}</div>
-                    <div className="orgs-stat-label">Nombre d'incidents</div>
+                    <div className="orgs-stat-label">Nombre de signalements</div>
                   </div>
                 </div>
               </div>
 
               {/* ── Toolbar ── */}
-              <div className="orgs-toolbar">
-                <div className="orgs-search">
-                  <SearchNormal1 size={16} variant="Linear" color="var(--color-text-muted)" />
-                  <input
-                    type="search"
-                    id="orgs-search-input"
-                    name="orgs-search-query"
-                    autoComplete="off"
-                    placeholder="Nom, acronyme, ville, pays..."
-                    value={searchInput}
-                    onChange={(e) => {
-                      setSearchInput(e.target.value);
-                      debouncedSetSearch(e.target.value);
-                    }}
-                  />
-                </div>
-
-                <div className="orgs-select-wrap">
-                  <select value={sectorFilter} onChange={(e) => setSectorFilter(e.target.value)}>
-                    <option value="">Tous les secteurs</option>
-                    {SECTORS.map((s) => <option key={s.en} value={s.en}>{s.fr}</option>)}
-                  </select>
-                  <ArrowDown2 size={14} variant="Linear" color="var(--color-text-muted)" />
-                </div>
-
-                <div className="orgs-select-wrap">
-                  <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-                    <option value="">Tous les types</option>
-                    {TYPES.map((t) => <option key={t.en} value={t.en}>{t.fr}</option>)}
-                  </select>
-                  <ArrowDown2 size={14} variant="Linear" color="var(--color-text-muted)" />
-                </div>
-
-                <div className="orgs-select-wrap">
-                  <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                    <option value="">Tous les statuts</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                  </select>
-                  <ArrowDown2 size={14} variant="Linear" color="var(--color-text-muted)" />
-                </div>
-
-                <span className="orgs-count-label">
-                  {filtered.length} organisation{filtered.length > 1 ? 's' : ''}
-                </span>
-              </div>
+              <FiltersBar
+                recherche={searchInput}
+                onRecherche={setSearchInput}
+                placeholder="Rechercher un nom, un acronyme, une ville, un pays…"
+                selects={[
+                  { id: 'secteur', valeur: sectorFilter, onChange: setSectorFilter,
+                    ariaLabel: 'Filtrer par secteur', tousLabel: 'Tous les secteurs',
+                    options: SECTORS.map((o) => ({ value: o.en, label: o.fr })) },
+                  { id: 'type', valeur: typeFilter, onChange: setTypeFilter,
+                    ariaLabel: 'Filtrer par type', tousLabel: 'Tous les types',
+                    options: TYPES.map((o) => ({ value: o.en, label: o.fr })) },
+                  { id: 'statut', valeur: statusFilter, onChange: setStatusFilter,
+                    ariaLabel: 'Filtrer par statut', tousLabel: 'Tous les statuts',
+                    options: [{ value: 'active', label: 'Active' }, { value: 'inactive', label: 'Inactive' }] },
+                ]}
+                onEffacer={() => {
+                  reinitialiserRecherche();
+                  setSectorFilter(''); setTypeFilter(''); setStatusFilter('');
+                }}
+                resultats={filtered.length}
+                nomResultat="organisation"
+              />
 
               {/* ── Tableau ── */}
-              {swrLoading ? (
-                <div className="orgs-table-wrap">
-                  <table className="orgs-table">
-                    <thead>
-                      <tr>
-                        <th>Organisation</th>
-                        <th>Secteur</th>
-                        <th>Localisation</th>
-                        <th>Incidents prise en compte</th>
-                        <th>Membres</th>
-                        <th>Statut</th>
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {[1, 2, 3, 4, 5].map((i) => (
-                        <tr key={i}>
-                          <td>
-                            <div className="orgs-table-org" style={{ opacity: 0.5 }}>
-                              <div className="orgs-avatar" style={{ backgroundColor: 'var(--color-border)', width: '36px', height: '36px', borderRadius: '50%', color: 'transparent' }}>
-                                --
-                              </div>
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                <div style={{ width: '120px', height: '12px', borderRadius: '4px', backgroundColor: 'var(--color-border)', animation: 'pulse 1.8s infinite' }} />
-                                <div style={{ width: '70px', height: '8px', borderRadius: '3px', backgroundColor: 'var(--color-border)', animation: 'pulse 1.8s infinite' }} />
-                              </div>
-                            </div>
-                          </td>
-                          <td><div style={{ width: '90px', height: '10px', borderRadius: '4px', backgroundColor: 'var(--color-border)', opacity: 0.5, animation: 'pulse 1.8s infinite' }} /></td>
-                          <td><div style={{ width: '80px', height: '10px', borderRadius: '4px', backgroundColor: 'var(--color-border)', opacity: 0.5, animation: 'pulse 1.8s infinite' }} /></td>
-                          <td><div style={{ width: '30px', height: '10px', borderRadius: '4px', backgroundColor: 'var(--color-border)', margin: '0 auto', opacity: 0.5, animation: 'pulse 1.8s infinite' }} /></td>
-                          <td><div style={{ width: '40px', height: '10px', borderRadius: '4px', backgroundColor: 'var(--color-border)', margin: '0 auto', opacity: 0.5, animation: 'pulse 1.8s infinite' }} /></td>
-                          <td><div style={{ width: '60px', height: '16px', borderRadius: '12px', backgroundColor: 'var(--color-border)', opacity: 0.5, animation: 'pulse 1.8s infinite' }} /></td>
-                          <td><div style={{ width: '40px', height: '24px', borderRadius: '4px', backgroundColor: 'var(--color-border)', opacity: 0.5, animation: 'pulse 1.8s infinite' }} /></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : filtered.length === 0 ? (
+              {filtered.length === 0 && !swrLoading ? (
                 <div className="orgs-empty">
                   <div className="orgs-empty-icon">
                     <Buildings2 size={48} variant="Linear" color="var(--color-border)" />
@@ -566,86 +499,17 @@ export const Organisations = () => {
                   <p>Aucune organisation ne correspond à vos critères.</p>
                 </div>
               ) : (
-                <div className="orgs-table-wrap">
-                  <table className="orgs-table">
-                    <thead>
-                      <tr>
-                        <th>Organisation</th>
-                        <th>Secteur</th>
-                        <th>Localisation</th>
-                        <th>Incidents prise en compte</th>
-                        <th>Membres</th>
-                        <th>Statut</th>
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filtered.map((org) => (
-                        <tr key={org.id}>
-                          <td>
-                            <div className="orgs-table-org">
-                              {org.logo_url ? (
-                                <BlurryImage
-                                  src={org.logo_url}
-                                  alt={org.name}
-                                  className="orgs-avatar"
-                                  style={{ objectFit: 'cover' }}
-                                />
-                              ) : (
-                                <div
-                                  className="orgs-avatar"
-                                  style={{ backgroundColor: org.color }}
-                                >
-                                  {(org.acronym || org.name || '?').slice(0, 2).toUpperCase()}
-                                </div>
-                              )}
-                              <div>
-                                <span className="orgs-table-org-name">{org.name}</span>
-                                <span className="orgs-table-org-type">{getTypeLabel(org.type)}</span>
-                              </div>
-                            </div>
-                          </td>
-                          <td style={{ fontSize: 'var(--font-size-body-small)', color: 'var(--color-text-secondary)' }}>
-                            {getSectorLabel(org.sector)}
-                          </td>
-                          <td style={{ fontSize: 'var(--font-size-body-small)', color: 'var(--color-text-secondary)' }}>
-                            {org.city}, {getCountryLabel(org.country)}
-                          </td>
-                          <td style={{ textAlign: 'center', fontWeight: 'var(--font-weight-semibold)' }}>
-                            {org.activeProjects}
-                          </td>
-                          <td style={{ textAlign: 'center', fontWeight: 'var(--font-weight-semibold)' }}>
-                            {org.membersCount.toLocaleString('fr')}
-                          </td>
-                          <td>
-                            <span className={`orgs-status orgs-status-${org.status}`}>
-                              <span className="orgs-status-dot" />
-                              {org.status === 'active' ? 'Active' : 'Inactive'}
-                            </span>
-                          </td>
-                          <td>
-                            <div className="orgs-row-actions">
-                              <button
-                                className="orgs-icon-btn orgs-icon-btn-edit"
-                                onClick={(e) => openEdit(org, e)}
-                                title="Modifier"
-                              >
-                                <Edit2 size={16} variant="Linear" />
-                              </button>
-                              <button
-                                className="orgs-icon-btn orgs-icon-btn-delete"
-                                onClick={(e) => openDelete(org, e)}
-                                title="Supprimer"
-                              >
-                                <Trash size={16} variant="Linear" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <ResponsiveTable
+                  colonnes={COLONNES_ORGANISATIONS}
+                  media={mediaOrganisation}
+                  donnees={filtered}
+                  cleDe={(o) => o.id}
+                  actions={actionsDe}
+                  chargement={swrLoading}
+                  classeTable="orgs-table"
+                  classeWrap="orgs-table-wrap"
+                  libelleListe="Organisations"
+                />
               )}
 
               <Pagination

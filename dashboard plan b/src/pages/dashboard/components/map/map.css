@@ -158,6 +158,7 @@
   width: 600px;
   max-width: 100%;
   height: 100vh;
+  height: 100dvh;
   background-color: var(--color-surface);
   box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
   display: flex;
@@ -458,11 +459,11 @@
 }
 
 .incident-modal-status-step.is-done {
-  color: var(--color-success);
+  color: var(--color-success-text);
 }
 
 .incident-modal-status-step.is-current {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   font-weight: var(--font-weight-bold);
 }
 
@@ -500,7 +501,7 @@
 }
 
 .status-stepper-pending .incident-modal-status-step.is-current {
-  color: var(--color-warning);
+  color: var(--color-warning-text);
 }
 
 .status-stepper-pending .incident-modal-status-step.is-current .incident-modal-status-dot {
@@ -513,7 +514,7 @@
 }
 
 .status-stepper-taken_into_account .incident-modal-status-step.is-current {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .status-stepper-taken_into_account .incident-modal-status-step.is-current .incident-modal-status-dot {
@@ -528,7 +529,7 @@
 
 .status-stepper-resolved .incident-modal-status-step.is-current,
 .status-stepper-resolved .incident-modal-status-step.is-done {
-  color: var(--color-success);
+  color: var(--color-success-text);
 }
 
 .status-stepper-resolved .incident-modal-status-step.is-current .incident-modal-status-dot {
@@ -667,7 +668,7 @@
   color: rgba(255, 255, 255, 0.7);
   cursor: pointer;
   border-radius: 6px;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
   font-family: inherit;
 }
 
@@ -746,7 +747,7 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
   .incident-modal {
     width: 100%;
   }
@@ -842,24 +843,7 @@
   padding: var(--spacing-5) 0;
 }
 
-.shimmer-box {
-  background: linear-gradient(90deg,
-      #E5E7EB 0%,
-      #F3F4F6 50%,
-      #E5E7EB 100%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite ease-in-out;
-}
 
-@keyframes shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-
-  100% {
-    background-position: -200% 0;
-  }
-}
 
 /* ============================================
    ANIMATIONS MODAL BOOTSTRAP (slide depuis la droite)
@@ -882,6 +866,7 @@
   margin-left: auto;
   max-width: 600px;
   height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
 }
@@ -893,6 +878,7 @@
   display: flex;
   flex-direction: column;
   max-height: 100vh;
+  max-height: 100dvh;
 }
 
 .modal-body {
@@ -917,14 +903,14 @@
   margin-top: var(--spacing-4);
   padding: var(--spacing-3) var(--spacing-4);
   background-color: transparent;
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   border: 2px solid var(--color-primary);
   border-radius: var(--radius-md);
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-semibold);
   font-family: var(--font-family);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, transform 0.2s ease;
   text-decoration: none;
 }
 
@@ -938,7 +924,7 @@
 /* ============================================
    RESPONSIVE MOBILE
    ============================================ */
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
 
   /* Modal Bootstrap sur mobile */
   .modal-dialog {
@@ -1113,6 +1099,17 @@
   color: #ffffff;
 }
 
+/* Safari iOS zoome automatiquement sur tout champ dont la police descend sous
+   16 px, et ne dezoome pas ensuite : la carte se retrouve recadree apres un
+   simple changement de filtre. Le `!important` ci-dessus impose d'en remettre
+   un ici pour le contrer. */
+@media (pointer: coarse) {
+  .map-filter-select {
+    font-size: 16px !important;
+    min-height: 44px;
+  }
+}
+
 .map-filter-buttons {
   display: flex;
   gap: 4px;
@@ -1129,7 +1126,7 @@
   color: rgba(255, 255, 255, 0.7);
   cursor: pointer;
   border-radius: 6px;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
   font-family: inherit;
   text-align: center;
 }
@@ -1154,7 +1151,7 @@
   display: none;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
   .map-filters-overlay {
     top: auto;
     bottom: 80px;
@@ -1198,5 +1195,145 @@
     height: 80vh !important;
     height: 80dvh !important;
     border-radius: 0 !important;
+  }
+}
+/* ── Marqueurs regroupés ─────────────────────────────────────────────────────
+   Plusieurs incidents peuvent partager exactement la même position. Le badge
+   indique combien d'incidents se cachent derrière une punaise. */
+
+.incident-marker-count {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  z-index: 3;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: #111827;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 14px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.incident-group-popup .mapboxgl-popup-content {
+  padding: 10px 12px;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  max-width: 280px;
+}
+
+.incident-group-title {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #6C7278;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.incident-group-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.incident-group-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 6px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+
+.incident-group-item:hover,
+.incident-group-item:focus-visible {
+  background: #F3F4F6;
+  outline: none;
+}
+
+.incident-group-dot {
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #6C7278;
+}
+
+.incident-group-item.severity-active-high .incident-group-dot { background: #EF4444; }
+.incident-group-item.severity-active-medium .incident-group-dot { background: #F59E0B; }
+.incident-group-item.severity-active-low .incident-group-dot { background: #3AA2DD; }
+.incident-group-item.severity-resolved-others .incident-group-dot { background: #22C55E; }
+.incident-group-item.severity-resolved-mine .incident-group-dot { background: #10B981; }
+
+.incident-group-label {
+  flex: 1 1 auto;
+  font-size: 13px;
+  color: #1F2937;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.incident-group-etat {
+  flex: 0 0 auto;
+  font-size: 11px;
+  color: #6C7278;
+}
+
+/* ── Bandeau d'état de la carte (compteur + « charger plus ») ────────────────
+   Centré en bas sur grand écran. Sous 480 px, la légende « Gravité » occupe le
+   coin inférieur gauche sur environ 105 px : un bloc centré la recouvrait, et
+   les libellés « Moyenne » et « Faible » passaient sous le compteur. On ancre
+   donc à droite, où les deux tiennent côte à côte même sur 320 px. */
+.map-status-stack {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.map-incidents-count {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  white-space: nowrap;
+}
+
+@media (max-width: 479.98px) {
+  .map-status-stack {
+    left: auto;
+    right: var(--spacing-3);
+    transform: none;
+    align-items: flex-end;
+    max-width: calc(100% - 105px - var(--spacing-3) * 2);
+  }
+
+  .map-incidents-count {
+    padding: 6px 12px;
+    font-size: 12px;
   }
 }

@@ -1,0 +1,181 @@
+/* ============================================================================
+   BARRE DE FILTRES COMMUNE
+   Reprend les mesures de la barre d'Agents pour qu'un utilisateur qui passe
+   d'une liste a l'autre retrouve exactement les memes reperes.
+   ============================================================================ */
+
+.am-filtres {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.am-filtres-controles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+/* ── Champ de recherche ────────────────────────────────────────────────────── */
+.am-filtres-recherche {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  flex: 1 1 240px;
+  min-width: 0;
+  min-height: 40px;
+  padding: 0 var(--spacing-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text-secondary);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.am-filtres-recherche:focus-within {
+  border-color: var(--color-primary);
+}
+
+.am-filtres-recherche input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+  outline: none;
+  font-family: var(--font-family);
+  font-size: var(--font-size-body-small);
+  color: var(--color-text-primary);
+}
+
+.am-filtres-recherche input::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* ── Listes deroulantes ────────────────────────────────────────────────────── */
+.am-filtres-select {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 0 1 auto;
+  min-height: 40px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text-secondary);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.am-filtres-select select {
+  appearance: none;
+  border: none;
+  background: none;
+  outline: none;
+  /* Place a droite pour le chevron, qui est en position absolue. */
+  padding: 0 32px 0 var(--spacing-3);
+  min-height: 40px;
+  font-family: var(--font-family);
+  font-size: var(--font-size-body-small);
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.am-filtres-select > svg {
+  position: absolute;
+  right: 10px;
+  pointer-events: none;
+}
+
+.am-filtres-select:focus-within {
+  border-color: var(--color-primary);
+}
+
+/* ── Filtre actif ──────────────────────────────────────────────────────────
+   Un filtre actif doit se voir sans qu'on lise son contenu : sinon on oublie
+   qu'on filtre, et on croit la liste plus courte qu'elle n'est. */
+.am-filtres-recherche.is-active,
+.am-filtres-select.is-active {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(58, 162, 221, 0.12);
+}
+
+.am-filtres-select.is-active select,
+.am-filtres-recherche.is-active input {
+  color: var(--color-primary-text);
+}
+
+/* ── Effacer ───────────────────────────────────────────────────────────────── */
+.am-filtres-effacer {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 var(--spacing-3);
+  min-height: 40px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-family: var(--font-family);
+  font-size: var(--font-size-body-small);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.am-filtres-effacer:hover,
+.am-filtres-effacer:focus-visible {
+  border-color: var(--color-danger);
+  background-color: rgba(239, 68, 68, 0.06);
+  color: var(--color-danger-text);
+}
+
+/* ── Nombre de resultats ───────────────────────────────────────────────────── */
+.am-filtres-resultats {
+  margin: 0;
+  font-size: var(--font-size-body-small);
+  color: var(--color-text-secondary);
+}
+
+.am-filtres-resultats strong {
+  color: var(--color-primary-text);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* ── Repli ─────────────────────────────────────────────────────────────────
+   Sous 600px les listes deroulantes se partagent la ligne au lieu de
+   s'empiler : deux controles courts cote a cote restent lisibles et
+   economisent de la hauteur sur un telephone. */
+@media (max-width: 599.98px) {
+  .am-filtres-recherche {
+    flex: 1 1 100%;
+  }
+
+  .am-filtres-select {
+    flex: 1 1 calc(50% - var(--spacing-2));
+  }
+
+  .am-filtres-select select {
+    width: 100%;
+  }
+}
+
+/* Au doigt, 40 px ne suffit pas. La regle globale de index.css vise `select`
+   nu et perd contre le selecteur de classe ci-dessus — l'exception se pose
+   donc ici, a cote de la mesure qu'elle releve. */
+@media (pointer: coarse) {
+  .am-filtres-recherche,
+  .am-filtres-select,
+  .am-filtres-select select,
+  .am-filtres-effacer {
+    min-height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .am-filtres-recherche,
+  .am-filtres-select,
+  .am-filtres-effacer {
+    transition: none;
+  }
+}

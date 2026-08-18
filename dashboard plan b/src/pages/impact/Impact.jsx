@@ -20,13 +20,6 @@ import {
 } from 'iconsax-react';
 import { Header, Sidebar } from '../../components/layout';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
-import {
-  getIncidentsService,
-  getIncidentPredictionService,
-  getIncidentAssignmentsService,
-  getResolvedIncidentsService
-} from '../incident/service/incident_service';
-import { getTasksService } from '../incident/service/task_service';
 import { getGlobalImpactService, getImpactIncidentsService } from './service/impact_service';
 import { authService } from '../auth/services/authService';
 import Pagination from '../../components/molecules/Pagination';
@@ -44,10 +37,10 @@ const STRUCTURE_LABELS = {
 };
 
 const SEVERITY_META = {
-  critical: { label: 'Critique', color: 'var(--color-danger)' },
-  high: { label: 'Élevée', color: 'var(--color-warning)' },
-  medium: { label: 'Modérée', color: 'var(--color-primary)' },
-  low: { label: 'Faible', color: 'var(--color-success)' }
+  critical: { label: 'Critique', color: 'var(--color-danger-text)' },
+  high: { label: 'Élevée', color: 'var(--color-warning-text)' },
+  medium: { label: 'Modérée', color: 'var(--color-primary-text)' },
+  low: { label: 'Faible', color: 'var(--color-success-text)' }
 };
 
 const getSeverity = (incident, prediction) => {
@@ -115,38 +108,10 @@ export const Impact = () => {
     }
   );
 
-  // Logger les données pour analyse
   useEffect(() => {
-    if (globalImpactData) {
-      console.log('========================================');
-      console.log('📊 DONNÉES IMPACT GLOBAL REÇUES:');
-      console.log('========================================');
-      console.log('Structure complète:', JSON.stringify(globalImpactData, null, 2));
-      console.log('========================================');
-      console.log('Type de données:', typeof globalImpactData);
-      console.log('Est un tableau?', Array.isArray(globalImpactData));
-      console.log('Clés disponibles:', Object.keys(globalImpactData));
-      console.log('========================================');
-    }
-    if (apiError) {
-      console.error('❌ ERREUR API IMPACT:', apiError);
-    }
-  }, [globalImpactData, apiError]);
-
-  // Logger les incidents d'impact
-  useEffect(() => {
-    if (impactIncidentsData) {
-      console.log('========================================');
-      console.log('📋 INCIDENTS D\'IMPACT REÇUS:');
-      console.log('========================================');
-      console.log('Nombre d\'incidents:', impactIncidentsData.results?.length || impactIncidentsData.length || 0);
-      console.log('Structure:', JSON.stringify(impactIncidentsData, null, 2));
-      console.log('========================================');
-    }
-    if (incidentsError) {
-      console.error('❌ ERREUR API INCIDENTS:', incidentsError);
-    }
-  }, [impactIncidentsData, incidentsError]);
+    if (apiError) console.error('[Impact] Erreur API impact:', apiError);
+    if (incidentsError) console.error('[Impact] Erreur API incidents:', incidentsError);
+  }, [apiError, incidentsError]);
 
   // Utiliser les vraies données ou fallback sur MOCK
   const loadingIncidents = isLoadingImpact || isLoadingIncidents;
@@ -343,11 +308,20 @@ export const Impact = () => {
             <div className="impact-filters-section">
               <div className="impact-filters-group">
                 <div className="impact-filter-col">
-                  <label className="impact-filter-label">Période</label>
-                  <div className="impact-period-filters">
+                  {/* Ce n'est pas un <label> : il ne designe aucun champ, mais
+                      un groupe de boutons. Un lecteur d'ecran annoncait une
+                      etiquette pour un controle inexistant. En span + groupe
+                      nomme, il annonce « Periode, groupe » a l'entree. */}
+                  <span className="impact-filter-label" id="impact-filtre-periode">Période</span>
+                  <div
+                    className="impact-period-filters"
+                    role="group"
+                    aria-labelledby="impact-filtre-periode"
+                  >
                     <button
                       type="button"
                       className={`impact-period-btn ${periodFilter === 'all' ? 'is-active' : ''}`}
+                      aria-pressed={periodFilter === 'all'}
                       onClick={() => setPeriodFilter('all')}
                     >
                       Toute la période
@@ -355,6 +329,7 @@ export const Impact = () => {
                     <button
                       type="button"
                       className={`impact-period-btn ${periodFilter === '30d' ? 'is-active' : ''}`}
+                      aria-pressed={periodFilter === '30d'}
                       onClick={() => setPeriodFilter('30d')}
                     >
                       30 derniers jours
@@ -362,6 +337,7 @@ export const Impact = () => {
                     <button
                       type="button"
                       className={`impact-period-btn ${periodFilter === '90d' ? 'is-active' : ''}`}
+                      aria-pressed={periodFilter === '90d'}
                       onClick={() => setPeriodFilter('90d')}
                     >
                       90 derniers jours
@@ -369,6 +345,7 @@ export const Impact = () => {
                     <button
                       type="button"
                       className={`impact-period-btn ${periodFilter === 'year' ? 'is-active' : ''}`}
+                      aria-pressed={periodFilter === 'year'}
                       onClick={() => setPeriodFilter('year')}
                     >
                       Cette année
@@ -377,11 +354,16 @@ export const Impact = () => {
                 </div>
 
                 <div className="impact-filter-col">
-                  <label className="impact-filter-label">Statut des Incidents</label>
-                  <div className="impact-period-filters">
+                  <span className="impact-filter-label" id="impact-filtre-statut">Statut des Signalements</span>
+                  <div
+                    className="impact-period-filters"
+                    role="group"
+                    aria-labelledby="impact-filtre-statut"
+                  >
                     <button
                       type="button"
                       className={`impact-period-btn ${statusFilter === 'both' ? 'is-active' : ''}`}
+                      aria-pressed={statusFilter === 'both'}
                       onClick={() => setStatusFilter('both')}
                     >
                       Les 2 ensembles
@@ -389,6 +371,7 @@ export const Impact = () => {
                     <button
                       type="button"
                       className={`impact-period-btn ${statusFilter === 'resolved' ? 'is-active' : ''}`}
+                      aria-pressed={statusFilter === 'resolved'}
                       onClick={() => setStatusFilter('resolved')}
                     >
                       Incidents résolus
@@ -396,6 +379,7 @@ export const Impact = () => {
                     <button
                       type="button"
                       className={`impact-period-btn ${statusFilter === 'taken_with_action' ? 'is-active' : ''}`}
+                      aria-pressed={statusFilter === 'taken_with_action'}
                       onClick={() => setStatusFilter('taken_with_action')}
                     >
                       Pris en compte avec action
@@ -542,11 +526,16 @@ export const Impact = () => {
                     </div>
 
                     <div className="impact-structures-interactive">
-                      <span className="structures-filter-title">Filtrer par type :</span>
-                      <div className="structures-grid-chips">
+                      <span className="structures-filter-title" id="impact-filtre-structure">Filtrer par type :</span>
+                      <div
+                        className="structures-grid-chips"
+                        role="group"
+                        aria-labelledby="impact-filtre-structure"
+                      >
                         <button
                           type="button"
                           className={`structure-chip ${structureFilter === 'all' ? 'active' : ''}`}
+                          aria-pressed={structureFilter === 'all'}
                           onClick={() => setStructureFilter('all')}
                         >
                           Tous ({globals.totalStructures || 0})
@@ -558,6 +547,7 @@ export const Impact = () => {
                               key={key}
                               type="button"
                               className={`structure-chip ${structureFilter === key ? 'active' : ''}`}
+                              aria-pressed={structureFilter === key}
                               disabled={count === 0}
                               onClick={() => setStructureFilter(key)}
                             >
@@ -577,7 +567,7 @@ export const Impact = () => {
                           <Activity size={24} variant="Bold" color="var(--color-danger)" />
                         </div>
                         <div>
-                          <span className="impact-kpi-label">Incidents sans analyse</span>
+                          <span className="impact-kpi-label">Signalements sans analyse</span>
                           <div className="impact-kpi-value">
                             {globals.incidentsWithoutAnalysis || 0}
                           </div>
@@ -708,7 +698,7 @@ export const Impact = () => {
                       <SearchNormal1 size={18} variant="Linear" color="#6C7278" />
                       <input
                         type="text"
-                        placeholder="Rechercher un incident par titre, description, zone…"
+                        placeholder="Rechercher un signalement par titre, description, zone…"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                       />
@@ -717,8 +707,8 @@ export const Impact = () => {
 
                   {filteredIncidents.length === 0 ? (
                     <div className="impact-empty">
-                      <Award size={48} variant="Linear" color="#9CA3AF" />
-                      <p>Aucun incident ne correspond à vos critères et filtres actuels.</p>
+                      <Award size={48} variant="Linear" color="var(--color-text-muted)" />
+                      <p>Aucun signalement ne correspond à vos critères et filtres actuels.</p>
                     </div>
                   ) : (
                     <div className="impact-list">
@@ -995,7 +985,7 @@ export const Impact = () => {
                                 <div className="impact-orgs">
                                   <h4 className="impact-orgs-label">Actions & Tâches effectives ({incTasks.length})</h4>
                                   {incTasks.length === 0 ? (
-                                    <span className="text-muted">Aucune tâche assignée à cet incident.</span>
+                                    <span className="text-muted">Aucune tâche assignée à cet signalement.</span>
                                   ) : (
                                     <div className="tasks-grid">
                                       {incTasks.map((t) => {

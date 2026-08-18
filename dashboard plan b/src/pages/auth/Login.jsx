@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Sms, Eye, EyeSlash } from 'iconsax-react';
-import logoMapAction from '../../assets/logo.svg';
-import loginBg from '../../assets/login_bg_1.svg';
+import logoMapAction from '../../assets/logo.webp';
+import loginBg from '../../assets/login_bg_1.webp';
 import { authService } from './services/authService';
 import './login.css';
 
@@ -63,7 +63,7 @@ export const Login = ({ onLogin }) => {
             {error && (
               <div className="login-error" style={{
                 backgroundColor: '#FEE2E2',
-                color: '#DC2626',
+                color: 'var(--color-danger-text)',
                 padding: '12px 16px',
                 borderRadius: '8px',
                 marginBottom: '16px',

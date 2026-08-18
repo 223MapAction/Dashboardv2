@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useSWR from 'swr';
 import { User, Setting2, LogoutCurve, ArrowDown2, Notification, Danger, People, InfoCircle } from 'iconsax-react';
-import logoMapActionMin from '../../assets/logo-min.svg';
 import notifSound from '../../assets/notif.mp3';
 import { authService } from '../../pages/auth/services/authService';
 import { getNotifications, markNotificationAsRead } from './service/notification_service';
@@ -24,7 +23,7 @@ export const Header = ({ onMenuToggle, user }) => {
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: true,
-      dedupingInterval: 15000 // 15 seconds deduping
+    
     }
   );
 
@@ -366,7 +365,7 @@ export const Header = ({ onMenuToggle, user }) => {
                   <div className="profile-name">{currentUser?.first_name || 'Utilisateur'}</div>
                   <div className="profile-email">{currentUser?.email}</div>
                   {currentUser?.organisation_name && (
-                    <div className="profile-org" style={{ fontSize: '13px', color: 'var(--color-primary)', marginTop: '4px', fontWeight: '500' }}>
+                    <div className="profile-org" style={{ fontSize: '13px', color: 'var(--color-primary-text)', marginTop: '4px', fontWeight: '500' }}>
                       {currentUser.organisation_name}
                     </div>
                   )}

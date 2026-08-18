@@ -5,6 +5,7 @@
 .login-split {
   display: flex;
   min-height: 100vh;
+  min-height: 100dvh;
   background-color: var(--color-surface);
 }
 
@@ -17,6 +18,7 @@
   max-width: 560px;
   width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .login-brand {
@@ -132,10 +134,22 @@
 /* ===== Options ===== */
 .login-options {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: var(--spacing-3);
+  gap: var(--spacing-2) var(--spacing-3);
   padding: var(--spacing-4) 0;
+}
+
+/* Sous 360 px, les deux libellés ne tiennent plus côte à côte : « Se souvenir
+   de moi » se coupait après « de », et « Mot de passe oublié ? » laissait son
+   point d'interrogation seul sur la ligne suivante. On empile plutôt que de
+   laisser le texte se briser. */
+@media (max-width: 359.98px) {
+  .login-options {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 .checkbox-label {
@@ -145,6 +159,7 @@
   cursor: pointer;
   font-size: var(--font-size-body-small);
   color: var(--color-text-secondary);
+  white-space: nowrap;
 }
 
 .checkbox-label input[type='checkbox'] {
@@ -156,9 +171,12 @@
 
 .forgot-password {
   font-size: var(--font-size-body-small);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   text-decoration: none;
   font-weight: var(--font-weight-medium);
+  /* Le libellé reste d'un seul tenant : c'est une cible cliquable, la couper
+     en deux crée deux zones de frappe séparées. */
+  white-space: nowrap;
 }
 
 .forgot-password:hover {
@@ -200,6 +218,7 @@
   background-position: center;
   background-repeat: no-repeat;
   min-height: 100vh;
+  min-height: 100dvh;
  
   position: relative;
 }
@@ -213,7 +232,7 @@
 }
 
 /* ===== Responsive ===== */
-@media (max-width: 900px) {
+@media (max-width: 899.98px) {
   .login-hero {
     display: none;
   }
@@ -224,7 +243,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 479.98px) {
   .login-side {
     padding: var(--spacing-4);
   }

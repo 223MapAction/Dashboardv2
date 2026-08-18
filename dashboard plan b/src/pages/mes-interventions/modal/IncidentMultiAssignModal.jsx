@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useMesInterventionsModalContext } from '../MesInterventionsModalContext';
 import { CloseCircle, TickCircle, SearchNormal1, Profile } from 'iconsax-react';
 
+import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
 const getInitials = (name = '') =>
   name
     .split(' ')
@@ -84,42 +85,15 @@ export const IncidentMultiAssignModal = () => {
     setSearchQuery('');
   };
 
-  const panelClass = [
-    'am-offcanvas-panel',
-    assignClosing ? 'am-offcanvas-panel--closing' : '',
-  ].filter(Boolean).join(' ');
-
-  const backdropClass = [
-    'am-offcanvas-backdrop',
-    assignClosing ? 'am-offcanvas-backdrop--closing' : '',
-  ].filter(Boolean).join(' ');
-
   return (
-    <>
-      <div className={backdropClass} onClick={handleOverlayClick} />
-      <div
-        className={panelClass}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Assigner des agents"
-      >
-        <div className="am-offcanvas-header">
-          <div>
-            <h5 className="am-offcanvas-title">
-              Gérer l'équipe terrain
-            </h5>
-            <p className="text-muted" style={{ fontSize: '13px', margin: '4px 0 0 0' }}>
-              {assignModal.incident.title || 'Sans titre'}
-            </p>
-          </div>
-          <button
-            type="button"
-            className="btn-close"
-            onClick={handleOverlayClick}
-            aria-label="Fermer"
-            disabled={isSaving || alert.type === 'success'}
-          />
-        </div>
+    <OffcanvasModal
+      onClose={handleOverlayClick}
+      isClosing={Boolean(assignClosing)}
+      title="Gérer l'équipe terrain"
+      subtitle={assignModal.incident.title || 'Sans titre'}
+      ariaLabel="Assigner des agents"
+      closeVariant="plain"
+    >
 
         <form onSubmit={handleConfirmAssign} id="multi-assign-form" className="am-offcanvas-body" noValidate>
           {alert.message && (
@@ -165,7 +139,7 @@ export const IncidentMultiAssignModal = () => {
 
             {filteredAgents.length === 0 ? (
               <div className="d-flex flex-column align-items-center justify-content-center p-4 border rounded bg-light text-center">
-                <Profile size={32} variant="Linear" color="#9CA3AF" />
+                <Profile size={32} variant="Linear" color="var(--color-text-muted)" />
                 <span className="fw-medium mt-2" style={{ fontSize: '13px', color: '#6B7280' }}>Aucun agent trouvé</span>
               </div>
             ) : (
@@ -247,8 +221,7 @@ export const IncidentMultiAssignModal = () => {
             {isSaving ? 'Enregistrement...' : 'Enregistrer l\'équipe'}
           </button>
         </div>
-      </div>
-    </>
+      </OffcanvasModal>
   );
 };
 

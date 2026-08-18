@@ -5,8 +5,7 @@ import debounce from 'lodash.debounce';
 import { useSidebarState } from '../../hooks/useSidebarState';
 import { Header, Sidebar } from '../../components/layout';
 import IncidentList from './components/IncidentList/IncidentList';
-import { getIncidentsService, getIncidentService } from './service/incident_service';
-import { authService } from '../auth/services/authService';
+import { getIncidentsService } from './service/incident_service';
 import IncidentModalContext from './modale/IncidentModalContext';
 import IncidentDeleteModal from './modale/IncidentDeleteModal';
 import IncidentAssignModal from './modale/IncidentAssignModal';
@@ -121,8 +120,12 @@ export const Incident = () => {
     isLoading: isLoadingIncidents,
     mutate: mutateIncidents
   } = useSWR(
-    ['/incidents/all', page, search],
-    () => getIncidentsService(page, pageSize, search),
+    // statusFilter fait partie de la cle : sans lui, changer de statut ne
+    // redemandait rien au serveur et le filtre ne s'appliquait qu'aux lignes
+    // deja recues — soit la page courante, pendant que la pagination
+    // continuait d'annoncer le total complet.
+    ['/incidents/all', page, search, statusFilter],
+    () => getIncidentsService(page, pageSize, search, statusFilter),
     {
       revalidateOnReconnect: true,
       onSuccess: (data) => {
@@ -230,7 +233,7 @@ export const Incident = () => {
             <IncidentList
               incidents={incidents}
               isLoading={isLoadingIncidents}
-              onSelectIncident={(incident) => navigate(`/incidents/${incident.id}`, { state: { incident } })}
+              onSelectIncident={(incident) => navigate(`/signalements/${incident.id}`, { state: { incident } })}
               search={searchInput}
               setSearch={(val) => {
                 setSearchInput(val);

@@ -1,3 +1,6 @@
+// Bootstrap est importé avant index.css : nos propres règles doivent gagner
+// à spécificité égale, et l'ordre d'import détermine ce départage.
+import 'bootstrap/dist/css/bootstrap.min.css';
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'

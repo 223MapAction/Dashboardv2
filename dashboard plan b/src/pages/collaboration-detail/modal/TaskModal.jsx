@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useCollaborationDetail } from '../context/CollaborationDetailContext';
+import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
 import {
   CloseSquare,
   Add,
@@ -18,7 +19,6 @@ export const TaskModal = () => {
     collaboration,
     showTaskModal,
     taskModalClosing,
-    taskModalShowing,
     closeTaskModal,
     draftTasks,
     setDraftTasks,
@@ -50,8 +50,7 @@ export const TaskModal = () => {
     startEditTask,
     cancelEditTask,
     saveEditTask,
-    deleteTask,
-    taskToDelete,
+    setTaskToDelete,
   } = useCollaborationDetail();
 
   const bodyRef = useRef(null);
@@ -85,38 +84,15 @@ export const TaskModal = () => {
 
   if (!showTaskModal) return null;
 
-  const panelClass = [
-    'am-offcanvas-panel',
-    taskModalClosing ? 'am-offcanvas-panel--closing' : '',
-    taskModalShowing && !taskModalClosing ? 'am-offcanvas-panel--opening' : '',
-  ].filter(Boolean).join(' ');
-
-  const backdropClass = [
-    'am-offcanvas-backdrop',
-    taskModalClosing ? 'am-offcanvas-backdrop--closing' : '',
-  ].filter(Boolean).join(' ');
-
   return (
-    <>
-      <div className={backdropClass} onClick={closeTaskModal} />
-      <div
-        className={panelClass}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Gérer mes tâches"
-      >
-        <div className="am-offcanvas-header">
-          <div className="d-flex flex-column" style={{ minWidth: 0, flex: 1 }}>
-            <h5 className="am-offcanvas-title">Gérer mes tâches</h5>
-            <small style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '4px' }}>{collaboration?.title}</small>
-          </div>
-          <button
-            type="button"
-            className="btn-close"
-            onClick={closeTaskModal}
-            aria-label="Fermer"
-          />
-        </div>
+    <OffcanvasModal
+      onClose={closeTaskModal}
+      isClosing={Boolean(taskModalClosing)}
+      title="Gérer mes tâches"
+      subtitle={collaboration?.title}
+      ariaLabel="Gérer mes tâches"
+      closeVariant="plain"
+    >
 
         <div className="am-offcanvas-body" ref={bodyRef}>
           {taskSubmitAlert && (
@@ -207,7 +183,7 @@ export const TaskModal = () => {
           {/* Liste des tâches en cours de création (draft) */}
           {draftTasks.length > 0 && (
             <div className="draft-tasks-section" style={{ marginTop: 'var(--spacing-4)', marginBottom: 'var(--spacing-4)', padding: 'var(--spacing-3)', backgroundColor: 'rgba(58, 162, 221, 0.05)', border: '1.5px dashed var(--color-primary)', borderRadius: 'var(--radius-md)' }}>
-              <h4 className="draft-tasks-title" style={{ fontSize: 'var(--font-size-body-large)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-primary)', marginBottom: 'var(--spacing-3)' }}>
+              <h4 className="draft-tasks-title" style={{ fontSize: 'var(--font-size-body-large)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-primary-text)', marginBottom: 'var(--spacing-3)' }}>
                 Tâches à ajouter ({draftTasks.length})
               </h4>
               <div className="draft-tasks-list" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)' }}>
@@ -225,7 +201,7 @@ export const TaskModal = () => {
                     <button
                       type="button"
                       onClick={() => setDraftTasks(draftTasks.filter((_, i) => i !== idx))}
-                      style={{ border: 'none', background: 'none', color: 'var(--color-danger)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center' }}
+                      style={{ border: 'none', background: 'none', color: 'var(--color-danger-text)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center' }}
                     >
                       <Trash size={18} variant="Linear" color="var(--color-danger)" />
                     </button>
@@ -245,7 +221,7 @@ export const TaskModal = () => {
 
             {currentTasks.filter(t => t.createdBy === 'me').length === 0 ? (
               <div className="my-tasks-empty">
-                <TaskSquare size={32} variant="Linear" color="#9CA3AF" />
+                <TaskSquare size={32} variant="Linear" color="var(--color-text-muted)" />
                 <p>Vous n'avez encore ajouté aucune tâche.</p>
               </div>
             ) : (
@@ -444,7 +420,6 @@ export const TaskModal = () => {
             )}
           </button>
         </div>
-      </div>
-    </>
+      </OffcanvasModal>
   );
 };

@@ -12,11 +12,11 @@ import {
 } from 'iconsax-react';
 import { getOtherOrganisationsService } from '../../../../collaboration-detail/service/collab_detail_service';
 
+import { OffcanvasModal } from '../../../../../components/molecules/OffcanvasModal';
 export const InviteOrgModal = () => {
   const {
     joinOpen,
     joinClosing,
-    joinShowing,
     closeJoinModal,
     safeIncident,
     handleJoinSubmit,
@@ -31,9 +31,6 @@ export const InviteOrgModal = () => {
     setOrgSearch,
     showOrgDropdown,
     setShowOrgDropdown,
-    isLoadingOrgs,
-    filteredOrgs,
-    availableOrgs,
     addInvitedOrg,
     invitedOrgs,
     removeInvitedOrg,
@@ -69,13 +66,20 @@ export const InviteOrgModal = () => {
     };
   }, [orgSearch, debouncedSetSearch]);
 
-  // Récupération paginée avec useSWRInfinite
+  // Récupération paginée avec useSWRInfinite.
+  //
+  // La clé vaut null tant que la modale est fermée, ce qui suspend toute
+  // requête. C'est indispensable : le `return null` plus bas n'empêche pas les
+  // hooks de s'exécuter, si bien que la liste complète des organisations était
+  // chargée page par page — trois requêtes en cascade, jusqu'à 1,5 s — à chaque
+  // ouverture d'un signalement, pour une modale souvent jamais ouverte.
   const getKey = useCallback(
     (pageIndex, previousPageData) => {
+      if (!joinOpen) return null;
       if (previousPageData && !previousPageData.next) return null;
       return ['other-organisations-invite', debouncedSearch, pageIndex + 1];
     },
-    [debouncedSearch]
+    [joinOpen, debouncedSearch]
   );
 
   const fetcher = useCallback(([, search, pageNumber]) => {
@@ -166,40 +170,15 @@ export const InviteOrgModal = () => {
 
   if (!joinOpen) return null;
 
-  const panelClass = [
-    'am-offcanvas-panel',
-    joinClosing ? 'am-offcanvas-panel--closing' : '',
-    joinShowing && !joinClosing ? 'am-offcanvas-panel--opening' : '',
-  ].filter(Boolean).join(' ');
-
-  const backdropClass = [
-    'am-offcanvas-backdrop',
-    joinClosing ? 'am-offcanvas-backdrop--closing' : '',
-  ].filter(Boolean).join(' ');
-
   return (
-    <>
-      <div className={backdropClass} onClick={closeJoinModal} />
-      <div
-        className={panelClass}
-        role="dialog"
-        aria-modal="true"
-        aria-label={safeIncident.isOwner || hasAcceptedRole ? 'Inviter des organisations' : "Rejoindre l'action"}
-      >
-        <div className="am-offcanvas-header">
-          <div className="d-flex flex-column" style={{ minWidth: 0, flex: 1 }}>
-            <h5 className="am-offcanvas-title">
-              {safeIncident.isOwner || hasAcceptedRole ? 'Inviter des organisations' : "Rejoindre l'action"}
-            </h5>
-            <small className="text-muted mt-1">{safeIncident.title}</small>
-          </div>
-          <button
-            type="button"
-            className="btn-close"
-            onClick={closeJoinModal}
-            aria-label="Fermer"
-          />
-        </div>
+    <OffcanvasModal
+      onClose={closeJoinModal}
+      isClosing={Boolean(joinClosing)}
+      title={safeIncident.isOwner || hasAcceptedRole ? 'Inviter des organisations' : "Rejoindre l'action"}
+      subtitle={safeIncident.title}
+      ariaLabel={safeIncident.isOwner || hasAcceptedRole ? 'Inviter des organisations' : "Rejoindre l'action"}
+      closeVariant="plain"
+    >
 
         <form onSubmit={handleJoinSubmit} id="invite-org-form" className="am-offcanvas-body" noValidate>
 
@@ -356,7 +335,7 @@ export const InviteOrgModal = () => {
                   border: '1px solid rgba(58, 162, 221, 0.2)',
                   marginBottom: 'var(--spacing-5)'
                 }}>
-                  <p style={{ margin: 0, color: 'var(--color-primary)', fontSize: 'var(--font-size-body)', lineHeight: '1.6' }}>
+                  <p style={{ margin: 0, color: 'var(--color-primary-text)', fontSize: 'var(--font-size-body)', lineHeight: '1.6' }}>
                     <strong>Agir en interne</strong><br />
                     Vous allez prendre en charge cet incident en interne. Vous le gérerez avec vos propres équipes simplement sans qu'il ne devienne privé.
                   </p>
@@ -372,7 +351,7 @@ export const InviteOrgModal = () => {
                   border: '1px solid var(--color-border)',
                   marginBottom: 'var(--spacing-5)'
                 }}>
-                  <p style={{ margin: 0, color: 'var(--color-info)', fontSize: 'var(--font-size-body)', lineHeight: '1.6' }}>
+                  <p style={{ margin: 0, color: 'var(--color-info-text)', fontSize: 'var(--font-size-body)', lineHeight: '1.6' }}>
                     <strong>Prendre en compte en collaboration (Public)</strong><br />
                     En confirmant, vous deviendrez le <strong>leader</strong> de cet incident public. Vous serez responsable de sa coordination et de la collaboration avec les autres organisations partenaires.
                   </p>
@@ -475,7 +454,7 @@ export const InviteOrgModal = () => {
                         </div>
                       ) : selectableOrgs.length === 0 ? (
                         <div className="invite-orgs-empty">
-                          <Buildings2 size={20} variant="Linear" color="#9CA3AF" />
+                          <Buildings2 size={20} variant="Linear" color="var(--color-text-muted)" />
                           <span>Aucune organisation disponible</span>
                         </div>
                       ) : (
@@ -658,8 +637,7 @@ export const InviteOrgModal = () => {
             )}
           </button>
         </div>
-      </div>
-    </>
+      </OffcanvasModal>
   );
 };
 

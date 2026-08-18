@@ -7,6 +7,7 @@
   padding: 0 !important;
   margin: 0 !important;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   position: relative;
 }
@@ -47,7 +48,7 @@
   font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .collab-detail-back:hover {
@@ -239,7 +240,7 @@
   font-weight: var(--font-weight-bold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   margin-top: 0;
   margin-bottom: var(--spacing-4);
 }
@@ -271,7 +272,7 @@
 }
 
 .collab-detail-meta-val.text-highlight {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   font-weight: var(--font-weight-semibold);
 }
 
@@ -284,11 +285,11 @@
 }
 
 .collab-detail-badge.badge-primary {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .collab-detail-badge.badge-success {
-  color: var(--color-success);
+  color: var(--color-success-text);
 }
 
 .collab-detail-badge.badge-warning {
@@ -296,7 +297,7 @@
 }
 
 .collab-detail-badge.badge-danger {
-  color: var(--color-danger);
+  color: var(--color-danger-text);
 }
 
 .collab-detail-badge.badge-info {
@@ -314,7 +315,7 @@
   font-size: 11px;
   font-weight: var(--font-weight-semibold);
   padding: 2px 8px;
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   border: 1px solid rgba(58, 162, 221, 0.3);
   border-radius: var(--radius-full);
 }
@@ -325,7 +326,7 @@
   gap: 2px;
   font-weight: var(--font-weight-bold);
   font-size: var(--font-size-body);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   line-height: 1;
 }
 
@@ -355,7 +356,7 @@
 
 .collab-detail-progress-percent {
   font-weight: var(--font-weight-bold);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   font-size: var(--font-size-body);
 }
 
@@ -394,7 +395,7 @@
   font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
   margin-top: var(--spacing-2);
   width: 100%;
 }
@@ -633,7 +634,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
   flex-shrink: 0;
 }
 
@@ -653,7 +654,7 @@
   border: none;
   border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
   flex-shrink: 0;
 }
 
@@ -701,7 +702,7 @@
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
   flex-shrink: 0;
 }
 
@@ -729,7 +730,7 @@
   background-color: var(--color-background);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .collab-task-item.is-completed {
@@ -769,7 +770,7 @@
   border: 2px solid var(--color-border);
   border-radius: var(--radius-sm);
   background-color: var(--color-surface);
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
 }
 
 .collab-task-checkbox:checked+.collab-task-checkmark {
@@ -780,7 +781,7 @@
 .collab-task-checkmark svg {
   opacity: 0;
   transform: scale(0.5);
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
 }
 
 .collab-task-checkbox:checked+.collab-task-checkmark svg {
@@ -828,7 +829,7 @@
 }
 
 .collab-task-meta .is-me {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   font-weight: var(--font-weight-semibold);
 }
 
@@ -863,7 +864,7 @@
 .collab-task-failure-label {
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-severity-high);
+  color: var(--color-severity-high-text);
   margin-bottom: 4px;
 }
 
@@ -911,7 +912,7 @@
   font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
 }
 
 .collab-task-failure-cancel {
@@ -933,7 +934,7 @@
 }
 
 .collab-task-failure-confirm:hover:not(:disabled) {
-  background-color: #DC2626;
+  background-color: var(--color-danger-text);
 }
 
 .collab-task-failure-confirm:disabled {
@@ -953,13 +954,13 @@
   gap: var(--spacing-2);
   padding: var(--spacing-2) var(--spacing-3);
   background-color: transparent;
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   border: 1px solid var(--color-primary);
   border-radius: var(--radius-md);
   font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 .collab-task-proof-btn:hover {
@@ -980,13 +981,13 @@
 }
 
 /* Responsive */
-@media (max-width: 1200px) {
+@media (max-width: 1199.98px) {
   .collab-detail-content {
     grid-template-columns: 280px 1fr 320px;
   }
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1023.98px) {
   .collab-detail-content {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr auto;
@@ -1041,7 +1042,7 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease;
   color: var(--color-text-secondary);
   font-size: var(--font-size-small);
   font-weight: var(--font-weight-medium);
@@ -1050,11 +1051,11 @@
 }
 
 .collab-mobile-nav-item.active {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .collab-mobile-nav-item.active svg {
-  color: var(--color-primary) !important;
+  color: var(--color-primary-text) !important;
   fill: var(--color-primary) !important;
 }
 
@@ -1094,10 +1095,11 @@
   border: none !important;
   height: auto;
   min-height: calc(100vh - 150px);
+  min-height: calc(100dvh - 150px);
   /* Header + bottom nav */
 }
 
-@media (max-width: 1020px) {
+@media (max-width: 1023.98px) {
   .collab-detail-header {
     padding: var(--spacing-4);
   }
@@ -1134,6 +1136,7 @@
   /* S'assurer que la discussion s'affiche correctement */
   .collab-discussion {
     height: calc(100vh - 220px) !important;
+    height: calc(100dvh - 220px) !important;
   }
 
   .collab-discussion-messages {
@@ -1215,7 +1218,7 @@
   font-weight: var(--font-weight-semibold);
   font-family: var(--font-family);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .collab-task-create-btn:hover {
@@ -1249,6 +1252,7 @@
   margin-left: auto;
   max-width: 700px;
   height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
 }
@@ -1260,6 +1264,7 @@
   display: flex;
   flex-direction: column;
   max-height: 100vh;
+  max-height: 100dvh;
 }
 
 .modal.tasks-modal-bootstrap .modal-body {
@@ -1273,7 +1278,7 @@
   flex-shrink: 0;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
   .modal.tasks-modal-bootstrap .modal-dialog {
     max-width: 100%;
     height: 100dvh;
@@ -1331,7 +1336,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 479.98px) {
   .collab-detail-header {
     padding: var(--spacing-2);
     height: auto;
@@ -1388,6 +1393,7 @@
 
   .collab-discussion {
     height: calc(100vh - 200px) !important;
+    height: calc(100dvh - 200px) !important;
   }
 
   .collab-mobile-nav {
@@ -1443,6 +1449,7 @@
   width: 600px;
   max-width: 100%;
   height: 100vh;
+  height: 100dvh;
   background-color: var(--color-surface);
   box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
   display: flex;
@@ -1548,7 +1555,7 @@
   font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
   flex-shrink: 0;
 }
 
@@ -1571,7 +1578,7 @@
   font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .tasks-close-collab-btn:hover {
@@ -1668,7 +1675,7 @@
   font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
 }
 
 .tasks-add-confirm:hover:not(:disabled) {
@@ -1796,7 +1803,7 @@
 
 .my-task-status.failed {
   background-color: rgba(239, 68, 68, 0.1);
-  color: #DC2626;
+  color: var(--color-danger-text);
 }
 
 .my-task-status.pending {
@@ -1857,7 +1864,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
 }
 
 .my-task-btn-cancel {
@@ -1903,7 +1910,7 @@
   font-weight: var(--font-weight-semibold);
   font-family: var(--font-family);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .collab-suggest-org-btn:hover {
@@ -2153,7 +2160,7 @@
   font-family: var(--font-family);
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 .role-option:hover {

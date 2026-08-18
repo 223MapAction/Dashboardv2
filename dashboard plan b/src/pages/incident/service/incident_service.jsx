@@ -13,7 +13,7 @@ const INCIDENTS_URL = 'incidents';
  * @param {number} pageSize - Taille de la page (default: 10)
  * @returns {Promise<Object>} - { count, next, previous, results }
  */
-export const getIncidentsService = async (page = null, pageSize = null, search = '') => {
+export const getIncidentsService = async (page = null, pageSize = null, search = '', etat = '') => {
   try {
     const axios = authService.createAuthenticatedAxios();
     
@@ -27,6 +27,10 @@ export const getIncidentsService = async (page = null, pageSize = null, search =
     
     if (search) {
       params.push(`search=${encodeURIComponent(search)}`);
+    }
+
+    if (etat) {
+      params.push(`etat=${encodeURIComponent(etat)}`);
     }
 
     const queryString = params.length > 0 ? `?${params.join('&')}` : '';
@@ -314,26 +318,34 @@ export const getAssignIncidentToAgentService = async (incidentId = null, data = 
   }
 };
 /**
- * Assignation d'incident a un agents
- * @returns {Promise<Array>} 
+ * Assigne un incident à un ou plusieurs agents.
+ *
+ * `incidentId` est obligatoire. La version précédente l'acceptait à null et
+ * retombait sur une ligne référençant `response`, variable déclarée dans le
+ * bloc `if` : tout appel sans identifiant levait un ReferenceError au lieu
+ * d'une erreur exploitable. Reste d'un copier-coller depuis
+ * getAssignIncidentToAgentService, dont la branche GET avait été retirée
+ * sans son `return`.
+ *
+ * @param {number|string} incidentId - ID de l'incident (requis)
+ * @param {Object} data - Données d'assignation
+ * @returns {Promise<Object>} Assignation créée
  */
-export const assignIncidentToAgentService = async (incidentId = null, data = null) => {
+export const assignIncidentToAgentService = async (incidentId, data = null) => {
+  if (!incidentId) {
+    throw new Error('[Incident] assignIncidentToAgentService : incidentId est requis');
+  }
+
   try {
     const axios = authService.createAuthenticatedAxios();
-    if (incidentId) {
-      console.log('[Incident]  assigner incident a un agents via assignIncidentToAgentService:', data);
-      const response = await axios.post(
-        `${API_URL_BASE}/MapApi/incidents/${incidentId}/assignments/`,
-        data
-      );
-      console.log('[Incident] Incident assigné:', response.data);
-      return response.data;
-    }
-
-    return response.data?.results || response.data || [];
+    const response = await axios.post(
+      `${API_URL_BASE}/MapApi/incidents/${incidentId}/assignments/`,
+      data
+    );
+    return response.data;
   } catch (error) {
     console.error(
-      `[Incident] Erreur ${incidentId ? 'assignation' : 'récupération'} incidents assignés:`,
+      '[Incident] Erreur assignation incident:',
       error.response?.status,
       error.response?.data
     );

@@ -5,6 +5,7 @@
 .collaboration-layout {
   display: flex;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   background-color: var(--color-background);
 }
@@ -15,6 +16,7 @@
   flex-direction: column;
   min-width: 0;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
 
 }
@@ -50,6 +52,20 @@
   gap: var(--spacing-2);
   border-bottom: 2px solid var(--color-border);
   padding-bottom: 0;
+  /* Les trois onglets réclament 365px : sous 400px de large, « Suggestions »
+     sortait du cadre et se faisait rogner par le overflow-x: hidden global,
+     devenant inatteignable. On défile plutôt que de perdre un onglet. */
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+.collab-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.collab-tab {
+  flex-shrink: 0;
 }
 
 .collab-tab {
@@ -64,7 +80,7 @@
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-medium);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-bottom-color 0.2s ease, color 0.2s ease;
   position: relative;
   bottom: -2px;
 }
@@ -75,26 +91,21 @@
 }
 
 .collab-tab.is-active {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   border-bottom-color: var(--color-primary);
   font-weight: var(--font-weight-bold);
 }
 
 .collab-tab.is-active svg {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .collab-title {
-  font-size: var(--font-size-h1);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
   margin: 0 0 4px 0;
   letter-spacing: var(--tracking-tight);
 }
 
 .collab-subtitle {
-  font-size: var(--font-size-body);
-  color: var(--color-text-muted);
   margin: 0;
   max-width: 540px;
   line-height: 1.5;
@@ -209,7 +220,7 @@
   border-radius: var(--radius-full);
   cursor: pointer;
   font-family: var(--font-family);
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .collab-filter-pill:hover {
@@ -356,7 +367,7 @@
 
 .collab-datepicker .react-datepicker__day:hover {
   background-color: rgba(58, 162, 221, 0.12);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .collab-datepicker .react-datepicker__day--outside-month {
@@ -366,19 +377,19 @@
 
 .collab-datepicker .react-datepicker__day--today {
   font-weight: var(--font-weight-bold);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .collab-datepicker .react-datepicker__day--keyboard-selected {
   background-color: rgba(58, 162, 221, 0.15);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 /* Range fill */
 .collab-datepicker .react-datepicker__day--in-range,
 .collab-datepicker .react-datepicker__day--in-selecting-range {
   background-color: rgba(58, 162, 221, 0.15);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   border-radius: 0;
 }
 
@@ -397,7 +408,7 @@
 .collab-datepicker .react-datepicker__day--range-start:hover,
 .collab-datepicker .react-datepicker__day--range-end:hover,
 .collab-datepicker .react-datepicker__day--selected:hover {
-  background-color: var(--color-primary-dark, #2C8DC2) !important;
+  background-color: var(--color-primary-dark, var(--color-primary-dark)) !important;
 }
 
 /* Same start/end */
@@ -459,7 +470,7 @@
 }
 
 /* --- Datepicker responsive (sans portal) --- */
-@media (max-width: 1024px) {
+@media (max-width: 1023.98px) {
 
   .collab-datepicker .react-datepicker__day,
   .collab-datepicker .react-datepicker__day-name {
@@ -474,7 +485,7 @@
   }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
 
   /* Le bloc période devient pleine largeur dans la toolbar */
   .collab-date-range {
@@ -528,7 +539,7 @@
 /* --- Grid --- */
 .collab-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
   gap: var(--spacing-4);
 }
 
@@ -550,7 +561,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  transition: all 0.25s ease;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
 }
 
 .collab-card-clickable {
@@ -620,7 +631,7 @@
   font-weight: var(--font-weight-bold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .collab-card-org::before {
@@ -652,7 +663,7 @@
 }
 
 .collab-card-role strong {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   font-weight: var(--font-weight-semibold);
 }
 
@@ -765,11 +776,11 @@
   font-weight: var(--font-weight-semibold);
   font-family: var(--font-family);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .collab-tasks-btn:hover {
-  background-color: var(--color-primary-dark, #2C8DC2);
+  background-color: var(--color-primary-dark, var(--color-primary-dark));
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(58, 162, 221, 0.3);
 }
@@ -820,6 +831,7 @@
   width: 600px;
   max-width: 100%;
   height: 100vh;
+  height: 100dvh;
   background-color: var(--color-surface);
   box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
   display: flex;
@@ -927,7 +939,7 @@
   font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
   flex-shrink: 0;
 }
 
@@ -950,7 +962,7 @@
   font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .tasks-close-collab-btn:hover {
@@ -996,7 +1008,7 @@
   font-weight: var(--font-weight-semibold);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-2);
@@ -1046,7 +1058,7 @@
 .tasks-progress-percent {
   font-size: var(--font-size-h2);
   font-weight: var(--font-weight-bold);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .tasks-progress-values {
@@ -1081,7 +1093,7 @@
   font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
   animation: pulse 2s ease-in-out infinite;
 }
 
@@ -1098,7 +1110,7 @@
 }
 
 .tasks-update-progress-btn:hover {
-  background-color: var(--color-primary-dark, #2C8DC2);
+  background-color: var(--color-primary-dark, var(--color-primary-dark));
   animation: none;
 }
 
@@ -1124,7 +1136,7 @@
   background-color: rgba(58, 162, 221, 0.06);
   border: 1px dashed rgba(58, 162, 221, 0.4);
   border-radius: var(--radius-md);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-semibold);
 }
@@ -1223,7 +1235,7 @@
 .mobile-sheet-org {
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -1366,13 +1378,13 @@
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
   background-color: var(--color-surface);
   border: 1.5px dashed;
 }
 
 .collab-action-add-task {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   border-color: rgba(58, 162, 221, 0.4);
 }
 
@@ -1566,7 +1578,7 @@
   font-weight: var(--font-weight-semibold);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-2);
@@ -1589,7 +1601,7 @@
 }
 
 .centered-modal-confirm:hover:not(:disabled) {
-  background-color: var(--color-primary-dark, #2C8DC2);
+  background-color: var(--color-primary-dark, var(--color-primary-dark));
 }
 
 .centered-modal-confirm:disabled {
@@ -1831,7 +1843,7 @@
 
 .suggest-orgs-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(180px, 100%), 1fr));
   gap: var(--spacing-2);
   max-height: 280px;
   overflow-y: auto;
@@ -1848,7 +1860,7 @@
   border-radius: var(--radius-md);
   cursor: pointer;
   text-align: left;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .suggest-org-card:hover {
@@ -1925,7 +1937,7 @@
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .role-option:hover:not(.is-selected) {
@@ -2055,7 +2067,7 @@
 
 .my-task-status.failed {
   background-color: rgba(239, 68, 68, 0.1);
-  color: #DC2626;
+  color: var(--color-danger-text);
 }
 
 .my-task-status.pending {
@@ -2115,7 +2127,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
 }
 
 .my-task-btn-cancel {
@@ -2165,11 +2177,11 @@
   font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .tasks-add-btn:hover {
-  background-color: var(--color-primary-dark, #2C8DC2);
+  background-color: var(--color-primary-dark, var(--color-primary-dark));
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(58, 162, 221, 0.3);
 }
@@ -2260,7 +2272,7 @@
   font-weight: var(--font-weight-semibold);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-2);
@@ -2283,7 +2295,7 @@
 }
 
 .tasks-add-confirm:hover:not(:disabled) {
-  background-color: var(--color-primary-dark, #2C8DC2);
+  background-color: var(--color-primary-dark, var(--color-primary-dark));
 }
 
 .tasks-add-confirm:disabled {
@@ -2341,7 +2353,7 @@
   background-color: var(--color-surface);
   border: 2px solid var(--color-border);
   border-radius: var(--radius-lg);
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .task-item:hover {
@@ -2390,7 +2402,7 @@
   border: 2px solid var(--color-border);
   border-radius: var(--radius-sm);
   background-color: var(--color-surface);
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
 }
 
 .task-checkbox:checked+.task-checkmark {
@@ -2441,7 +2453,7 @@
 }
 
 .task-creator.is-me {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   font-weight: var(--font-weight-semibold);
 }
 
@@ -2460,7 +2472,7 @@
   align-items: center;
   gap: 4px;
   padding: 4px 8px;
-  background-color: #EF4444;
+  background-color: var(--color-danger-text);
   color: #fff;
   border-radius: var(--radius-sm);
   font-size: var(--font-size-caption);
@@ -2481,7 +2493,7 @@
   background-color: transparent;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .task-fail-btn:hover {
@@ -2598,7 +2610,7 @@
   font-weight: var(--font-weight-semibold);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-2);
@@ -2616,14 +2628,14 @@
 }
 
 .failure-form-confirm {
-  background-color: #EF4444;
+  background-color: var(--color-danger-text);
   color: #fff;
-  border: 1px solid #EF4444;
+  border: 1px solid var(--color-danger-text);
 }
 
 .failure-form-confirm:hover:not(:disabled) {
-  background-color: #DC2626;
-  border-color: #DC2626;
+  background-color: var(--color-danger-text);
+  border-color: var(--color-danger-text);
 }
 
 .failure-form-confirm:disabled {
@@ -2693,9 +2705,9 @@
   border-radius: var(--radius-md);
   font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-medium);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 .task-proof-btn:hover {
@@ -2704,7 +2716,7 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
   .collaboration-content {
     padding: var(--spacing-4);
   }

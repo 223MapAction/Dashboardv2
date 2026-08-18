@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { authService } from '../../pages/auth/services/authService';
+import { canAccessPath, isKnownWebRole } from '../../utils/permissions';
 
 /**
  * Composant qui protège les routes en vérifiant l'authentification et les autorisations.
@@ -17,40 +18,25 @@ export const ProtectedRoute = ({ children }) => {
   }
 
   const user = authService.getCurrentUser();
-  const webRole = user?.web_role;
 
-  // 1. Si l'utilisateur est super_admin (web_role === 'super_admin'), il a accès à toutes les pages
-  const isSuperAdmin = webRole === 'super_admin';
-
-  // 2. Si le rôle web n'est pas autorisé, on refuse l'accès
-  if (!isSuperAdmin && webRole !== 'org_admin' && webRole !== 'bureau_agent') {
-    console.warn(`[ProtectedRoute] Accès refusé : web_role ${webRole} n'est pas autorisé.`);
+  // Un rôle web non reconnu n'a rien à faire dans le dashboard.
+  if (!isKnownWebRole(user)) {
+    console.warn(`[ProtectedRoute] Accès refusé : web_role "${user?.web_role}" non autorisé.`);
     authService.logout();
-    return <Navigate to="/login" state={{ error: "Vous n'avez pas l'autorisation d'accéder à cette application." }} replace />;
+    return (
+      <Navigate
+        to="/login"
+        state={{ error: "Vous n'avez pas l'autorisation d'accéder à cette application." }}
+        replace
+      />
+    );
   }
-
-  // Définir les chemins autorisés pour l'admin
-  const allowedPathsForAdmin = [
-    '/dashboard',
-    '/collaboration',
-    '/collaboration-detail',
-    '/incidents',
-    '/mes-interventions',
-    '/agents',
-    '/profile',
-    '/impact'
-  ];
 
   const currentPath = location.pathname;
 
-  const isUnauthorized =
-    !isSuperAdmin &&
-    (webRole === 'org_admin' || webRole === 'bureau_agent') &&
-    !allowedPathsForAdmin.some(allowed => currentPath.startsWith(allowed));
-
-  if (isUnauthorized) {
+  if (!canAccessPath(user, currentPath)) {
     const lastSafePath = sessionStorage.getItem('last_safe_path') || '/dashboard';
-    console.warn(`[ProtectedRoute] Accès refusé à ${currentPath} pour l'admin. Redirection vers ${lastSafePath}`);
+    console.warn(`[ProtectedRoute] Accès refusé à ${currentPath}. Redirection vers ${lastSafePath}`);
     return <Navigate to={lastSafePath} replace />;
   }
 

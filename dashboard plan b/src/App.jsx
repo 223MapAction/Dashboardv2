@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { SWRConfig } from 'swr';
 import { Login, ForgotPassword, ResetPassword } from './pages/auth';
 import { ProtectedRoute } from './components/auth';
@@ -21,6 +21,12 @@ const Agents = lazy(() => import('./pages/agents').then((m) => ({ default: m.Age
 const MesInterventions = lazy(() => import('./pages/mes-interventions').then((m) => ({ default: m.MesInterventions })));
 const NotFound = lazy(() => import('./pages/not-found').then((m) => ({ default: m.NotFound })));
 
+
+/** Reporte l'identifiant de l'ancienne adresse /incidents/:id vers la nouvelle. */
+const RedirectionSignalement = () => {
+  const { id } = useParams();
+  return <Navigate to={`/signalements/${id}`} replace />;
+};
 
 function App() {
   const [isAuthChecked, setIsAuthChecked] = useState(false);
@@ -90,7 +96,7 @@ function App() {
           }
         />
         <Route
-          path="/incidents"
+          path="/signalements"
           element={
             <ProtectedRoute>
               <Incident />
@@ -98,7 +104,7 @@ function App() {
           }
         />
         <Route
-          path="/incidents/:id"
+          path="/signalements/:id"
           element={
             <ProtectedRoute>
               <IncidentDetailPage />
@@ -156,6 +162,12 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* Anciennes adresses : les signets et liens partagés vers /incidents
+            doivent continuer de fonctionner. `replace` évite de polluer
+            l'historique, et `:id` est reporté sur la nouvelle adresse. */}
+        <Route path="/incidents" element={<Navigate to="/signalements" replace />} />
+        <Route path="/incidents/:id" element={<RedirectionSignalement />} />
 
         {/* Redirections & 404 */}
         <Route path="/404" element={<NotFound />} />

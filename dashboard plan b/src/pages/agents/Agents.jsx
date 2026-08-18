@@ -5,7 +5,6 @@ import { useSidebarState } from '../../hooks/useSidebarState';
 import { Header, Sidebar } from '../../components/layout';
 import {
   SearchNormal1, ArrowDown2, Add, Edit2, Trash,
-  People, TickCircle, ShieldTick, Briefcase,
 } from 'iconsax-react';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText, ShimmerCircularImage } from 'react-shimmer-effects';
 import { ROLES, AVATAR_COLORS } from './data/agents';
@@ -14,74 +13,20 @@ import { getOrganisationMembersService, getAgentsStatsService } from './service/
 import AgentsContext from './modale/AgentsModalContext';
 import { AgentFormModal, AgentDeleteModal } from './modale';
 import Pagination from '../../components/molecules/Pagination';
+import { TableActionsMenu } from '../../components/molecules/TableActionsMenu';
+import { grouperParRole } from './roles';
+import { AgentCard } from './components/AgentCard';
+import { AgentListRow } from './components/AgentListRow';
+import { AgentsFilters } from './components/AgentsFilters';
+import { AgentsResume } from './components/AgentsResume';
+import { AgentsSkeleton } from './components/AgentsSkeleton';
 import { authService } from '../auth/services/authService';
 import './agents.css';
-
-// ── Helpers ───────────────────────────────────────────────────────
-const getRoleConfig = (roleId) =>
-  ROLES.find((r) => r.id === roleId) || { label: roleId, color: '#9CA3AF' };
-
-const getInitials = (name) =>
-  name
-    .split(' ')
-    .slice(0, 2)
-    .map((n) => n[0]?.toUpperCase() || '')
-    .join('');
+import './agents-roster.css';
 
 const EMPTY_ARRAY = [];
 
-const AgentTableSkeleton = () => (
-  <div className="agents-table-wrap">
-    <table className="agents-table">
-      <thead>
-        <tr>
-          <th>Agent</th>
-          <th>Rôle</th>
-          <th>Organisation</th>
-          <th>Depuis</th>
-          <th>Statut</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {[...Array(5)].map((_, idx) => (
-          <tr key={idx}>
-            <td>
-              <div className="agents-cell-identity" style={{ opacity: 0.7 }}>
-                <ShimmerCircularImage size={32} style={{ margin: 0 }} />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
-                  <ShimmerTitle line={1} gap={0} width={120} style={{ margin: 0 }} />
-                  <ShimmerText line={1} width={160} style={{ margin: 0 }} />
-                </div>
-              </div>
-            </td>
-            <td>
-              <ShimmerThumbnail height={20} width={70} rounded style={{ margin: 0 }} />
-            </td>
-            <td>
-              <ShimmerText line={1} width={100} style={{ margin: 0 }} />
-            </td>
-            <td>
-              <ShimmerText line={1} width={80} style={{ margin: 0 }} />
-            </td>
-            <td>
-              <ShimmerThumbnail height={20} width={60} rounded style={{ margin: 0 }} />
-            </td>
-            <td>
-              <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                <ShimmerThumbnail height={24} width={24} rounded style={{ margin: 0 }} />
-                <ShimmerThumbnail height={24} width={24} rounded style={{ margin: 0 }} />
-              </div>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-);
-
-const fetcher = async ([, organisationsList, search, role, status]) => {
-  if (!organisationsList || organisationsList.length === 0) return [];
+const fetcher = async ([, search, role, status]) => {
   const allMembers = [];
 
   const getIndexFromId = (id) => {
@@ -103,9 +48,6 @@ const fetcher = async ([, organisationsList, search, role, status]) => {
       if (m.org_role === 'bureau_agent') parsedRole = 'bureau';
 
       const orgId = m.organisation_member || m.organisation;
-      const org = (organisationsList || []).find(
-        (o) => String(o.id) === String(orgId)
-      );
 
       allMembers.push({
         id: m.id,
@@ -114,11 +56,11 @@ const fetcher = async ([, organisationsList, search, role, status]) => {
         fullName: `${m.first_name || ''} ${m.last_name || ''}`.trim() || m.email,
         email: m.email,
         phone: m.phone || '',
+        agentCode: m.agent_code || '',
         address: m.address || '',
         role: parsedRole,
         organisationId: orgId || '',
-        organisationName: m.organisation_name || org?.name || 'Organisation inconnue',
-        organisationLogo: org?.avatar || '',
+        organisationName: m.organisation_name || 'Organisation inconnue',
         avatar: m.avatar || '',
         status: m.is_active ? 'active' : 'inactive',
         avatarColor: AVATAR_COLORS[getIndexFromId(m.id) % AVATAR_COLORS.length] || '#3AA2DD',
@@ -162,7 +104,9 @@ export const Agents = () => {
   }, [debouncedSetSearch]);
 
   // ── Chargement des données ────────────────────────────────────
-  const { data: rawOrgs, isLoading: loadingOrgs } = useSWR(
+  // Le squelette de la liste ne depend plus de ce chargement : les organisations
+  // ne servent qu'au formulaire de creation.
+  const { data: rawOrgs } = useSWR(
     'organisation_list',
     getOrganisationsService
   );
@@ -179,11 +123,22 @@ export const Agents = () => {
     isLoading: loadingMembers,
     mutate: mutateAgents,
   } = useSWR(
-    organisationsList.length > 0 ? ['agents_list', organisationsList, search, roleFilter, statusFilter] : null,
+    // organisationsList ne figure NI dans la cle NI dans le fetcher.
+    //
+    // Elle y etait, et c'etait doublement couteux. En verrou (`length > 0 ? ...
+    // : null`) elle serialisait deux appels qui pouvaient partir ensemble. Mais
+    // la simple retirer du verrou en la laissant dans la cle etait pire : la
+    // liste passe de vide a remplie, la cle change, et SWR refait la requete —
+    // mesure a deux appels de /agents/ au lieu d'un.
+    //
+    // Elle ne servait qu'a deux replis : `organisationLogo`, qui n'est lu nulle
+    // part, et `organisationName`, dont le formulaire de creation fait deja sa
+    // propre recherche. Le payload des membres porte `organisation_name`.
+    ['agents_list', search, roleFilter, statusFilter],
     fetcher
   );
 
-  const isDataLoading = loadingOrgs || (organisationsList.length > 0 && loadingMembers);
+  const isDataLoading = loadingMembers;
   const agents = fetchedAgents || EMPTY_ARRAY;
 
   // ── Modal form ────────────────────────────────────────────────
@@ -208,12 +163,27 @@ export const Agents = () => {
     setTimeout(() => setFormAnimating(false), 350);
   };
 
+  // Un agent de bureau ne peut ni modifier ni supprimer un administrateur.
+  //
+  // Les trois orthographes testées ci-dessous sont conservées telles quelles :
+  // seule la valeur `super_admin` a été observée en réponse réelle de l'API, et
+  // normaliser sans avoir vu un compte `bureau_agent` reviendrait à parier sur
+  // les droits en production.
+  const estAgentDeBureau = () =>
+    currentUser?.web_role === 'bureau_agent'
+    || currentUser?.web_role === 'bureau'
+    || currentUser?.web_role === 'agent_de_bureau';
+
+  const estAdministrateur = (agent) =>
+    agent?.role === 'admin' || agent?.role === 'super_admin' || agent?.role === 'admin_organisation';
+
+  const peutModifier = (agent) => !(estAgentDeBureau() && estAdministrateur(agent));
+  const peutSupprimer = (agent) => !estAgentDeBureau() || agent?.role === 'terrain';
+
   // ── Ouvrir modal édition ──────────────────────────────────────
   const openEdit = (agent, e) => {
     e?.stopPropagation();
-    const isOffice = currentUser?.web_role === 'bureau_agent' || currentUser?.web_role === 'bureau' || currentUser?.web_role === 'agent_de_bureau';
-    const isTargetAdmin = agent?.role === 'admin' || agent?.role === 'super_admin' || agent?.role === 'admin_organisation';
-    if (isOffice && isTargetAdmin) {
+    if (!peutModifier(agent)) {
       return;
     }
     setModalAlert({ type: null, message: null });
@@ -237,8 +207,7 @@ export const Agents = () => {
   // ── Ouvrir modal suppression ──────────────────────────────────
   const openDelete = (agent, e) => {
     e?.stopPropagation();
-    const isOffice = currentUser?.web_role === 'bureau_agent' || currentUser?.web_role === 'bureau' || currentUser?.web_role === 'agent_de_bureau';
-    if (isOffice && agent.role !== 'terrain') {
+    if (!peutSupprimer(agent)) {
       return;
     }
     setDeleteAlert({ type: null, message: null });
@@ -268,6 +237,36 @@ export const Agents = () => {
 
   const [page, setPage] = useState(1);
   const pageSize = 20;
+
+  // Preference d'affichage, conservee entre les sessions comme celle de la sidebar.
+  const [vue, setVue] = useState(() => {
+    try {
+      return localStorage.getItem('mapaction_agents_vue') === 'liste' ? 'liste' : 'fiches';
+    } catch {
+      return 'fiches';
+    }
+  });
+
+  const changerVue = (v) => {
+    setVue(v);
+    try { localStorage.setItem('mapaction_agents_vue', v); } catch { /* stockage indisponible */ }
+  };
+
+  const filtreActif = Boolean(searchInput || roleFilter || statusFilter);
+
+  const effacerFiltres = () => {
+    setSearchInput('');
+    setSearch('');
+    debouncedSetSearch.cancel();
+    setRoleFilter('');
+    setStatusFilter('');
+  };
+
+  // Actions disponibles sur un agent, selon les droits de l'utilisateur connecte.
+  const actionsPour = (agent) => [
+    peutModifier(agent) && { id: 'edit', label: 'Modifier', icon: Edit2, onSelect: () => openEdit(agent) },
+    peutSupprimer(agent) && { id: 'delete', label: 'Supprimer', icon: Trash, tone: 'danger', onSelect: () => openDelete(agent) },
+  ].filter(Boolean);
 
   // Reset page to 1 on filter/search change
   useEffect(() => {
@@ -341,202 +340,68 @@ export const Agents = () => {
                 </button>
               </div>
 
-              {/* ── Statistiques ── */}
-              <div className="agents-stats">
-                <div className="agents-stat">
-                  <div className="agents-stat-icon agents-stat-icon-primary">
-                    <People size={20} variant="Bold" color="var(--color-primary)" />
-                  </div>
-                  <div>
-                    <div className="agents-stat-value">{statsTotal}</div>
-                    <div className="agents-stat-label">Total agents</div>
-                  </div>
-                </div>
-                <div className="agents-stat">
-                  <div className="agents-stat-icon agents-stat-icon-success">
-                    <TickCircle size={20} variant="Bold" color="var(--color-success)" />
-                  </div>
-                  <div>
-                    <div className="agents-stat-value">{statsActive}</div>
-                    <div className="agents-stat-label">Actifs</div>
-                  </div>
-                </div>
-                <div className="agents-stat">
-                  <div className="agents-stat-icon agents-stat-icon-warning">
-                    <ShieldTick size={20} variant="Bold" color="var(--color-warning)" />
-                  </div>
-                  <div>
-                    <div className="agents-stat-value">{statsAdmins}</div>
-                    <div className="agents-stat-label">Admins</div>
-                  </div>
-                </div>
-                <div className="agents-stat">
-                  <div className="agents-stat-icon agents-stat-icon-danger">
-                    <Briefcase size={20} variant="Bold" color="var(--color-danger)" />
-                  </div>
-                  <div>
-                    <div className="agents-stat-value">{statsTerrain}</div>
-                    <div className="agents-stat-label">Agents terrain</div>
-                  </div>
-                </div>
-              </div>
+              <AgentsResume
+                filtreActif={filtreActif}
+                nbResultats={filtered.length}
+                total={statsTotal}
+                actifs={statsActive}
+                terrain={statsTerrain}
+                admins={statsAdmins}
+              />
 
-              {/* ── Toolbar ── */}
-              <div className="agents-toolbar">
-                <div className="agents-search">
-                  <SearchNormal1 size={16} variant="Linear" color="var(--color-text-muted)" />
-                  <input
-                    type="search"
-                    id="agents-search-input"
-                    name="agents-search-query"
-                    autoComplete="off"
-                    placeholder="Nom, email, organisation..."
-                    value={searchInput}
-                    onChange={(e) => {
-                      setSearchInput(e.target.value);
-                      debouncedSetSearch(e.target.value);
-                    }}
-                  />
-                </div>
-
-                <div className="agents-select-wrap">
-                  <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>
-                    <option value="">Tous les rôles</option>
-                    {ROLES.map((r) => (
-                      <option key={r.id} value={r.id}>{r.label}</option>
-                    ))}
-                  </select>
-                  <ArrowDown2 size={14} variant="Linear" color="var(--color-text-muted)" />
-                </div>
-
-
-
-                <div className="agents-select-wrap">
-                  <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                    <option value="">Tous les statuts</option>
-                    <option value="active">Actif</option>
-                    <option value="inactive">Inactif</option>
-                  </select>
-                  <ArrowDown2 size={14} variant="Linear" color="var(--color-text-muted)" />
-                </div>
-
-                <span className="agents-count-label">
-                  {filtered.length} agent{filtered.length > 1 ? 's' : ''}
-                </span>
-              </div>
+              <AgentsFilters
+                recherche={searchInput}
+                onRecherche={(v) => { setSearchInput(v); debouncedSetSearch(v); }}
+                role={roleFilter}
+                onRole={setRoleFilter}
+                statut={statusFilter}
+                onStatut={setStatusFilter}
+                vue={vue}
+                onVue={changerVue}
+                onEffacer={effacerFiltres}
+                filtreActif={filtreActif}
+              />
 
               {/* ── Tableau ── */}
               {isDataLoading ? (
-                <AgentTableSkeleton />
+                <AgentsSkeleton vue={vue} />
               ) : (
                 <>
-                  <div className="agents-table-wrap">
-                    <table className="agents-table">
-                      <thead>
-                        <tr>
-                          <th>Agent</th><th>Rôle</th><th>Organisation</th>
-                          <th>Depuis</th><th>Statut</th><th></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {paginatedAgents.map((agent, index) => {
-                          const roleConfig = getRoleConfig(agent.role);
-                          return (
-                            <tr key={index}>
-                              <td>
-                                <div className="agents-cell-identity">
-                                  {agent.avatar ? (
-                                    <>
-                                      <img
-                                        src={agent.avatar}
-                                        alt={agent.fullName}
-                                        className="agents-avatar"
-                                        style={{
-                                          width: '32px',
-                                          height: '32px',
-                                          borderRadius: '50%',
-                                          objectFit: 'cover',
-                                          flexShrink: 0
-                                        }}
-                                        onError={(e) => {
-                                          e.target.style.display = 'none';
-                                          e.target.nextSibling.style.display = 'flex';
-                                        }}
-                                      />
-                                      <div className="agents-avatar" style={{ backgroundColor: agent.avatarColor, display: 'none' }}>
-                                        {getInitials(agent.fullName)}
-                                      </div>
-                                    </>
-                                  ) : (
-                                    <div className="agents-avatar" style={{ backgroundColor: agent.avatarColor }}>
-                                      {getInitials(agent.fullName)}
-                                    </div>
-                                  )}
-                                  <div>
-                                    <span className="agents-full-name">{agent.fullName}</span>
-                                    <span className="agents-email">{agent.email}</span>
-                                  </div>
-                                </div>
-                              </td>
-                              <td>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                  <span
-                                    className="agents-role"
-                                    style={{ backgroundColor: `${roleConfig.color}18`, color: roleConfig.color }}
-                                    title={roleConfig.description}
-                                  >
-                                    {roleConfig.label}
-                                  </span>
-                                  {roleConfig.mobileOnly && (
-                                    <span style={{ fontSize: '11px', padding: '2px 6px', borderRadius: '999px', backgroundColor: 'rgba(34,197,94,0.1)', color: '#22C55E', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                                      Mobile
-                                    </span>
-                                  )}
-                                </div>
-                              </td>
-                              <td style={{ fontSize: 'var(--font-size-body-small)', color: 'var(--color-text-secondary)' }}>
-                                {agent.organisationName || '—'}
-                              </td>
-                              <td style={{ fontSize: 'var(--font-size-body-small)', color: 'var(--color-text-secondary)' }}>
-                                {new Date(agent.joinedAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
-                              </td>
-                              <td>
-                                <span className={`agents-status agents-status-${agent.status}`}>
-                                  <span className="agents-status-dot" />
-                                  {agent.status === 'active' ? 'Actif' : 'Inactif'}
-                                </span>
-                              </td>
-                              <td>
-                                <div className="agents-row-actions">
-                                  {!(
-                                    (currentUser?.web_role === 'bureau_agent' || currentUser?.web_role === 'bureau' || currentUser?.web_role === 'agent_de_bureau') &&
-                                    (agent.role === 'admin' || agent.role === 'super_admin' || agent.role === 'admin_organisation')
-                                  ) && (
-                                    <button
-                                      className="agents-icon-btn agents-icon-btn-edit"
-                                      onClick={(e) => openEdit(agent, e)}
-                                      title="Modifier"
-                                    >
-                                      <Edit2 size={16} variant="Bold" color="var(--color-primary)" />
-                                    </button>
-                                  )}
-                                  {(!(currentUser?.web_role === 'bureau_agent' || currentUser?.web_role === 'bureau' || currentUser?.web_role === 'agent_de_bureau') || agent.role === 'terrain') && (
-                                    <button
-                                      className="agents-icon-btn agents-icon-btn-delete"
-                                      onClick={(e) => openDelete(agent, e)}
-                                      title="Supprimer"
-                                    >
-                                      <Trash size={16} variant="Bold" color="var(--color-danger)" />
-                                    </button>
-                                  )}
-                                </div>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
+                  {grouperParRole(paginatedAgents).map((groupe) => (
+                    <section key={groupe.role} className="agents-groupe">
+                      <h2 className="agents-groupe-titre">
+                        {groupe.libelle}
+                        <span className="agents-groupe-compte">{groupe.agents.length}</span>
+                      </h2>
+
+                      {vue === 'fiches' ? (
+                        <div className="agents-grille">
+                          {groupe.agents.map((agent) => (
+                            <AgentCard key={agent.id} agent={agent} actions={actionsPour(agent)} />
+                          ))}
+                        </div>
+                      ) : (
+                        <ul className="agents-liste">
+                          {groupe.agents.map((agent) => (
+                            <AgentListRow key={agent.id} agent={agent} actions={actionsPour(agent)} />
+                          ))}
+                        </ul>
+                      )}
+                    </section>
+                  ))}
+
+                  {paginatedAgents.length === 0 && (
+                    <div className="agents-vide">
+                      <p className="agents-vide-titre">Aucun agent ne correspond</p>
+                      <p className="agents-vide-texte">
+                        Modifiez votre recherche, ou invitez un nouvel agent dans l’équipe.
+                      </p>
+                      <button type="button" className="agents-add-btn" onClick={openCreate}>
+                        <Add size={18} color="#fff" />
+                        Nouvel agent
+                      </button>
+                    </div>
+                  )}
 
                   <Pagination
                     page={page}

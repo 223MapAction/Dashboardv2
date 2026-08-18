@@ -10,7 +10,7 @@ import { SuggestOrgModal } from './modal/SuggestOrgModal';
 import { DeleteTaskModal } from './modal/DeleteTaskModal';
 import { AgentReportsModal } from './modal/AgentReportsModal';
 import { NotFound } from '../not-found';
-import { getCollaborationService, getCollaborationsService } from '../collaboration/service/collaboration_service';
+import { getCollaborationService } from '../collaboration/service/collaboration_service';
 import { getOrganisationsService, formatOrganisation } from '../organisations/service/organisation_service';
 import { BlurryImage } from '../../components/atoms/BlurryImage';
 import { API_URL_BASE } from '../../config/api_url_base';
@@ -62,6 +62,7 @@ import {
   Pause,
   DocumentText
 } from 'iconsax-react';
+import { OffcanvasModal } from '../../components/molecules/OffcanvasModal';
 import './collaboration-detail.css';
 
 const formatFailureReason = (reason) => {
@@ -885,7 +886,7 @@ export const CollaborationDetail = () => {
 
                       {/* Subsection 1: L'Incident */}
                       <div className="collab-detail-subsection">
-                        <h4 className="collab-detail-subsection-title">L'Incident</h4>
+                        <h4 className="collab-detail-subsection-title">L'Signalement</h4>
                         <div className="collab-detail-meta-group">
                           <div className="collab-detail-meta-row">
                             <span className="collab-detail-meta-label">Titre</span>
@@ -1767,7 +1768,7 @@ export const CollaborationDetail = () => {
         resolution_end_date: resolutionEndDate,
         resolution_file: resolutionFile
       });
-      setCloseAlert({ type: 'success', message: 'Incident résolu avec succès !' });
+      setCloseAlert({ type: 'success', message: 'Signalement résolu avec succès !' });
       setTimeout(() => {
         closeCloseModal();
         mutateCollaboration(); // Recharger uniquement les données SWR au lieu de la page entière
@@ -2066,7 +2067,7 @@ export const CollaborationDetail = () => {
 
                       {/* Subsection 1: L'Incident (Most Important) */}
                       <div className="collab-detail-subsection">
-                        <h4 className="collab-detail-subsection-title">L'Incident</h4>
+                        <h4 className="collab-detail-subsection-title">L'Signalement</h4>
                         <div className="collab-detail-meta-group">
                           {collaboration?.title && (
                             <div className="collab-detail-meta-row">
@@ -2100,7 +2101,7 @@ export const CollaborationDetail = () => {
                           )}
                           {collaboration?.incidentDetails?.etat && (
                             <div className="collab-detail-meta-row">
-                              <span className="collab-detail-meta-label">État incident</span>
+                              <span className="collab-detail-meta-label">État signalement</span>
                               <span className="collab-detail-meta-val">
                                 <span className={`collab-detail-badge ${getEtatBadgeClass(collaboration.incidentDetails.etat)}`}>
                                   {formatEtat(collaboration.incidentDetails.etat)}
@@ -2364,7 +2365,7 @@ export const CollaborationDetail = () => {
                                   borderRadius: '16px',
                                   padding: '6px 16px',
                                   fontSize: '12px',
-                                  color: 'var(--color-primary)',
+                                  color: 'var(--color-primary-text)',
                                   cursor: 'pointer',
                                   fontWeight: '500'
                                 }}
@@ -2501,11 +2502,11 @@ export const CollaborationDetail = () => {
                                                   type="button"
                                                   onClick={() => handleDownload(msg.file.url, msg.file.name, msg.id)}
                                                   disabled={downloadingMsgId === msg.id}
-                                                  style={{ background: 'none', border: 'none', padding: 0, fontSize: '11px', fontWeight: '500', color: 'var(--color-primary)', textDecoration: 'none', cursor: downloadingMsgId === msg.id ? 'not-allowed' : 'pointer', opacity: downloadingMsgId === msg.id ? 0.7 : 1, display: 'flex', alignItems: 'center', gap: '4px' }}
+                                                  style={{ background: 'none', border: 'none', padding: 0, fontSize: '11px', fontWeight: '500', color: 'var(--color-primary-text)', textDecoration: 'none', cursor: downloadingMsgId === msg.id ? 'not-allowed' : 'pointer', opacity: downloadingMsgId === msg.id ? 0.7 : 1, display: 'flex', alignItems: 'center', gap: '4px' }}
                                                 >
                                                   {downloadingMsgId === msg.id ? (
                                                     <>
-                                                      <svg style={{ animation: 'spin 1s linear infinite', width: '12px', height: '12px', color: 'var(--color-primary)' }} viewBox="0 0 24 24" fill="none">
+                                                      <svg style={{ animation: 'spin 1s linear infinite', width: '12px', height: '12px', color: 'var(--color-primary-text)' }} viewBox="0 0 24 24" fill="none">
                                                         <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" style={{ opacity: 0.25 }}></circle>
                                                         <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" style={{ opacity: 0.75 }}></path>
                                                       </svg>
@@ -2574,7 +2575,7 @@ export const CollaborationDetail = () => {
                                           style={{
                                             background: 'none', border: 'none', padding: '2px',
                                             cursor: isDeleting ? 'not-allowed' : 'pointer',
-                                            color: 'var(--color-danger)', opacity: isDeleting ? 0.5 : 1,
+                                            color: 'var(--color-danger-text)', opacity: isDeleting ? 0.5 : 1,
                                             display: 'flex', alignItems: 'center'
                                           }}
                                         >
@@ -2855,7 +2856,7 @@ export const CollaborationDetail = () => {
                                     {(task.completedAt || task.updated_at) && task.completed && (
                                       <>
                                         <span>•</span>
-                                        <span className="completed-date" style={{ color: 'var(--color-success)', fontWeight: '500' }}>
+                                        <span className="completed-date" style={{ color: 'var(--color-success-text)', fontWeight: '500' }}>
                                           Fait le {formatDateTime(task.completedAt || task.updated_at)}
                                         </span>
                                       </>
@@ -3003,7 +3004,7 @@ export const CollaborationDetail = () => {
                                   borderRadius: 'var(--radius-md)',
                                   animation: 'slideDown 0.2s ease-out'
                                 }}>
-                                  <div style={{ fontSize: 'var(--font-size-body-small)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-primary)', marginBottom: 'var(--spacing-2)' }}>
+                                  <div style={{ fontSize: 'var(--font-size-body-small)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-primary-text)', marginBottom: 'var(--spacing-2)' }}>
                                     Compléter la tâche avec une preuve
                                   </div>
                                   <p style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-text-secondary)', margin: '0 0 var(--spacing-3) 0' }}>
@@ -3126,7 +3127,7 @@ export const CollaborationDetail = () => {
                                             }}
                                             style={{
                                               backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                                              color: 'var(--color-danger)',
+                                              color: 'var(--color-danger-text)',
                                               border: 'none',
                                               borderLeft: '1px solid var(--color-border)',
                                               padding: '0 var(--spacing-3)',
@@ -3245,7 +3246,7 @@ export const CollaborationDetail = () => {
                                         style={{
                                           background: 'none',
                                           border: 'none',
-                                          color: 'var(--color-primary)',
+                                          color: 'var(--color-primary-text)',
                                           fontSize: 'var(--font-size-caption)',
                                           fontWeight: '500',
                                           display: 'inline-flex',
@@ -3384,7 +3385,7 @@ export const CollaborationDetail = () => {
                                                   Cliquer pour ouvrir ou télécharger
                                                 </div>
                                               </div>
-                                              <div style={{ fontSize: '20px', color: 'var(--color-primary)' }}>→</div>
+                                              <div style={{ fontSize: '20px', color: 'var(--color-primary-text)' }}>→</div>
                                             </a>
                                             );
                                           })()}
@@ -3544,7 +3545,7 @@ export const CollaborationDetail = () => {
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.transform = 'scale(1.1)';
-                        e.currentTarget.style.backgroundColor = '#DC2626';
+                        e.currentTarget.style.backgroundColor = 'var(--color-danger-text)';
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.transform = 'scale(1)';
@@ -3620,33 +3621,46 @@ export const CollaborationDetail = () => {
 
       {/* Modal de résolution d'incident */}
       {showCloseModal && (
-        <>
-          <div
-            className={[
-              'am-offcanvas-backdrop',
-              !closeModalShowing ? 'am-offcanvas-backdrop--closing' : '',
-            ].filter(Boolean).join(' ')}
-            onClick={closeCloseModal}
-          />
-          <div
-            className={[
-              'am-offcanvas-panel',
-              !closeModalShowing ? 'am-offcanvas-panel--closing' : 'am-offcanvas-panel--opening',
-            ].filter(Boolean).join(' ')}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Résoudre l'incident"
-          >
-            <div className="am-offcanvas-header">
-              <h5 className="am-offcanvas-title">Résoudre l'incident</h5>
+        // Deux notions distinctes se ressemblent ici :
+        //   closeModalShowing → animation du panneau (sémantique inversée)
+        //   isClosing         → clôture de l'incident en cours (soumission)
+        <OffcanvasModal
+          onClose={closeCloseModal}
+          isClosing={!closeModalShowing}
+          title="Résoudre l'incident"
+          ariaLabel="Résoudre l'incident"
+          closeVariant="plain"
+          closeDisabled={isClosing}
+          footer={
+            <>
               <button
                 type="button"
-                className="btn-close"
+                className="am-btn am-btn--secondary"
                 onClick={closeCloseModal}
                 disabled={isClosing}
-              />
-            </div>
-
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                className="am-btn am-btn--primary"
+                onClick={handleCloseIncident}
+                disabled={isClosing || !resolutionStartDate || !resolutionEndDate}
+              >
+                {isClosing ? (
+                  <>
+                    <span className="am-spinner" aria-hidden="true" />
+                    Clôture en cours...
+                  </>
+                ) : (
+                  <>
+                    Resoudre cet incident
+                  </>
+                )}
+              </button>
+            </>
+          }
+        >
             <div className="am-offcanvas-body" ref={closeModalBodyRef}>
               {closeAlert && (
                 <div className={`am-alert am-alert--${closeAlert.type === 'success' ? 'success' : 'danger'}`} role="alert" style={{ marginBottom: 'var(--spacing-4)', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -3708,41 +3722,12 @@ export const CollaborationDetail = () => {
               </div>
 
               <div className='alert alert-info'>
-                <p style={{ margin: 0, color: 'var(--color-info)', fontSize: 'var(--font-size-body)', lineHeight: '1.5' }}>
+                <p style={{ margin: 0, color: 'var(--color-info-text)', fontSize: 'var(--font-size-body)', lineHeight: '1.5' }}>
                   <strong>Attention :</strong> Cette action est irréversible. Une fois l'incident résolu, il ne pourra plus être modifié.
                 </p>
               </div>
             </div>
-
-            <div className="am-offcanvas-footer">
-              <button
-                type="button"
-                className="am-btn am-btn--secondary"
-                onClick={closeCloseModal}
-                disabled={isClosing}
-              >
-                Annuler
-              </button>
-              <button
-                type="button"
-                className="am-btn am-btn--primary"
-                onClick={handleCloseIncident}
-                disabled={isClosing || !resolutionStartDate || !resolutionEndDate}
-              >
-                {isClosing ? (
-                  <>
-                    <span className="am-spinner" aria-hidden="true" />
-                    Clôture en cours...
-                  </>
-                ) : (
-                  <>
-                    Resoudre cet incident
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </>
+        </OffcanvasModal>
       )}
       <AgentReportsModal
         isOpen={showReportsModal}

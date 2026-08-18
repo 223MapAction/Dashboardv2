@@ -22,7 +22,7 @@ export const IncidentDetailPage = () => {
     if (fromTab) {
       navigate(fromTab);
     } else {
-      navigate('/incidents');
+      navigate('/signalements');
     }
   };
 

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Eye, EyeSlash, Lock } from 'iconsax-react';
-import logoMapAction from '../../assets/logo.svg';
-import loginBg from '../../assets/login_bg.png';
+import logoMapAction from '../../assets/logo.webp';
+import loginBg from '../../assets/login_bg.webp';
 import { authService } from './services/authService';
 import './login.css';
 import './forgot-password.css';
@@ -106,7 +106,7 @@ export const ResetPassword = () => {
                 {error && (
                   <div className="login-error" style={{
                     backgroundColor: '#FEE2E2',
-                    color: '#DC2626',
+                    color: 'var(--color-danger-text)',
                     padding: '12px 16px',
                     borderRadius: '8px',
                     marginBottom: '16px',

@@ -5,6 +5,7 @@
 .agents-layout {
   display: flex;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   background-color: var(--color-background);
 }
@@ -15,6 +16,7 @@
   flex-direction: column;
   min-width: 0;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
 }
 
@@ -46,16 +48,11 @@
 }
 
 .agents-title {
-  font-size: var(--font-size-h2);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
   margin: 0 0 var(--spacing-1) 0;
   letter-spacing: var(--tracking-tight);
 }
 
 .agents-subtitle {
-  font-size: var(--font-size-body);
-  color: var(--color-text-muted);
   margin: 0;
   line-height: 1.5;
 }
@@ -384,7 +381,7 @@
 
 .agents-status-active {
   background-color: rgba(34, 197, 94, 0.1);
-  color: var(--color-success);
+  color: var(--color-success-text);
 }
 
 .agents-status-inactive {
@@ -404,37 +401,6 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-1);
-}
-
-.agents-icon-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: none;
-  border-radius: var(--radius-md);
-  background: transparent;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.agents-icon-btn-edit {
-  color: var(--color-primary);
-  background-color: rgba(58, 162, 221, 0.1);
-}
-
-.agents-icon-btn-edit:hover {
-  background-color: rgba(58, 162, 221, 0.2);
-}
-
-.agents-icon-btn-delete {
-  color: var(--color-danger);
-  background-color: rgba(239, 68, 68, 0.08);
-}
-
-.agents-icon-btn-delete:hover {
-  background-color: rgba(239, 68, 68, 0.18);
 }
 
 /* Empty state */
@@ -623,7 +589,7 @@
 
 .agents-field-error {
   font-size: var(--font-size-caption);
-  color: var(--color-danger);
+  color: var(--color-danger-text);
 }
 
 /* Password field */
@@ -759,7 +725,7 @@
 }
 
 .agents-btn-confirm-delete:hover {
-  background-color: #DC2626;
+  background-color: var(--color-danger-text);
 }
 
 /* ── Toast ─────────────────────────── */
@@ -800,7 +766,7 @@
 }
 
 /* ── Responsive ────────────────────── */
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
   .agents-content {
     padding: 0 var(--spacing-4) var(--spacing-4);
   }

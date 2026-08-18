@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sms } from 'iconsax-react';
 import { authService } from './services/authService';
-import logoMapAction from '../../assets/logo.svg';
-import loginBg from '../../assets/login_bg.png';
+import logoMapAction from '../../assets/logo.webp';
+import loginBg from '../../assets/login_bg.webp';
 import './login.css';
 import './forgot-password.css';
 
@@ -60,7 +60,7 @@ export const ForgotPassword = () => {
                 {error && (
                   <div className="login-error" style={{
                     backgroundColor: '#FEE2E2',
-                    color: '#DC2626',
+                    color: 'var(--color-danger-text)',
                     padding: '12px 16px',
                     borderRadius: '8px',
                     marginBottom: '16px',

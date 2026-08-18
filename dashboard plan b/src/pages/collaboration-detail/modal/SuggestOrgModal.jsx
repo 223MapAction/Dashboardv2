@@ -12,14 +12,14 @@ import {
   Edit2,
   TickCircle
 } from 'iconsax-react';
-import { suggestCollaborationPartnerService, getOtherOrganisationsService } from '../service/collab_detail_service';
+import { getOtherOrganisationsService } from '../service/collab_detail_service';
 
+import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
 export const SuggestOrgModal = () => {
   const {
     collaboration,
     showSuggestModal,
     suggestModalClosing,
-    suggestModalShowing,
     closeSuggestModal,
     suggestSearch,
     setSuggestSearch,
@@ -28,7 +28,6 @@ export const SuggestOrgModal = () => {
     updateSuggestedRole,
     updateSuggestedComment,
     suggestAlert,
-    setSuggestAlert,
     suggestSubmitting,
     handleSuggestSubmit,
     ROLE_OPTIONS,
@@ -61,12 +60,15 @@ export const SuggestOrgModal = () => {
   // donc un changement de recherche invalide automatiquement toutes les pages.
   const getKey = useCallback(
     (pageIndex, previousPageData) => {
+      // Modale fermée : aucune requête. Le `return null` du rendu n'empêche pas
+      // les hooks de tourner, la liste se chargeait donc en pure perte.
+      if (!showSuggestModal) return null;
       // On a atteint la fin : plus de page suivante.
       if (previousPageData && !previousPageData.next) return null;
       // Sinon on demande la page suivante (pageIndex commence à 0).
       return ['other-organisations', debouncedSearch, pageIndex + 1];
     },
-    [debouncedSearch]
+    [showSuggestModal, debouncedSearch]
   );
 
   const fetcher = useCallback(([, search, pageNumber]) => {
@@ -164,44 +166,19 @@ export const SuggestOrgModal = () => {
 
   if (!showSuggestModal) return null;
 
-  const panelClass = [
-    'am-offcanvas-panel',
-    suggestModalClosing ? 'am-offcanvas-panel--closing' : '',
-    suggestModalShowing && !suggestModalClosing ? 'am-offcanvas-panel--opening' : '',
-  ].filter(Boolean).join(' ');
-
-  const backdropClass = [
-    'am-offcanvas-backdrop',
-    suggestModalClosing ? 'am-offcanvas-backdrop--closing' : '',
-  ].filter(Boolean).join(' ');
-
   const selectableOrgs = organisations.filter(
     (o) => !suggestedOrgs.find((s) => s.id === o.id)
   );
 
   return (
-    <>
-      <div className={backdropClass} onClick={closeSuggestModal} />
-      <div
-        className={panelClass}
-        role="dialog"
-        aria-modal="true"
-        aria-label={collaboration?.role == "leader" ? "Inviter des organisations" : "Suggérer des organisations"}
-      >
-        <div className="am-offcanvas-header">
-          <div className="d-flex flex-column" style={{ minWidth: 0, flex: 1 }}>
-            <h5 className="am-offcanvas-title">
-              {collaboration?.role == "leader" ? "Inviter des organisations" : "Suggérer des organisations"}
-            </h5>
-            <small style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '4px' }}>{collaboration?.title}</small>
-          </div>
-          <button
-            type="button"
-            className="btn-close"
-            onClick={closeSuggestModal}
-            aria-label="Fermer"
-          />
-        </div>
+    <OffcanvasModal
+      onClose={closeSuggestModal}
+      isClosing={Boolean(suggestModalClosing)}
+      title={collaboration?.role == "leader" ? "Inviter des organisations" : "Suggérer des organisations"}
+      subtitle={collaboration?.title}
+      ariaLabel={collaboration?.role == "leader" ? "Inviter des organisations" : "Suggérer des organisations"}
+      closeVariant="plain"
+    >
 
         <div className="am-offcanvas-body" ref={bodyRef}>
           {/* Alerte de retour */}
@@ -275,7 +252,7 @@ export const SuggestOrgModal = () => {
                       </div>
                     ) : selectableOrgs.length === 0 ? (
                       <div className="suggest-search-empty">
-                        <Buildings2 size={20} variant="Linear" color="#9CA3AF" />
+                        <Buildings2 size={20} variant="Linear" color="var(--color-text-muted)" />
                         <span>Aucune organisation disponible</span>
                       </div>
                     ) : (
@@ -350,7 +327,7 @@ export const SuggestOrgModal = () => {
 
             {suggestedOrgs.length === 0 ? (
               <div className="suggest-empty">
-                <People size={28} variant="Linear" color="#9CA3AF" />
+                <People size={28} variant="Linear" color="var(--color-text-muted)" />
                 <p>Aucune organisation sélectionnée pour le moment.</p>
               </div>
             ) : (
@@ -461,8 +438,7 @@ export const SuggestOrgModal = () => {
             )}
           </button>
         </div>
-      </div>
-    </>
+      </OffcanvasModal>
   );
 };
 

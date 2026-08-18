@@ -19,18 +19,33 @@
 }
 
 .project-list-title {
-  font-size: var(--font-size-h2);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
   margin: 0 0 var(--spacing-1) 0;
   letter-spacing: var(--tracking-tight);
 }
 
 .project-list-subtitle {
-  font-size: var(--font-size-body);
-  color: var(--color-text-muted);
   margin: 0;
   line-height: 1.5;
+}
+
+/* Habillage de la barre de filtres commune : la carte translucide reste
+   propre a cette page, les controles a l'interieur sont partages. */
+.project-filtres-zone {
+  margin: 0 var(--spacing-5) var(--spacing-4) var(--spacing-5);
+  padding: var(--spacing-3) var(--spacing-4);
+  /* Collee sous l'en-tete, qui fait 64px. Cette regle vivait sur
+     `.project-filters` ; elle a ete perdue au passage sur FiltersBar. Sans
+     elle, la recherche disparait des qu'on defile la liste — le geste le plus
+     frequent sur telephone, ou la liste est longue. */
+  position: sticky;
+  top: 64px;
+  z-index: 4;
+  flex-shrink: 0;
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: saturate(180%) blur(16px);
+  -webkit-backdrop-filter: saturate(180%) blur(16px);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
 }
 
 /* ============================================
@@ -286,18 +301,46 @@
 
 .incident-date-badge.is-pending {
   background-color: rgba(245, 158, 11, 0.15);
-  color: var(--color-warning);
+  color: var(--color-warning-text);
 }
 
 .incident-date-badge.is-resolved {
   background-color: rgba(34, 197, 94, 0.15);
-  color: var(--color-success);
+  color: var(--color-success-text);
   border: 1px solid rgba(34, 197, 94, 0.2);
 }
 
 .incident-date-badge.is-neutral {
   background-color: rgba(108, 114, 120, 0.1);
   color: var(--color-text-secondary);
+}
+
+/* Periode : « declare le X → resolu le Y ». La fleche porte le sens, donc
+   elle reste lisible mais discrete ; les deux dates gardent le meme poids. */
+.incident-periode {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  flex-wrap: wrap;
+  row-gap: var(--spacing-1);
+}
+
+.incident-periode-debut {
+  white-space: nowrap;
+}
+
+.incident-periode-lien {
+  color: var(--color-text-tertiary, var(--color-text-secondary));
+  font-size: 13px;
+  margin-left: var(--spacing-2);
+}
+
+/* Etat : statut au-dessus, gravite en dessous. */
+.incident-etat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  align-items: flex-start;
 }
 
 /* Badges in table */
@@ -335,15 +378,15 @@
 }
 
 .variant-taken .badge-dot {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .variant-in-progress .badge-dot {
-  color: var(--color-warning);
+  color: var(--color-warning-text);
 }
 
 .variant-resolved .badge-dot {
-  color: var(--color-success);
+  color: var(--color-success-text);
 }
 
 .variant-declared {
@@ -354,30 +397,30 @@
 
 .variant-taken {
   background-color: rgba(58, 162, 221, 0.1);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   border-color: rgba(58, 162, 221, 0.2);
 }
 
 .variant-in-progress {
   background-color: rgba(245, 158, 11, 0.1);
-  color: var(--color-warning);
+  color: var(--color-warning-text);
   border-color: rgba(245, 158, 11, 0.2);
 }
 
 .variant-resolved {
   background-color: rgba(34, 197, 94, 0.1);
-  color: var(--color-success);
+  color: var(--color-success-text);
   border-color: rgba(34, 197, 94, 0.2);
 }
 
 .variant-taken-me {
   background-color: rgba(58, 162, 221, 0.15);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   border-color: rgba(58, 162, 221, 0.35);
 }
 
 .variant-taken-me .badge-dot {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .variant-taken-other {
@@ -392,12 +435,12 @@
 
 .variant-resolved-me {
   background-color: rgba(34, 197, 94, 0.15);
-  color: var(--color-success);
+  color: var(--color-success-text);
   border-color: rgba(34, 197, 94, 0.35);
 }
 
 .variant-resolved-me .badge-dot {
-  color: var(--color-success);
+  color: var(--color-success-text);
 }
 
 .variant-resolved-other {
@@ -445,42 +488,10 @@
   background-color: rgba(58, 162, 221, 0.2);
 }
 
-/* Incident List Actions Table Buttons */
-.incident-action-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: none;
-  border-radius: var(--radius-md);
-  background: transparent;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.incident-action-btn.assign-btn {
-  color: var(--color-primary);
-  background-color: rgba(58, 162, 221, 0.1);
-}
-
-.incident-action-btn.assign-btn:hover {
-  background-color: rgba(58, 162, 221, 0.2);
-}
-
-.incident-action-btn.delete-btn {
-  color: var(--color-danger);
-  background-color: rgba(239, 68, 68, 0.08);
-}
-
-.incident-action-btn.delete-btn:hover {
-  background-color: rgba(239, 68, 68, 0.18);
-}
-
 /* ============================================
    RESPONSIVE
    ============================================ */
-@media (max-width: 1023px) {
+@media (max-width: 1023.98px) {
   .project-list-section {
     width: 100%;
   }

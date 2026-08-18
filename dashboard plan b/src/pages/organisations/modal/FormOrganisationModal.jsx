@@ -4,6 +4,7 @@ import { useOrganisationsContext } from '../context/OrganisationsContext';
 import { SECTORS, TYPES, COUNTRIES } from '../data/organisations';
 import { BlurryImage } from '../../../components/atoms/BlurryImage';
 
+import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
 const FormOrganisationModal = () => {
   const {
     formModal,
@@ -29,43 +30,28 @@ const FormOrganisationModal = () => {
 
   if (!formModal.open) return null;
 
-  const isClosing = formAnimating === 'closing';
-  const panelClass = [
-    'am-offcanvas-panel',
-    isClosing ? 'am-offcanvas-panel--closing' : '',
-    formAnimating === 'opening' ? 'am-offcanvas-panel--opening' : '',
-  ].filter(Boolean).join(' ');
 
-  const backdropClass = [
-    'am-offcanvas-backdrop',
-    isClosing ? 'am-offcanvas-backdrop--closing' : '',
-  ].filter(Boolean).join(' ');
+
+  const titre = formModal.mode === 'create' ? 'Nouvelle organisation' : "Modifier l'organisation";
+  const verrouille = isSubmitting || modalAlert.type === 'success';
 
   return (
-    <>
-      <div className={backdropClass} onClick={closeFormModal} />
+    <OffcanvasModal
+      onClose={closeFormModal}
+      isClosing={formAnimating === 'closing'}
+      title={titre}
+      ariaLabel={titre}
+      closeVariant="plain"
+      closeDisabled={verrouille}
+    >
+      {/* Le panneau etait lui-meme un <form>. La coquille rendant un <aside>,
+          le formulaire enveloppe desormais le corps, et le bouton d'envoi du
+          pied lui est rattache par l'attribut `form`. */}
       <form
-        className={panelClass}
-        role="dialog"
-        aria-modal="true"
-        aria-label={formModal.mode === 'create' ? 'Nouvelle organisation' : "Modifier l'organisation"}
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleSubmit();
-        }}
+        id="organisation-form"
+        onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}
+        style={{ display: 'contents' }}
       >
-        <div className="am-offcanvas-header">
-          <h5 className="am-offcanvas-title">
-            {formModal.mode === 'create' ? 'Nouvelle organisation' : 'Modifier l\'organisation'}
-          </h5>
-          <button
-            type="button"
-            className="btn-close"
-            onClick={closeFormModal}
-            disabled={isSubmitting || modalAlert.type === 'success'}
-            aria-label="Fermer"
-          />
-        </div>
 
         <div className="am-offcanvas-body" ref={bodyRef}>
           {modalAlert.message && (
@@ -135,7 +121,7 @@ const FormOrganisationModal = () => {
                     style={formErrors.name ? { borderColor: 'var(--color-danger)' } : {}}
                   />
                   {formErrors.name && (
-                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger)' }}>{formErrors.name}</span>
+                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger-text)' }}>{formErrors.name}</span>
                   )}
                 </div>
 
@@ -151,7 +137,7 @@ const FormOrganisationModal = () => {
                     style={formErrors.acronym ? { borderColor: 'var(--color-danger)' } : {}}
                   />
                   {formErrors.acronym && (
-                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger)' }}>{formErrors.acronym}</span>
+                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger-text)' }}>{formErrors.acronym}</span>
                   )}
                 </div>
 
@@ -163,7 +149,7 @@ const FormOrganisationModal = () => {
                     {SECTORS.map((s) => <option key={s.en} value={s.en}>{s.fr}</option>)}
                   </select>
                   {formErrors.sector && (
-                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger)' }}>{formErrors.sector}</span>
+                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger-text)' }}>{formErrors.sector}</span>
                   )}
                 </div>
 
@@ -175,7 +161,7 @@ const FormOrganisationModal = () => {
                     {TYPES.map((t) => <option key={t.en} value={t.en}>{t.fr}</option>)}
                   </select>
                   {formErrors.type && (
-                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger)' }}>{formErrors.type}</span>
+                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger-text)' }}>{formErrors.type}</span>
                   )}
                 </div>
 
@@ -187,7 +173,7 @@ const FormOrganisationModal = () => {
                     {COUNTRIES.map((c) => <option key={c.en} value={c.en}>{c.fr}</option>)}
                   </select>
                   {formErrors.country && (
-                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger)' }}>{formErrors.country}</span>
+                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger-text)' }}>{formErrors.country}</span>
                   )}
                 </div>
 
@@ -202,7 +188,7 @@ const FormOrganisationModal = () => {
                     style={formErrors.email ? { borderColor: 'var(--color-danger)' } : {}}
                   />
                   {formErrors.email && (
-                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger)' }}>{formErrors.email}</span>
+                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger-text)' }}>{formErrors.email}</span>
                   )}
                 </div>
 
@@ -217,7 +203,7 @@ const FormOrganisationModal = () => {
                     style={formErrors.phone ? { borderColor: 'var(--color-danger)' } : {}}
                   />
                   {formErrors.phone && (
-                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger)' }}>{formErrors.phone}</span>
+                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger-text)' }}>{formErrors.phone}</span>
                   )}
                 </div>
 
@@ -232,7 +218,7 @@ const FormOrganisationModal = () => {
                     style={formErrors.website ? { borderColor: 'var(--color-danger)' } : {}}
                   />
                   {formErrors.website && (
-                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger)' }}>{formErrors.website}</span>
+                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger-text)' }}>{formErrors.website}</span>
                   )}
                 </div>
 
@@ -248,7 +234,7 @@ const FormOrganisationModal = () => {
                     <option value="inactive">Inactive</option>
                   </select>
                   {formErrors.status && (
-                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger)' }}>{formErrors.status}</span>
+                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger-text)' }}>{formErrors.status}</span>
                   )}
                 </div>
 
@@ -262,7 +248,7 @@ const FormOrganisationModal = () => {
                     style={formErrors.description ? { borderColor: 'var(--color-danger)' } : {}}
                   />
                   {formErrors.description && (
-                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger)' }}>{formErrors.description}</span>
+                    <span style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-danger-text)' }}>{formErrors.description}</span>
                   )}
                 </div>
               </div>
@@ -279,6 +265,7 @@ const FormOrganisationModal = () => {
           </button>
           <button
             type="submit"
+            form="organisation-form"
             className="am-btn am-btn--primary"
             disabled={isSubmitting || modalAlert.type === 'success'}
           >
@@ -290,7 +277,7 @@ const FormOrganisationModal = () => {
           </button>
         </div>
       </form>
-    </>
+    </OffcanvasModal>
   );
 };
 

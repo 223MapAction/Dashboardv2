@@ -9,7 +9,7 @@ import {
   ShimmerCircularImage,
   ShimmerButton
 } from 'react-shimmer-effects';
-import { takeInChargeIncidentService, getIncidentService, getIncidentPredictionService, togglePublicIncidentService } from '../../service/incident_service';
+import { takeInChargeIncidentService, getIncidentService, getIncidentPredictionService } from '../../service/incident_service';
 import { requestCollaborationService, getCollaborationsService } from '../../service/collaboration_service';
 import { getIncidentChatHistoryService, sendIncidentChatMessageService } from '../../service/chat_service';
 import { authService } from '../../../auth/services/authService';
@@ -55,6 +55,7 @@ import { NotFound } from '../../../not-found';
 import { BlurryImage } from '../../../../components/atoms/BlurryImage';
 
 
+import { ImageViewer } from '../../../../components/molecules/ImageViewer';
 const formatMessageTime = (dateStr) => {
   if (!dateStr) return '';
   try {
@@ -220,14 +221,14 @@ const ROLE_OPTIONS = [
     label: 'Leader',
     description: 'Pilote l\'action et coordonne les autres organisations',
     icon: Crown1,
-    color: 'var(--color-warning)'
+    color: 'var(--color-warning-text)'
   },
   {
     id: 'contributeur',
     label: 'Contributeur',
     description: 'Participe activement à la réalisation des tâches',
     icon: People,
-    color: 'var(--color-primary)'
+    color: 'var(--color-primary-text)'
   },
   {
     id: 'observateur',
@@ -943,7 +944,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
       <section className="project-detail empty">
         <div className="project-detail-empty">
           <Briefcase size={48} variant="Linear" color="var(--color-text-muted)" />
-          <p>Sélectionnez un incident dans la liste pour voir ses détails</p>
+          <p>Sélectionnez un signalement dans la liste pour voir ses détails</p>
         </div>
       </section>
     );
@@ -955,7 +956,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
         return safeIncident.isOwner
           ? {
             label: 'Résolu (Moi)',
-            color: 'var(--color-success)',
+            color: 'var(--color-success-text)',
             bg: 'rgba(34, 197, 94, 0.12)',
             border: 'rgba(34, 197, 94, 0.3)',
             icon: <ShieldTick size={14} variant="Bold" color="var(--color-success)" style={{ marginRight: '6px' }} />
@@ -971,14 +972,14 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
         return safeIncident.isOwner
           ? {
             label: 'Pris en compte (Moi)',
-            color: 'var(--color-primary)',
+            color: 'var(--color-primary-text)',
             bg: 'rgba(58, 162, 221, 0.12)',
             border: 'rgba(58, 162, 221, 0.3)',
             icon: <ClipboardTick size={14} variant="Bold" color="var(--color-primary)" style={{ marginRight: '6px' }} />
           }
           : {
             label: 'Pris en compte (Autre)',
-            color: 'var(--color-warning)',
+            color: 'var(--color-warning-text)',
             bg: 'rgba(249, 115, 22, 0.12)',
             border: 'rgba(249, 115, 22, 0.3)',
             icon: <ClipboardTick size={14} variant="Bold" color="var(--color-warning)" style={{ marginRight: '6px' }} />
@@ -987,7 +988,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
       default:
         return {
           label: 'Déclaré',
-          color: 'var(--color-danger)',
+          color: 'var(--color-danger-text)',
           bg: 'rgba(239, 68, 68, 0.12)',
           border: 'rgba(239, 68, 68, 0.3)',
           icon: <Danger size={14} variant="Bold" color="var(--color-danger)" style={{ marginRight: '6px' }} />
@@ -999,7 +1000,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
     return safeIncident.is_public
       ? {
         label: 'Public',
-        color: 'var(--color-success)',
+        color: 'var(--color-success-text)',
         bg: 'rgba(34, 197, 94, 0.12)',
         border: 'rgba(34, 197, 94, 0.3)',
         icon: <Eye size={14} variant="Bold" color="var(--color-success)" style={{ marginRight: '6px' }} />
@@ -1019,14 +1020,14 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
     return isInternal
       ? {
         label: 'Interne',
-        color: 'var(--color-danger)',
+        color: 'var(--color-danger-text)',
         bg: 'rgba(239, 68, 68, 0.12)',
         border: 'rgba(239, 68, 68, 0.3)',
         icon: <Briefcase size={14} variant="Bold" color="var(--color-danger)" style={{ marginRight: '6px' }} />
       }
       : {
         label: 'Collaboratif',
-        color: 'var(--color-primary)',
+        color: 'var(--color-primary-text)',
         bg: 'rgba(58, 162, 221, 0.12)',
         border: 'rgba(58, 162, 221, 0.3)',
         icon: <People size={14} variant="Bold" color="var(--color-primary)" style={{ marginRight: '6px' }} />
@@ -1054,7 +1055,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
     if (normalizedRole === 'contributor' || normalizedRole === 'contributeur') {
       return {
         label: 'Contributeur',
-        color: 'var(--color-primary)',
+        color: 'var(--color-primary-text)',
         bg: 'rgba(58, 162, 221, 0.12)',
         border: 'rgba(58, 162, 221, 0.3)',
         icon: <People size={14} variant="Bold" color="var(--color-primary)" style={{ marginRight: '6px' }} />
@@ -1063,7 +1064,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
     if (normalizedRole === 'leader') {
       return {
         label: 'Leader',
-        color: 'var(--color-warning)',
+        color: 'var(--color-warning-text)',
         bg: 'rgba(245, 158, 11, 0.12)',
         border: 'rgba(245, 158, 11, 0.3)',
         icon: <Crown1 size={14} variant="Bold" color="var(--color-warning)" style={{ marginRight: '6px' }} />
@@ -1141,19 +1142,19 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
 
     if (isAccepted) {
       return {
-        color: 'var(--color-success)',
+        color: 'var(--color-success-text)',
         bg: 'rgba(34, 197, 94, 0.12)',
         border: 'rgba(34, 197, 94, 0.3)'
       };
     } else if (isPending) {
       return {
-        color: 'var(--color-warning)',
+        color: 'var(--color-warning-text)',
         bg: 'rgba(245, 158, 11, 0.12)',
         border: 'rgba(245, 158, 11, 0.3)'
       };
     } else if (isRejected) {
       return {
-        color: 'var(--color-danger)',
+        color: 'var(--color-danger-text)',
         bg: 'rgba(239, 68, 68, 0.12)',
         border: 'rgba(239, 68, 68, 0.3)'
       };
@@ -1451,7 +1452,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
               <People size={20} variant="Bold" color="var(--color-warning)" />
               <div style={{ fontSize: '14px', fontWeight: '500' }}>
                 <span>
-                  <strong>Incident ouvert à la collaboration :</strong> Des organisations se mobilisent déjà pour intervenir, mais aucun leader n'est encore désigné pour coordonner les actions. Prenez le leadership ou rejoignez l'effort !
+                  <strong>Signalement ouvert à la collaboration :</strong> Des organisations se mobilisent déjà pour intervenir, mais aucun leader n'est encore désigné pour coordonner les actions. Prenez le leadership ou rejoignez l'effort !
                 </span>
               </div>
             </div>
@@ -1479,11 +1480,11 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                 <div style={{ fontSize: '14px', fontWeight: '500' }}>
                   {takingOrg.isMe ? (
                     <span>
-                      <strong>Incident géré en interne :</strong> Votre organisation travaille actuellement sur cet incident en interne avec ses propres équipes.
+                      <strong>Signalement géré en interne :</strong> Votre organisation travaille actuellement sur cet incident en interne avec ses propres équipes.
                     </span>
                   ) : (
                     <span>
-                      <strong>Incident géré en interne :</strong> L'organisation <strong>{takingOrg.name}</strong> a pris en charge cet incident et travaille dessus en interne avec ses propres équipes.
+                      <strong>Signalement géré en interne :</strong> L'organisation <strong>{takingOrg.name}</strong> a pris en charge cet incident et travaille dessus en interne avec ses propres équipes.
                     </span>
                   )}
                 </div>
@@ -1509,7 +1510,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                 {safeIncident.image ? (
                   <BlurryImage
                     src={safeIncident.image}
-                    alt="Incident"
+                    alt="Signalement"
                     className="incident-actual-image clickable"
                     onClick={() => setIsImageModalOpen(true)}
                   />
@@ -1585,8 +1586,12 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                   </div>
                   {/* Mini-carte détaillée */}
                   <div className="detail-geo-map" style={{ marginTop: '12px', height: '320px', borderRadius: '8px', overflow: 'hidden', position: 'relative' }}>
+                    {/* Meme correctif que sur le tableau de bord :
+                        `cooperativeGestures` est ignore par react-map-gl v8, donc
+                        la carte avalait la molette et bloquait le defilement de
+                        la fiche. Le zoom passe par les boutons. */}
                     <Map
-                      cooperativeGestures={true}
+                      scrollZoom={false}
                       initialViewState={{
                         longitude: safeIncident.coordinates.lng,
                         latitude: safeIncident.coordinates.lat,
@@ -1696,7 +1701,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                           height: '24px',
                           borderRadius: '4px',
                           backgroundColor: 'rgba(58, 162, 221, 0.1)',
-                          color: 'var(--color-primary)',
+                          color: 'var(--color-primary-text)',
                           fontWeight: 'bold',
                           fontSize: '12px'
                         }}>
@@ -1767,7 +1772,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                   color: 'var(--color-text-muted)',
                   fontSize: '14px'
                 }}>
-                  <span>Aucune vidéo disponible pour cet incident</span>
+                  <span>Aucune vidéo disponible pour cet signalement</span>
                 </div>
               )}
             </div>
@@ -1815,7 +1820,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                   {predictionError && (
                     <div style={{
                       fontSize: 'var(--font-size-caption)',
-                      color: 'var(--color-warning)',
+                      color: 'var(--color-warning-text)',
                       padding: 'var(--spacing-2) var(--spacing-3)',
                       backgroundColor: 'rgba(245, 158, 11, 0.1)',
                       borderRadius: 'var(--radius-sm)',
@@ -1834,7 +1839,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                     {/* Score d'impact global */}
                     <div className="kpi-card" style={{ margin: 0 }}>
                       <Danger size={32} variant="Bold" color="var(--color-warning)" />
-                      <div className="kpi-value" style={{ fontSize: '28px', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-warning)' }}>
+                      <div className="kpi-value" style={{ fontSize: '28px', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-warning-text)' }}>
                         {pred.global_impact_score}
                       </div>
                       <div className="kpi-label">SCORE D'IMPACT GLOBAL</div>
@@ -1886,7 +1891,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                       border: '1px solid var(--color-success)',
                       marginBottom: 'var(--spacing-3)'
                     }}>
-                      <span style={{ fontSize: 'var(--font-size-caption)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-success)' }}>
+                      <span style={{ fontSize: 'var(--font-size-caption)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-success-text)' }}>
                         {pred.status === 'completed' ? 'IA Vision Terminée' : 'IA Vision Engagée'}
                       </span>
                     </div>
@@ -1925,7 +1930,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                         border: '1px solid var(--color-danger)',
                         marginBottom: 'var(--spacing-2)'
                       }}>
-                        <span style={{ fontSize: 'var(--font-size-caption)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-danger)' }}>
+                        <span style={{ fontSize: 'var(--font-size-caption)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-danger-text)' }}>
                           Motif ({pred.sub_category})
                         </span>
                       </div>
@@ -1962,7 +1967,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                             }
                           }
                           return vectorsArray.map((vector, idx) => (
-                            <span key={idx} style={{ padding: 'var(--spacing-1) var(--spacing-2)', backgroundColor: 'var(--color-background)', border: '1px solid var(--color-primary)', color: 'var(--color-primary)', borderRadius: 'var(--radius-full)', fontSize: 'var(--font-size-caption)', fontWeight: 'var(--font-weight-medium)' }}>
+                            <span key={idx} style={{ padding: 'var(--spacing-1) var(--spacing-2)', backgroundColor: 'var(--color-background)', border: '1px solid var(--color-primary)', color: 'var(--color-primary-text)', borderRadius: 'var(--radius-full)', fontSize: 'var(--font-size-caption)', fontWeight: 'var(--font-weight-medium)' }}>
                               {vector}
                             </span>
                           ));
@@ -1993,7 +1998,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                             }
                           }
                           return tagsArray.map((tag, idx) => (
-                            <span key={idx} style={{ padding: 'var(--spacing-1) var(--spacing-2)', backgroundColor: 'var(--color-background)', border: '1px solid var(--color-success)', color: 'var(--color-success)', borderRadius: 'var(--radius-full)', fontSize: 'var(--font-size-caption)', fontWeight: 'var(--font-weight-medium)' }}>
+                            <span key={idx} style={{ padding: 'var(--spacing-1) var(--spacing-2)', backgroundColor: 'var(--color-background)', border: '1px solid var(--color-success)', color: 'var(--color-success-text)', borderRadius: 'var(--radius-full)', fontSize: 'var(--font-size-caption)', fontWeight: 'var(--font-weight-medium)' }}>
                               {tag}
                             </span>
                           ));
@@ -2043,7 +2048,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
 
                       <div style={{ marginBottom: 'var(--spacing-3)' }}>
                         <div style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-text-muted)', marginBottom: 'var(--spacing-1)' }}>PERSONNES EXPOSÉES</div>
-                        <div style={{ fontSize: '20px', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-primary)' }}>
+                        <div style={{ fontSize: '20px', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-primary-text)' }}>
                           {pred.total_population_exposed}
                         </div>
                       </div>
@@ -2073,9 +2078,9 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                       <div style={{ marginBottom: 'var(--spacing-3)', paddingTop: 'var(--spacing-2)', borderTop: '1px solid var(--color-border)' }}>
                         <div style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-text-muted)', marginBottom: 'var(--spacing-1)' }}>VULNÉRABILITÉ SOCIALE</div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-1)' }}>
-                          <span style={{ fontSize: 'var(--font-size-body-large)', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-primary)' }}>{pred.social_vulnerability_score}/10</span>
+                          <span style={{ fontSize: 'var(--font-size-body-large)', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-primary-text)' }}>{pred.social_vulnerability_score}/10</span>
                           {pred.is_social_probabilistic && (
-                            <span style={{ fontSize: '9px', backgroundColor: 'var(--color-background)', border: '1px solid var(--color-primary)', color: 'var(--color-primary)', padding: '2px 4px', borderRadius: 'var(--radius-sm)', fontWeight: 'var(--font-weight-semibold)' }}>PROB</span>
+                            <span style={{ fontSize: '9px', backgroundColor: 'var(--color-background)', border: '1px solid var(--color-primary)', color: 'var(--color-primary-text)', padding: '2px 4px', borderRadius: 'var(--radius-sm)', fontWeight: 'var(--font-weight-semibold)' }}>PROB</span>
                           )}
                         </div>
                       </div>
@@ -2112,7 +2117,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
 
                       <div style={{ marginBottom: 'var(--spacing-3)' }}>
                         <div style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-text-muted)', marginBottom: 'var(--spacing-1)' }}>TEMPÉRATURE</div>
-                        <div style={{ fontSize: '20px', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-success)' }}>
+                        <div style={{ fontSize: '20px', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-success-text)' }}>
                           {pred.topography?.temperature_celsius ?? 40.5}°C
                         </div>
                       </div>
@@ -2178,7 +2183,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
 
                       <div style={{ marginBottom: 'var(--spacing-3)' }}>
                         <div style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-text-muted)', marginBottom: 'var(--spacing-1)' }}>ÉCOLES</div>
-                        <div style={{ fontSize: '20px', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-warning)' }}>
+                        <div style={{ fontSize: '20px', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-warning-text)' }}>
                           {pred.schools ?? pred.social_data?.schools ?? 0}
                         </div>
                       </div>
@@ -2223,7 +2228,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                   }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--spacing-3)' }}>
                       <div>
-                        <div style={{ fontSize: 'var(--font-size-body-small)', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-warning)', marginBottom: 'var(--spacing-2)' }}>
+                        <div style={{ fontSize: 'var(--font-size-body-small)', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-warning-text)', marginBottom: 'var(--spacing-2)' }}>
                           ALERTE PROPAGATION : {pred.potential_risk?.message || `Risque de propagation secondaire par courant d'eau estimé à ≥${pred.impact_radius_meters}m.`}
                         </div>
                         <div style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-text-secondary)', lineHeight: '1.6' }}>
@@ -2254,7 +2259,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                   }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--spacing-3)' }}>
                       <div>
-                        <div style={{ fontSize: 'var(--font-size-body-small)', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-success)', marginBottom: 'var(--spacing-2)' }}>
+                        <div style={{ fontSize: 'var(--font-size-body-small)', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-success-text)', marginBottom: 'var(--spacing-2)' }}>
                           {pred.recommendation || pred.piste_solution || `Intervention recommandée dans un rayon de ${pred.impact_radius_meters}m. Score de gravité: ${pred.global_impact_score}/10.`}
                         </div>
                         <div style={{ fontSize: 'var(--font-size-caption)', color: 'var(--color-text-secondary)', lineHeight: '1.6', display: 'flex', gap: 'var(--spacing-4)', flexWrap: 'wrap' }}>
@@ -2409,12 +2414,11 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
         <InviteOrgModal key={"InviteOrgModalIncident"} />
         {/* Modal pour afficher l'image en grand */}
         {isImageModalOpen && safeIncident.image && (
-          <div className="image-zoom-modal" onClick={() => setIsImageModalOpen(false)}>
-            <button className="image-zoom-close" onClick={() => setIsImageModalOpen(false)}>
-              <CloseCircle size={32} variant="Bold" color="#FFF" />
-            </button>
-            <BlurryImage src={safeIncident.image} alt="Incident Zoom" className="image-zoom-content" onClick={(e) => e.stopPropagation()} />
-          </div>
+          <ImageViewer
+            src={safeIncident.image}
+            alt={safeIncident.title || 'Photo du signalement'}
+            onClose={() => setIsImageModalOpen(false)}
+          />
         )}
 
       </section>

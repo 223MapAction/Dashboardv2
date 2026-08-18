@@ -75,17 +75,17 @@
   border: none;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
   white-space: nowrap;
 }
 
 .language-btn:hover {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   background-color: var(--color-surface);
 }
 
 .language-btn.active {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   background-color: var(--color-surface);
   box-shadow: var(--shadow-sm);
 }
@@ -154,6 +154,7 @@
   z-index: 1100;
   animation: notificationSlideIn 0.25s cubic-bezier(0.32, 0.72, 0.35, 1) forwards;
   max-height: calc(100vh - 100px);
+  max-height: calc(100dvh - 100px);
   display: flex;
   flex-direction: column;
   transform-origin: top right;
@@ -263,7 +264,7 @@
   text-align: center;
   background: transparent;
   border: none;
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
@@ -287,7 +288,7 @@
   overflow: hidden;
   background-color: var(--color-primary);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
   border: 2px solid transparent;
   padding: 0;
   display: flex;
@@ -335,7 +336,7 @@
   overflow: hidden;
   background-color: var(--color-primary);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
   border: 2px solid transparent;
 }
 
@@ -431,7 +432,7 @@
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
   font-size: var(--font-size-body);
   color: var(--color-text-primary);
   text-align: left;
@@ -451,7 +452,7 @@
 }
 
 .profile-menu-item.logout {
-  color: var(--color-severity-high);
+  color: var(--color-severity-high-text);
 }
 
 .profile-menu-item.logout svg {
@@ -469,16 +470,18 @@
 /* === RESPONSIVE === */
 
 /* Mobile (jusqu'à 767px) */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
   .notification-menu {
     max-width: 330px;
     right: -40px;
  
     max-height: calc(100vh - 80px);
+    max-height: calc(100dvh - 80px);
   }
   
   .notification-list {
     max-height: calc(100vh - 200px);
+    max-height: calc(100dvh - 200px);
   }
   
  
@@ -519,7 +522,7 @@
     width: calc(100% - 64px);
   }
 }
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 767.98px) {
   .app-header{
       width: 100%;
   }

@@ -5,6 +5,7 @@
 .orgs-layout {
   display: flex;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   background-color: var(--color-background);
 }
@@ -15,6 +16,7 @@
   flex-direction: column;
   min-width: 0;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
 }
 
@@ -48,16 +50,11 @@
 .orgs-header-left {}
 
 .orgs-title {
-  font-size: var(--font-size-h2);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
   margin: 0 0 var(--spacing-1) 0;
   letter-spacing: var(--tracking-tight);
 }
 
 .orgs-subtitle {
-  font-size: var(--font-size-body);
-  color: var(--color-text-muted);
   margin: 0;
   line-height: 1.5;
 }
@@ -385,12 +382,12 @@
 
 .orgs-status-active {
   background-color: rgba(34, 197, 94, 0.1);
-  color: var(--color-success);
+  color: var(--color-success-text);
 }
 
 .orgs-status-inactive {
   background-color: rgba(239, 68, 68, 0.1);
-  color: var(--color-danger);
+  color: var(--color-danger-text);
 }
 
 .orgs-status-dot {
@@ -410,45 +407,6 @@
 
 .orgs-table tbody tr:hover .orgs-row-actions {
   opacity: 1;
-}
-
-.orgs-icon-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: none;
-  border-radius: var(--radius-md);
-  background: transparent;
-  cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.orgs-icon-btn-edit {
-  fill: var(--color-primary);
-  background-color: rgba(58, 162, 221, 0.1);
-}
-
-.orgs-icon-btn-edit svg {
-  fill: var(--color-primary);
-}
-
-.orgs-icon-btn-edit:hover {
-  background-color: rgba(58, 162, 221, 0.2);
-}
-
-.orgs-icon-btn-delete {
-  fill: var(--color-danger);
-  background-color: rgba(239, 68, 68, 0.08);
-}
-
-.orgs-icon-btn-delete svg {
-  fill: var(--color-danger);
-}
-
-.orgs-icon-btn-delete:hover {
-  background-color: rgba(239, 68, 68, 0.18);
 }
 
 /* Empty state */
@@ -597,7 +555,7 @@
 
 .orgs-photo-btn-upload {
   background-color: rgba(58, 162, 221, 0.1);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   border: 1px solid rgba(58, 162, 221, 0.3);
 }
 
@@ -608,7 +566,7 @@
 
 .orgs-photo-btn-remove {
   background-color: rgba(239, 68, 68, 0.07);
-  color: var(--color-danger);
+  color: var(--color-danger-text);
   border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
@@ -792,7 +750,7 @@
 }
 
 .orgs-btn-confirm-delete:hover {
-  background-color: #DC2626;
+  background-color: var(--color-danger-text);
 }
 
 .orgs-btn-cancel:disabled,
@@ -860,7 +818,7 @@
 }
 
 /* ── Responsive ────────────────────── */
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
   .orgs-content {
     padding: 0 var(--spacing-4) var(--spacing-4);
   }

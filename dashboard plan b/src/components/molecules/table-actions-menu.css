@@ -1,0 +1,158 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   MENU D'ACTIONS DE TABLEAU
+   Remplace les quatre variantes divergentes qui coexistaient
+   (.incident-action-btn, .agents-icon-btn, .orgs-icon-btn,
+   .mes-interventions-action-btn) par un seul déclencheur, aligné sur la
+   couleur principale.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.table-actions-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  /* Cerclé et teinté en permanence : en fond transparent avec une icône grise,
+     le bouton ne se révélait qu'au survol — donc jamais au doigt, où le survol
+     n'existe pas. */
+  border: 1px solid rgba(58, 162, 221, 0.35);
+  border-radius: var(--radius-md);
+  background-color: rgba(58, 162, 221, 0.08);
+  color: var(--color-primary-text);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.table-actions-trigger:hover {
+  background-color: rgba(58, 162, 221, 0.18);
+  border-color: var(--color-primary);
+  color: var(--color-primary-text);
+}
+
+/* Le déclencheur reste teinté tant que son menu est ouvert : sans ça, on perd
+   de vue quelle ligne on est en train de manipuler. */
+.table-actions-trigger.is-open {
+  background-color: rgba(58, 162, 221, 0.14);
+  border-color: var(--color-primary);
+  color: var(--color-primary-text);
+}
+
+/* ── Le menu ─────────────────────────────────────────────────────────────────
+   Rendu dans document.body via un portail, donc positionné en fixe : les
+   tableaux vivent dans un conteneur overflow-x: auto qui le rognerait. */
+.table-actions-menu {
+  position: fixed;
+  z-index: 1200;
+  padding: 6px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  animation: table-actions-apparition 0.14s ease-out;
+}
+
+@keyframes table-actions-apparition {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.table-actions-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-primary);
+  font-family: var(--font-family);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.table-actions-item:hover:not(:disabled),
+.table-actions-item:focus-visible:not(:disabled) {
+  background-color: rgba(58, 162, 221, 0.1);
+  color: var(--color-primary-text);
+  outline: none;
+}
+
+.table-actions-item.is-danger {
+  color: var(--color-danger-text);
+}
+
+.table-actions-item.is-danger:hover:not(:disabled),
+.table-actions-item.is-danger:focus-visible:not(:disabled) {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--color-danger-text);
+}
+
+.table-actions-item:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Au doigt, la cible passe à 44px — le minimum recommandé par Apple. */
+@media (pointer: coarse) {
+  .table-actions-trigger {
+    width: 44px;
+    height: 44px;
+  }
+
+  .table-actions-item {
+    padding: 12px 12px;
+  }
+}
+
+/* ── Colonne d'actions figée à droite ────────────────────────────────────────
+   Le menu condensé réduit la largeur de la colonne, mais ne supprime pas le
+   défilement : les tableaux imposent un min-width de 700 à 1000px, et la
+   colonne d'actions reste au bout. Mesuré sur /agents à 320px : 515px de
+   défilement nécessaires pour atteindre le bouton.
+
+   On fige donc la dernière colonne au bord droit. Elle flotte au-dessus du
+   contenu qui défile dessous, avec un liseré et une ombre portée vers la
+   gauche qui signalent la superposition. Le bouton reste atteignable à toute
+   largeur, sans défiler.
+
+   `background` est obligatoire : sans fond opaque, le contenu défilant
+   passerait visiblement sous la colonne figée. */
+.has-sticky-actions th:last-child,
+.has-sticky-actions td:last-child {
+  position: sticky;
+  right: 0;
+  z-index: 2;
+  background-color: var(--color-surface);
+  box-shadow: -8px 0 12px -8px rgba(15, 23, 42, 0.18);
+}
+
+.has-sticky-actions thead th:last-child {
+  z-index: 3;
+}
+
+/* La ligne survolée ou sélectionnée doit teinter la cellule figée aussi,
+   sinon elle trancherait comme un bloc blanc au milieu de la ligne. */
+.has-sticky-actions tbody tr:hover td:last-child {
+  background-color: var(--color-background);
+}
+
+.has-sticky-actions tbody tr.is-selected td:last-child {
+  background-color: rgba(58, 162, 221, 0.06);
+}
+
+/* Sur grand écran, le tableau tient sans défiler : l'ombre n'aurait plus de
+   sens et ferait une barre verticale parasite. */
+@media (min-width: 1280px) {
+  .has-sticky-actions th:last-child,
+  .has-sticky-actions td:last-child {
+    box-shadow: none;
+  }
+}

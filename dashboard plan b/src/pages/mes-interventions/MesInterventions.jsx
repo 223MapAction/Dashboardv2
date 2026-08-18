@@ -1,4 +1,6 @@
 import React, { useState, useMemo } from 'react';
+import { useRechercheDebouncee } from '../../hooks/useRechercheDebouncee';
+import { FiltersBar } from '../../components/molecules/FiltersBar';
 import { useNavigate } from 'react-router-dom';
 import useSWR from 'swr';
 import { useSidebarState } from '../../hooks/useSidebarState';
@@ -9,14 +11,16 @@ import { MesInterventionsModalProvider, useMesInterventionsModalContext } from '
 import { MesInterventionsAssignModal } from './modal/MesInterventionsAssignModal';
 import { IncidentAgentsListModal } from './modal/IncidentAgentsListModal';
 import { IncidentReportsModal } from './modal/IncidentReportsModal';
-import { getOrgInternalIncidentsService, toggleIncidentPublicService } from './service/mes_interventions_service';
+import { getOrgInternalIncidentsService } from './service/mes_interventions_service';
 import { getIncidentAssignmentsService } from '../incident/service/incident_service';
 import { BlurryImage } from '../../components/atoms/BlurryImage';
 import Pagination from '../../components/molecules/Pagination';
-import debounce from 'lodash.debounce';
+import { ResponsiveTable } from '../../components/molecules/ResponsiveTable';
+import { creerColonnesInterventions, mediaIntervention } from './colonnes';
 import './mes-interventions.css';
 
 
+import { TableActionsMenu } from '../../components/molecules/TableActionsMenu';
 // Initiales pour les avatars
 const getInitials = (name = '') =>
   name
@@ -52,52 +56,6 @@ const adaptIncidentData = (incident) => {
   };
 };
 
-const TableSkeleton = () => (
-  <div className="mes-interventions-table-wrap">
-    <table className="mes-interventions-table">
-      <thead>
-        <tr>
-          <th>Incident</th>
-          <th>Localisation</th>
-          <th>Mode</th>
-          <th>Date de déclaration</th>
-          <th>Date de résolution</th>
-          <th>Progression</th>
-          <th>Équipe terrain</th>
-          <th>Statut</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {[...Array(4)].map((_, idx) => (
-          <tr key={idx}>
-            <td>
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                <ShimmerThumbnail height={40} width={40} rounded />
-                <div>
-                  <ShimmerTitle line={1} gap={4} width={150} />
-                </div>
-              </div>
-            </td>
-            <td><ShimmerText line={1} width={100} /></td>
-            <td><ShimmerThumbnail height={20} width={80} rounded /></td>
-            <td><ShimmerText line={1} width={80} /></td>
-            <td><ShimmerText line={1} width={80} /></td>
-            <td><ShimmerThumbnail height={8} width={60} rounded /></td>
-            <td>
-              <div style={{ display: 'flex', gap: '4px' }}>
-                <ShimmerCircularImage size={24} />
-                <ShimmerCircularImage size={24} />
-              </div>
-            </td>
-            <td><ShimmerThumbnail height={24} width={80} rounded /></td>
-            <td><ShimmerCircularImage size={32} /></td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-);
 
 const AVATAR_COLORS = [
   '#EF4444', '#F97316', '#F59E0B', '#22C55E',
@@ -230,25 +188,18 @@ const MesInterventionsContent = () => {
     setMutateIncidents
   } = useMesInterventionsModalContext();
 
-  const [searchInput, setSearchInput] = useState('');
-  const [search, setSearch] = useState('');
+  const {
+    saisie: searchInput,
+    setSaisie: setSearchInput,
+    recherche: search,
+    reinitialiser: reinitialiserRecherche,
+  } = useRechercheDebouncee();
   const [statusFilter, setStatusFilter] = useState('');
   const [sourceFilter, setSourceFilter] = useState('agents_or_internal');
 
   const [page, setPage] = useState(1);
   const pageSize = 20;
 
-  // Debounce search input de 300ms
-  const debouncedSetSearch = useMemo(
-    () => debounce((val) => setSearch(val), 300),
-    []
-  );
-
-  React.useEffect(() => {
-    return () => {
-      debouncedSetSearch.cancel();
-    };
-  }, [debouncedSetSearch]);
 
   // Reset page to 1 on filter/search change
   React.useEffect(() => {
@@ -298,8 +249,39 @@ const MesInterventionsContent = () => {
 
   };
 
+  // Les colonnes vivent dans ./colonnes : sorties d'ici, elles se testent,
+  // et ce fichier redescend sous les 400 lignes.
+  const colonnes = creerColonnesInterventions({
+    onOuvrirRapports: handleOpenReports,
+    RenduEquipe: IncidentAgentsStack,
+  });
+
+  const actionsDe = (incident) => (
+    <>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <TableActionsMenu
+                ariaLabel={`Actions sur ${incident.title || 'cette intervention'}`}
+                actions={[
+                  {
+                    id: 'detail',
+                    label: 'Voir le détail',
+                    icon: Eye,
+                    onSelect: () => handleGoToIncidentDetail(incident),
+                  },
+                  {
+                    id: 'team',
+                    label: "Gérer l'équipe",
+                    icon: People,
+                    onSelect: () => openAssignModal(incident),
+                  },
+                ]}
+              />
+            </div>
+    </>
+  );
+
   const handleGoToIncidentDetail = (incident) => {
-    navigate(`/incidents/${incident.id}`, {
+    navigate(`/signalements/${incident.id}`, {
       state: { incident, from: '/mes-interventions' }
     });
   };
@@ -329,201 +311,54 @@ const MesInterventionsContent = () => {
           </header>
 
           {/* Filtres et Barre de recherche */}
-          <div className="mes-interventions-filters">
-            <div className="mes-interventions-search">
-              <SearchNormal1 size={18} variant="Linear" color="#6C7278" />
-              <input
-                type="text"
-                placeholder="Rechercher par titre, description, localisation..."
-                value={searchInput}
-                onChange={(e) => {
-                  setSearchInput(e.target.value);
-                  debouncedSetSearch(e.target.value);
-                }}
-              />
-            </div>
-
-            <div className="mes-interventions-select-wrapper">
-              <select
-                value={sourceFilter}
-                onChange={(e) => setSourceFilter(e.target.value)}
-                aria-label="Filtrer par source"
-              >
-                <option value="agents_or_internal">Agents & Internes</option>
-                <option value="internal">Internes uniquement</option>
-                <option value="agents">Agents uniquement</option>
-              </select>
-              <ArrowDown2 size={16} variant="Linear" color="#6C7278" />
-            </div>
-
-            <div className="mes-interventions-select-wrapper">
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                aria-label="Filtrer par statut"
-              >
-                <option value="">Tous les statuts</option>
-                <option value="En cours">En cours </option>
-                <option value="terminer">Terminer</option>
-              </select>
-              <ArrowDown2 size={16} variant="Linear" color="#6C7278" />
-            </div>
-          </div>
+          <FiltersBar
+            recherche={searchInput}
+            onRecherche={setSearchInput}
+            placeholder="Rechercher un titre, une description, un lieu…"
+            selects={[
+              { id: 'source', valeur: sourceFilter, onChange: setSourceFilter,
+                ariaLabel: 'Filtrer par source', neutre: 'agents_or_internal',
+                options: [
+                  { value: 'agents_or_internal', label: 'Agents & internes' },
+                  { value: 'internal', label: 'Internes uniquement' },
+                  { value: 'agents', label: 'Agents uniquement' },
+                ] },
+              { id: 'statut', valeur: statusFilter, onChange: setStatusFilter,
+                ariaLabel: 'Filtrer par statut', tousLabel: 'Tous les statuts',
+                options: [
+                  { value: 'En cours', label: 'En cours' },
+                  { value: 'terminer', label: 'Terminée' },
+                ] },
+            ]}
+            onEffacer={() => {
+              reinitialiserRecherche();
+              setSourceFilter('agents_or_internal'); setStatusFilter('');
+            }}
+            resultats={data?.count ?? incidents.length}
+            nomResultat="intervention"
+          />
 
           {/* Affichage des données / Chargement */}
-          {isLoading ? (
-            <TableSkeleton />
-          ) : incidents.length === 0 ? (
+          {!isLoading && incidents.length === 0 ? (
             <div className="mes-interventions-empty">
-              <p className="h1 mb-p pb-0">Aucun incident</p>
-              <p className="mt-2">Aucun incident assigné ne correspond à vos critères.</p>
+              <p className="h1 mb-p pb-0">Aucun signalement</p>
+              <p className="mt-2">Aucun signalement assigné ne correspond à vos critères.</p>
             </div>
           ) : (
             <>
-              <div className="mes-interventions-table-wrap">
-                <table className="mes-interventions-table">
-                  <thead>
-                    <tr>
-                      <th>Incident</th>
-                      <th>Localisation</th>
-                      <th>Mode</th>
-                      <th>Date de déclaration</th>
-                      <th>Date de résolution</th>
-                      <th>Progression</th>
-                      <th>Équipe terrain</th>
-                      <th>Rapports</th>
-                      <th>Statut</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {incidents?.map((incident) => {
-                      return (
-                        <tr
-                          key={incident.id}
-                          onClick={() => handleRowClick(incident)}
-                          className="mes-interventions-row-clickable"
-                        >
-                          <td>
-                            <div className="mes-interventions-main-cell">
-                              <BlurryImage
-                                src={incident.image}
-                                alt={incident.title}
-                                className="mes-interventions-img"
-                              />
-                              <div>
-                                <span className="mes-interventions-row-title">
-                                  {incident.title || 'Sans titre'}
-                                </span>
-                                <span className="mes-interventions-row-desc">
-                                  {incident.description
-                                    ? incident.description.substring(0, 80) +
-                                    (incident.description.length > 80 ? '...' : '')
-                                    : 'Aucune description disponible.'}
-                                </span>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="mes-interventions-cell-text">
-                            {incident.location || 'Inconnue'}
-                          </td>
-                          <td className="mes-interventions-cell-text">
-                            {incident.take_in_charge_mode && (
-                              <span className={`take-in-charge-tag ${incident.take_in_charge_mode}`} style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                padding: '4px 10px',
-                                borderRadius: '12px',
-                                fontSize: '11px',
-                                fontWeight: '600',
-                                backgroundColor: (incident.take_in_charge_mode === 'internal' || incident.take_in_charge_mode === 'interne') ? 'rgba(58, 162, 221, 0.12)' : 'rgba(168, 85, 247, 0.12)',
-                                color: (incident.take_in_charge_mode === 'internal' || incident.take_in_charge_mode === 'interne') ? 'var(--color-primary)' : '#A855F7',
-                                border: (incident.take_in_charge_mode === 'internal' || incident.take_in_charge_mode === 'interne') ? '1px solid rgba(58, 162, 221, 0.3)' : '1px solid rgba(168, 85, 247, 0.3)'
-                              }}>
-                                {(incident.take_in_charge_mode === 'internal' || incident.take_in_charge_mode === 'interne') ? 'Interne' : 'Collaboratif'}
-                              </span>
-                            ) || (
-                                <span style={{ color: 'var(--color-text-muted)', fontStyle: 'italic' }}>Non spécifié</span>
-                              )}
-                          </td>
-                          <td className="mes-interventions-cell-text">
-                            {incident.startDate}
-                          </td>
-                          <td className="mes-interventions-cell-text">
-                            {incident.endDate === 'En cours' ? (
-                              <span className="mes-interventions-date-badge is-pending">En cours</span>
-                            ) : (
-                              <span className="mes-interventions-date-badge is-resolved">{incident.endDate}</span>
-                            )}
-                          </td>
-                          <td className="mes-interventions-cell-text">
-                            <div className="mes-interventions-progress-container">
-                              <div className="mes-interventions-progress-bar-bg">
-                                <div
-                                  className="mes-interventions-progress-bar-fill"
-                                  style={{ width: `${incident.progressValue}%` }}
-                                />
-                              </div>
-                              <span className="mes-interventions-progress-label">
-                                {incident.progressValue}%
-                              </span>
-                            </div>
-                          </td>
-                          <td className="mes-interventions-cell-text">
-                            <IncidentAgentsStack incident={incident} />
-                          </td>
-                          <td className="mes-interventions-cell-text" onClick={(e) => e.stopPropagation()}>
-                            {(() => {
-                              const reportsCount = incident?.reports_count || 0;
-                              return (
-                                <button
-                                  type="button"
-                                  className="rapport-count-btn"
-                                  onClick={(e) => { e.stopPropagation(); handleOpenReports(incident); }}
-                                  disabled={reportsCount === 0}
-                                  title={reportsCount > 0 ? `Voir les ${reportsCount} rapport(s)` : 'Aucun rapport'}
-                                >
-                                  <DocumentText size={16} variant={reportsCount > 0 ? 'Bold' : 'Linear'} color={reportsCount > 0 ? '#3AA2DD' : '#9CA3AF'} />
-                                  <span>{reportsCount}</span>
-                                </button>
-                              );
-                            })()}
-                          </td>
-                          <td>
-                            <span className={`mes-interventions-badge-glow variant-${incident.badge.variant}`}
-                              style={{ width: "max-content" }}
-                            >
-                              {incident.badge.label}
-                            </span>
-                          </td>
-                          <td onClick={(e) => e.stopPropagation()}>
-                            <div style={{ display: 'flex', gap: '8px' }}>
-                              <button
-                                type="button"
-                                className="btn btn-primary"
-                                style={{ width: "max-content" }}
-                                onClick={(e) => { e.stopPropagation(); openAssignModal(incident); }}
-                                title="Gérer l'équipe"
-                              >
-                                Gérer l'équipe
-                              </button>
-
-                              <button
-                                type="button"
-                                className="btn btn-light"
-                                onClick={(e) => { e.stopPropagation(); handleGoToIncidentDetail(incident); }}
-                                title="Voir le détail"
-                              >
-                                <Eye size={16} variant="Bold" color="#6C7278" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+              <ResponsiveTable
+                colonnes={colonnes}
+                donnees={incidents || []}
+                cleDe={(i) => i.id}
+                actions={actionsDe}
+                onLigneClick={handleRowClick}
+                media={mediaIntervention}
+                chargement={isLoading}
+                classeLigne={() => 'mes-interventions-row-clickable'}
+                classeTable="mes-interventions-table"
+                classeWrap="mes-interventions-table-wrap"
+                libelleListe="Mes interventions"
+              />
 
               <Pagination
                 page={page}

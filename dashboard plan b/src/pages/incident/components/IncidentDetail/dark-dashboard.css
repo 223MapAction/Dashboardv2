@@ -190,7 +190,7 @@
 }
 
 .kpi-value.yellow {
-  color: var(--color-warning);
+  color: var(--color-warning-text);
 }
 
 .kpi-value.white {
@@ -243,7 +243,7 @@
   gap: 8px;
   font-size: 18px;
   font-weight: 700;
-  color: var(--color-warning);
+  color: var(--color-warning-text);
   margin-bottom: 12px;
 }
 
@@ -296,7 +296,7 @@
 
 .tag-item.green {
   background-color: rgba(34, 197, 94, 0.1);
-  color: var(--color-success);
+  color: var(--color-success-text);
   border: 1px solid rgba(34, 197, 94, 0.2);
 }
 
@@ -308,7 +308,7 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark, #2C8DC2));
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark, var(--color-primary-dark)));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -356,7 +356,7 @@
 
 .chatbot-header {
   padding: 16px 20px;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark, #2C8DC2));
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark, var(--color-primary-dark)));
   color: #FFF;
   display: flex;
   align-items: center;
@@ -519,7 +519,7 @@
 }
 
 .chatbot-send-btn:hover:not(:disabled) {
-  background-color: var(--color-primary-dark, #2C8DC2);
+  background-color: var(--color-primary-dark, var(--color-primary-dark));
 }
 
 .chatbot-send-btn:active:not(:disabled) {
@@ -538,7 +538,7 @@
   gap: 16px;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1023.98px) {
   .incident-dark-dashboard {
     grid-template-columns: 1fr;
   }
@@ -552,7 +552,7 @@
   }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
   .incident-dark-dashboard {
     padding: 12px;
     gap: 16px;

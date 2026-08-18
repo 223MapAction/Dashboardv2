@@ -4,6 +4,7 @@ import { useMesInterventionsModalContext } from '../MesInterventionsModalContext
 import { CloseCircle, Profile, Edit2 } from 'iconsax-react';
 import { getIncidentAssignmentsService } from '../../incident/service/incident_service';
 
+import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
 const AVATAR_COLORS = [
   '#EF4444', '#F97316', '#F59E0B', '#22C55E',
   '#3AA2DD', '#1E40AF', '#A855F7', '#EC4899',
@@ -105,41 +106,15 @@ export const IncidentAgentsListModal = () => {
     }, 300);
   };
 
-  const panelClass = [
-    'am-offcanvas-panel',
-    agentsClosing ? 'am-offcanvas-panel--closing' : '',
-  ].filter(Boolean).join(' ');
-
-  const backdropClass = [
-    'am-offcanvas-backdrop',
-    agentsClosing ? 'am-offcanvas-backdrop--closing' : '',
-  ].filter(Boolean).join(' ');
-
   return (
-    <>
-      <div className={backdropClass} onClick={handleOverlayClick} />
-      <div
-        className={panelClass}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Liste des agents assignés"
-      >
-        <div className="am-offcanvas-header">
-          <div>
-            <h5 className="am-offcanvas-title">
-              Équipe sur le terrain
-            </h5>
-            <p className="text-muted" style={{ fontSize: '13px', margin: '4px 0 0 0' }}>
-              {currentIncident.title || 'Sans titre'}
-            </p>
-          </div>
-          <button
-            type="button"
-            className="btn-close"
-            onClick={handleOverlayClick}
-            aria-label="Fermer"
-          />
-        </div>
+    <OffcanvasModal
+      onClose={handleOverlayClick}
+      isClosing={Boolean(agentsClosing)}
+      title="Équipe sur le terrain"
+      subtitle={currentIncident.title || 'Sans titre'}
+      ariaLabel="Liste des agents assignés"
+      closeVariant="plain"
+    >
 
         <div className="am-offcanvas-body">
           {isLoading ? (
@@ -149,7 +124,7 @@ export const IncidentAgentsListModal = () => {
             </div>
           ) : assignedAgents.length === 0 ? (
             <div className="d-flex flex-column align-items-center justify-content-center p-5 border rounded bg-light text-center" style={{ gap: '12px' }}>
-              <Profile size={48} variant="Linear" color="#9CA3AF" />
+              <Profile size={48} variant="Linear" color="var(--color-text-muted)" />
               <div>
                 <span className="fw-semibold d-block" style={{ fontSize: '14px', color: '#4B5563' }}>
                   Aucun agent sur le terrain
@@ -251,7 +226,7 @@ export const IncidentAgentsListModal = () => {
                       )}
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <span style={{ color: 'var(--color-text-muted)' }}>Date limite :</span>
-                        <span style={{ fontWeight: '600', color: 'var(--color-danger)' }}>{formatDate(agent.deadline)}</span>
+                        <span style={{ fontWeight: '600', color: 'var(--color-danger-text)' }}>{formatDate(agent.deadline)}</span>
                       </div>
                       {(agent.assignedByName || agent.assignedByEmail) && (
                         <div style={{ display: 'flex', flexDirection: 'column', marginTop: '4px', padding: '6px 8px', borderRadius: '4px', backgroundColor: 'var(--color-background-hover)', fontSize: '11px' }}>
@@ -278,8 +253,7 @@ export const IncidentAgentsListModal = () => {
             Fermer
           </button>
         </div>
-      </div>
-    </>
+      </OffcanvasModal>
   );
 };
 

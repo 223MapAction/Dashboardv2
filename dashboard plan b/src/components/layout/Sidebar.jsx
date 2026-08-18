@@ -1,12 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authService } from '../../pages/auth/services/authService';
+import { getAccessibleNavIds } from '../../utils/permissions';
 import {
   Element4,
   Briefcase, Award, Trash, Buildings2, Profile2User, Lock1
 } from 'iconsax-react';
-import logoMapAction from '../../assets/logo.svg';
-import logoMapActionMin from '../../assets/logo-min.svg';
+import logoMapAction from '../../assets/logo.webp';
+import logoMapActionMin from '../../assets/logo-min.webp';
 import './sidebar.css';
 import {
   User,          // Mon profil
@@ -47,9 +48,9 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed: controlledCollapsed, onC
     },
     {
       id: 'incidents',
-      label: 'Incidents',
+      label: 'Signalements',
       icon: Briefcase,
-      path: '/incidents'
+      path: '/signalements'
     },
     {
       id: 'mes-interventions',
@@ -92,16 +93,15 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed: controlledCollapsed, onC
   ];
 
   const user = authService.getCurrentUser();
-  const isSuperAdmin = user?.web_role === 'super_admin';
-  const orgRole = isSuperAdmin ? 'super_admin' : user?.org_role;
 
+  // Dépendance sur `user?.web_role` et non sur `user` : getCurrentUser() fait un
+  // JSON.parse à chaque rendu et renvoie donc un objet neuf à chaque fois, ce
+  // qui invaliderait le mémo en permanence.
   const filteredNavItems = useMemo(() => {
-    if (orgRole === 'org_admin' || orgRole === 'bureau_agent') {
-      const allowedIds = ['dashboard', 'collaboration', 'incidents', 'mes-interventions', 'agents', 'profile', 'impact'];
-      return navItems.filter(item => allowedIds.includes(item.id));
-    }
-    return navItems;
-  }, [orgRole]);
+    const allowedIds = getAccessibleNavIds(user);
+    return navItems.filter(item => allowedIds.includes(item.id));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.web_role]);
 
   const handleItemClick = (path) => {
     navigate(path);
