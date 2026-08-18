@@ -6,17 +6,17 @@ via l'API Performance du navigateur (`performance.getEntriesByType('resource')`)
 ## Contexte du jeu de données
 
 **Important pour l'interprétation** : l'organisation de test (Kaicedra
-Consulting SAS) contient **2 incidents** et **0 intervention assignée**. Les
+Consulting SAS) contient **2 signalements** et **0 intervention assignée**. Les
 mesures ci-dessous valent pour ce volume. Elles ne disent rien du comportement
-à 50 ou 200 incidents.
+à 50 ou 200 signalements.
 
 ## Relevés
 
 | Page | Nb requêtes | Requête la plus lente | Détail |
 |---|---|---|---|
-| `/mes-interventions` | 2 | 736 ms (`org-incidents/`) | page vide, aucun incident assigné |
+| `/mes-interventions` | 2 | 736 ms (`org-incidents/`) | page vide, aucun signalement assigné |
 | `/impact` | 3 | 1344 ms (`impact/`) | `impact/` et `impact/incidents/` en parallèle |
-| `/incidents` | 3 | 1264 ms (`incident/`) | + `collaboration/` non paginé à 928 ms |
+| `/signalements` | 3 | 1264 ms (`incident/`) | + `collaboration/` non paginé à 928 ms |
 
 Les tailles de payload ne sont pas mesurables : l'API est cross-origin sans
 en-tête `Timing-Allow-Origin`, donc `transferSize` vaut 0.
@@ -85,7 +85,7 @@ Les deux consommateurs du second module (`Collaboration.jsx`,
 ### H4 — Payloads surdimensionnés : PARTIELLEMENT INFIRMÉE
 
 `/MapApi/incident/` est appelé avec `page` et `page_size` explicites depuis la
-page `/incidents` : le défaut `page_size=100` d'`incident_service.jsx:25` ne
+page `/signalements` : le défaut `page_size=100` d'`incident_service.jsx:25` ne
 s'applique pas sur ce chemin.
 
 `organisation_service.jsx:33` (`page_size=1000`) n'a pas été atteint pendant les
@@ -95,14 +95,14 @@ relevés.
 
 ## Découverte non prévue
 
-`/incidents` appelle `/MapApi/collaboration/` **non paginé** (928 ms) pour
+`/signalements` appelle `/MapApi/collaboration/` **non paginé** (928 ms) pour
 alimenter une simple liste. L'endpoint renvoie toutes les collaborations de
 l'utilisateur alors que la page n'en affiche qu'un extrait. C'est un coût réel
 mais modéré au volume actuel ; il grandira linéairement avec le nombre de
 collaborations.
 
 Non corrigé : la correction demande de savoir si l'API accepte un filtrage par
-incident, ce qui n'a pas été vérifié.
+signalement, ce qui n'a pas été vérifié.
 
 ## Vérification de l'intercepteur 401
 
@@ -150,6 +150,6 @@ avec un compte `bureau_agent`.
 
 ## Ce qui n'a pas été mesuré
 
-- `/incidents/:id` — non relevé.
+- `/signalements/:id` — non relevé.
 - Coût de rendu React (Profiler) — non relevé.
 - Tailles de payload — non mesurables (cross-origin sans `Timing-Allow-Origin`).
