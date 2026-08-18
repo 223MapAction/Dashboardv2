@@ -1,6 +1,15 @@
-# Services Incident
+# Services Signalement
 
-Ce dossier contient tous les services pour gérer les incidents et leurs fonctionnalités associées.
+Ce dossier contient tous les services pour gérer les signalements et leurs
+fonctionnalités associées.
+
+> **Vocabulaire.** L'interface parle de « signalements », et c'est le terme
+> employé dans cette documentation. Le code et l'API ont gardé le nom
+> d'origine, `incident` : dossier `src/pages/incident/`, fichier
+> `incident_service.jsx`, fonctions `getIncidentsService`, paramètre
+> `incidentId`, routes `/MapApi/incident/`. Ces identifiants ne sont pas
+> renommés ici parce qu'ils doivent continuer de correspondre à ce que le
+> serveur expose.
 
 ## Structure des fichiers
 
@@ -30,41 +39,41 @@ import { getIncidentsService } from './service/incident_service';
 
 ## Services disponibles
 
-### 📋 Incident Service
+### 📋 incident_service.jsx
 
 #### `getIncidentsService(filterType)`
-Récupère la liste des incidents
+Récupère la liste des signalements
 - **Params**: `filterType` (string) - 'all', etc.
-- **Returns**: Array d'incidents
+- **Returns**: Array de signalements
 
 #### `getIncidentService(id)`
-Récupère un incident spécifique
+Récupère un signalement spécifique
 - **Params**: `id` (number)
-- **Returns**: Objet incident
+- **Returns**: Objet signalement
 
 #### `deleteIncidentService(id)`
-Supprime un incident
+Supprime un signalement
 - **Params**: `id` (number)
 - **Returns**: Response data
 
 #### `takeInChargeIncidentService(incidentId)`
-Prendre en charge un incident (devenir leader)
+Prendre en charge un signalement (devenir leader)
 - **Params**: `incidentId` (number)
-- **Returns**: Incident mis à jour
+- **Returns**: Signalement mis à jour
 
 #### `closeIncidentService(incidentId, data)`
-Clôturer un incident (leader uniquement)
+Clôturer un signalement (leader uniquement)
 - **Params**: 
   - `incidentId` (number)
   - `data` (object): `{ resolution_start_date, resolution_end_date }`
-- **Returns**: Incident clôturé
+- **Returns**: Signalement clôturé
 
 ---
 
 ### ✅ Task Service
 
 #### `getTasksService(incidentId)`
-Liste des tâches d'un incident
+Liste des tâches d'un signalement
 - **Params**: `incidentId` (number)
 - **Returns**: Array de tâches
 
@@ -149,7 +158,7 @@ Liste des collaborations de l'utilisateur
 - **Returns**: Array de collaborations
 
 #### `requestCollaborationService(data)`
-Demander à rejoindre un incident
+Demander à rejoindre un signalement
 - **Params**: `data` (object): `{ incident, role, motivation, end_date }`
 - **Returns**: Collaboration créée
 
@@ -211,12 +220,12 @@ Envoyer un message (fonction générique)
 
 ## Exemples d'utilisation
 
-### Prendre en charge un incident
+### Prendre en charge un signalement
 ```javascript
 const handleTakeCharge = async (incidentId) => {
   try {
     const result = await takeInChargeIncidentService(incidentId);
-    console.log('Incident pris en charge:', result);
+    console.log('Signalement pris en charge:', result);
   } catch (error) {
     console.error('Erreur:', error);
   }
@@ -289,7 +298,7 @@ try {
 
 ## États et énumérations
 
-### États d'incident
+### États d'un signalement
 - `declared` - Déclaré
 - `taken_into_account` - Pris en charge
 - `in_progress` - En cours

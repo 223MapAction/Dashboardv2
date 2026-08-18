@@ -38,7 +38,7 @@ Trois widgets de statistiques côte à côte.
 
 **Widgets:**
 1. **Par Localité** - Top 5 des communes
-2. **Top 5 Incidents** - Barres de progression
+2. **Top 5 Signalements** - Barres de progression
 3. **Gravité** - Graphique en donut
 
 **Fichiers:**
@@ -134,7 +134,7 @@ Panneau d'activité en temps réel avec indicateur live.
 - Ségou: 156
 - Kayes: 124
 
-### Top Incidents
+### Top Signalements
 - DÉFORESTATION: 42%
 - POLLUTION EAU: 28%
 - INCENDIE: 15%
@@ -150,7 +150,7 @@ Panneau d'activité en temps réel avec indicateur live.
 
 1. **Intégration Leaflet/OSM**
    - Remplacer le placeholder par une vraie carte
-   - Ajouter des markers pour les incidents
+   - Ajouter des markers pour les signalements
    - Heatmap des zones critiques
 
 2. **Données Réelles**
@@ -160,7 +160,7 @@ Panneau d'activité en temps réel avec indicateur live.
 
 3. **Interactions**
    - Clic sur localité → filtre carte
-   - Clic sur incident → détails
+   - Clic sur signalement → détails
    - Clic sur activité → modal détails
 
 4. **Graphiques**
