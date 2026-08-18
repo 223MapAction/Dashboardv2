@@ -13,6 +13,7 @@ import { FiltersBar } from '../../components/molecules/FiltersBar';
 import { useRechercheDebouncee } from '../../hooks/useRechercheDebouncee';
 import { OffcanvasModal } from '../../components/molecules/OffcanvasModal';
 import './trash.css';
+import { logger } from '../../utils/logger';
 
 // Composant Shimmer Skeleton pour le chargement des incidents de la corbeille
 const TrashSkeleton = ({ viewMode = 'list' }) => {
@@ -191,7 +192,7 @@ export const TrashPage = () => {
       setSelected((prev) => { const s = new Set(prev); s.delete(id); return s; });
       showToast(`"${item?.title}" a été restauré.`);
     } catch (error) {
-      console.error('Erreur lors de la restauration:', error);
+      logger.error('Erreur lors de la restauration:', error);
       showToast('Erreur lors de la restauration.');
     }
   };
@@ -212,7 +213,7 @@ export const TrashPage = () => {
       }
       closeConfirmModal();
     } catch (error) {
-      console.error('Erreur lors de la suppression:', error);
+      logger.error('Erreur lors de la suppression:', error);
       showToast('Erreur lors de la suppression.');
       closeConfirmModal();
     }
@@ -227,7 +228,7 @@ export const TrashPage = () => {
       showToast(`${count} incident(s) restauré(s).`);
       setSelected(new Set());
     } catch (error) {
-      console.error('Erreur lors de la restauration:', error);
+      logger.error('Erreur lors de la restauration:', error);
       showToast('Erreur lors de la restauration.');
     }
   };

@@ -1,5 +1,6 @@
 import { authService } from '../../auth/services/authService';
 import { API_URL_BASE } from '../../../config/api_url_base';
+import { logger } from '../../../utils/logger';
 
 const DISCUSSION_URL = 'discussion';
 
@@ -27,11 +28,9 @@ export const getDiscussionMessagesService = async (incidentId, options = {}) => 
     const response = await axios.get(`${API_URL_BASE}/MapApi/${DISCUSSION_URL}/${incidentId}/`, { params });
 
     const data = response?.data;
-    console.log('[Discussion] Réponse brute du serveur:', data);
 
     // 1. La réponse est directement un tableau (format legacy le plus simple)
     if (Array.isArray(data)) {
-      console.log('[Discussion] Format détecté: tableau direct,', data.length, 'messages');
       return { results: data, has_more: false, next_before: null };
     }
 
@@ -56,14 +55,13 @@ export const getDiscussionMessagesService = async (incidentId, options = {}) => 
         ? data.next_before
         : (results.length > 0 ? results[0]?.id ?? null : null);
 
-      console.log('[Discussion] Format détecté: objet,', results.length, 'messages, has_more:', has_more);
       return { results, has_more, next_before };
     }
 
-    console.warn('[Discussion] Format de réponse inattendu, retour vide:', data);
+    logger.warn('[Discussion] Format de réponse inattendu, retour vide:', data);
     return { results: [], has_more: false, next_before: null };
   } catch (error) {
-    console.error('[Discussion] Erreur récupération messages:', error?.response?.status, error?.response?.data);
+    logger.error('[Discussion] Erreur récupération messages:', error?.response?.status, error?.response?.data);
     throw error;
   }
 };
@@ -92,10 +90,9 @@ export const sendTextMessageService = async (incidentId, data) => {
       }
     );
 
-    console.log('[Discussion] Message texte envoyé:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Discussion] Erreur envoi message texte:', error?.response?.status, error?.response?.data);
+    logger.error('[Discussion] Erreur envoi message texte:', error?.response?.status, error?.response?.data);
     throw error;
   }
 };
@@ -128,10 +125,9 @@ export const sendAudioMessageService = async (incidentId, data) => {
       }
     );
 
-    console.log('[Discussion] Message audio envoyé:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Discussion] Erreur envoi message audio:', error?.response?.status, error?.response?.data);
+    logger.error('[Discussion] Erreur envoi message audio:', error?.response?.status, error?.response?.data);
     throw error;
   }
 };
@@ -164,10 +160,9 @@ export const sendAttachmentMessageService = async (incidentId, data) => {
       }
     );
 
-    console.log('[Discussion] Fichier joint envoyé:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Discussion] Erreur envoi fichier joint:', error?.response?.status, error?.response?.data);
+    logger.error('[Discussion] Erreur envoi fichier joint:', error?.response?.status, error?.response?.data);
     throw error;
   }
 };
@@ -217,13 +212,12 @@ export const sendMessageService = async (incidentId, data) => {
         }
       );
 
-      console.log('[Discussion] Message avec fichier envoyé:', response.data);
       return response.data;
     }
 
     throw new Error('Au moins un des champs message/audio/attachment est requis');
   } catch (error) {
-    console.error('[Discussion] Erreur envoi message:', error?.response?.status, error?.response?.data);
+    logger.error('[Discussion] Erreur envoi message:', error?.response?.status, error?.response?.data);
     throw error;
   }
 };
@@ -244,10 +238,9 @@ export const updateDiscussionMessageService = async (incidentId, messageId, mess
       { message },
       { headers: { 'Content-Type': 'application/json' } }
     );
-    console.log('[Discussion] Message modifié:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Discussion] Erreur modification message:', error?.response?.status, error?.response?.data);
+    logger.error('[Discussion] Erreur modification message:', error?.response?.status, error?.response?.data);
     throw error;
   }
 };
@@ -263,9 +256,8 @@ export const deleteDiscussionMessageService = async (incidentId, messageId) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     await axios.delete(`${API_URL_BASE}/MapApi/${DISCUSSION_URL}/${incidentId}/${messageId}/`);
-    console.log('[Discussion] Message supprimé:', messageId);
   } catch (error) {
-    console.error('[Discussion] Erreur suppression message:', error?.response?.status, error?.response?.data);
+    logger.error('[Discussion] Erreur suppression message:', error?.response?.status, error?.response?.data);
     throw error;
   }
 };
@@ -410,10 +402,9 @@ export const suggestCollaborationPartnerService = async (incidentId, data) => {
       data,
       { headers: { 'Content-Type': 'application/json' } }
     );
-    console.log('[Collaboration] Suggestion envoyée:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Collaboration] Erreur suggestion:', error?.response?.status, error?.response?.data);
+    logger.error('[Collaboration] Erreur suggestion:', error?.response?.status, error?.response?.data);
     throw error;
   }
 };
@@ -434,10 +425,9 @@ export const getOtherOrganisationsService = async (params = {}) => {
       `${API_URL_BASE}/MapApi/organisations/others/`,
       { params }
     );
-    console.log('[Organisations] Autres organisations récupérées:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Organisations] Erreur récupération autres organisations:', error?.response?.status, error?.response?.data);
+    logger.error('[Organisations] Erreur récupération autres organisations:', error?.response?.status, error?.response?.data);
     throw error;
   }
 };

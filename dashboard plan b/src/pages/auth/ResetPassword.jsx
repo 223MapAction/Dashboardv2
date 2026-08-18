@@ -6,6 +6,7 @@ import loginBg from '../../assets/login_bg_1.webp';
 import { authService } from './services/authService';
 import './login.css';
 import './forgot-password.css';
+import { logger } from '../../utils/logger';
 
 export const ResetPassword = () => {
   const navigate = useNavigate();
@@ -66,15 +67,14 @@ export const ResetPassword = () => {
     setIsLoading(true);
 
     try {
-      const response = await authService.confirmPasswordReset({ 
+      await authService.confirmPasswordReset({ 
         email, 
         code, 
         new_password: password 
       });
-      console.log('[RESET_PASSWORD] Succès:', response);
       setSuccess(true);
     } catch (err) {
-      console.error('[RESET_PASSWORD] Erreur:', err);
+      logger.error('[RESET_PASSWORD] Erreur:', err);
       setError(
         err?.detail || 
         err?.message || 

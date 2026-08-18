@@ -1,5 +1,6 @@
 import { authService } from '../../auth/services/authService';
 import { API_URL_BASE } from '../../../config/api_url_base';
+import { logger } from '../../../utils/logger';
 
 // ─────────────────────────────────────────────────────────
 // RAPPORTS DE TERRAIN (FIELD REPORTS)
@@ -35,10 +36,9 @@ export const createFieldReportService = async (data) => {
     }
 
     const response = await axios.post(`${API_URL_BASE}/MapApi/field-reports/`, payload, config);
-    console.log('[FieldReport] Rapport créé:', response.data);
     return response?.data || {};
   } catch (error) {
-    console.error('[FieldReport] Erreur création rapport:', error?.response?.status, error?.response?.data);
+    logger.error('[FieldReport] Erreur création rapport:', error?.response?.status, error?.response?.data);
     throw error;
   }
 };
@@ -53,10 +53,9 @@ export const listFieldReportsService = async (params = {}) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.get(`${API_URL_BASE}/MapApi/field-reports/`, { params });
-    console.log('[FieldReport] Rapports récupérés:', response.data);
     return response?.data?.results || response?.data || [];
   } catch (error) {
-    console.error('[FieldReport] Erreur liste rapports:', error?.response?.status, error?.response?.data);
+    logger.error('[FieldReport] Erreur liste rapports:', error?.response?.status, error?.response?.data);
     throw error;
   }
 };

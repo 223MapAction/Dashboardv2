@@ -1,6 +1,7 @@
 import { authService } from '../../auth/services/authService';
 import { API_URL_BASE } from '../../../config/api_url_base';
 import { couleurAvatarPour, AVATAR_COULEUR_DEFAUT } from '../../../utils/couleursAvatar';
+import { logger } from '../../../utils/logger';
 
 /**
  * Récupère les organisations avec pagination et filtrage
@@ -52,7 +53,6 @@ export const getOrganisationsService = async (
     }
 
     const response = await axios.get(url);
-    console.log('[Organisation] Organisations récupérées:', response.data);
     
     if (returnFullResponse) {
       return response.data;
@@ -60,7 +60,7 @@ export const getOrganisationsService = async (
     
     return response?.data?.results || response?.data || [];
   } catch (error) {
-    console.error('[Organisation] Erreur récupération organisations:', error?.response?.status, error?.response?.data);
+    logger.error('[Organisation] Erreur récupération organisations:', error?.response?.status, error?.response?.data);
     throw error;
   }
 };
@@ -76,7 +76,7 @@ export const getOrganisationStatsService = async () => {
     const response = await axios.get(url);
     return response.data;
   } catch (error) {
-    console.error('[Organisation] Erreur récupération statistiques:', error?.response?.status, error?.response?.data);
+    logger.error('[Organisation] Erreur récupération statistiques:', error?.response?.status, error?.response?.data);
     throw error;
   }
 };
@@ -107,10 +107,9 @@ export const createOrganisationService = async (data) => {
       }
     );
 
-    console.log('[Organisation] Organisations creer:', response.data);
     return response?.data?.results || response?.data || [];
   } catch (error) {
-    console.error('[Organisation] Erreur creer organisations:', error?.response?.status, error?.response?.data);
+    logger.error('[Organisation] Erreur creer organisations:', error?.response?.status, error?.response?.data);
     throw error;
   }
 };
@@ -124,10 +123,9 @@ export const deleteOrganisationService = async (id) => {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.delete(`${API_URL_BASE}/MapApi/organisations/${id}/`);
 
-    console.log('[Organisation] Organisations supprimer:', response.data);
     return response?.data?.results || response?.data || [];
   } catch (error) {
-    console.error('[Organisation] Erreur supprimer organisations:', error?.response?.status, error?.response?.data);
+    logger.error('[Organisation] Erreur supprimer organisations:', error?.response?.status, error?.response?.data);
     throw error;
   }
 };
@@ -159,10 +157,9 @@ export const updateOrganisationService = async (id, data) => {
       }
     );
 
-    console.log('[Organisation] Organisations modifier:', response.data);
     return response?.data?.results || response?.data || [];
   } catch (error) {
-    console.error('[Organisation] Erreur modifier organisations:', error?.response?.status, error?.response?.data);
+    logger.error('[Organisation] Erreur modifier organisations:', error?.response?.status, error?.response?.data);
     throw error;
   }
 };
@@ -181,10 +178,9 @@ export const listMembersService = async (orgId) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.get(`${API_URL_BASE}/MapApi/organisations/${orgId}/members/`);
-    console.log('[Organisation] Membres récupérés:', response.data);
     return response?.data?.results || response?.data || [];
   } catch (error) {
-    console.error('[Organisation] Erreur liste membres:', error?.response?.status, error?.response?.data);
+    logger.error('[Organisation] Erreur liste membres:', error?.response?.status, error?.response?.data);
     throw error;
   }
 };
@@ -200,10 +196,9 @@ export const addMemberService = async (orgId, data) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.post(`${API_URL_BASE}/MapApi/organisations/${orgId}/members/add/`, data);
-    console.log('[Organisation] Membre ajouté:', response.data);
     return response?.data || {};
   } catch (error) {
-    console.error('[Organisation] Erreur ajout membre:', error?.response?.status, error?.response?.data);
+    logger.error('[Organisation] Erreur ajout membre:', error?.response?.status, error?.response?.data);
     throw error;
   }
 };
@@ -220,10 +215,9 @@ export const updateMemberService = async (orgId, userId, data) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.put(`${API_URL_BASE}/MapApi/organisations/${orgId}/members/${userId}/`, data);
-    console.log('[Organisation] Membre mis à jour:', response.data);
     return response?.data || {};
   } catch (error) {
-    console.error('[Organisation] Erreur mise à jour membre:', error?.response?.status, error?.response?.data);
+    logger.error('[Organisation] Erreur mise à jour membre:', error?.response?.status, error?.response?.data);
     throw error;
   }
 };
@@ -239,10 +233,9 @@ export const removeMemberService = async (orgId, userId) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.delete(`${API_URL_BASE}/MapApi/organisations/${orgId}/members/${userId}/`);
-    console.log('[Organisation] Membre retiré:', response.data);
     return response?.data || {};
   } catch (error) {
-    console.error('[Organisation] Erreur suppression membre:', error?.response?.status, error?.response?.data);
+    logger.error('[Organisation] Erreur suppression membre:', error?.response?.status, error?.response?.data);
     throw error;
   }
 };
@@ -257,10 +250,9 @@ export const getOrganisationService = async (id) => {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.get(`${API_URL_BASE}/MapApi/organisations/${id}`);
 
-    console.log('[Organisation] Organisation récupérée:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Organisation] Erreur récupération organisation:', error.response?.status, error.response?.data);
+    logger.error('[Organisation] Erreur récupération organisation:', error.response?.status, error.response?.data);
     throw error;
   }
 };

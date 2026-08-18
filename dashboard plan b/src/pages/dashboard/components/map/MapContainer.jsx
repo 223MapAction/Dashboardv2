@@ -14,6 +14,7 @@ import { COUNTRIES } from '../../../organisations/data/organisations';
 import { OSM_STYLE, MAPBOX_SATELLITE_STYLE, HAS_MAPBOX_SATELLITE } from '../../../../config/mapStyles';
 import './map.css';
 import { useReinitialisationSurChangement } from '../../../../hooks/useReinitialisationSurChangement';
+import { logger } from '../../../../utils/logger';
 
 
 // Calcule la classe de couleur du marqueur en fonction de son statut et de l'utilisateur connecté
@@ -123,10 +124,7 @@ export const MapContainer = () => {
       revalidateOnFocus: false,
 
       onError: (err) => {
-        console.error('[MAP] Erreur chargement incident:', err);
-      },
-      onSuccess: (data) => {
-        console.log('[MAP] Incident chargé:', data);
+        logger.error('[MAP] Erreur chargement incident:', err);
       }
     }
   );
@@ -199,7 +197,7 @@ export const MapContainer = () => {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
       onError: (err) => {
-        console.error('[MAP] Erreur chargement incidents:', err);
+        logger.error('[MAP] Erreur chargement incidents:', err);
         setIsLoadingMore(false);
       }
     }

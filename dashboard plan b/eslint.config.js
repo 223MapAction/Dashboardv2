@@ -33,6 +33,18 @@ export default defineConfig([
         'error',
         { varsIgnorePattern: '^[A-Z_]', argsIgnorePattern: '^[A-Z_]' },
       ],
+      // `console` fuite en production et n'a aucun masquage : un appel suffit
+      // a deverser un mot de passe, un jeton ou une reponse API complete dans
+      // la console du navigateur. Passer par `src/utils/logger.js`, qui masque
+      // les champs sensibles et se tait hors developpement.
+      'no-console': 'error',
+    },
+  },
+  {
+    // Seul endroit autorise a appeler `console` : c'est lui qui l'encapsule.
+    files: ['src/utils/logger.js'],
+    rules: {
+      'no-console': 'off',
     },
   },
 ])

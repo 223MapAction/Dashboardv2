@@ -1,5 +1,6 @@
 import { authService } from '../../auth/services/authService';
 import { API_URL_BASE } from '../../../config/api_url_base';
+import { logger } from '../../../utils/logger';
 
 /**
  * Récupère tous les messages de discussion d'un incident
@@ -12,11 +13,10 @@ export const getDiscussionMessagesService = async (incidentId) => {
     const response = await axios.get(
       `${API_URL_BASE}/MapApi/discussion/${incidentId}/`
     );
-    console.log("[Discussion] Message", response.data);
 
     return response.data || [];
   } catch (error) {
-    console.error('[Liste Messages] Erreur:', error.response?.status, error.response?.data);
+    logger.error('[Liste Messages] Erreur:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -37,7 +37,7 @@ export const sendTextMessageService = async (incidentId, data) => {
 
     return response.data;
   } catch (error) {
-    console.error('[Envoyer Message Texte] Erreur:', error.response?.status, error.response?.data);
+    logger.error('[Envoyer Message Texte] Erreur:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -63,7 +63,7 @@ export const sendAudioMessageService = async (incidentId, formData) => {
 
     return response.data;
   } catch (error) {
-    console.error('[Envoyer Message Audio] Erreur:', error.response?.status, error.response?.data);
+    logger.error('[Envoyer Message Audio] Erreur:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -89,7 +89,7 @@ export const sendAttachmentMessageService = async (incidentId, formData) => {
 
     return response.data;
   } catch (error) {
-    console.error('[Envoyer Fichier] Erreur:', error.response?.status, error.response?.data);
+    logger.error('[Envoyer Fichier] Erreur:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -117,7 +117,7 @@ export const sendMessageService = async (incidentId, data) => {
 
     return response.data;
   } catch (error) {
-    console.error('[Envoyer Message] Erreur:', error.response?.status, error.response?.data);
+    logger.error('[Envoyer Message] Erreur:', error.response?.status, error.response?.data);
     throw error;
   }
 };

@@ -11,6 +11,7 @@ import './dashboard.css';
 import { getActivityFeedService, getDashboardStatsService } from './service/dashboard_service';
 import { API_URL_BASE } from '../../config/api_url_base';
 import { authService } from '../auth/services/authService';
+import { logger } from '../../utils/logger';
 
 export const Dashboard = () => {
   const {
@@ -83,12 +84,10 @@ export const Dashboard = () => {
 
       socket.onopen = () => {
         delay = 3000;
-        console.log('[WS-Activity] Connecté au flux d\'activités');
       };
       socket.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          console.log('[WS-Activity] Message reçu en temps réel:', data);
           if (data.event === 'activity' || data.action) {
             const newAct = {
               id: data.id || `activity-${Date.now()}`,
@@ -114,7 +113,7 @@ export const Dashboard = () => {
             }, { revalidate: false });
           }
         } catch (e) {
-          console.error('[WS-Activity] Erreur parsing message:', e);
+          logger.error('[WS-Activity] Erreur parsing message:', e);
           mutateActivities();
         }
       };
@@ -156,7 +155,7 @@ export const Dashboard = () => {
         setNextUrl(data.next || null);
       }
     } catch (err) {
-      console.error('[Dashboard] Erreur chargement plus d\'activités:', err);
+      logger.error('[Dashboard] Erreur chargement plus d\'activités:', err);
     } finally {
       setIsLoadingMore(false);
     }

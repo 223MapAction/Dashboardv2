@@ -25,6 +25,7 @@ import './agents.css';
 import './agents-roster.css';
 import { useReinitialisationSurChangement } from '../../hooks/useReinitialisationSurChangement';
 import { AVATAR_COLORS, AVATAR_COULEUR_DEFAUT } from '../../utils/couleursAvatar';
+import { logger } from '../../utils/logger';
 
 
 const EMPTY_ARRAY = [];
@@ -71,7 +72,7 @@ const fetcher = async ([, search, role, status]) => {
       });
     });
   } catch (err) {
-    console.error(`[Agents] Erreur lors de la récupération des agents:`, err);
+    logger.error(`[Agents] Erreur lors de la récupération des agents:`, err);
   }
 
   // Tri récent (plus récent en premier)

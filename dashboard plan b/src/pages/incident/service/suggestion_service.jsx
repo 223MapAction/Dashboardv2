@@ -1,5 +1,6 @@
 import { authService } from '../../auth/services/authService';
 import { API_URL_BASE } from '../../../config/api_url_base';
+import { logger } from '../../../utils/logger';
 
 /**
  * Récupère toutes les suggestions de partenaires pour un incident
@@ -15,7 +16,7 @@ export const getSuggestionsService = async (incidentId) => {
     
     return response.data || [];
   } catch (error) {
-    console.error('[Liste Suggestions] Erreur:', error.response?.status, error.response?.data);
+    logger.error('[Liste Suggestions] Erreur:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -36,7 +37,7 @@ export const createSuggestionService = async (incidentId, data) => {
     
     return response.data;
   } catch (error) {
-    console.error('[Créer Suggestion] Erreur:', error.response?.status, error.response?.data);
+    logger.error('[Créer Suggestion] Erreur:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -56,7 +57,7 @@ export const getSuggestionService = async (incidentId, suggestionId) => {
     
     return response.data;
   } catch (error) {
-    console.error('[Détail Suggestion] Erreur:', error.response?.status, error.response?.data);
+    logger.error('[Détail Suggestion] Erreur:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -76,7 +77,7 @@ export const acceptSuggestionService = async (incidentId, suggestionId) => {
     
     return response.data;
   } catch (error) {
-    console.error('[Accepter Suggestion] Erreur:', error.response?.status, error.response?.data);
+    logger.error('[Accepter Suggestion] Erreur:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -96,7 +97,7 @@ export const rejectSuggestionService = async (incidentId, suggestionId) => {
     
     return response.data;
   } catch (error) {
-    console.error('[Rejeter Suggestion] Erreur:', error.response?.status, error.response?.data);
+    logger.error('[Rejeter Suggestion] Erreur:', error.response?.status, error.response?.data);
     throw error;
   }
 };

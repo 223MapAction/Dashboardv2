@@ -1,5 +1,6 @@
 import { authService } from '../../auth/services/authService';
 import { API_URL_BASE } from '../../../config/api_url_base';
+import { logger } from '../../../utils/logger';
 
 // ─────────────────────────────────────────────────────────
 // SUGGESTIONS DE PARTENAIRES (NOUVEAUX ENDPOINTS)
@@ -17,10 +18,9 @@ export const listIncidentSuggestionsService = async (incidentId, params = {}) =>
     try {
         const axios = authService.createAuthenticatedAxios();
         const response = await axios.get(`${API_URL_BASE}/MapApi/incidents/${incidentId}/suggestions/`, { params });
-        console.log(`[Suggestion] Liste suggestions incident ${incidentId}:`, response.data);
         return response?.data?.results || response?.data || [];
     } catch (error) {
-        console.error('[Suggestion] Erreur liste suggestions:', error?.response?.status, error?.response?.data);
+        logger.error('[Suggestion] Erreur liste suggestions:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -42,10 +42,9 @@ export const createSuggestionService = async (incidentId, data) => {
     try {
         const axios = authService.createAuthenticatedAxios();
         const response = await axios.post(`${API_URL_BASE}/MapApi/incidents/${incidentId}/suggestions/`, data);
-        console.log('[Suggestion] Suggestion créée:', response.data);
         return response?.data || {};
     } catch (error) {
-        console.error('[Suggestion] Erreur création suggestion:', error?.response?.status, error?.response?.data);
+        logger.error('[Suggestion] Erreur création suggestion:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -62,10 +61,9 @@ export const getSuggestionDetailService = async (incidentId, suggestionId) => {
     try {
         const axios = authService.createAuthenticatedAxios();
         const response = await axios.get(`${API_URL_BASE}/MapApi/incidents/${incidentId}/suggestions/${suggestionId}/`);
-        console.log('[Suggestion] Détail suggestion:', response.data);
         return response?.data || {};
     } catch (error) {
-        console.error('[Suggestion] Erreur détail suggestion:', error?.response?.status, error?.response?.data);
+        logger.error('[Suggestion] Erreur détail suggestion:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -84,10 +82,9 @@ export const acceptPartnerSuggestionService = async (incidentId, suggestionId) =
         const response = await axios.post(
             `${API_URL_BASE}/MapApi/incidents/${incidentId}/suggestions/${suggestionId}/accept/`
         );
-        console.log('[Suggestion] Suggestion acceptée:', response.data);
         return response?.data || {};
     } catch (error) {
-        console.error('[Suggestion] Erreur acceptation suggestion:', error?.response?.status, error?.response?.data);
+        logger.error('[Suggestion] Erreur acceptation suggestion:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -106,10 +103,9 @@ export const rejectPartnerSuggestionService = async (incidentId, suggestionId) =
         const response = await axios.post(
             `${API_URL_BASE}/MapApi/incidents/${incidentId}/suggestions/${suggestionId}/reject/`
         );
-        console.log('[Suggestion] Suggestion rejetée:', response.data);
         return response?.data || {};
     } catch (error) {
-        console.error('[Suggestion] Erreur rejet suggestion:', error?.response?.status, error?.response?.data);
+        logger.error('[Suggestion] Erreur rejet suggestion:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -124,10 +120,9 @@ export const getMyReceivedSuggestionsService = async (params = {}) => {
     try {
         const axios = authService.createAuthenticatedAxios();
         const response = await axios.get(`${API_URL_BASE}/MapApi/my-suggestions/received/`, { params });
-        console.log('[Suggestion] Mes suggestions reçues:', response.data);
         return response?.data?.results || response?.data || [];
     } catch (error) {
-        console.error('[Suggestion] Erreur suggestions reçues:', error?.response?.status, error?.response?.data);
+        logger.error('[Suggestion] Erreur suggestions reçues:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -150,10 +145,9 @@ export const getMySentSuggestionsService = async (params = {}) => {
     try {
         const axios = authService.createAuthenticatedAxios();
         const response = await axios.get(`${API_URL_BASE}/MapApi/my-suggestions/sent/`, { params });
-        console.log('[Suggestion] Mes suggestions envoyées:', response.data);
         return response?.data?.results || response?.data || [];
     } catch (error) {
-        console.error('[Suggestion] Erreur suggestions envoyées:', error?.response?.status, error?.response?.data);
+        logger.error('[Suggestion] Erreur suggestions envoyées:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -172,10 +166,9 @@ export const listDemandeDeCollaborationsService = async (params = {}) => {
     try {
         const axios = authService.createAuthenticatedAxios();
         const response = await axios.get(`${API_URL_BASE}/MapApi/collaboration/`, { params });
-        console.log('[Collaboration] Liste des collaborations:', response.data);
         return response?.data?.results || response?.data || [];
     } catch (error) {
-        console.error('[Collaboration] Erreur liste collaborations:', error?.response?.status, error?.response?.data);
+        logger.error('[Collaboration] Erreur liste collaborations:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -190,10 +183,9 @@ export const getCollaborationDashboardService = async (params = {}) => {
     try {
         const axios = authService.createAuthenticatedAxios();
         const response = await axios.get(`${API_URL_BASE}/MapApi/collaborations/dashboard/`, { params });
-        console.log('[Collaboration] Dashboard récupéré:', response.data);
         return response?.data;
     } catch (error) {
-        console.error('[Collaboration] Erreur dashboard:', error?.response?.status, error?.response?.data);
+        logger.error('[Collaboration] Erreur dashboard:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -208,10 +200,9 @@ export const acceptCollaborationService = async (collaborationId) => {
     try {
         const axios = authService.createAuthenticatedAxios();
         const response = await axios.post(`${API_URL_BASE}/MapApi/collaboration/${collaborationId}/accept/`);
-        console.log('[Collaboration] Collaboration acceptée:', response.data);
         return response?.data || {};
     } catch (error) {
-        console.error('[Collaboration] Erreur acceptation collaboration:', error?.response?.status, error?.response?.data);
+        logger.error('[Collaboration] Erreur acceptation collaboration:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -226,10 +217,9 @@ export const rejectCollaborationService = async (collaborationId) => {
     try {
         const axios = authService.createAuthenticatedAxios();
         const response = await axios.post(`${API_URL_BASE}/MapApi/collaboration/${collaborationId}/reject/`);
-        console.log('[Collaboration] Collaboration rejetée:', response.data);
         return response?.data || {};
     } catch (error) {
-        console.error('[Collaboration] Erreur rejet collaboration:', error?.response?.status, error?.response?.data);
+        logger.error('[Collaboration] Erreur rejet collaboration:', error?.response?.status, error?.response?.data);
         throw error;
     }
 };

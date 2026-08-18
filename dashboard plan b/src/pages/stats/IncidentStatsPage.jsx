@@ -6,6 +6,7 @@ import { IncidentStats } from '../dashboard/components/stats/IncidentStats';
 import { getDashboardStatsService } from '../dashboard/service/dashboard_service';
 import { ShimmerThumbnail, ShimmerTitle } from 'react-shimmer-effects';
 import './incident-stats-page.css';
+import { logger } from '../../utils/logger';
 
 export const IncidentStatsPage = () => {
   const {
@@ -26,10 +27,7 @@ export const IncidentStatsPage = () => {
       errorRetryCount: 3,
       errorRetryInterval: 2000,
       onError: (err) => {
-        console.error('[STATS] Erreur chargement statistiques:', err);
-      },
-      onSuccess: (data) => {
-        console.log('[STATS] Statistiques chargées:', data);
+        logger.error('[STATS] Erreur chargement statistiques:', err);
       }
     }
   );

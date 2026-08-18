@@ -1,5 +1,6 @@
 import React from 'react';
 import { Danger, Refresh } from 'iconsax-react';
+import { logger } from '../../utils/logger';
 
 /**
  * Rattrape l'echec de chargement d'une page.
@@ -36,7 +37,7 @@ export class FrontiereChargementPage extends React.Component {
   componentDidCatch(erreur, infos) {
     // Une frontiere silencieuse transforme un bug en mystere. On laisse une
     // trace exploitable, prefixee pour etre retrouvable dans la console.
-    console.error('[Chargement de page] échec du chargement du code de la page', erreur, infos);
+    logger.error('[Chargement de page] échec du chargement du code de la page', erreur, infos);
   }
 
   render() {

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Trash, CloseCircle, TickCircle } from 'iconsax-react';
 import { deleteTaskService } from '../../incident/service/task_service';
 import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
+import { logger } from '../../../utils/logger';
 
 export const DeleteTaskModal = ({
   isOpen,
@@ -58,7 +59,7 @@ export const DeleteTaskModal = ({
         await onConfirm(taskId);
       }
     } catch (error) {
-      console.error('[DeleteTaskModal] Erreur lors de la suppression de la tâche:', error);
+      logger.error('[DeleteTaskModal] Erreur lors de la suppression de la tâche:', error);
       let errorMessage = 'Une erreur est survenue lors de la suppression de la tâche.';
       if (error.response?.data) {
         if (typeof error.response.data === 'object') {

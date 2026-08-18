@@ -34,6 +34,7 @@ import { RequestDecisionModal } from '../../components/collaboration/RequestDeci
 import { authService } from '../auth/services/authService';
 import { API_URL_BASE } from '../../config/api_url_base';
 import '../../styles/collaboration-requests.css';
+import { logger } from '../../utils/logger';
 
 /* ──────────────────── Constants ──────────────────── */
 
@@ -276,7 +277,7 @@ export const SuggestRequests = ({ embedded = false }) => {
           mutateSuggestions();
           mutateSentSuggestions();
         } catch (e) {
-          console.error('[WS] Erreur parsing:', e);
+          logger.error('[WS] Erreur parsing:', e);
         }
       };
 
@@ -477,7 +478,7 @@ export const SuggestRequests = ({ embedded = false }) => {
       mutateSentSuggestions();
       closeDecision();
     } catch (err) {
-      console.error('[Decision] Erreur:', err);
+      logger.error('[Decision] Erreur:', err);
       setDecisionError(
         err?.response?.data?.detail ||
         err?.response?.data?.message ||

@@ -11,6 +11,7 @@ import { authService } from '../../auth/services/authService';
 
 import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
 import { AVATAR_COLORS, AVATAR_COULEUR_DEFAUT } from '../../../utils/couleursAvatar';
+import { logger } from '../../../utils/logger';
 
 // `fetchedAgents || []` fabriquait un tableau neuf a chaque rendu tant que la
 // requete n'avait pas repondu. Les useMemo qui en dependent ne memoisaient donc
@@ -114,7 +115,7 @@ export const MesInterventionsAssignModal = () => {
           };
         });
       } catch (err) {
-        console.error(`[MesInterventionsAssignModal] Erreur chargement agents org ${userOrgId}:`, err);
+        logger.error(`[MesInterventionsAssignModal] Erreur chargement agents org ${userOrgId}:`, err);
         return [];
       }
     },
@@ -202,7 +203,6 @@ export const MesInterventionsAssignModal = () => {
       incident: incident.id,
       agent: data.agent
     };
-    console.log('[MesInterventionsAssignModal] Payload assignation:', payload);
 
     try {
       await assignIncidentToAgentService(incident.id, payload);
@@ -228,7 +228,7 @@ export const MesInterventionsAssignModal = () => {
         });
       }, 1500);
     } catch (err) {
-      console.error('[MesInterventionsAssignModal] Erreur lors de l\'assignation:', err);
+      logger.error('[MesInterventionsAssignModal] Erreur lors de l\'assignation:', err);
 
       if (err?.response?.status === 400 && err?.response?.data) {
         const serverErrors = err.response.data;

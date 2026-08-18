@@ -12,6 +12,7 @@ import IncidentAssignModal from './modale/IncidentAssignModal';
 import './incident.css';
 import { useReinitialisationSurChangement } from '../../hooks/useReinitialisationSurChangement';
 import { BandeauErreur } from '../../components/molecules/BandeauErreur';
+import { logger } from '../../utils/logger';
 
 
 // Fonction pour adapter les données de l'API au format attendu
@@ -129,11 +130,8 @@ export const Incident = () => {
     () => getIncidentsService(page, pageSize, search, statusFilter),
     {
       revalidateOnReconnect: true,
-      onSuccess: (data) => {
-        console.log('[INCIDENT] Incidents chargés:', data);
-      },
       onError: (error) => {
-        console.error('[INCIDENT] Erreur chargement incidents:', error);
+        logger.error('[INCIDENT] Erreur chargement incidents:', error);
       }
     }
   );

@@ -7,6 +7,7 @@ import {
   deleteTaskService,
   updateTaskService,
 } from '../incident/service/task_service';
+import { logger } from '../../utils/logger';
 
 /**
  * Les taches d'une collaboration : liste temps reel, avancement, preuves,
@@ -90,7 +91,7 @@ export function useTaches({ incidentId, collaboration, tasksData, mutateTasks })
 
       mutateTasks();
     } catch (err) {
-      console.error('[WS] Erreur parsing message:', err);
+      logger.error('[WS] Erreur parsing message:', err);
       mutateTasks();
     }
   }, { socketRef: tasksSocketRef });
@@ -169,7 +170,7 @@ export function useTaches({ incidentId, collaboration, tasksData, mutateTasks })
       }
       await mutateTasks();
     } catch (err) {
-      console.error('[toggleTask] Erreur:', err);
+      logger.error('[toggleTask] Erreur:', err);
     }
   };
 
@@ -187,7 +188,7 @@ export function useTaches({ incidentId, collaboration, tasksData, mutateTasks })
         setFailureAlert(null);
       }, 1500);
     } catch (err) {
-      console.error('[markTaskFailed] Erreur:', err);
+      logger.error('[markTaskFailed] Erreur:', err);
       let errorMessage = "Erreur lors du marquage de la tâche.";
       if (err.response?.data) {
         if (typeof err.response.data === 'object') {
@@ -210,7 +211,7 @@ export function useTaches({ incidentId, collaboration, tasksData, mutateTasks })
       await updateTaskService(incidentId, taskId, { status: 'in_progress' });
       await mutateTasks();
     } catch (err) {
-      console.error('[resetTaskStatus] Erreur:', err);
+      logger.error('[resetTaskStatus] Erreur:', err);
     }
   };
 
@@ -233,7 +234,7 @@ export function useTaches({ incidentId, collaboration, tasksData, mutateTasks })
       setProofUploadSuccess('Preuve téléversée et tâche terminée avec succès !');
       return true;
     } catch (err) {
-      console.error('[handleProofUpload] Erreur:', err);
+      logger.error('[handleProofUpload] Erreur:', err);
       let errorMessage = "Erreur lors de l'envoi de la preuve.";
       if (err.response?.data) {
         if (typeof err.response.data === 'object') {
@@ -338,7 +339,7 @@ export function useTaches({ incidentId, collaboration, tasksData, mutateTasks })
         closeTaskModal();
       }, 2000);
     } catch (err) {
-      console.error('[submitNewTask] Erreur lors de la création:', err);
+      logger.error('[submitNewTask] Erreur lors de la création:', err);
       let errorMessage = 'Une erreur est survenue lors de la création des tâches.';
       if (err.response?.data) {
         if (typeof err.response.data === 'object') {
@@ -355,26 +356,22 @@ export function useTaches({ incidentId, collaboration, tasksData, mutateTasks })
   };
 
   const notifyTaskChange = (action, taskId) => {
-    console.log('[WS] notifyTaskChange appelé:', { action, taskId });
 
     if (!tasksSocketRef.current) {
-      console.warn('[WS] tasksSocketRef.current est null');
+      logger.warn('[WS] tasksSocketRef.current est null');
       return;
     }
 
-    console.log('[WS] État du socket:', tasksSocketRef.current.readyState, 'OPEN=', WebSocket.OPEN);
 
     if (tasksSocketRef.current.readyState === WebSocket.OPEN) {
       try {
         const message = { type: 'task_event', action, task_id: taskId };
-        console.log('[WS] Envoi du message:', message);
         tasksSocketRef.current.send(JSON.stringify(message));
-        console.log('[WS] Message envoyé avec succès');
       } catch (e) {
-        console.error('[WS] Erreur lors de l\'envoi du message:', e);
+        logger.error('[WS] Erreur lors de l\'envoi du message:', e);
       }
     } else {
-      console.warn('[WS] Socket non ouvert, impossible d\'envoyer le message');
+      logger.warn('[WS] Socket non ouvert, impossible d\'envoyer le message');
     }
   };
 
@@ -394,7 +391,7 @@ export function useTaches({ incidentId, collaboration, tasksData, mutateTasks })
       await deleteTaskService(incidentId, taskId);
       notifyTaskChange('delete', taskId);
     } catch (err) {
-      console.error('[deleteTask] Erreur:', err);
+      logger.error('[deleteTask] Erreur:', err);
       await mutateTasks(); // Restaurer/Recharger la liste en cas d'erreur
     } finally {
       setDeletingTaskIds(prev => prev.filter(id => id !== taskId));
@@ -469,7 +466,7 @@ export function useTaches({ incidentId, collaboration, tasksData, mutateTasks })
         cancelEditTask();
       }, 1500);
     } catch (err) {
-      console.error('[saveEditTask] Erreur:', err);
+      logger.error('[saveEditTask] Erreur:', err);
       let errorMessage = 'Une erreur est survenue lors de la modification de la tâche.';
       if (err.response?.data) {
         if (typeof err.response.data === 'object') {

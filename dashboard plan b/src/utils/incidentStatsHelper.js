@@ -1,7 +1,7 @@
 /**
  * Utilitaires pour calculer les statistiques des incidents
  */
-import { CLES_GRAVITE, gravite, libelleGravite, repartitionGravite } from './gravite';
+import { gravite, repartitionGravite } from './gravite';
 
 /**
  * Détermine la gravité d'un incident.
@@ -116,46 +116,6 @@ export const calculateAllStats = (incidents) => {
   };
 };
 
-/**
- * Affiche les statistiques dans la console de manière formatée
- * @param {Array} incidents - Liste des incidents
- */
-export const logStats = (incidents) => {
-  const stats = calculateAllStats(incidents);
-  
-  console.log('\n═══════════════════════════════════════════════════════');
-  console.log('📊 STATISTIQUES DES INCIDENTS');
-  console.log('═══════════════════════════════════════════════════════\n');
-  
-  console.log('📈 PAR STATUT:');
-  console.log(`   Total: ${stats.status.total}`);
-  console.log(`   ✅ Résolus: ${stats.status.resolved}`);
-  console.log(`   🔄 En cours: ${stats.status.inProgress}`);
-  console.log(`   ❌ Non résolus: ${stats.status.unresolved}\n`);
-  
-  console.log('📍 TOP 5 PAR LOCALITÉ:');
-  stats.locations.forEach((loc, idx) => {
-    console.log(`   ${idx + 1}. ${loc.name}: ${loc.count} incidents`);
-  });
-  console.log('');
-  
-  console.log('🔥 TOP 5 TYPES D\'INCIDENTS:');
-  stats.topIncidents.forEach((inc, idx) => {
-    console.log(`   ${idx + 1}. ${inc.name}: ${inc.count} (${inc.percentage}%)`);
-  });
-  console.log('');
-  
-  console.log('⚠️  PAR GRAVITÉ:');
-  CLES_GRAVITE.forEach((cle) => {
-    const { count, percentage } = stats.severity[cle];
-    console.log(`   ${libelleGravite(cle)}: ${count} (${percentage}%)`);
-  });
-  
-  console.log('\n═══════════════════════════════════════════════════════\n');
-  
-  return stats;
-};
-
 export default {
   getSeverity,
   normalizeIncidents,
@@ -163,6 +123,5 @@ export default {
   calculateLocationStats,
   calculateTopIncidents,
   calculateSeverityStats,
-  calculateAllStats,
-  logStats
+  calculateAllStats
 };

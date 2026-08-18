@@ -1,5 +1,6 @@
 import { authService } from '../../auth/services/authService';
 import { API_URL_BASE } from '../../../config/api_url_base';
+import { logger } from '../../../utils/logger';
 
 /**
  * Récupère tous les incidents pour la carte
@@ -16,7 +17,7 @@ export const getIncidentsService = async () => {
 
     return response.data || [];
   } catch (error) {
-    console.error('[DASHBOARD] Erreur:', error.response?.status, error.response?.data);
+    logger.error('[DASHBOARD] Erreur:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -28,10 +29,9 @@ export const getDashboardStatsService = async () => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.get(`${API_URL_BASE}/MapApi/incidents/dashboard-stats/`);
-    console.log('[DASHBOARD] Statistiques récupérées:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[DASHBOARD] Erreur récupération statistiques:', error.response?.status, error.response?.data);
+    logger.error('[DASHBOARD] Erreur récupération statistiques:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -54,10 +54,9 @@ export const getIncidentsFilteredService = async (params = {}) => {
       ...params
     };
     const response = await axios.get(`${API_URL_BASE}/MapApi/incident-filter/`, { params: queryParams });
-    console.log(`[DASHBOARD] Incidents filtrés (${queryParams.scope}) récupérés:`, response.data);
     return response.data;
   } catch (error) {
-    console.error('[DASHBOARD] Erreur récupération incidents filtrés:', error.response?.status, error.response?.data);
+    logger.error('[DASHBOARD] Erreur récupération incidents filtrés:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -70,10 +69,9 @@ export const getIncidentsNotResolvedService = async (params = {}) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.get(`${API_URL_BASE}/MapApi/incidentNotResolved/`, { params });
-    console.log('[DASHBOARD] Incidents non résolus récupérés:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[DASHBOARD] Erreur récupération incidents non résolus:', error.response?.status, error.response?.data);
+    logger.error('[DASHBOARD] Erreur récupération incidents non résolus:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -86,10 +84,9 @@ export const getIncidentsResolvedService = async (params = {}) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.get(`${API_URL_BASE}/MapApi/incidentResolved/`, { params });
-    console.log('[DASHBOARD] Incidents résolus récupérés:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[DASHBOARD] Erreur récupération incidents résolus:', error.response?.status, error.response?.data);
+    logger.error('[DASHBOARD] Erreur récupération incidents résolus:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -108,10 +105,9 @@ export const getActivityFeedService = async (filters = {}) => {
     }
 
     const response = await axios.get(url, { params });
-    console.log('[DASHBOARD] Flux d\'activité récupéré:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[DASHBOARD] Erreur récupération flux d\'activité:', error.response?.status, error.response?.data);
+    logger.error('[DASHBOARD] Erreur récupération flux d\'activité:', error.response?.status, error.response?.data);
     throw error;
   }
 };

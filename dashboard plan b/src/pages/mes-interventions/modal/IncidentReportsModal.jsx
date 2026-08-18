@@ -7,6 +7,7 @@ import { getFieldReportsService } from '../service/mes_interventions_service';
 import { BlurryImage } from '../../../components/atoms/BlurryImage';
 
 import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
+import { logger } from '../../../utils/logger';
 const formatDate = (isoString) => {
   if (!isoString) return 'Non spécifiée';
   try {
@@ -70,7 +71,7 @@ export const IncidentReportsModal = () => {
         setNextUrl(data.next || null);
       }
     } catch (err) {
-      console.error('[IncidentReportsModal] Erreur chargement rapports:', err);
+      logger.error('[IncidentReportsModal] Erreur chargement rapports:', err);
     } finally {
       setIsLoadingMore(false);
     }

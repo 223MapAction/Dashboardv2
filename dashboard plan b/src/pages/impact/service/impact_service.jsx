@@ -1,5 +1,6 @@
 import { authService } from '../../auth/services/authService';
 import { API_URL_BASE } from '../../../config/api_url_base';
+import { logger } from '../../../utils/logger';
 
 /**
  * Récupère les données globales d'impact
@@ -13,10 +14,9 @@ export const getGlobalImpactService = async (status = 'all', period = 'all') => 
     if (period) params.filter_type = period;
 
     const response = await axios.get(`${API_URL_BASE}/MapApi/impact/`, { params });
-    console.log('[Impact] Données globales récupérées:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Impact] Erreur récupération données globales:', error.response?.status, error.response?.data);
+    logger.error('[Impact] Erreur récupération données globales:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -42,10 +42,9 @@ export const getImpactIncidentsService = async (status = 'all', period = 'all', 
     if (search) params.search = search;
 
     const response = await axios.get(`${API_URL_BASE}/MapApi/impact/incidents/`, { params });
-    console.log('[Impact] Incidents d\'impact récupérés:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Impact] Erreur récupération incidents d\'impact:', error.response?.status, error.response?.data);
+    logger.error('[Impact] Erreur récupération incidents d\'impact:', error.response?.status, error.response?.data);
     throw error;
   }
 };
