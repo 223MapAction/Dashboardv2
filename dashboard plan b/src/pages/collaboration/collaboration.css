@@ -36,6 +36,27 @@
   gap: var(--spacing-5);
 }
 
+/* Recherche et filtres restent visibles pendant le defilement de la liste :
+   .collaboration-content est le conteneur qui defile (overflow-y: auto), et
+   c'est par rapport a lui que le sticky s'ancre. Le fond opaque + le liseré
+   sont necessaires des qu'un element sticky, sinon le contenu qui defile
+   dessous se voit au travers. */
+.collab-filtres-fixes {
+  position: sticky;
+  /* .app-header (position: fixed, 60px de haut, z-index: 100) recouvre le
+     haut de la page : coller ce bloc a top:0 le fait passer SOUS le header
+     fixe, qui masque alors sa premiere ligne (la recherche) sans toucher aux
+     lignes suivantes, plus basses — d'ou l'illusion que seuls les filtres
+     restent visibles au defilement. */
+  top: 60px;
+  z-index: 20;
+  background-color: var(--color-background);
+  padding-top: var(--spacing-2);
+  margin-top: calc(-1 * var(--spacing-2));
+  padding-bottom: var(--spacing-2);
+  margin-bottom: calc(-1 * var(--spacing-2));
+}
+
 /* --- Header --- */
 .collab-page-header {
   display: flex;
@@ -87,7 +108,7 @@
 
 .collab-tab:hover {
   color: var(--color-text-primary);
-  background-color: rgba(58, 162, 221, 0.05);
+  background-color: rgba(var(--rgb-primary), 0.05);
 }
 
 .collab-tab.is-active {
@@ -135,7 +156,7 @@
 }
 
 .collab-stat-value {
-  font-size: 22px;
+  font-size: var(--font-size-title);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   line-height: 1.1;
@@ -157,7 +178,7 @@
   gap: var(--spacing-4);
   flex-wrap: wrap;
   align-items: center;
-  background-color: rgba(255, 255, 255, 0.85);
+  background-color: rgba(var(--rgb-surface), 0.85);
   backdrop-filter: saturate(180%) blur(12px);
   -webkit-backdrop-filter: saturate(180%) blur(12px);
   padding: var(--spacing-3) var(--spacing-4);
@@ -225,13 +246,13 @@
 
 .collab-filter-pill:hover {
   background-color: var(--color-surface);
-  border-color: #cbd5e1;
+  border-color: var(--color-border);
 }
 
 .collab-filter-pill.is-active {
   background-color: var(--color-primary);
   border-color: var(--color-primary);
-  color: #fff;
+  color: var(--color-surface);
 }
 
 .collab-filter-count {
@@ -242,14 +263,75 @@
   height: 22px;
   padding: 0 6px;
   border-radius: var(--radius-full);
-  background-color: rgba(0, 0, 0, 0.08);
-  font-size: 11px;
+  background-color: rgba(var(--rgb-ombre), 0.08);
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
 }
 
 .collab-filter-pill.is-active .collab-filter-count {
-  background-color: rgba(255, 255, 255, 0.25);
-  color: #fff;
+  background-color: rgba(var(--rgb-surface), 0.25);
+  color: var(--color-surface);
+}
+
+/* ── Filtres avances (role, signalement, acceptation, periode) ───────────────
+   Repliés par defaut : recherche et pastilles suffisent la plupart du temps,
+   le reste n'a besoin d'être visible que sur demande. Voir Collaboration.jsx
+   pour le detail des filtres qu'il contient. */
+.collab-filtres-avances-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: 8px 14px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body-small);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  font-family: var(--font-family);
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.collab-filtres-avances-toggle:hover {
+  border-color: var(--color-primary);
+  color: var(--color-text-primary);
+}
+
+/* Actif = le panneau est ouvert OU un filtre qu'il contient est actif : dans
+   les deux cas, l'utilisateur doit pouvoir le reperer d'un coup d'oeil. */
+.collab-filtres-avances-toggle.is-active {
+  border-color: var(--color-primary);
+  color: var(--color-primary-text);
+  background-color: var(--color-primary-surface);
+}
+
+.collab-filtres-avances-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary);
+  color: var(--color-surface);
+  font-size: var(--font-size-micro);
+  font-weight: var(--font-weight-bold);
+}
+
+/* flex-basis:100% force ce panneau sur sa propre ligne dans la barre de
+   filtres (qui est en flex-wrap), sous la recherche et les pastilles, plutot
+   que de s'inserer au milieu d'elles. */
+.collab-filtres-avances-panneau {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+  flex-basis: 100%;
+  padding-top: var(--spacing-2);
+  border-top: 1px solid var(--color-border);
+  margin-top: var(--spacing-1);
 }
 
 /* --- Date range filter (react-datepicker) --- */
@@ -266,7 +348,7 @@
 
 .collab-date-range:focus-within {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(58, 162, 221, 0.15);
+  box-shadow: 0 0 0 3px rgba(var(--rgb-primary), 0.15);
 }
 
 .collab-date-label {
@@ -305,14 +387,14 @@
   width: 28px;
   height: 28px;
   border: none;
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgba(var(--rgb-danger), 0.1);
   border-radius: 50%;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
 .collab-date-clear:hover {
-  background-color: rgba(239, 68, 68, 0.18);
+  background-color: rgba(var(--rgb-danger), 0.18);
 }
 
 /* --- Skin react-datepicker (couleurs projet) --- */
@@ -324,7 +406,7 @@
   font-family: var(--font-family);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.14);
+  box-shadow: 0 12px 32px rgba(var(--rgb-text-primary), 0.14);
   overflow: hidden;
   background-color: var(--color-surface);
 }
@@ -366,7 +448,7 @@
 }
 
 .collab-datepicker .react-datepicker__day:hover {
-  background-color: rgba(58, 162, 221, 0.12);
+  background-color: rgba(var(--rgb-primary), 0.12);
   color: var(--color-primary-text);
 }
 
@@ -381,14 +463,14 @@
 }
 
 .collab-datepicker .react-datepicker__day--keyboard-selected {
-  background-color: rgba(58, 162, 221, 0.15);
+  background-color: rgba(var(--rgb-primary), 0.15);
   color: var(--color-primary-text);
 }
 
 /* Range fill */
 .collab-datepicker .react-datepicker__day--in-range,
 .collab-datepicker .react-datepicker__day--in-selecting-range {
-  background-color: rgba(58, 162, 221, 0.15);
+  background-color: rgba(var(--rgb-primary), 0.15);
   color: var(--color-primary-text);
   border-radius: 0;
 }
@@ -400,7 +482,7 @@
 .collab-datepicker .react-datepicker__day--selecting-range-end,
 .collab-datepicker .react-datepicker__day--selected {
   background-color: var(--color-primary) !important;
-  color: #fff !important;
+  color: var(--color-surface) !important;
   border-radius: 50%;
   font-weight: var(--font-weight-bold);
 }
@@ -448,7 +530,7 @@
 
 /* --- Portal overlay (mobile) --- */
 .react-datepicker__portal {
-  background-color: rgba(15, 23, 42, 0.55);
+  background-color: rgba(var(--rgb-text-primary), 0.55);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   z-index: 1000;
@@ -571,7 +653,7 @@
 .collab-card-clickable:hover {
   border-color: var(--color-primary);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 24px rgba(var(--rgb-ombre), 0.12);
 }
 
 .collab-card-clickable:active {
@@ -582,7 +664,7 @@
   position: relative;
   width: 100%;
   height: 160px;
-  background-color: #e0e5ea;
+  background-color: var(--color-border);
   background-size: cover;
   background-position: center;
 }
@@ -599,20 +681,20 @@
   gap: 6px;
   padding: 5px 12px;
   border-radius: var(--radius-full);
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
   letter-spacing: 0.04em;
-  color: #fff;
+  color: var(--color-surface);
   backdrop-filter: blur(8px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(var(--rgb-ombre), 0.2);
 }
 
 .collab-status-in-progress {
-  background-color: #F59E0B;
+  background-color: var(--color-warning);
 }
 
 .collab-status-completed {
-  background-color: #22C55E;
+  background-color: var(--color-success);
 }
 
 .collab-card-body {
@@ -627,7 +709,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 11px;
+  font-size: var(--font-size-micro);
   font-weight: var(--font-weight-bold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -643,7 +725,7 @@
 }
 
 .collab-card-title {
-  font-size: 16px;
+  font-size: var(--font-size-body-large);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   margin: 0;
@@ -693,7 +775,7 @@
   align-items: center;
   gap: 8px;
   font-size: var(--font-size-caption);
-  color: var(--color-text-secondary, #4B5563);
+  color: var(--color-text-secondary, var(--color-text-secondary));
   font-weight: var(--font-weight-medium);
 }
 
@@ -725,7 +807,7 @@
   background-color: var(--color-background);
   border-radius: var(--radius-full);
   overflow: hidden;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+  box-shadow: inset 0 1px 2px rgba(var(--rgb-ombre), 0.04);
 }
 
 .collab-progress-fill {
@@ -735,11 +817,11 @@
 }
 
 .collab-progress-fill.collab-progress-in-progress {
-  background: linear-gradient(90deg, #F59E0B, #FBBF24);
+  background: linear-gradient(90deg, var(--color-warning), var(--color-warning));
 }
 
 .collab-progress-fill.collab-progress-completed {
-  background: linear-gradient(90deg, #22C55E, #4ADE80);
+  background: linear-gradient(90deg, var(--color-success), var(--color-success));
 }
 
 /* Badge clôturée sur la carte */
@@ -750,8 +832,8 @@
   gap: 6px;
   padding: 6px var(--spacing-3);
   margin-top: var(--spacing-3);
-  background: linear-gradient(90deg, #22C55E, #16A34A);
-  color: #fff;
+  background: linear-gradient(90deg, var(--color-success), var(--color-success));
+  color: var(--color-surface);
   border-radius: var(--radius-md);
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-semibold);
@@ -769,7 +851,7 @@
   padding: 10px var(--spacing-4);
   margin-top: var(--spacing-3);
   background-color: var(--color-primary);
-  color: #fff;
+  color: var(--color-surface);
   border: none;
   border-radius: var(--radius-md);
   font-size: var(--font-size-body-small);
@@ -782,7 +864,7 @@
 .collab-tasks-btn:hover {
   background-color: var(--color-primary-dark, var(--color-primary-dark));
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(58, 162, 221, 0.3);
+  box-shadow: 0 4px 12px rgba(var(--rgb-primary), 0.3);
 }
 
 .collab-tasks-btn:active {
@@ -795,7 +877,7 @@
 .tasks-modal-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(var(--rgb-ombre), 0.5);
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -833,7 +915,7 @@
   height: 100vh;
   height: 100dvh;
   background-color: var(--color-surface);
-  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+  box-shadow: -4px 0 24px rgba(var(--rgb-ombre), 0.15);
   display: flex;
   flex-direction: column;
   animation: slideInRight 0.28s cubic-bezier(0.32, 0.72, 0, 1);
@@ -955,7 +1037,7 @@
   flex: 1;
   padding: 12px var(--spacing-4);
   background-color: var(--color-primary);
-  color: #fff;
+  color: var(--color-surface);
   border: none;
   border-radius: var(--radius-md);
   font-family: var(--font-family);
@@ -977,8 +1059,8 @@
   flex-direction: column;
   gap: var(--spacing-3);
   padding: var(--spacing-3);
-  background-color: rgba(245, 158, 11, 0.08);
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  background-color: rgba(var(--rgb-warning), 0.08);
+  border: 1px solid rgba(var(--rgb-warning), 0.3);
   border-radius: var(--radius-md);
   animation: slideDown 0.25s ease;
 }
@@ -1025,13 +1107,13 @@
 }
 
 .tasks-close-confirm-btn {
-  background-color: #1A1C1E;
-  color: #fff;
-  border: 1px solid #1A1C1E;
+  background-color: var(--color-text-primary);
+  color: var(--color-surface);
+  border: 1px solid var(--color-text-primary);
 }
 
 .tasks-close-confirm-btn:hover {
-  background-color: #2D2F31;
+  background-color: var(--color-text-primary);
 }
 
 /* Progression globale */
@@ -1086,7 +1168,7 @@
   padding: 10px var(--spacing-4);
   margin-top: var(--spacing-3);
   background-color: var(--color-primary);
-  color: #fff;
+  color: var(--color-surface);
   border: none;
   border-radius: var(--radius-md);
   font-family: var(--font-family);
@@ -1101,11 +1183,11 @@
 
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(58, 162, 221, 0.4);
+    box-shadow: 0 0 0 0 rgba(var(--rgb-primary), 0.4);
   }
 
   50% {
-    box-shadow: 0 0 0 8px rgba(58, 162, 221, 0);
+    box-shadow: 0 0 0 8px rgba(var(--rgb-primary), 0);
   }
 }
 
@@ -1133,8 +1215,8 @@
   gap: 6px;
   margin-top: var(--spacing-2);
   padding: 8px var(--spacing-3);
-  background-color: rgba(58, 162, 221, 0.06);
-  border: 1px dashed rgba(58, 162, 221, 0.4);
+  background-color: rgba(var(--rgb-primary), 0.06);
+  border: 1px dashed rgba(var(--rgb-primary), 0.4);
   border-radius: var(--radius-md);
   color: var(--color-primary-text);
   font-size: var(--font-size-caption);
@@ -1147,7 +1229,7 @@
 .mobile-sheet-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(var(--rgb-ombre), 0.5);
   z-index: 1400;
   display: flex;
   align-items: flex-end;
@@ -1165,7 +1247,7 @@
   background-color: var(--color-surface);
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
-  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 -8px 32px rgba(var(--rgb-ombre), 0.2);
   display: flex;
   flex-direction: column;
   padding: var(--spacing-2) var(--spacing-4) var(--spacing-4);
@@ -1281,8 +1363,8 @@
 }
 
 .mobile-sheet-action.primary {
-  background-color: rgba(58, 162, 221, 0.06);
-  border-color: rgba(58, 162, 221, 0.3);
+  background-color: rgba(var(--rgb-primary), 0.06);
+  border-color: rgba(var(--rgb-primary), 0.3);
 }
 
 .mobile-sheet-action-icon {
@@ -1320,10 +1402,10 @@
   justify-content: center;
   gap: var(--spacing-2);
   padding: var(--spacing-4);
-  background-color: rgba(34, 197, 94, 0.08);
-  border: 1px solid rgba(34, 197, 94, 0.3);
+  background-color: rgba(var(--rgb-success), 0.08);
+  border: 1px solid rgba(var(--rgb-success), 0.3);
   border-radius: var(--radius-md);
-  color: #16A34A;
+  color: var(--color-success-text);
   font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-semibold);
 }
@@ -1385,21 +1467,21 @@
 
 .collab-action-add-task {
   color: var(--color-primary-text);
-  border-color: rgba(58, 162, 221, 0.4);
+  border-color: rgba(var(--rgb-primary), 0.4);
 }
 
 .collab-action-add-task:hover {
-  background-color: rgba(58, 162, 221, 0.08);
+  background-color: rgba(var(--rgb-primary), 0.08);
   border-style: solid;
 }
 
 .collab-action-suggest {
-  color: #F59E0B;
-  border-color: rgba(245, 158, 11, 0.4);
+  color: var(--color-warning-text);
+  border-color: rgba(var(--rgb-warning), 0.4);
 }
 
 .collab-action-suggest:hover {
-  background-color: rgba(245, 158, 11, 0.08);
+  background-color: rgba(var(--rgb-warning), 0.08);
   border-style: solid;
 }
 
@@ -1417,18 +1499,18 @@
 }
 
 .collab-role-leader {
-  background-color: rgba(245, 158, 11, 0.1);
-  color: #B45309;
+  background-color: rgba(var(--rgb-warning), 0.1);
+  color: var(--color-warning-text);
 }
 
 .collab-role-contributeur {
-  background-color: rgba(58, 162, 221, 0.1);
-  color: #1E6FA0;
+  background-color: rgba(var(--rgb-primary), 0.1);
+  color: var(--color-primary-text);
 }
 
 .collab-role-observateur {
-  background-color: rgba(108, 114, 120, 0.1);
-  color: #4B5563;
+  background-color: rgba(var(--rgb-text-secondary), 0.1);
+  color: var(--color-text-secondary);
 }
 
 /* ============================================
@@ -1437,7 +1519,7 @@
 .centered-modal-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.55);
+  background-color: rgba(var(--rgb-ombre), 0.55);
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -1452,7 +1534,7 @@
   max-height: 90vh;
   background-color: var(--color-surface);
   border-radius: var(--radius-lg);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 16px 48px rgba(var(--rgb-ombre), 0.25);
   display: flex;
   flex-direction: column;
   animation: scaleIn 0.25s cubic-bezier(0.32, 0.72, 0, 1);
@@ -1522,8 +1604,8 @@
 .centered-modal-help {
   margin: 0 0 var(--spacing-2) 0;
   padding: var(--spacing-3);
-  background-color: rgba(245, 158, 11, 0.08);
-  border-left: 3px solid #F59E0B;
+  background-color: rgba(var(--rgb-warning), 0.08);
+  border-left: 3px solid var(--color-warning);
   border-radius: var(--radius-sm);
   font-size: var(--font-size-body-small);
   color: var(--color-text-primary);
@@ -1538,7 +1620,7 @@
 }
 
 .centered-modal-label .required {
-  color: #EF4444;
+  color: var(--color-danger-text);
   margin-left: 2px;
 }
 
@@ -1596,7 +1678,7 @@
 
 .centered-modal-confirm {
   background-color: var(--color-primary);
-  color: #fff;
+  color: var(--color-surface);
   border: 1px solid var(--color-primary);
 }
 
@@ -1616,8 +1698,8 @@
   align-items: flex-start;
   gap: var(--spacing-2);
   padding: var(--spacing-3) var(--spacing-4);
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.04));
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  background: linear-gradient(135deg, rgba(var(--rgb-warning), 0.1), rgba(var(--rgb-warning), 0.04));
+  border: 1px solid rgba(var(--rgb-warning), 0.3);
   border-radius: var(--radius-md);
   font-size: var(--font-size-body-small);
   color: var(--color-text-primary);
@@ -1683,7 +1765,7 @@
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0);
+  box-shadow: 0 8px 24px rgba(var(--rgb-ombre), 0);
   padding: 4px;
   animation: slideDown 0.2s ease;
 }
@@ -1703,7 +1785,7 @@
 }
 
 .suggest-search-result:hover {
-  background-color: rgba(58, 162, 221, 0.08);
+  background-color: rgba(var(--rgb-primary), 0.08);
 }
 
 .suggest-search-empty {
@@ -1756,7 +1838,7 @@
 }
 
 .suggest-remove-btn:hover {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgba(var(--rgb-danger), 0.1);
 }
 
 /* Header de la row */
@@ -1784,7 +1866,7 @@
 .suggest-role-desc {
   margin: 0;
   padding: var(--spacing-2) var(--spacing-3);
-  background-color: rgba(58, 162, 221, 0.06);
+  background-color: rgba(var(--rgb-primary), 0.06);
   border-left: 3px solid var(--color-primary);
   border-radius: var(--radius-sm);
   font-size: var(--font-size-caption);
@@ -1865,12 +1947,12 @@
 
 .suggest-org-card:hover {
   border-color: var(--color-primary);
-  background-color: rgba(58, 162, 221, 0.04);
+  background-color: rgba(var(--rgb-primary), 0.04);
 }
 
 .suggest-org-card.is-selected {
-  border-color: #22C55E;
-  background-color: rgba(34, 197, 94, 0.08);
+  border-color: var(--color-success);
+  background-color: rgba(var(--rgb-success), 0.08);
 }
 
 .suggest-org-avatar {
@@ -1881,7 +1963,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: var(--color-surface);
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-bold);
 }
@@ -2011,17 +2093,17 @@
 
 .my-task-item:hover {
   border-color: var(--color-primary);
-  box-shadow: 0 2px 8px rgba(58, 162, 221, 0.08);
+  box-shadow: 0 2px 8px rgba(var(--rgb-primary), 0.08);
 }
 
 .my-task-item.is-completed {
-  background-color: rgba(34, 197, 94, 0.04);
-  border-color: rgba(34, 197, 94, 0.3);
+  background-color: rgba(var(--rgb-success), 0.04);
+  border-color: rgba(var(--rgb-success), 0.3);
 }
 
 .my-task-item.is-failed {
-  background-color: rgba(239, 68, 68, 0.04);
-  border-color: rgba(239, 68, 68, 0.3);
+  background-color: rgba(var(--rgb-danger), 0.04);
+  border-color: rgba(var(--rgb-danger), 0.3);
 }
 
 .my-task-info {
@@ -2061,18 +2143,18 @@
 }
 
 .my-task-status.completed {
-  background-color: rgba(34, 197, 94, 0.1);
-  color: #16A34A;
+  background-color: rgba(var(--rgb-success), 0.1);
+  color: var(--color-success-text);
 }
 
 .my-task-status.failed {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgba(var(--rgb-danger), 0.1);
   color: var(--color-danger-text);
 }
 
 .my-task-status.pending {
-  background-color: rgba(245, 158, 11, 0.1);
-  color: #B45309;
+  background-color: rgba(var(--rgb-warning), 0.1);
+  color: var(--color-warning-text);
 }
 
 .my-task-actions {
@@ -2096,11 +2178,11 @@
 }
 
 .my-task-action-btn.edit:hover {
-  background-color: rgba(58, 162, 221, 0.1);
+  background-color: rgba(var(--rgb-primary), 0.1);
 }
 
 .my-task-action-btn.delete:hover {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgba(var(--rgb-danger), 0.1);
 }
 
 /* Mode édition inline */
@@ -2142,7 +2224,7 @@
 
 .my-task-btn-save {
   background-color: var(--color-primary);
-  color: #fff;
+  color: var(--color-surface);
   border: 1px solid var(--color-primary);
 }
 
@@ -2170,7 +2252,7 @@
   width: 100%;
   padding: 12px var(--spacing-4);
   background-color: var(--color-primary);
-  color: #fff;
+  color: var(--color-surface);
   border: none;
   border-radius: var(--radius-md);
   font-family: var(--font-family);
@@ -2183,7 +2265,7 @@
 .tasks-add-btn:hover {
   background-color: var(--color-primary-dark, var(--color-primary-dark));
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(58, 162, 221, 0.3);
+  box-shadow: 0 4px 12px rgba(var(--rgb-primary), 0.3);
 }
 
 .tasks-add-form {
@@ -2231,7 +2313,7 @@
 }
 
 .tasks-add-label .required {
-  color: #EF4444;
+  color: var(--color-danger-text);
   margin-left: 2px;
 }
 
@@ -2290,7 +2372,7 @@
 
 .tasks-add-confirm {
   background-color: var(--color-primary);
-  color: #fff;
+  color: var(--color-surface);
   border: 1px solid var(--color-primary);
 }
 
@@ -2309,10 +2391,10 @@
   align-items: center;
   gap: var(--spacing-2);
   padding: var(--spacing-3) var(--spacing-4);
-  background-color: rgba(34, 197, 94, 0.1);
-  border: 1px solid rgba(34, 197, 94, 0.3);
+  background-color: rgba(var(--rgb-success), 0.1);
+  border: 1px solid rgba(var(--rgb-success), 0.3);
   border-radius: var(--radius-md);
-  color: #16A34A;
+  color: var(--color-success-text);
   font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-semibold);
 }
@@ -2328,7 +2410,7 @@
 
 .tasks-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--color-primary), #5BB8E8);
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary));
   border-radius: var(--radius-full);
   transition: width 0.4s ease;
 }
@@ -2358,21 +2440,21 @@
 
 .task-item:hover {
   border-color: var(--color-primary);
-  box-shadow: 0 2px 8px rgba(58, 162, 221, 0.1);
+  box-shadow: 0 2px 8px rgba(var(--rgb-primary), 0.1);
 }
 
 .task-item.is-completed {
-  background-color: rgba(34, 197, 94, 0.03);
-  border-color: rgba(34, 197, 94, 0.3);
+  background-color: rgba(var(--rgb-success), 0.03);
+  border-color: rgba(var(--rgb-success), 0.3);
 }
 
 .task-item.is-failed {
-  background-color: rgba(239, 68, 68, 0.03);
-  border-color: rgba(239, 68, 68, 0.4);
+  background-color: rgba(var(--rgb-danger), 0.03);
+  border-color: rgba(var(--rgb-danger), 0.4);
 }
 
 .task-item.is-failed:hover {
-  border-color: rgba(239, 68, 68, 0.6);
+  border-color: rgba(var(--rgb-danger), 0.6);
 }
 
 .task-main {
@@ -2406,8 +2488,8 @@
 }
 
 .task-checkbox:checked+.task-checkmark {
-  background-color: #22C55E;
-  border-color: #22C55E;
+  background-color: var(--color-success);
+  border-color: var(--color-success);
 }
 
 .task-checkbox:not(:checked)+.task-checkmark svg {
@@ -2458,12 +2540,12 @@
 }
 
 .task-completed-date {
-  color: #22C55E;
+  color: var(--color-success-text);
   font-weight: var(--font-weight-medium);
 }
 
 .task-failed-date {
-  color: #EF4444;
+  color: var(--color-danger-text);
   font-weight: var(--font-weight-medium);
 }
 
@@ -2473,7 +2555,7 @@
   gap: 4px;
   padding: 4px 8px;
   background-color: var(--color-danger-text);
-  color: #fff;
+  color: var(--color-surface);
   border-radius: var(--radius-sm);
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-semibold);
@@ -2497,7 +2579,7 @@
 }
 
 .task-fail-btn:hover {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgba(var(--rgb-danger), 0.1);
   transform: scale(1.1);
 }
 
@@ -2510,15 +2592,15 @@
 .task-failure-section {
   margin-top: var(--spacing-3);
   padding: var(--spacing-3);
-  background-color: rgba(239, 68, 68, 0.05);
-  border-left: 3px solid #EF4444;
+  background-color: rgba(var(--rgb-danger), 0.05);
+  border-left: 3px solid var(--color-danger);
   border-radius: var(--radius-sm);
 }
 
 .task-failure-label {
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-semibold);
-  color: #EF4444;
+  color: var(--color-danger-text);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: var(--spacing-1);
@@ -2534,8 +2616,8 @@
 .task-failure-form {
   margin-top: var(--spacing-3);
   padding: var(--spacing-4);
-  background-color: rgba(239, 68, 68, 0.03);
-  border: 2px solid rgba(239, 68, 68, 0.2);
+  background-color: rgba(var(--rgb-danger), 0.03);
+  border: 2px solid rgba(var(--rgb-danger), 0.2);
   border-radius: var(--radius-md);
   animation: slideDown 0.25s ease;
 }
@@ -2561,7 +2643,7 @@
 }
 
 .failure-form-label .required {
-  color: #EF4444;
+  color: var(--color-danger-text);
   margin-left: 2px;
 }
 
@@ -2588,7 +2670,7 @@
 
 .failure-form-textarea:focus {
   outline: none;
-  border-color: #EF4444;
+  border-color: var(--color-danger);
 }
 
 .failure-form-textarea::placeholder {
@@ -2629,7 +2711,7 @@
 
 .failure-form-confirm {
   background-color: var(--color-danger-text);
-  color: #fff;
+  color: var(--color-surface);
   border: 1px solid var(--color-danger-text);
 }
 
@@ -2700,7 +2782,7 @@
   align-items: center;
   gap: var(--spacing-2);
   padding: 8px var(--spacing-3);
-  background-color: rgba(58, 162, 221, 0.1);
+  background-color: rgba(var(--rgb-primary), 0.1);
   border: 1px dashed var(--color-primary);
   border-radius: var(--radius-md);
   font-size: var(--font-size-body-small);
@@ -2711,7 +2793,7 @@
 }
 
 .task-proof-btn:hover {
-  background-color: rgba(58, 162, 221, 0.15);
+  background-color: rgba(var(--rgb-primary), 0.15);
   border-style: solid;
 }
 

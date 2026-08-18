@@ -5,34 +5,20 @@ import { ShimmerThumbnail, ShimmerTitle, ShimmerText, ShimmerButton } from 'reac
 import { useSidebarState } from '../../hooks/useSidebarState';
 import { Header, Sidebar } from '../../components/layout';
 import { CollaborationDetailProvider } from './context/CollaborationDetailContext';
+import { useDiscussion } from './useDiscussion';
+import { useTaches } from './useTaches';
+import { useSuggestionsOrganisations } from './useSuggestionsOrganisations';
+import { useClotureIncident } from './useClotureIncident';
 import { TaskModal } from './modal/TaskModal';
 import { SuggestOrgModal } from './modal/SuggestOrgModal';
 import { DeleteTaskModal } from './modal/DeleteTaskModal';
 import { AgentReportsModal } from './modal/AgentReportsModal';
 import { NotFound } from '../not-found';
 import { getCollaborationService } from '../collaboration/service/collaboration_service';
-import { getOrganisationsService, formatOrganisation } from '../organisations/service/organisation_service';
 import { BlurryImage } from '../../components/atoms/BlurryImage';
 import { API_URL_BASE } from '../../config/api_url_base';
 import { authService } from '../auth/services/authService';
-import sendMessageSound from '../../assets/send_message.mp3';
-import {
-  getDiscussionMessagesService,
-  sendMessageService,
-  updateDiscussionMessageService,
-  deleteDiscussionMessageService,
-  formatMessage
-} from './service/collab_detail_service';
-import { createSuggestionService } from '../suggest-request/service/suggest_service';
-import {
-  getTasksService,
-  createTaskService,
-  completeTaskService,
-  failTaskService,
-  deleteTaskService,
-  updateTaskService
-} from '../incident/service/task_service';
-import { closeIncidentService } from '../incident/service/incident_service';
+import { getTasksService, deleteTaskService } from '../incident/service/task_service';
 import {
   ArrowLeft2,
   Location,
@@ -40,7 +26,6 @@ import {
   People,
   Crown1,
   Eye,
-  Lock1,
   TickCircle,
   Clock,
   Danger,
@@ -63,267 +48,28 @@ import {
   DocumentText
 } from 'iconsax-react';
 import { OffcanvasModal } from '../../components/molecules/OffcanvasModal';
+import { ImageViewer } from '../../components/molecules/ImageViewer';
 import './collaboration-detail.css';
+import { CustomAudioPlayer } from './LecteurAudio';
+import {
+  formatFailureReason,
+  formatDateTime,
+  formatEtat,
+  getEtatBadgeClass,
+  formatStatus,
+  getStatusBadgeClass,
+  formatRole,
+  getRoleBadgeClass,
+} from './formatage';
 
-const formatFailureReason = (reason) => {
-  if (!reason) return '';
-  try {
-    let clean = reason;
-    if (clean.includes("{'") || clean.includes('{"')) {
-      clean = clean.replace(/'/g, '"');
-      const parsed = JSON.parse(clean);
-      if (parsed.failure_reason) return parsed.failure_reason;
-      if (typeof parsed === 'object') {
-        return Object.values(parsed).flat().join(', ');
-      }
-    }
-    return reason;
-  } catch (e) {
-    let clean = reason.replace(/\{'failure_reason':\s*'/g, '').replace(/'\}/g, '');
-    clean = clean.replace(/\{"failure_reason":\s*"/g, '').replace(/"\}/g, '');
-    return clean;
-  }
-};
-
-const formatDateTime = (dateStr) => {
-  if (!dateStr) return '';
-  try {
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return '';
-    const dayAndMonth = date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
-    const time = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-    return `${dayAndMonth} à ${time}`;
-  } catch (e) {
-    return dateStr;
-  }
-};
-
-const CustomAudioPlayer = ({ id, src, activeAudioId, setActiveAudioId }) => {
-  const audioRef = useRef(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [currentTime, setCurrentTime] = useState(0);
-
-  // Éviter les coupures d'audio lors des rafraîchissements SWR
-  // Si le token change mais que c'est le même fichier, on ne met pas à jour la source.
-  const [stableSrc, setStableSrc] = useState(src);
-
-  useEffect(() => {
-    if (!src) return;
-    if (!stableSrc) {
-      setStableSrc(src);
-      return;
-    }
-    const oldBase = stableSrc.split('?')[0];
-    const newBase = src.split('?')[0];
-    if (oldBase !== newBase) {
-      setStableSrc(src);
-    }
-  }, [src, stableSrc]);
-
-  // Si un autre audio démarre, on met celui-ci en pause
-  useEffect(() => {
-    if (activeAudioId && activeAudioId !== id && isPlaying && audioRef.current) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    }
-  }, [activeAudioId, id, isPlaying]);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const setAudioData = () => {
-      setDuration(audio.duration);
-      setCurrentTime(audio.currentTime);
-    };
-
-    const setAudioTime = () => {
-      setCurrentTime(audio.currentTime);
-      setProgress((audio.currentTime / audio.duration) * 100);
-    };
-
-    const onAudioEnd = () => {
-      setIsPlaying(false);
-      setProgress(0);
-      setCurrentTime(0);
-      audio.currentTime = 0;
-      if (setActiveAudioId && activeAudioId === id) setActiveAudioId(null);
-    };
-
-    audio.addEventListener('loadedmetadata', setAudioData);
-    audio.addEventListener('timeupdate', setAudioTime);
-    audio.addEventListener('ended', onAudioEnd);
-
-    return () => {
-      audio.removeEventListener('loadedmetadata', setAudioData);
-      audio.removeEventListener('timeupdate', setAudioTime);
-      audio.removeEventListener('ended', onAudioEnd);
-    };
-  }, [id, activeAudioId, setActiveAudioId]);
-
-  const togglePlayPause = () => {
-    const prevValue = isPlaying;
-    if (!prevValue) {
-      if (setActiveAudioId) setActiveAudioId(id);
-      audioRef.current.play();
-      setIsPlaying(true);
-    } else {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    }
-  };
-
-  const handleProgressChange = (e) => {
-    const audio = audioRef.current;
-    const newTime = (e.target.value / 100) * duration;
-    audio.currentTime = newTime;
-    setProgress(e.target.value);
-  };
-
-  const formatTime = (time) => {
-    if (time && !isNaN(time)) {
-      const minutes = Math.floor(time / 60);
-      const formatMinutes = minutes < 10 ? `0${minutes}` : `${minutes}`;
-      const seconds = Math.floor(time % 60);
-      const formatSeconds = seconds < 10 ? `0${seconds}` : `${seconds}`;
-      return `${formatMinutes}:${formatSeconds}`;
-    }
-    return '00:00';
-  };
-
-  return (
-    <div className="custom-audio-player" style={{ display: 'flex', alignItems: 'center', gap: '16px', minWidth: '240px' }}>
-      <audio ref={audioRef} src={stableSrc} preload="metadata" />
-      <button
-        onClick={togglePlayPause}
-        style={{
-          width: '40px', height: '40px', borderRadius: '50%',
-          backgroundColor: 'var(--color-primary)', border: 'none',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          cursor: 'pointer', flexShrink: 0,
-
-          transition: 'transform 0.2s ease, box-shadow 0.2s ease'
-        }}
-        onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 6px 14px rgba(0,0,0,0.2)'; }}
-        onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 10px rgba(0,0,0,0.15)'; }}
-      >
-        {isPlaying ? <Pause size={20} variant="Bold" color="#FFF" /> : <Play size={20} variant="Bold" color="#FFF" style={{ marginLeft: '2px' }} />}
-      </button>
-
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        <div style={{ position: 'relative', width: '100%', height: '6px', backgroundColor: 'var(--color-border)', borderRadius: '3px', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', backgroundColor: 'var(--color-primary)', width: `${progress || 0}%`, borderRadius: '3px', transition: 'width 0.1s linear' }} />
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value={progress || 0}
-            onChange={handleProgressChange}
-            style={{
-              position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-              opacity: 0, cursor: 'pointer', margin: 0, padding: 0
-            }}
-          />
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--color-text-muted)', fontWeight: '600', fontFamily: 'monospace' }}>
-          <span>{formatTime(currentTime)}</span>
-          <span>{formatTime(duration)}</span>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export const CollaborationDetail = () => {
 
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const tasksSocketRef = useRef(null);
   const closeModalBodyRef = useRef(null);
 
-  const formatEtat = (etat) => {
-    if (!etat) return 'Inconnu';
-    switch (etat) {
-      case 'taken_into_account':
-        return 'Pris en compte';
-      case 'resolved':
-        return 'Résolu';
-      case 'pending':
-        return 'En attente';
-      default:
-        return etat.charAt(0).toUpperCase() + etat.slice(1);
-    }
-  };
-
-  const getEtatBadgeClass = (etat) => {
-    switch (etat) {
-      case 'taken_into_account':
-        return 'badge-primary';
-      case 'resolved':
-        return 'badge-success';
-      case 'pending':
-        return 'badge-warning';
-      default:
-        return 'badge-info';
-    }
-  };
-
-  const formatStatus = (status) => {
-    if (!status) return 'Inconnu';
-    switch (status) {
-      case 'accepted':
-        return 'Acceptée';
-      case 'pending':
-        return 'En attente';
-      case 'rejected':
-        return 'Refusée';
-      default:
-        return status.charAt(0).toUpperCase() + status.slice(1);
-    }
-  };
-
-  const getStatusBadgeClass = (status) => {
-    switch (status) {
-      case 'accepted':
-        return 'badge-success';
-      case 'pending':
-        return 'badge-warning';
-      case 'rejected':
-        return 'badge-danger';
-      default:
-        return 'badge-info';
-    }
-  };
-
-  const formatRole = (role) => {
-    if (!role) return 'Membre';
-    switch (role) {
-      case 'leader':
-        return 'Leader';
-      case 'contributeur':
-        return 'Contributeur';
-      case 'observateur':
-        return 'Observateur';
-      default:
-        return role.charAt(0).toUpperCase() + role.slice(1);
-    }
-  };
-
-  const getRoleBadgeClass = (role) => {
-    switch (role) {
-      case 'leader':
-        return 'badge-warning';
-      case 'contributeur':
-        return 'badge-primary';
-      case 'observateur':
-        return 'badge-info';
-      default:
-        return 'badge-primary';
-    }
-  };
 
   const {
     isOpen: sidebarOpen,
@@ -351,10 +97,28 @@ export const CollaborationDetail = () => {
 
   // Récupérer l'incidentId depuis la collaboration
   const incidentId = collaborationData?.incident;
+
+  // Toute la discussion — chargement pagine, temps reel, redaction, pieces
+  // jointes, enregistrement vocal, edition — vit dans son propre hook. Elle ne
+  // consomme rien d'autre de cette page que l'identifiant ci-dessus.
+  const {
+    messages, hasMoreMessages, isLoadingMoreMessages, loadMoreMessages,
+    messagesContainerRef, messagesEndRef,
+    newMessage, setNewMessage, sendMessage, sendingMessage,
+    attachedFile, attachedAudio, fileInputRef,
+    handleFileSelect, removeAttachedFile, handleAudioSelect, removeAttachedAudio,
+    getFileIcon, handleDownload, downloadingMsgId,
+    isRecording, recordingTime, startRecording, stopRecording, formatRecordingTime,
+    activeAudioId, setActiveAudioId,
+    editingMessageId, editingMessageText, setEditingMessageText,
+    startEditMessage, cancelEditMessage, handleEditMessage, savingEdit,
+    handleDeleteMessage, deletingMessageId,
+    formatMessageTime,
+  } = useDiscussion(incidentId);
   const isIncidentResolved = collaborationData?.incident_details?.etat === 'resolved';
 
   // Utiliser useSWR pour charger les tâches de l'incident (sans polling, géré par WebSockets)
-  const { data: tasksData, error: tasksError, isLoading: tasksLoading, mutate: mutateTasks } = useSWR(
+  const { data: tasksData, isLoading: tasksLoading, mutate: mutateTasks } = useSWR(
     incidentId ? `tasks-${incidentId}` : null,
     () => getTasksService(incidentId),
     {
@@ -363,357 +127,32 @@ export const CollaborationDetail = () => {
     }
   );
 
-  // États pour la pagination du chat
-  const [allMessages, setAllMessages] = useState([]);
-  const [hasMoreMessages, setHasMoreMessages] = useState(false);
-  const [nextBeforeId, setNextBeforeId] = useState(null);
-  const [isLoadingMoreMessages, setIsLoadingMoreMessages] = useState(false);
-  const messagesContainerRef = useRef(null);
-
-  // Référence pour éviter les stale closures dans les effets
-  const allMessagesRef = useRef([]);
-  // Drapeau: true quand on ajoute des messages anciens en haut (ne pas scroller en bas)
-  const isPrependingRef = useRef(false);
-
-  // Synchroniser la ref avec l'état
-  useEffect(() => {
-    allMessagesRef.current = Array.isArray(allMessages) ? allMessages : [];
-  }, [allMessages]);
-
-  // Réinitialiser la pagination quand incidentId change
-  useEffect(() => {
-    setAllMessages([]);
-    setHasMoreMessages(false);
-    setNextBeforeId(null);
-    allMessagesRef.current = [];
-  }, [incidentId]);
-
-  // Charger les messages initiaux (10 plus récents) via SWR
-  const { data: rawMessagesData, error: messagesError, mutate: mutateMessages } = useSWR(
-    incidentId ? `discussion-${incidentId}` : null,
-    () => getDiscussionMessagesService(incidentId, { limit: 10 }),
-    {
-      revalidateOnFocus: false
-    }
-  );
-
-  // Gérer à la fois le chargement initial et les mises à jour WebSocket
-  // - Si allMessages est vide : chargement initial (initialise la liste + pagination)
-  // - Si allMessages n'est pas vide : mise à jour WebSocket (ajoute seulement les nouveaux messages)
-  useEffect(() => {
-    if (!rawMessagesData || !Array.isArray(rawMessagesData.results)) return;
-
-    const apiResults = rawMessagesData.results;
-    const currentMessages = allMessagesRef.current;
-
-    if (currentMessages.length === 0) {
-      // Chargement initial : définir tous les messages depuis l'API
-      setAllMessages(apiResults);
-      setHasMoreMessages(rawMessagesData.has_more || false);
-      setNextBeforeId(rawMessagesData.next_before || null);
-      console.log('[Chat] Chargement initial:', apiResults.length, 'messages, has_more:', rawMessagesData.has_more);
-
-      // Scroller vers le bas après le chargement initial
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
-    } else {
-      // Mise à jour WebSocket : ajouter seulement les nouveaux messages
-      const newMessages = apiResults.filter(
-        newMsg => !currentMessages.some(existingMsg => existingMsg.id === newMsg.id)
-      );
-
-      if (newMessages.length > 0) {
-        console.log('[Chat] Nouveaux messages reçus:', newMessages.length);
-        setAllMessages(prev => {
-          const prevArray = Array.isArray(prev) ? prev : [];
-          return [...prevArray, ...newMessages];
-        });
-
-        setTimeout(() => {
-          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
-      }
-    }
-  }, [rawMessagesData]);
-
-  // Écoute temps réel via WebSockets natifs
-  useEffect(() => {
-    if (!incidentId) return;
-
-    const wsBaseUrl = API_URL_BASE.replace(/^http/, 'ws');
-    const token = authService.getAccessToken();
-    const query = token ? `?token=${token}` : '';
-
-    let discussionSocket = null;
-    let tasksSocket = null;
-    let isCleanedUp = false;
-    let discussionDelay = 3000;
-    let tasksDelay = 3000;
-
-    const shouldRetry = (code) => ![1000, 4001, 4003, 4004].includes(code);
-
-    const connectDiscussion = () => {
-      if (isCleanedUp) return;
-      discussionSocket = new WebSocket(`${wsBaseUrl}/ws/incidents/${incidentId}/discussion/${query}`);
-
-      discussionSocket.onopen = () => {
-        discussionDelay = 3000;
-        console.log('[WS] Discussion connectée');
-      };
-      discussionSocket.onmessage = () => mutateMessages();
-      discussionSocket.onerror = () => discussionSocket.close();
-      discussionSocket.onclose = (e) => {
-        if (!isCleanedUp && shouldRetry(e.code)) {
-          setTimeout(connectDiscussion, discussionDelay);
-          discussionDelay = Math.min(discussionDelay * 2, 30000);
-        }
-      };
-    };
-
-    const connectTasks = () => {
-      if (isCleanedUp) return;
-      tasksSocket = new WebSocket(`${wsBaseUrl}/ws/incidents/${incidentId}/tasks/${query}`);
-      tasksSocketRef.current = tasksSocket;
-
-      tasksSocket.onopen = () => {
-        tasksDelay = 3000;
-        console.log('[WS] Tasks connectée');
-      };
-      tasksSocket.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          console.log('[WS] Message reçu:', data);
-
-          if (data.type === 'task_event' && data.action === 'delete' && data.task_id) {
-            console.log('[WS] Suppression de tâche reçue en temps réel:', data.task_id);
-            mutateTasks(prev => {
-              const list = Array.isArray(prev) ? prev : (prev?.results || []);
-              // Normaliser les IDs pour la comparaison (string vs number)
-              const taskIdToDelete = String(data.task_id);
-              return Array.isArray(prev)
-                ? prev.filter(t => String(t.id) !== taskIdToDelete)
-                : { ...prev, results: list.filter(t => String(t.id) !== taskIdToDelete) };
-            }, { revalidate: false });
-          } else {
-            console.log('[WS] Rechargement complet des tâches');
-            mutateTasks();
-          }
-        } catch (e) {
-          console.error('[WS] Erreur parsing message:', e);
-          mutateTasks();
-        }
-      };
-      tasksSocket.onerror = () => tasksSocket.close();
-      tasksSocket.onclose = (e) => {
-        if (!isCleanedUp && shouldRetry(e.code)) {
-          setTimeout(connectTasks, tasksDelay);
-          tasksDelay = Math.min(tasksDelay * 2, 30000);
-        }
-      };
-    };
-
-    connectDiscussion();
-    connectTasks();
-
-    return () => {
-      isCleanedUp = true;
-      discussionSocket?.close();
-      tasksSocket?.close();
-      tasksSocketRef.current = null;
-    };
-  }, [incidentId]); // ← seulement incidentId
-
-  // Fonction pour charger plus de messages (messages plus anciens)
-  const loadMoreMessages = async () => {
-    if (!hasMoreMessages || isLoadingMoreMessages || !nextBeforeId || !incidentId) return;
-
-    setIsLoadingMoreMessages(true);
-    console.log('[Chat] Chargement de plus de messages avant ID:', nextBeforeId);
-
-    try {
-      const data = await getDiscussionMessagesService(incidentId, {
-        limit: 10,
-        before: nextBeforeId
-      });
-
-      if (data && Array.isArray(data.results)) {
-        // Marquer qu'on ajoute des messages anciens (empêche le scroll vers le bas)
-        isPrependingRef.current = true;
-        // Ajouter les messages plus anciens au début de la liste
-        setAllMessages(prev => {
-          const prevArray = Array.isArray(prev) ? prev : [];
-          return [...data.results, ...prevArray];
-        });
-        setHasMoreMessages(data.has_more || false);
-        setNextBeforeId(data.next_before || null);
-        console.log('[Chat] Chargé', data.results.length, 'messages supplémentaires, has_more:', data.has_more);
-      }
-    } catch (err) {
-      console.error('[Chat] Erreur chargement messages supplémentaires:', err);
-    } finally {
-      setIsLoadingMoreMessages(false);
-    }
-  };
-
-  // Détecter le scroll vers le haut pour charger plus de messages
-  useEffect(() => {
-    const container = messagesContainerRef.current;
-    if (!container) return;
-
-    const handleScroll = () => {
-      // Si on scroll vers le haut (proche du début)
-      if (container.scrollTop < 100 && hasMoreMessages && !isLoadingMoreMessages) {
-        const previousScrollHeight = container.scrollHeight;
-        const previousScrollTop = container.scrollTop;
-
-        loadMoreMessages().then(() => {
-          // Maintenir la position de scroll après le chargement
-          requestAnimationFrame(() => {
-            const newScrollHeight = container.scrollHeight;
-            const scrollDiff = newScrollHeight - previousScrollHeight;
-            container.scrollTop = previousScrollTop + scrollDiff;
-          });
-        });
-      }
-    };
-
-    container.addEventListener('scroll', handleScroll);
-    return () => container.removeEventListener('scroll', handleScroll);
-  }, [hasMoreMessages, isLoadingMoreMessages, nextBeforeId, incidentId]);
 
 
-  // Formater les messages pour l'affichage
-  const messages = useMemo(() => {
-    if (!Array.isArray(allMessages)) {
-      console.warn('[Chat] allMessages n\'est pas un tableau:', allMessages);
-      return [];
-    }
-    return allMessages.map(msg => {
-      const formatted = formatMessage(msg);
-      if (!formatted) return null;
-      return formatted;
-    }).filter(Boolean);
-  }, [allMessages]);
 
-  const [collabTasks, setCollabTasks] = useState({});
-  const [savedProgress, setSavedProgress] = useState({});
-  const [closedCollabs, setClosedCollabs] = useState({});
-
-  const [expandedFailureTask, setExpandedFailureTask] = useState(null);
-  const [failureReason, setFailureReason] = useState('');
-  const [failureAlert, setFailureAlert] = useState(null);
-  const [failureSaving, setFailureSaving] = useState(false);
-  const [confirmClose, setConfirmClose] = useState(false);
 
   // États pour la navigation mobile
   const [isMobile, setIsMobile] = useState(false);
   const [activeTab, setActiveTab] = useState('details'); // 'details' | 'chat' | 'tasks'
 
-  const getTodayStr = () => {
-    const date = new Date();
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    const d = String(date.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
-  };
-
-  const [editingTaskId, setEditingTaskId] = useState(null);
-  const [editTaskTitle, setEditTaskTitle] = useState('');
-  const [editTaskDeadline, setEditTaskDeadline] = useState('');
-  const [editTaskDescription, setEditTaskDescription] = useState('');
-  const [editTaskStartDate, setEditTaskStartDate] = useState('');
-  const [editTaskSaving, setEditTaskSaving] = useState(false);
-  const [taskAlert, setTaskAlert] = useState(null);
-  const [taskSubmitSaving, setTaskSubmitSaving] = useState(false);
-  const [taskSubmitAlert, setTaskSubmitAlert] = useState(null);
-  const [deletingTaskIds, setDeletingTaskIds] = useState([]);
-  const [expandedProofTask, setExpandedProofTask] = useState(null);
-  const [uploadingProofTask, setUploadingProofTask] = useState(null);
-  const [selectedProofFile, setSelectedProofFile] = useState(null);
-  const [proofPreviewUrl, setProofPreviewUrl] = useState(null);
-  const [proofPreviewType, setProofPreviewType] = useState(null);
-  const [proofUploadError, setProofUploadError] = useState(null);
-  const [proofUploadSuccess, setProofUploadSuccess] = useState(null);
-  const [newTaskTitle, setNewTaskTitle] = useState('');
-  const [newTaskDeadline, setNewTaskDeadline] = useState('');
-  const [draftTasks, setDraftTasks] = useState([]);
-  const [newTaskDescription, setNewTaskDescription] = useState('');
-  const [newTaskStartDate, setNewTaskStartDate] = useState(getTodayStr());
-  const [showTaskModal, setShowTaskModal] = useState(false);
-  const [taskModalClosing, setTaskModalClosing] = useState(false);
-  const [taskModalShowing, setTaskModalShowing] = useState(false);
-
-  // États pour le modal de suggestion d'organisations
-  const [showSuggestModal, setShowSuggestModal] = useState(false);
-  const [showReportsModal, setShowReportsModal] = useState(false);
-  const [suggestModalClosing, setSuggestModalClosing] = useState(false);
-  const [suggestModalShowing, setSuggestModalShowing] = useState(false);
-  const [suggestSearch, setSuggestSearch] = useState('');
-  const [suggestedOrgs, setSuggestedOrgs] = useState([]);
-  const [suggestAlert, setSuggestAlert] = useState(null);
-  const [suggestSubmitting, setSuggestSubmitting] = useState(false);
-  const [activeProofPreview, setActiveProofPreview] = useState(null);
-  const [expandedCompletedProofs, setExpandedCompletedProofs] = useState([]);
-
-  // États pour le modal de clôture d'incident
-  const [showCloseModal, setShowCloseModal] = useState(false);
-  const [closeModalShowing, setCloseModalShowing] = useState(false);
-  const [resolutionStartDate, setResolutionStartDate] = useState('');
-  const [resolutionEndDate, setResolutionEndDate] = useState('');
-  const [resolutionFile, setResolutionFile] = useState(null);
-  const [closeAlert, setCloseAlert] = useState(null);
-  const [isClosing, setIsClosing] = useState(false);
-  const [taskToDelete, setTaskToDelete] = useState(null);
-
-  const toggleCompletedProof = (taskId) => {
-    setExpandedCompletedProofs(prev =>
-      prev.includes(taskId) ? prev.filter(id => id !== taskId) : [...prev, taskId]
-    );
-  };
+  /**
+   * Image ouverte en plein écran, ou null. { src, alt }
+   *
+   * Une photo d'incident se lit souvent sur un téléphone, en plein soleil :
+   * le détail qui compte (une fissure, une plaque, un niveau d'eau) est
+   * invisible dans une vignette. La visionneuse partagée gère le pincement,
+   * le glissé et la molette — on la réutilise plutôt que d'ouvrir une
+   * seconde fois une image simplement plus grande.
+   */
+  const [imageAZoomer, setImageAZoomer] = useState(null);
 
 
-  const [newMessage, setNewMessage] = useState('');
-  const [attachedFile, setAttachedFile] = useState(null);
-  const [attachedAudio, setAttachedAudio] = useState(null);
-  const [sendingMessage, setSendingMessage] = useState(false);
-  const [downloadingMsgId, setDownloadingMsgId] = useState(null);
-  const [openingMsgId, setOpeningMsgId] = useState(null);
-  const [activeAudioId, setActiveAudioId] = useState(null);
-  const [isRecording, setIsRecording] = useState(false);
-  const [recordingTime, setRecordingTime] = useState(0);
-  const [editingMessageId, setEditingMessageId] = useState(null);
-  const [editingMessageText, setEditingMessageText] = useState('');
-  const [savingEdit, setSavingEdit] = useState(false);
-  const [deletingMessageId, setDeletingMessageId] = useState(null);
-  const messagesEndRef = useRef(null);
-  const fileInputRef = useRef(null);
-  const audioInputRef = useRef(null);
-  const mediaRecorderRef = useRef(null);
-  const audioChunksRef = useRef([]);
-  const recordingTimerRef = useRef(null);
 
-  // Charger toutes les organisations depuis l'API
-  const { data: orgsData } = useSWR(
-    'organisations-list',
-    async () => {
-      try {
-        const rawOrgs = await getOrganisationsService();
-        return (rawOrgs || []).map(org => formatOrganisation(org)).filter(Boolean);
-      } catch (err) {
-        console.error('[CollaborationDetail] Erreur chargement organisations list:', err);
-        return [];
-      }
-    },
-    {
-      revalidateOnFocus: false
-    }
-  );
 
-  // Données pour les organisations disponibles
-  const AVAILABLE_ORGS = useMemo(() => {
-    return orgsData || [];
-  }, [orgsData]);
+
+
+
+
 
   // Détecter le mobile
   useEffect(() => {
@@ -727,36 +166,13 @@ export const CollaborationDetail = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Faire défiler vers le bas quand les messages changent (sauf lors du chargement de messages anciens)
-  useEffect(() => {
-    if (isPrependingRef.current) {
-      isPrependingRef.current = false;
-      return;
-    }
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages?.length]);
-
-  // Bloquer le scroll du body quand un modal est ouvert
-  useEffect(() => {
-    if (showTaskModal || showSuggestModal || showCloseModal || taskToDelete !== null || showReportsModal) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [showTaskModal, showSuggestModal, showCloseModal, taskToDelete, showReportsModal]);
-
-  // Scroll to top of close modal body when an alert is set
-  useEffect(() => {
-    if (closeAlert && closeModalBodyRef.current) {
-      closeModalBodyRef.current.scrollTop = 0;
-    }
-  }, [closeAlert]);
 
   // Mapper les données API vers le format attendu par le composant
-  const collaboration = collaborationData ? {
+  //
+  // Memoise : cet objet est une dependance de currentTasks juste en dessous.
+  // Recree a chaque rendu, il rendait ce useMemo — et toute la chaine qui en
+  // decoule — parfaitement inutile.
+  const collaboration = useMemo(() => (collaborationData ? {
     id: collaborationData.id,
     userRole: collaborationData.role,
     title: collaborationData.incident_details?.title || collaborationData.incident_title || `Incident #${collaborationData.incident}`,
@@ -796,40 +212,86 @@ export const CollaborationDetail = () => {
     organisationId: collaborationData.organisation_id,
     incidentDetails: collaborationData.incident_details,
     predictionDetails: collaborationData.prediction_details
-  } : null;
+  } : null), [collaborationData]);
 
-  // Utiliser les tâches de l'API en les formatant pour l'affichage
-  const currentTasks = useMemo(() => {
-    return (tasksData || []).map(task => {
-      const formatted = { ...task };
-      if (formatted.state === 'done' || formatted.status === 'completed' || formatted.state === 'completed') formatted.completed = true;
-      if (formatted.state === 'failed' || formatted.status === 'failed') formatted.failed = true;
+  // Les taches — liste temps reel, avancement, preuves, creation, edition —
+  // vivent dans leur propre hook, pour la meme raison que la discussion.
+  const {
+    currentTasks, hasUnresolvedOrFailedTasks,
+    getCalculatedProgress, getSavedProgress, hasPendingChanges,
+    toggleTask, markTaskFailed, resetTaskStatus, deleteTask, notifyTaskChange,
+    taskToDelete, setTaskToDelete, deletingTaskIds, taskAlert,
+    expandedFailureTask, setExpandedFailureTask,
+    failureReason, setFailureReason, failureAlert, setFailureAlert, failureSaving,
+    handleProofUpload, expandedProofTask, setExpandedProofTask,
+    uploadingProofTask, setUploadingProofTask,
+    selectedProofFile, setSelectedProofFile,
+    proofPreviewUrl, setProofPreviewUrl, proofPreviewType, setProofPreviewType,
+    proofUploadError, setProofUploadError, proofUploadSuccess, setProofUploadSuccess,
+    activeProofPreview, setActiveProofPreview,
+    expandedCompletedProofs, toggleCompletedProof,
+    showTaskModal, setShowTaskModal, taskModalClosing, setTaskModalClosing,
+    taskModalShowing, openTaskModal, closeTaskModal,
+    draftTasks, setDraftTasks,
+    newTaskTitle, setNewTaskTitle, newTaskDescription, setNewTaskDescription,
+    newTaskStartDate, setNewTaskStartDate, newTaskDeadline, setNewTaskDeadline,
+    addDraftTask, submitNewTask, taskSubmitSaving, taskSubmitAlert,
+    editingTaskId, setEditingTaskId,
+    editTaskTitle, setEditTaskTitle, editTaskDescription, setEditTaskDescription,
+    editTaskStartDate, setEditTaskStartDate, editTaskDeadline, setEditTaskDeadline,
+    editTaskSaving, startEditTask, cancelEditTask, saveEditTask,
+  } = useTaches({ incidentId, collaboration, tasksData, mutateTasks });
 
-      // Normaliser createdBy pour l'affichage local
-      if (!formatted.createdBy) {
-        if (formatted.created_by === collaboration?.userId) {
-          formatted.createdBy = 'me';
-        } else {
-          formatted.createdBy = formatted.created_by_organisation;
-        }
-      }
+  // Suggerer des organisations partenaires, et cloturer le signalement : deux
+  // parcours complets, chacun avec ses etats de modale, ses champs et son envoi.
+  const {
+    showSuggestModal, setShowSuggestModal,
+    showReportsModal, setShowReportsModal,
+    suggestModalClosing,
+    suggestModalShowing, setSuggestModalShowing,
+    closeSuggestModal,
+    suggestSearch, setSuggestSearch,
+    suggestedOrgs, toggleSuggestedOrg, updateSuggestedRole, updateSuggestedComment,
+    suggestAlert, setSuggestAlert,
+    suggestSubmitting, handleSuggestSubmit,
+    AVAILABLE_ORGS,
+    ROLE_OPTIONS,
+  } = useSuggestionsOrganisations(collaboration);
 
-      // Normaliser assignedTo pour l'affichage local
-      if (!formatted.assignedTo) {
-        if (formatted.assigned_to === collaboration?.userId) {
-          formatted.assignedTo = 'me';
-        } else {
-          formatted.assignedTo = formatted.assigned_to_name;
-        }
-      }
-      return formatted;
-    });
-  }, [tasksData, collaboration]);
+  const {
+    showCloseModal,
+    closeModalShowing,
+    openCloseModal, closeCloseModal, handleCloseIncident,
+    resolutionStartDate, setResolutionStartDate,
+    resolutionEndDate, setResolutionEndDate,
+    resolutionFile, setResolutionFile,
+    closeAlert,
+    isClosing,
+  } = useClotureIncident(collaboration, mutateCollaboration);
 
-  const hasUnresolvedOrFailedTasks = useMemo(() => {
-    if (currentTasks.length === 0) return true;
-    return currentTasks.some(task => !task.completed || task.failed);
-  }, [currentTasks]);
+  // Ces deux effets lisent des valeurs fournies par les hooks ci-dessus, ils
+  // doivent donc etre declares APRES eux. Leurs tableaux de dependances sont
+  // evalues pendant le rendu : places plus haut, ils lisaient des `const` qui
+  // n'existaient pas encore, et la page entiere refusait de se rendre.
+  // Bloquer le scroll du body quand un modal est ouvert
+  useEffect(() => {
+    if (showTaskModal || showSuggestModal || showCloseModal || taskToDelete !== null || showReportsModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showTaskModal, showSuggestModal, showCloseModal, taskToDelete, showReportsModal]);
+
+  // Scroll to top of close modal body when an alert is set
+  useEffect(() => {
+    if (closeAlert && closeModalBodyRef.current) {
+      closeModalBodyRef.current.scrollTop = 0;
+    }
+  }, [closeAlert]);
+
 
   // Gestion des états de chargement et d'erreur
   if (isLoading) {
@@ -1083,826 +545,13 @@ export const CollaborationDetail = () => {
     );
   }
 
-  const isCollabClosed = (collabId) => closedCollabs[collabId] === true;
+  // Progression recalculee a partir des taches affichees, ici et maintenant.
 
-  const getCalculatedProgress = () => {
-    if (!currentTasks.length) return 0;
-    const completed = currentTasks.filter(t => t.completed || t.status === 'completed').length;
-    return Math.round((completed / currentTasks.length) * 100);
-  };
 
-  const getSavedProgress = () => {
-    return savedProgress[collaboration?.id] ?? collaboration?.progress ?? 0;
-  };
 
-  const hasPendingChanges = () => {
-    const calculated = getCalculatedProgress();
-    const saved = getSavedProgress();
-    return calculated !== saved;
-  };
 
-  const saveProgress = () => {
-    setSavedProgress(prev => ({
-      ...prev,
-      [collaboration?.id]: getCalculatedProgress()
-    }));
-  };
 
-  // Marquer une tâche comme terminée via API (avec preuve optionnelle)
-  const toggleTask = async (taskId) => {
-    const task = currentTasks.find(t => t.id === taskId);
-    if (!task) return;
-    try {
-      if (task.completed || task.status === 'completed') {
-        // Remettre en cours via patch
-        await updateTaskService(incidentId, taskId, { status: 'in_progress' });
-      } else {
-        // Marquer comme complétée (sans preuve)
-        const formData = new FormData();
-        await completeTaskService(incidentId, taskId, formData);
-      }
-      await mutateTasks();
-    } catch (err) {
-      console.error('[toggleTask] Erreur:', err);
-    }
-  };
 
-  // Marquer une tâche comme échouée via API
-  const markTaskFailed = async (taskId, reason) => {
-    setFailureSaving(true);
-    setFailureAlert(null);
-    try {
-      await failTaskService(incidentId, taskId, { failure_reason: reason });
-      await mutateTasks();
-      setFailureAlert({ type: 'success', message: 'Tâche marquée comme échouée avec succès.' });
-      setTimeout(() => {
-        setExpandedFailureTask(null);
-        setFailureReason('');
-        setFailureAlert(null);
-      }, 1500);
-    } catch (err) {
-      console.error('[markTaskFailed] Erreur:', err);
-      let errorMessage = "Erreur lors du marquage de la tâche.";
-      if (err.response?.data) {
-        if (typeof err.response.data === 'object') {
-          errorMessage = Object.entries(err.response.data)
-            .map(([field, errors]) => `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`)
-            .join(' | ');
-        } else if (typeof err.response.data === 'string') {
-          errorMessage = err.response.data;
-        }
-      }
-      setFailureAlert({ type: 'danger', message: errorMessage });
-    } finally {
-      setFailureSaving(false);
-    }
-  };
-
-  // Remettre une tâche à "en cours" via API
-  const resetTaskStatus = async (taskId) => {
-    try {
-      await updateTaskService(incidentId, taskId, { status: 'in_progress' });
-      await mutateTasks();
-    } catch (err) {
-      console.error('[resetTaskStatus] Erreur:', err);
-    }
-  };
-
-  // Uploader une preuve (image/vidéo/document) pour terminer une tâche via API
-  const handleProofUpload = async (taskId, file) => {
-    setProofUploadError(null);
-    setProofUploadSuccess(null);
-    try {
-      const formData = new FormData();
-      if (file.type && file.type.startsWith('video/')) {
-        formData.append('proof_video', file);
-      } else if (file.type && file.type.startsWith('image/')) {
-        formData.append('proof_image', file);
-      } else {
-        // Pour les documents (PDF, Word, Excel, etc.)
-        formData.append('proof_image', file);
-      }
-      await completeTaskService(incidentId, taskId, formData);
-      await mutateTasks();
-      setProofUploadSuccess('Preuve téléversée et tâche terminée avec succès !');
-      return true;
-    } catch (err) {
-      console.error('[handleProofUpload] Erreur:', err);
-      let errorMessage = "Erreur lors de l'envoi de la preuve.";
-      if (err.response?.data) {
-        if (typeof err.response.data === 'object') {
-          errorMessage = Object.entries(err.response.data)
-            .map(([field, errors]) => `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`)
-            .join(' | ');
-        } else if (typeof err.response.data === 'string') {
-          errorMessage = err.response.data;
-        }
-      }
-      setProofUploadError(errorMessage);
-      throw err;
-    }
-  };
-
-  // Ouvrir le modal des tâches avec initialisation
-  const openTaskModal = () => {
-    setShowTaskModal(true);
-    setTimeout(() => {
-      setTaskModalShowing(true);
-    }, 10);
-  };
-
-  // Ajouter une tâche à la liste temporaire (draft)
-  const addDraftTask = () => {
-    if (!newTaskTitle.trim()) return;
-    setTaskSubmitAlert(null);
-
-    const todayStr = getTodayStr();
-
-    // Validation 1: Date de début ne peut pas être dans le passé
-    if (newTaskStartDate && newTaskStartDate < todayStr) {
-      setTaskSubmitAlert({
-        type: 'danger',
-        message: "La date de début ne peut pas être antérieure à la date d'aujourd'hui."
-      });
-      return;
-    }
-
-    if (newTaskStartDate && newTaskDeadline) {
-      // Validation 2: Date de début ne peut pas être égale à la date de fin
-      if (newTaskStartDate === newTaskDeadline) {
-        setTaskSubmitAlert({
-          type: 'danger',
-          message: "La date de début ne peut pas être égale à la date de fin."
-        });
-        return;
-      }
-      // Validation 3: Date de début ne peut pas être supérieure à la date de fin
-      if (newTaskStartDate > newTaskDeadline) {
-        setTaskSubmitAlert({
-          type: 'danger',
-          message: "La date de début ne peut pas être supérieure à la date de fin."
-        });
-        return;
-      }
-    }
-
-    const task = {
-      title: newTaskTitle.trim(),
-      description: newTaskDescription.trim() || null,
-      start_date: newTaskStartDate || null,
-      end_date: newTaskDeadline || null,
-      assigned_to: null
-    };
-    setDraftTasks([...draftTasks, task]);
-    setNewTaskTitle('');
-    setNewTaskDescription('');
-    setNewTaskStartDate(getTodayStr());
-    setNewTaskDeadline('');
-  };
-
-  // Créer toutes les tâches draftées dans la base de données via API
-  const submitNewTask = async () => {
-    if (draftTasks.length === 0) {
-      closeTaskModal();
-      return;
-    }
-
-    setTaskSubmitSaving(true);
-    setTaskSubmitAlert(null);
-
-    try {
-      // Créer chaque tâche séquentiellement/en parallèle via l'API
-      await Promise.all(
-        draftTasks.map(task =>
-          createTaskService(incidentId, {
-            title: task.title,
-            description: task.description || null,
-            start_date: task.start_date || null,
-            end_date: task.end_date || null,
-            ...(task.assigned_to && { assigned_to: task.assigned_to })
-          })
-        )
-      );
-
-      await mutateTasks();
-      setTaskSubmitAlert({ type: 'success', message: 'Tâche(s) créée(s) et ajoutée(s) avec succès !' });
-
-      // Afficher l'alerte pendant 2 secondes puis refermer le modal
-      setTimeout(() => {
-        closeTaskModal();
-      }, 2000);
-    } catch (err) {
-      console.error('[submitNewTask] Erreur lors de la création:', err);
-      let errorMessage = 'Une erreur est survenue lors de la création des tâches.';
-      if (err.response?.data) {
-        if (typeof err.response.data === 'object') {
-          errorMessage = Object.entries(err.response.data)
-            .map(([field, errors]) => `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`)
-            .join(' | ');
-        } else if (typeof err.response.data === 'string') {
-          errorMessage = err.response.data;
-        }
-      }
-      setTaskSubmitAlert({ type: 'danger', message: errorMessage });
-      setTaskSubmitSaving(false); // Réactive le bouton et cache le loader
-    }
-  };
-
-  const notifyTaskChange = (action, taskId) => {
-    console.log('[WS] notifyTaskChange appelé:', { action, taskId });
-
-    if (!tasksSocketRef.current) {
-      console.warn('[WS] tasksSocketRef.current est null');
-      return;
-    }
-
-    console.log('[WS] État du socket:', tasksSocketRef.current.readyState, 'OPEN=', WebSocket.OPEN);
-
-    if (tasksSocketRef.current.readyState === WebSocket.OPEN) {
-      try {
-        const message = { type: 'task_event', action, task_id: taskId };
-        console.log('[WS] Envoi du message:', message);
-        tasksSocketRef.current.send(JSON.stringify(message));
-        console.log('[WS] Message envoyé avec succès');
-      } catch (e) {
-        console.error('[WS] Erreur lors de l\'envoi du message:', e);
-      }
-    } else {
-      console.warn('[WS] Socket non ouvert, impossible d\'envoyer le message');
-    }
-  };
-
-  // Supprimer une tâche via API
-  const deleteTask = async (taskId) => {
-    setDeletingTaskIds(prev => [...prev, taskId]);
-
-    // Mise à jour optimiste locale instantanée
-    mutateTasks(prev => {
-      const list = Array.isArray(prev) ? prev : (prev?.results || []);
-      return Array.isArray(prev)
-        ? prev.filter(t => t.id !== taskId)
-        : { ...prev, results: list.filter(t => t.id !== taskId) };
-    }, { revalidate: false });
-
-    try {
-      await deleteTaskService(incidentId, taskId);
-      notifyTaskChange('delete', taskId);
-    } catch (err) {
-      console.error('[deleteTask] Erreur:', err);
-      await mutateTasks(); // Restaurer/Recharger la liste en cas d'erreur
-    } finally {
-      setDeletingTaskIds(prev => prev.filter(id => id !== taskId));
-    }
-  };
-
-  // Modifier une tâche via API
-  const startEditTask = (task) => {
-    setTaskAlert(null); // Reset alert
-    setEditingTaskId(task.id);
-    setEditTaskTitle(task.title);
-    setEditTaskDescription(task.description || '');
-    setEditTaskStartDate(task.start_date || '');
-    setEditTaskDeadline(task.end_date || task.deadline || '');
-  };
-
-  const cancelEditTask = () => {
-    setEditingTaskId(null);
-    setEditTaskTitle('');
-    setEditTaskDescription('');
-    setEditTaskStartDate('');
-    setEditTaskDeadline('');
-    setTaskAlert(null);
-  };
-
-  const saveEditTask = async (taskId) => {
-    if (!editTaskTitle.trim()) return;
-    setTaskAlert(null);
-
-    const todayStr = getTodayStr();
-
-    // Validation 1: Date de début ne peut pas être dans le passé
-    if (editTaskStartDate && editTaskStartDate < todayStr) {
-      setTaskAlert({
-        type: 'danger',
-        message: "La date de début ne peut pas être antérieure à la date d'aujourd'hui."
-      });
-      return;
-    }
-
-    if (editTaskStartDate && editTaskDeadline) {
-      // Validation 2: Date de début ne peut pas être égale à la date de fin
-      if (editTaskStartDate === editTaskDeadline) {
-        setTaskAlert({
-          type: 'danger',
-          message: "La date de début ne peut pas être égale à la date de fin."
-        });
-        return;
-      }
-      // Validation 3: Date de début ne peut pas être supérieure à la date de fin
-      if (editTaskStartDate > editTaskDeadline) {
-        setTaskAlert({
-          type: 'danger',
-          message: "La date de début ne peut pas être supérieure à la date de fin."
-        });
-        return;
-      }
-    }
-
-    setEditTaskSaving(true);
-    try {
-      await updateTaskService(incidentId, taskId, {
-        title: editTaskTitle.trim(),
-        description: editTaskDescription.trim() || null,
-        start_date: editTaskStartDate || null,
-        end_date: editTaskDeadline || null,
-        status: 'in_progress'
-      });
-      await mutateTasks();
-      setTaskAlert({ type: 'success', message: 'Tâche modifiée avec succès !' });
-      setTimeout(() => {
-        cancelEditTask();
-      }, 1500);
-    } catch (err) {
-      console.error('[saveEditTask] Erreur:', err);
-      let errorMessage = 'Une erreur est survenue lors de la modification de la tâche.';
-      if (err.response?.data) {
-        if (typeof err.response.data === 'object') {
-          errorMessage = Object.entries(err.response.data)
-            .map(([field, errors]) => `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`)
-            .join(' | ');
-        } else if (typeof err.response.data === 'string') {
-          errorMessage = err.response.data;
-        }
-      }
-      setTaskAlert({ type: 'danger', message: errorMessage });
-    } finally {
-      setEditTaskSaving(false);
-    }
-  };
-
-  const handleFileSelect = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const allowedTypes = [
-        'application/pdf',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'application/vnd.ms-excel',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      ];
-
-      if (allowedTypes.includes(file.type)) {
-        setAttachedFile(file);
-      } else {
-        alert('Type de fichier non supporté. Veuillez choisir un fichier PDF, Word ou Excel.');
-      }
-    }
-  };
-
-  const removeAttachedFile = () => {
-    setAttachedFile(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
-
-  const handleAudioSelect = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.type.startsWith('audio/')) {
-        setAttachedAudio(file);
-      } else {
-        alert('Veuillez choisir un fichier audio valide.');
-      }
-    }
-  };
-
-  const removeAttachedAudio = () => {
-    setAttachedAudio(null);
-    if (audioInputRef.current) {
-      audioInputRef.current.value = '';
-    }
-  };
-
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
-
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-        }
-      };
-
-      mediaRecorder.onstop = () => {
-        if (audioChunksRef.current.length > 0) {
-          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-          const audioFile = new File([audioBlob], 'enregistrement_vocal.webm', { type: 'audio/webm' });
-          setAttachedAudio(audioFile);
-        }
-        stream.getTracks().forEach(track => track.stop());
-      };
-
-      mediaRecorder.start();
-      setIsRecording(true);
-      setRecordingTime(0);
-
-      recordingTimerRef.current = setInterval(() => {
-        setRecordingTime((prev) => prev + 1);
-      }, 1000);
-    } catch (err) {
-      console.error("Erreur d'accès au microphone:", err);
-      alert("Impossible d'accéder au microphone. Veuillez vérifier vos permissions.");
-    }
-  };
-
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-      clearInterval(recordingTimerRef.current);
-    }
-  };
-
-  const cancelRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      audioChunksRef.current = []; // Ignorer les données
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-      clearInterval(recordingTimerRef.current);
-      setRecordingTime(0);
-      setAttachedAudio(null);
-    }
-  };
-
-  const formatRecordingTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
-
-  const getFileIcon = (fileName) => {
-    if (!fileName) return '📎';
-    const cleanName = fileName.split('?')[0];
-    const ext = cleanName.split('.').pop().toLowerCase();
-    if (ext === 'pdf') return '📄';
-    if (ext === 'doc' || ext === 'docx') return '📝';
-    if (ext === 'xls' || ext === 'xlsx') return '📊';
-    if (['mp3', 'wav', 'm4a', 'ogg', 'aac'].includes(ext)) return '🎵';
-    return '📎';
-  };
-
-  const handleDownload = async (url, fileName, msgId) => {
-    try {
-      setDownloadingMsgId(msgId);
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Erreur réseau');
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(blobUrl);
-    } catch (error) {
-      console.error('Erreur lors du téléchargement:', error);
-      window.open(url, '_blank');
-    } finally {
-      setDownloadingMsgId(null);
-    }
-  };
-  const handleOpen = async (url, msgId) => {
-    try {
-      setOpeningMsgId(msgId);
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Erreur réseau');
-
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-      window.open(blobUrl, '_blank');
-      // On nettoie après un délai raisonnable
-      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 60000);
-    } catch (error) {
-      console.error('Erreur lors de l\'ouverture:', error);
-      window.open(url, '_blank');
-    } finally {
-      setOpeningMsgId(null);
-    }
-  };
-
-
-  const sendMessage = async () => {
-    if (!newMessage.trim() && !attachedFile && !attachedAudio) return;
-
-    setSendingMessage(true);
-    try {
-      if (attachedAudio) {
-        await sendMessageService(incidentId, {
-          message: newMessage.trim(),
-          audio: attachedAudio
-        });
-      } else if (attachedFile) {
-        await sendMessageService(incidentId, {
-          message: newMessage.trim(),
-          attachment: attachedFile
-        });
-      } else {
-        await sendMessageService(incidentId, {
-          message: newMessage.trim()
-        });
-      }
-
-      await mutateMessages();
-
-      // Jouer le son une fois le message envoyé avec succès
-      try {
-        const audio = new Audio(sendMessageSound);
-        audio.play().catch(() => {});
-      } catch (e) {}
-
-      setNewMessage('');
-      setAttachedFile(null);
-      setAttachedAudio(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-      if (audioInputRef.current) {
-        audioInputRef.current.value = '';
-      }
-
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
-    } catch (err) {
-      console.error('[sendMessage] Erreur envoi message:', err);
-    } finally {
-      setSendingMessage(false);
-    }
-  };
-
-  const handleEditMessage = async (msgId) => {
-    if (!editingMessageText.trim()) return;
-    setSavingEdit(true);
-    try {
-      await updateDiscussionMessageService(incidentId, msgId, editingMessageText.trim());
-      await mutateMessages();
-      setEditingMessageId(null);
-      setEditingMessageText('');
-    } catch (err) {
-      console.error('[handleEditMessage] Erreur:', err);
-    } finally {
-      setSavingEdit(false);
-    }
-  };
-
-  const handleDeleteMessage = async (msgId) => {
-    setDeletingMessageId(msgId);
-    try {
-      await deleteDiscussionMessageService(incidentId, msgId);
-      await mutateMessages();
-    } catch (err) {
-      console.error('[handleDeleteMessage] Erreur:', err);
-    } finally {
-      setDeletingMessageId(null);
-    }
-  };
-
-  const startEditMessage = (msg) => {
-    setEditingMessageId(msg.id);
-    setEditingMessageText(msg.message || '');
-  };
-
-  const cancelEditMessage = () => {
-    setEditingMessageId(null);
-    setEditingMessageText('');
-  };
-
-  const formatMessageTime = (timestamp) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffInHours = (now - date) / (1000 * 60 * 60);
-
-    if (diffInHours < 24) {
-      return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-    }
-    return date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
-  };
-
-  const closeTaskModal = () => {
-    setTaskModalShowing(false);
-    setTaskModalClosing(true);
-    setTimeout(() => {
-      setShowTaskModal(false);
-      setTaskModalClosing(false);
-      setDraftTasks([]);
-      setNewTaskTitle('');
-      setNewTaskDescription('');
-      setNewTaskStartDate(getTodayStr());
-      setNewTaskDeadline('');
-      setTaskSubmitAlert(null);
-      setTaskSubmitSaving(false);
-    }, 300);
-  };
-
-  // Fermeture du modal de suggestion avec animation
-  const closeSuggestModal = () => {
-    setSuggestModalShowing(false);
-    setSuggestModalClosing(true);
-    setTimeout(() => {
-      setShowSuggestModal(false);
-      setSuggestModalClosing(false);
-      setSuggestSearch('');
-      setSuggestedOrgs([]);
-      setSuggestAlert(null);
-    }, 300);
-  };
-
-  // Ouvrir le modal de clôture d'incident
-  const openCloseModal = () => {
-    setShowCloseModal(true);
-    setResolutionStartDate('');
-    setResolutionEndDate('');
-    setResolutionFile(null);
-    setCloseAlert(null);
-    setTimeout(() => {
-      setCloseModalShowing(true);
-    }, 10);
-  };
-
-  // Fermer le modal de clôture d'incident
-  const closeCloseModal = () => {
-    setCloseModalShowing(false);
-    setTimeout(() => {
-      setShowCloseModal(false);
-      setResolutionStartDate('');
-      setResolutionEndDate('');
-      setResolutionFile(null);
-      setCloseAlert(null);
-    }, 300);
-  };
-
-  // Clôturer l'incident
-  const handleCloseIncident = async () => {
-    if (!resolutionStartDate || !resolutionEndDate) {
-      setCloseAlert({ type: 'danger', message: 'Veuillez renseigner les deux dates.' });
-      return;
-    }
-
-    if (new Date(resolutionStartDate) > new Date(resolutionEndDate)) {
-      setCloseAlert({ type: 'danger', message: 'La date de début doit être antérieure à la date de fin.' });
-      return;
-    }
-
-    setIsClosing(true);
-    setCloseAlert(null);
-
-    try {
-      await closeIncidentService(collaboration.incidentId, {
-        resolution_start_date: resolutionStartDate,
-        resolution_end_date: resolutionEndDate,
-        resolution_file: resolutionFile
-      });
-      setCloseAlert({ type: 'success', message: 'Signalement résolu avec succès !' });
-      setTimeout(() => {
-        closeCloseModal();
-        mutateCollaboration(); // Recharger uniquement les données SWR au lieu de la page entière
-      }, 2000);
-    } catch (err) {
-      console.error('[CloseIncident] Erreur:', err);
-      const errorMsg = err?.detail || err?.message || 'Erreur lors de la résolution de l\'incident.';
-      setCloseAlert({ type: 'danger', message: errorMsg });
-    } finally {
-      setIsClosing(false);
-    }
-  };
-
-  // Envoi des suggestions d'organisations partenaires
-  const handleSuggestSubmit = async () => {
-    if (!suggestedOrgs.length || !collaboration?.id) return;
-    setSuggestSubmitting(true);
-    setSuggestAlert(null);
-    const errors = [];
-    const successes = [];
-
-
-
-    const results = await Promise.allSettled(
-      suggestedOrgs.map(org =>
-        createSuggestionService(collaboration.incidentId, {
-          incident: collaboration.incidentId,
-          suggested_organisation: org.id,
-          suggested_role: org.role === 'observateur' ? 'observer' : 'contributor',
-          justification: org.comment || ''
-        }).then(() => ({ ok: true, name: org.name }))
-          .catch(err => {
-            const data = err?.response?.data;
-            let errorDetail = 'Erreur inconnue';
-            if (data) {
-              if (data.non_field_errors && Array.isArray(data.non_field_errors)) {
-                const msg = data.non_field_errors[0];
-                errorDetail = msg.includes('unique set')
-                  ? 'déjà invitée ou suggérée pour cet incident'
-                  : msg;
-              } else if (data.detail) {
-                errorDetail = data.detail;
-              } else if (data.message) {
-                errorDetail = data.message;
-              } else {
-                const keys = Object.keys(data);
-                if (keys.length > 0) {
-                  const val = data[keys[0]];
-                  const msg = Array.isArray(val) ? val[0] : String(val);
-                  errorDetail = msg.includes('unique set')
-                    ? 'déjà invitée ou suggérée pour cet incident'
-                    : msg;
-                } else {
-                  errorDetail = err?.message || 'Erreur inconnue';
-                }
-              }
-            } else {
-              errorDetail = err?.message || 'Erreur inconnue';
-            }
-            return {
-              ok: false,
-              name: org.name,
-              detail: errorDetail
-            };
-          })
-      )
-    );
-
-    for (const result of results) {
-      if (result.status === 'fulfilled') {
-        if (result.value.ok) successes.push(result.value.name);
-        else errors.push(`${result.value.name} : ${result.value.detail}`);
-      }
-    }
-
-    setSuggestSubmitting(false);
-    if (errors.length === 0) {
-      setSuggestAlert({ type: 'success', message: `Suggestion(s) envoyée(s) avec succès pour : ${successes.join(', ')}.` });
-      setSuggestedOrgs([]);
-      // Fermer le modal après un court délai pour que l'utilisateur voie le message de succès
-      setTimeout(() => {
-        closeSuggestModal();
-      }, 1500);
-    } else if (successes.length > 0) {
-      setSuggestAlert({ type: 'warning', message: `Succès : ${successes.join(', ')}. Erreurs : ${errors.join(' | ')}` });
-    } else {
-      setSuggestAlert({ type: 'danger', message: errors.join(' | ') });
-    }
-  };
-
-  // Gestion des organisations suggérées
-  const toggleSuggestedOrg = (org) => {
-
-
-    setSuggestedOrgs(prev => {
-      const exists = prev.find(o => o.id === org.id);
-      if (exists) {
-        return prev.filter(o => o.id !== org.id);
-      } else {
-        return [...prev, { ...org, role: 'contributeur', comment: '' }];
-      }
-    });
-  };
-
-  const updateSuggestedRole = (orgId, roleId) => {
-    setSuggestedOrgs(prev =>
-      prev.map(org => org.id === orgId ? { ...org, role: roleId } : org)
-    );
-  };
-
-  const updateSuggestedComment = (orgId, comment) => {
-    setSuggestedOrgs(prev =>
-      prev.map(org => org.id === orgId ? { ...org, comment } : org)
-    );
-  };
-
-  // Options de rôles
-  const ROLE_OPTIONS = [
-
-    {
-      id: 'contributeur',
-      label: 'Contributeur',
-      icon: People,
-      color: '#3AA2DD',
-      description: 'Peut participer activement et créer des tâches'
-    },
-    {
-      id: 'observateur',
-      label: 'Observateur',
-      icon: Eye,
-      color: '#6C7278',
-      description: 'Peut uniquement consulter les informations'
-    }
-  ];
 
   const contextValue = {
     collaboration,
@@ -1999,14 +648,9 @@ export const CollaborationDetail = () => {
                   </p>
                 </div>
                 {isIncidentResolved ? (
-                  <div className="collab-detail-closed-badge" style={{ backgroundColor: 'var(--color-success)', color: '#FFFFFF' }}>
-                    <TickCircle size={16} variant="Bold" color="#FFFFFF" />
+                  <div className="collab-detail-closed-badge" style={{ backgroundColor: 'var(--color-success)', color: 'var(--color-surface)' }}>
+                    <TickCircle size={16} variant="Bold" color="var(--color-surface)" />
                     Incident Résolu
-                  </div>
-                ) : isCollabClosed(collaboration?.id) ? (
-                  <div className="collab-detail-closed-badge">
-                    <Lock1 size={16} variant="Bold" color="#FFFFFF" />
-                    Clôturée
                   </div>
                 ) : collaboration?.userRole === 'leader' && (
                   <button
@@ -2031,7 +675,16 @@ export const CollaborationDetail = () => {
 
                       {collaboration?.image && (
                         <div className="collab-detail-image">
-                          <BlurryImage src={collaboration?.image} alt={collaboration?.title} />
+                          {/* onClick suffit : BlurryImage se rend alors comme un
+                              bouton, avec l'intitulé « Agrandir : … ». */}
+                          <BlurryImage
+                            src={collaboration?.image}
+                            alt={collaboration?.title}
+                            onClick={() => setImageAZoomer({
+                              src: collaboration?.image,
+                              alt: collaboration?.title || "Photo de l'incident",
+                            })}
+                          />
                         </div>
                       )}
 
@@ -2136,7 +789,7 @@ export const CollaborationDetail = () => {
                             {collaboration.predictionDetails.recommendation && (
                               <div className="collab-detail-meta-row">
                                 <span className="collab-detail-meta-label">Recommandation</span>
-                                <span className="collab-detail-meta-val text-highlight" style={{ fontSize: '13px' }}>
+                                <span className="collab-detail-meta-val text-highlight" style={{ fontSize: 'var(--font-size-body-small)' }}>
                                   {collaboration.predictionDetails.recommendation}
                                 </span>
                               </div>
@@ -2151,7 +804,7 @@ export const CollaborationDetail = () => {
                                 {(collaboration.predictionDetails.children_exposed !== undefined ||
                                   collaboration.predictionDetails.adult_men_exposed !== undefined ||
                                   collaboration.predictionDetails.adult_women_exposed !== undefined) && (
-                                    <span className="collab-detail-meta-val" style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>
+                                    <span className="collab-detail-meta-val" style={{ fontSize: 'var(--font-size-micro)', color: 'var(--color-text-secondary)' }}>
                                       (Enfants : {collaboration.predictionDetails.children_exposed || 0}, Hommes : {collaboration.predictionDetails.adult_men_exposed || 0}, Femmes : {collaboration.predictionDetails.adult_women_exposed || 0})
                                     </span>
                                   )}
@@ -2176,7 +829,7 @@ export const CollaborationDetail = () => {
                             {collaboration.predictionDetails.potential_risk?.message && (
                               <div className="collab-detail-meta-row">
                                 <span className="collab-detail-meta-label">Vecteur de propagation</span>
-                                <span className="collab-detail-meta-val" style={{ fontSize: '13px' }}>
+                                <span className="collab-detail-meta-val" style={{ fontSize: 'var(--font-size-body-small)' }}>
                                   {collaboration.predictionDetails.potential_risk.message}
                                 </span>
                               </div>
@@ -2194,7 +847,7 @@ export const CollaborationDetail = () => {
                                   } else {
                                     tagsArray = rawTags.split(',').map(t => t.trim()).filter(Boolean);
                                   }
-                                } catch (e) {
+                                } catch {
                                   tagsArray = rawTags.split(',').map(t => t.trim()).filter(Boolean);
                                 }
                               }
@@ -2212,7 +865,7 @@ export const CollaborationDetail = () => {
                             })()}
                           </div>
                         ) : (
-                          <div className="collab-detail-meta-val" style={{ color: 'var(--color-text-muted)', fontSize: '13px', fontStyle: 'italic' }}>
+                          <div className="collab-detail-meta-val" style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-body-small)', fontStyle: 'italic' }}>
                             Aucune prédiction IA disponible pour cet incident.
                           </div>
                         )}
@@ -2333,7 +986,7 @@ export const CollaborationDetail = () => {
                               justifyContent: 'center',
                               padding: '12px',
                               color: 'var(--color-text-secondary)',
-                              fontSize: '13px',
+                              fontSize: 'var(--font-size-body-small)',
                               gap: '8px',
                               alignItems: 'center'
                             }}>
@@ -2364,7 +1017,7 @@ export const CollaborationDetail = () => {
                                   border: '1px solid var(--color-border)',
                                   borderRadius: '16px',
                                   padding: '6px 16px',
-                                  fontSize: '12px',
+                                  fontSize: 'var(--font-size-caption)',
                                   color: 'var(--color-primary-text)',
                                   cursor: 'pointer',
                                   fontWeight: '500'
@@ -2388,7 +1041,7 @@ export const CollaborationDetail = () => {
                               const canEditOrDelete = msg.isMe || isSuperAdmin;
                               const isEditing = editingMessageId === msg.id;
                               const isDeleting = deletingMessageId === msg.id;
-                              const renderAvatar = (isMe) => (
+                              const renderAvatar = () => (
                                 <div
                                   className="collab-message-avatar"
                                   style={msg.senderAvatar ? { backgroundColor: 'transparent', overflow: 'hidden' } : { backgroundColor: msg.senderColor }}
@@ -2414,19 +1067,19 @@ export const CollaborationDetail = () => {
                                 key={msg.id}
                                 className={`collab-message ${msg.isMe ? 'is-me' : ''}`}
                               >
-                                {!msg.isMe && renderAvatar(false)}
+                                {!msg.isMe && renderAvatar()}
                                 <div className="collab-message-content">
                                   {!msg.isMe && (
                                     <div className="collab-message-sender">
                                       <span style={{ fontWeight: 'var(--font-weight-semibold)' }}>{msg.senderName}</span>
                                       {msg.senderOrgName && (
-                                        <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', marginLeft: '4px' }}>• {msg.senderOrgName}</span>
+                                        <span style={{ fontSize: 'var(--font-size-micro)', color: 'var(--color-text-muted)', marginLeft: '4px' }}>• {msg.senderOrgName}</span>
                                       )}
                                     </div>
                                   )}
                                   {msg.isMe && msg.senderOrgName && (
                                     <div className="collab-message-sender" style={{ textAlign: 'right' }}>
-                                      <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', marginRight: '4px' }}>{msg.senderOrgName} •</span>
+                                      <span style={{ fontSize: 'var(--font-size-micro)', color: 'var(--color-text-muted)', marginRight: '4px' }}>{msg.senderOrgName} •</span>
                                       <span style={{ fontWeight: 'var(--font-weight-semibold)' }}>{msg.senderName}</span>
                                     </div>
                                   )}
@@ -2454,7 +1107,7 @@ export const CollaborationDetail = () => {
                                             disabled={savingEdit}
                                             style={{
                                               padding: '4px 12px', borderRadius: '6px', border: '1px solid var(--color-border)',
-                                              background: 'var(--color-surface)', fontSize: '12px', cursor: 'pointer'
+                                              background: 'var(--color-surface)', fontSize: 'var(--font-size-caption)', cursor: 'pointer'
                                             }}
                                           >
                                             Annuler
@@ -2465,7 +1118,7 @@ export const CollaborationDetail = () => {
                                             disabled={savingEdit || !editingMessageText.trim()}
                                             style={{
                                               padding: '4px 12px', borderRadius: '6px', border: 'none',
-                                              background: 'var(--color-primary)', color: '#fff', fontSize: '12px',
+                                              background: 'var(--color-primary)', color: 'var(--color-surface)', fontSize: 'var(--font-size-caption)',
                                               cursor: savingEdit ? 'not-allowed' : 'pointer', opacity: savingEdit ? 0.7 : 1
                                             }}
                                           >
@@ -2486,11 +1139,11 @@ export const CollaborationDetail = () => {
                                             borderRadius: '12px',
                                             marginTop: '4px',
                                             border: '1px solid var(--color-border)',
-                                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                                            boxShadow: '0 2px 8px rgba(var(--rgb-ombre),0.05)',
                                             textAlign: 'left',
                                             minWidth: '240px'
                                           }}>
-                                            <span className="collab-message-file-icon" style={{ display: 'flex', alignItems: 'center', fontSize: '24px' }}>
+                                            <span className="collab-message-file-icon" style={{ display: 'flex', alignItems: 'center', fontSize: 'var(--font-size-h2)' }}>
                                               {getFileIcon(msg.file.name)}
                                             </span>
                                             <div className="collab-message-file-info" style={{ flex: 1 }}>
@@ -2502,7 +1155,7 @@ export const CollaborationDetail = () => {
                                                   type="button"
                                                   onClick={() => handleDownload(msg.file.url, msg.file.name, msg.id)}
                                                   disabled={downloadingMsgId === msg.id}
-                                                  style={{ background: 'none', border: 'none', padding: 0, fontSize: '11px', fontWeight: '500', color: 'var(--color-primary-text)', textDecoration: 'none', cursor: downloadingMsgId === msg.id ? 'not-allowed' : 'pointer', opacity: downloadingMsgId === msg.id ? 0.7 : 1, display: 'flex', alignItems: 'center', gap: '4px' }}
+                                                  style={{ background: 'none', border: 'none', padding: 0, fontSize: 'var(--font-size-micro)', fontWeight: '500', color: 'var(--color-primary-text)', textDecoration: 'none', cursor: downloadingMsgId === msg.id ? 'not-allowed' : 'pointer', opacity: downloadingMsgId === msg.id ? 0.7 : 1, display: 'flex', alignItems: 'center', gap: '4px' }}
                                                 >
                                                   {downloadingMsgId === msg.id ? (
                                                     <>
@@ -2518,8 +1171,8 @@ export const CollaborationDetail = () => {
                                                 </button>
                                                 {msg.file.size > 0 && (
                                                   <>
-                                                    <span style={{ fontSize: '10px', color: 'var(--color-text-muted)' }}>•</span>
-                                                    <span className="collab-message-file-size" style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>
+                                                    <span style={{ fontSize: 'var(--font-size-micro)', color: 'var(--color-text-muted)' }}>•</span>
+                                                    <span className="collab-message-file-size" style={{ fontSize: 'var(--font-size-micro)', color: 'var(--color-text-muted)' }}>
                                                       {(msg.file.size / 1024).toFixed(2)} KB
                                                     </span>
                                                   </>
@@ -2535,7 +1188,7 @@ export const CollaborationDetail = () => {
                                             borderRadius: '12px',
                                             marginTop: '4px',
                                             border: '1px solid var(--color-border)',
-                                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                                            boxShadow: '0 2px 8px rgba(var(--rgb-ombre),0.05)',
                                             display: 'inline-block'
                                           }}>
                                             <CustomAudioPlayer
@@ -2592,7 +1245,7 @@ export const CollaborationDetail = () => {
                                     )}
                                   </div>
                                 </div>
-                                {msg.isMe && renderAvatar(true)}
+                                {msg.isMe && renderAvatar()}
                               </div>
                               );
                             })
@@ -2600,7 +1253,7 @@ export const CollaborationDetail = () => {
                           <div ref={messagesEndRef} />
                         </div>
 
-                        {!isCollabClosed(collaboration?.id) && !isIncidentResolved && (
+                        {!isIncidentResolved && (
                           <div className="collab-discussion-input">
                             <div className="collab-discussion-input-wrapper">
                               {attachedFile && (
@@ -2614,7 +1267,7 @@ export const CollaborationDetail = () => {
                                     title="Supprimer le fichier"
                                     disabled={sendingMessage}
                                   >
-                                    <CloseSquare size={16} variant="Bold" color="#EF4444" />
+                                    <CloseSquare size={16} variant="Bold" color="var(--color-danger-text)" />
                                   </button>
                                 </div>
                               )}
@@ -2629,7 +1282,7 @@ export const CollaborationDetail = () => {
                                     title="Supprimer l'audio"
                                     disabled={sendingMessage}
                                   >
-                                    <CloseSquare size={16} variant="Bold" color="#EF4444" />
+                                    <CloseSquare size={16} variant="Bold" color="var(--color-danger-text)" />
                                   </button>
                                 </div>
                               )}
@@ -2703,7 +1356,7 @@ export const CollaborationDetail = () => {
                                       title="Enregistrer un message vocal"
                                       style={{ opacity: sendingMessage ? 0.6 : 1, cursor: sendingMessage ? 'not-allowed' : 'pointer', backgroundColor: 'var(--color-primary)' }}
                                     >
-                                      <Microphone size={20} variant="Bold" color="#FFFFFF" />
+                                      <Microphone size={20} variant="Bold" color="var(--color-surface)" />
                                     </button>
                                   ) : (
                                     <button
@@ -2715,12 +1368,12 @@ export const CollaborationDetail = () => {
                                       style={{ opacity: sendingMessage ? 0.6 : 1, cursor: sendingMessage ? 'not-allowed' : 'pointer' }}
                                     >
                                       {sendingMessage ? (
-                                        <svg style={{ animation: 'spin 1s linear infinite', width: '20px', height: '20px', color: '#FFFFFF' }} viewBox="0 0 24 24" fill="none">
+                                        <svg style={{ animation: 'spin 1s linear infinite', width: '20px', height: '20px', color: 'var(--color-surface)' }} viewBox="0 0 24 24" fill="none">
                                           <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" style={{ opacity: 0.25 }}></circle>
                                           <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" style={{ opacity: 0.75 }}></path>
                                         </svg>
                                       ) : (
-                                        <Send2 size={20} variant="Bold" color="#FFFFFF" />
+                                        <Send2 size={20} variant="Bold" color="var(--color-surface)" />
                                       )}
                                     </button>
                                   )}
@@ -2740,14 +1393,14 @@ export const CollaborationDetail = () => {
                     <div className="collab-detail-section">
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-4)' }}>
                         <h3 className="collab-detail-section-title" style={{ margin: 0 }}>Tâches</h3>
-                        {!isCollabClosed(collaboration?.id) && !isIncidentResolved && (
+                        {!isIncidentResolved && (
                           <button
                             type="button"
                             className="collab-task-create-btn"
                             onClick={openTaskModal}
                             title="Créer une nouvelle tâche"
                           >
-                            <Add size={20} color="#fff" />
+                            <Add size={20} color="var(--color-surface)" />
                             <span>Nouvelle tâche</span>
                           </button>
                         )}
@@ -2790,24 +1443,24 @@ export const CollaborationDetail = () => {
                                       }
                                     }}
                                     className="collab-task-checkbox"
-                                    disabled={task.failed || isCollabClosed(collaboration?.id)}
+                                    disabled={task.failed || isIncidentResolved}
                                   />
                                   <span className="collab-task-checkmark">
-                                    <TickCircle size={18} variant="Bold" color="#FFFFFF" />
+                                    <TickCircle size={18} variant="Bold" color="var(--color-surface)" />
                                   </span>
                                 </label>
 
                                 <div
                                   className="collab-task-content"
                                   onClick={() => {
-                                    if (!task.completed && !task.failed && !isCollabClosed(collaboration?.id)) {
+                                    if (!task.completed && !task.failed && !isIncidentResolved) {
                                       setExpandedProofTask(prev => prev === task.id ? null : task.id);
                                       setExpandedFailureTask(null);
                                       setFailureReason('');
                                     }
                                   }}
                                   style={{
-                                    cursor: (!task.completed && !task.failed && !isCollabClosed(collaboration?.id)) ? 'pointer' : 'default',
+                                    cursor: (!task.completed && !task.failed && !isIncidentResolved) ? 'pointer' : 'default',
                                     flex: 1
                                   }}
                                 >
@@ -2833,8 +1486,8 @@ export const CollaborationDetail = () => {
                                       color: 'var(--color-text-secondary)'
                                     }}>
                                     {task.failed && (
-                                      <span className="collab-task-failed-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', backgroundColor: '#EF4444', color: '#FFFFFF', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold' }}>
-                                        <Danger size={10} variant="Bold" color="#FFFFFF" />
+                                      <span className="collab-task-failed-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', backgroundColor: 'var(--color-danger)', color: 'var(--color-surface)', padding: '2px 6px', borderRadius: '4px', fontSize: 'var(--font-size-micro)', fontWeight: 'bold' }}>
+                                        <Danger size={10} variant="Bold" color="var(--color-surface)" />
                                         Échouée
                                       </span>
                                     )}
@@ -2864,7 +1517,7 @@ export const CollaborationDetail = () => {
                                     {task.failed && task.updated_at && (
                                       <>
                                         <span>•</span>
-                                        <span className="failed-date" style={{ color: '#EF4444', fontWeight: '500' }}>
+                                        <span className="failed-date" style={{ color: 'var(--color-danger-text)', fontWeight: '500' }}>
                                           Échouée le {formatDateTime(task.updated_at)}
                                         </span>
                                       </>
@@ -2872,7 +1525,7 @@ export const CollaborationDetail = () => {
                                   </div>
                                 </div>
 
-                                {!task.completed && !task.failed && !isCollabClosed(collaboration?.id) && (
+                                {!task.completed && !task.failed && !isIncidentResolved && (
                                   <button
                                     type="button"
                                     className="collab-task-fail-btn"
@@ -2893,22 +1546,22 @@ export const CollaborationDetail = () => {
                                     }}
                                     title="Marquer comme échouée"
                                   >
-                                    <Danger size={18} variant="Bold" color="#EF4444" />
+                                    <Danger size={18} variant="Bold" color="var(--color-danger-text)" />
                                   </button>
                                 )}
 
-                                {task.failed && !isCollabClosed(collaboration?.id) && (
+                                {task.failed && !isIncidentResolved && (
                                   <button
                                     type="button"
                                     className="collab-task-reset-btn"
                                     onClick={() => resetTaskStatus(task.id)}
                                     title="Réinitialiser"
                                   >
-                                    <Add size={18} variant="Bold" color="#6C7278" />
+                                    <Add size={18} variant="Bold" color="var(--color-text-secondary)" />
                                   </button>
                                 )}
 
-                                {!isCollabClosed(collaboration?.id) && (
+                                {!isIncidentResolved && (
                                   <button
                                     type="button"
                                     className="collab-task-delete-btn"
@@ -2917,9 +1570,9 @@ export const CollaborationDetail = () => {
                                     title="Supprimer la tâche"
                                   >
                                     {deletingTaskIds.includes(task.id) ? (
-                                      <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" style={{ width: '12px', height: '12px', border: '2px solid transparent', borderTopColor: '#EF4444', borderRightColor: '#EF4444', borderRadius: '50%', animation: 'spin 0.75s linear infinite' }}></span>
+                                      <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" style={{ width: '12px', height: '12px', border: '2px solid transparent', borderTopColor: 'var(--color-danger)', borderRightColor: 'var(--color-danger)', borderRadius: '50%', animation: 'spin 0.75s linear infinite' }}></span>
                                     ) : (
-                                      <Trash size={18} variant="Bold" color="#EF4444" />
+                                      <Trash size={18} variant="Bold" color="var(--color-danger-text)" />
                                     )}
                                   </button>
                                 )}
@@ -2929,11 +1582,11 @@ export const CollaborationDetail = () => {
                                 <div className="collab-task-failure-section" style={{
                                   marginTop: 'var(--spacing-2)',
                                   padding: '8px 12px',
-                                  backgroundColor: 'rgba(239, 68, 68, 0.05)',
+                                  backgroundColor: 'rgba(var(--rgb-danger), 0.05)',
                                   borderRadius: 'var(--radius-sm)',
-                                  borderLeft: '3px solid #EF4444'
+                                  borderLeft: '3px solid var(--color-danger)'
                                 }}>
-                                  <div className="collab-task-failure-label" style={{ fontSize: 'var(--font-size-caption)', fontWeight: 'bold', color: '#EF4444' }}>Raison :</div>
+                                  <div className="collab-task-failure-label" style={{ fontSize: 'var(--font-size-caption)', fontWeight: 'bold', color: 'var(--color-danger-text)' }}>Raison :</div>
                                   <div className="collab-task-failure-reason" style={{ fontSize: 'var(--font-size-body-small)', color: 'var(--color-text-secondary)' }}>
                                     {formatFailureReason(task.failure_reason || task.failureReason)}
                                   </div>
@@ -2981,12 +1634,12 @@ export const CollaborationDetail = () => {
                                     >
                                       {failureSaving ? (
                                         <>
-                                          <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" style={{ width: '12px', height: '12px', border: '2px solid transparent', borderTopColor: '#ffffff', borderRightColor: '#ffffff', borderRadius: '50%', animation: 'spin 0.75s linear infinite' }}></span>
+                                          <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" style={{ width: '12px', height: '12px', border: '2px solid transparent', borderTopColor: 'var(--color-surface)', borderRightColor: 'var(--color-surface)', borderRadius: '50%', animation: 'spin 0.75s linear infinite' }}></span>
                                           <span>Envoi...</span>
                                         </>
                                       ) : (
                                         <>
-                                          <Danger size={14} variant="Bold" color="#FFFFFF" />
+                                          <Danger size={14} variant="Bold" color="var(--color-surface)" />
                                           Confirmer
                                         </>
                                       )}
@@ -2999,7 +1652,7 @@ export const CollaborationDetail = () => {
                                 <div className="collab-task-proof-upload-panel" style={{
                                   marginTop: 'var(--spacing-3)',
                                   padding: 'var(--spacing-3)',
-                                  backgroundColor: 'rgba(58, 162, 221, 0.05)',
+                                  backgroundColor: 'rgba(var(--rgb-primary), 0.05)',
                                   border: '1.5px dashed var(--color-primary)',
                                   borderRadius: 'var(--radius-md)',
                                   animation: 'slideDown 0.2s ease-out'
@@ -3040,8 +1693,8 @@ export const CollaborationDetail = () => {
                                               position: 'absolute',
                                               top: '4px',
                                               right: '4px',
-                                              backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                                              color: '#fff',
+                                              backgroundColor: 'rgba(var(--rgb-ombre), 0.6)',
+                                              color: 'var(--color-surface)',
                                               border: 'none',
                                               borderRadius: '50%',
                                               width: '24px',
@@ -3050,7 +1703,7 @@ export const CollaborationDetail = () => {
                                               alignItems: 'center',
                                               justifyContent: 'center',
                                               cursor: 'pointer',
-                                              fontSize: '14px',
+                                              fontSize: 'var(--font-size-body)',
                                               zIndex: 10
                                             }}
                                           >
@@ -3072,8 +1725,8 @@ export const CollaborationDetail = () => {
                                               position: 'absolute',
                                               top: '4px',
                                               right: '4px',
-                                              backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                                              color: '#fff',
+                                              backgroundColor: 'rgba(var(--rgb-ombre), 0.6)',
+                                              color: 'var(--color-surface)',
                                               border: 'none',
                                               borderRadius: '50%',
                                               width: '24px',
@@ -3082,7 +1735,7 @@ export const CollaborationDetail = () => {
                                               alignItems: 'center',
                                               justifyContent: 'center',
                                               cursor: 'pointer',
-                                              fontSize: '14px',
+                                              fontSize: 'var(--font-size-body)',
                                               zIndex: 10
                                             }}
                                           >
@@ -3126,7 +1779,7 @@ export const CollaborationDetail = () => {
                                               setProofPreviewType(null);
                                             }}
                                             style={{
-                                              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                              backgroundColor: 'rgba(var(--rgb-danger), 0.1)',
                                               color: 'var(--color-danger-text)',
                                               border: 'none',
                                               borderLeft: '1px solid var(--color-border)',
@@ -3135,13 +1788,13 @@ export const CollaborationDetail = () => {
                                               alignItems: 'center',
                                               justifyContent: 'center',
                                               cursor: 'pointer',
-                                              fontSize: '18px',
+                                              fontSize: 'var(--font-size-h3)',
                                               fontWeight: 'bold',
                                               transition: 'background-color 0.2s ease',
                                               minWidth: '40px'
                                             }}
-                                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.2)'}
-                                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)'}
+                                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(var(--rgb-danger), 0.2)'}
+                                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(var(--rgb-danger), 0.1)'}
                                           >
                                             ×
                                           </button>
@@ -3206,12 +1859,12 @@ export const CollaborationDetail = () => {
                                     >
                                       {uploadingProofTask === task.id ? (
                                         <>
-                                          <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" style={{ width: '12px', height: '12px', border: '2px solid transparent', borderTopColor: '#ffffff', borderRightColor: '#ffffff', borderRadius: '50%', animation: 'spin 0.75s linear infinite' }}></span>
+                                          <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" style={{ width: '12px', height: '12px', border: '2px solid transparent', borderTopColor: 'var(--color-surface)', borderRightColor: 'var(--color-surface)', borderRadius: '50%', animation: 'spin 0.75s linear infinite' }}></span>
                                           <span>Envoi...</span>
                                         </>
                                       ) : (
                                         <>
-                                          <TickCircle size={14} variant="Bold" color="#FFFFFF" />
+                                          <TickCircle size={14} variant="Bold" color="var(--color-surface)" />
                                           <span>Confirmer</span>
                                         </>
                                       )}
@@ -3253,14 +1906,14 @@ export const CollaborationDetail = () => {
                                           alignItems: 'center',
                                           gap: '6px',
                                           padding: '4px 8px',
-                                          backgroundColor: 'rgba(58, 162, 221, 0.08)',
+                                          backgroundColor: 'rgba(var(--rgb-primary), 0.08)',
                                           borderRadius: '6px',
                                           cursor: 'pointer',
                                           marginBottom: '8px',
                                           transition: 'background-color 0.2s ease'
                                         }}
-                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(58, 162, 221, 0.15)'}
-                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(58, 162, 221, 0.08)'}
+                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(var(--rgb-primary), 0.15)'}
+                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(var(--rgb-primary), 0.08)'}
                                       >
                                         <span>{expandedCompletedProofs.includes(task.id) ? '▼ Masquer la preuve' : '▶ Afficher la preuve'}</span>
                                       </button>
@@ -3283,13 +1936,18 @@ export const CollaborationDetail = () => {
                                             const isImage = lowerUrl.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg|tiff|heic|heif)$/);
                                             if (!isImage) return null;
                                             return (
-                                            <div
+                                            <button
+                                              type="button"
+                                              aria-label="Agrandir la photo de preuve"
                                               onClick={() => {
-                                                setActiveProofPreview({ type: 'image', url: proofUrl });
+                                                setImageAZoomer({ src: proofUrl, alt: 'Preuve de complétion' });
                                               }}
                                               style={{
                                                 cursor: 'pointer',
-                                                backgroundColor: '#000',
+                                                padding: 0,
+                                                border: 'none',
+                                                display: 'block',
+                                                backgroundColor: 'rgba(var(--rgb-ombre), 1)',
                                                 maxHeight: '400px',
                                                 position: 'relative',
                                                 width: '100%',
@@ -3306,22 +1964,24 @@ export const CollaborationDetail = () => {
                                               />
                                               <div className="proof-hover-overlay" style={{
                                                 position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                                                background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                opacity: 0, transition: 'opacity 0.3s ease', color: '#fff', gap: '8px', fontSize: '13px', fontWeight: '500'
+                                                background: 'rgba(var(--rgb-ombre),0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                opacity: 0, transition: 'opacity 0.3s ease', color: 'var(--color-surface)', gap: '8px', fontSize: 'var(--font-size-body-small)', fontWeight: '500'
                                               }}>
                                                 <span>🔍 Cliquer pour agrandir</span>
                                               </div>
-                                            </div>
+                                            </button>
                                             );
                                           })()}
 
                                           {/* Vidéo */}
                                           {(task.proof_video || (task.proof?.type === 'video' && task.proof.url)) && (
-                                            <div
+                                            <button
+                                              type="button"
+                                              aria-label="Lire la video de preuve"
                                               onClick={() => {
                                                 setActiveProofPreview({ type: 'video', url: task.proof_video || task.proof.url });
                                               }}
-                                              style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', cursor: 'pointer' }}
+                                              style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', cursor: 'pointer', padding: 0, border: 'none', background: 'none', display: 'block' }}
                                               className="proof-hover-container"
                                             >
                                               <video
@@ -3331,13 +1991,13 @@ export const CollaborationDetail = () => {
                                               />
                                               <div style={{
                                                 position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                                                background: 'rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                                                color: '#fff', gap: '6px', fontSize: '12px'
+                                                background: 'rgba(var(--rgb-ombre),0.5)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                                                color: 'var(--color-surface)', gap: '6px', fontSize: 'var(--font-size-caption)'
                                               }}>
                                                 <div style={{
-                                                  width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.2)',
+                                                  width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'rgba(var(--rgb-surface),0.2)',
                                                   display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)',
-                                                  border: '1px solid rgba(255,255,255,0.4)', transition: 'transform 0.2s ease'
+                                                  border: '1px solid rgba(var(--rgb-surface),0.4)', transition: 'transform 0.2s ease'
                                                 }} className="play-button-circle">
                                                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                                     <path d="M5.25 20.25V3.75L19.5 12L5.25 20.25Z" fill="currentColor" />
@@ -3345,7 +2005,7 @@ export const CollaborationDetail = () => {
                                                 </div>
                                                 <span style={{ fontWeight: '500' }}>Lire la vidéo</span>
                                               </div>
-                                            </div>
+                                            </button>
                                           )}
 
                                           {/* Document (PDF, Word, Excel, etc.) */}
@@ -3373,7 +2033,7 @@ export const CollaborationDetail = () => {
                                                 color: 'inherit',
                                                 transition: 'background-color 0.2s ease'
                                               }}
-                                              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(58, 162, 221, 0.05)'}
+                                              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(var(--rgb-primary), 0.05)'}
                                               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--color-background)'}
                                             >
                                               <DocumentUpload size={32} variant="Bold" color="var(--color-primary)" />
@@ -3385,16 +2045,16 @@ export const CollaborationDetail = () => {
                                                   Cliquer pour ouvrir ou télécharger
                                                 </div>
                                               </div>
-                                              <div style={{ fontSize: '20px', color: 'var(--color-primary-text)' }}>→</div>
+                                              <div style={{ fontSize: 'var(--font-size-title)', color: 'var(--color-primary-text)' }}>→</div>
                                             </a>
                                             );
                                           })()}
                                         </div>
                                       )}
                                     </>
-                                  ) : !isCollabClosed(collaboration?.id) && (
+                                  ) : !isIncidentResolved && (
                                     <label className="collab-task-proof-btn" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: 'var(--font-size-caption)' }}>
-                                      <DocumentUpload size={14} variant="Bold" color="#3AA2DD" />
+                                      <DocumentUpload size={14} variant="Bold" color="var(--color-primary-text)" />
                                       Ajouter une preuve
                                       <input
                                         type="file"
@@ -3473,7 +2133,7 @@ export const CollaborationDetail = () => {
                   try {
                     await deleteTaskService(collaborationData?.incident, taskId);
                     notifyTaskChange('delete', taskId);
-                  } catch (e) {
+                  } catch {
                     await mutateTasks(); // Restaurer la liste en cas d'erreur
                   }
                   setTaskToDelete(null);
@@ -3492,7 +2152,7 @@ export const CollaborationDetail = () => {
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                    backgroundColor: 'rgba(var(--rgb-ombre), 0.85)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -3506,16 +2166,16 @@ export const CollaborationDetail = () => {
                     onClick={(e) => e.stopPropagation()}
                     style={{
                       position: 'relative',
-                      backgroundColor: '#1E1E1E',
+                      backgroundColor: 'rgba(var(--rgb-ombre), 1)',
                       borderRadius: '16px',
                       padding: '16px',
                       maxWidth: '90%',
                       maxHeight: '90%',
-                      boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4)',
+                      boxShadow: '0 20px 25px -5px rgba(var(--rgb-ombre), 0.5), 0 10px 10px -5px rgba(var(--rgb-ombre), 0.4)',
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      border: '1px solid rgba(var(--rgb-surface), 0.1)',
                       animation: 'scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
                     }}
                   >
@@ -3530,16 +2190,16 @@ export const CollaborationDetail = () => {
                         width: '36px',
                         height: '36px',
                         borderRadius: '50%',
-                        backgroundColor: '#EF4444',
-                        color: '#FFFFFF',
+                        backgroundColor: 'var(--color-danger)',
+                        color: 'var(--color-surface)',
                         border: 'none',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         cursor: 'pointer',
-                        fontSize: '18px',
+                        fontSize: 'var(--font-size-h3)',
                         fontWeight: 'bold',
-                        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.2)',
+                        boxShadow: '0 4px 6px -1px rgba(var(--rgb-ombre),0.2)',
                         transition: 'transform 0.2s ease, background-color 0.2s ease',
                         zIndex: 10
                       }}
@@ -3549,49 +2209,46 @@ export const CollaborationDetail = () => {
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.transform = 'scale(1)';
-                        e.currentTarget.style.backgroundColor = '#EF4444';
+                        e.currentTarget.style.backgroundColor = 'var(--color-danger)';
                       }}
                     >
                       ×
                     </button>
 
-                    {/* Corps du modal */}
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', borderRadius: '12px', minHeight: '400px', backgroundColor: '#000000', width: '100%' }}>
-                      {activeProofPreview.type === 'image' ? (
-                        <BlurryImage
-                          src={activeProofPreview.url}
-                          alt="Aperçu Preuve"
-                          style={{
-                            maxWidth: '100%',
-                            maxHeight: '75vh',
-                            minHeight: '400px',
-                            objectFit: 'contain',
-                            display: 'block'
-                          }}
-                        />
-                      ) : (
-                        <video
-                          src={activeProofPreview.url}
-                          controls
-                          autoPlay
-                          style={{
-                            maxWidth: '100%',
-                            maxHeight: '75vh',
-                            minHeight: '400px',
-                            width: 'auto',
-                            height: 'auto',
-                            display: 'block'
-                          }}
-                        />
-                      )}
+                    {/* Corps du modal — vidéo uniquement : les photos passent
+                        desormais par la visionneuse, qui sait zoomer. */}
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', borderRadius: '12px', minHeight: '400px', backgroundColor: 'rgba(var(--rgb-ombre), 1)', width: '100%' }}>
+                      <video
+                        src={activeProofPreview.url}
+                        controls
+                        autoPlay
+                        style={{
+                          maxWidth: '100%',
+                          maxHeight: '75vh',
+                          minHeight: '400px',
+                          width: 'auto',
+                          height: 'auto',
+                          display: 'block'
+                        }}
+                      />
                     </div>
 
-                    <div style={{ marginTop: '12px', color: 'rgba(255, 255, 255, 0.7)', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{ marginTop: '12px', color: 'rgba(var(--rgb-surface), 0.7)', fontSize: 'var(--font-size-body-small)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span>Preuve de complétion</span>
 
                     </div>
                   </div>
                 </div>
+              )}
+
+              {/* Visionneuse plein écran : zoom molette, pincement tactile,
+                  glissé, Échap pour fermer. */}
+              {imageAZoomer && (
+                <ImageViewer
+                  src={imageAZoomer.src}
+                  alt={imageAZoomer.alt}
+                  onClose={() => setImageAZoomer(null)}
+                />
               )}
 
               <style>{`
@@ -3611,7 +2268,7 @@ export const CollaborationDetail = () => {
                 }
                 .proof-hover-container:hover .play-button-circle {
                   transform: scale(1.15);
-                  background-color: rgba(255,255,255,0.3) !important;
+                  background-color: rgba(var(--rgb-surface),0.3) !important;
                 }
               `}</style>
             </div>

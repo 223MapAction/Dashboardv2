@@ -1,6 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
-
-const MesInterventionsModalContext = createContext();
+import React, { useState } from 'react';
+import { MesInterventionsModalContext } from './mesInterventionsModalContexte';
 
 export const MesInterventionsModalProvider = ({ children }) => {
   const [assignModal, setAssignModal] = useState({ open: false, incident: null });
@@ -86,13 +85,3 @@ export const MesInterventionsModalProvider = ({ children }) => {
     </MesInterventionsModalContext.Provider>
   );
 };
-
-export const useMesInterventionsModalContext = () => {
-  const context = useContext(MesInterventionsModalContext);
-  if (!context) {
-    throw new Error('useMesInterventionsModalContext must be used within a MesInterventionsModalProvider');
-  }
-  return context;
-};
-
-export default MesInterventionsModalContext;

@@ -62,12 +62,12 @@ export const Login = ({ onLogin }) => {
           <form onSubmit={handleSubmit} className="login-form">
             {error && (
               <div className="login-error" style={{
-                backgroundColor: '#FEE2E2',
+                backgroundColor: 'var(--color-danger-surface)',
                 color: 'var(--color-danger-text)',
                 padding: '12px 16px',
                 borderRadius: '8px',
                 marginBottom: '16px',
-                fontSize: '14px'
+                fontSize: 'var(--font-size-body)'
               }}>
                 {error}
               </div>
@@ -82,7 +82,7 @@ export const Login = ({ onLogin }) => {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
-                <Sms size={20} variant="Linear" color="#6C7278" />
+                <Sms size={20} variant="Linear" color="var(--color-text-secondary)" />
               </div>
             </div>
 
@@ -103,9 +103,9 @@ export const Login = ({ onLogin }) => {
                   aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
                 >
                   {showPassword ? (
-                    <EyeSlash size={20} variant="Linear" color="#6C7278" />
+                    <EyeSlash size={20} variant="Linear" color="var(--color-text-secondary)" />
                   ) : (
-                    <Eye size={20} variant="Linear" color="#6C7278" />
+                    <Eye size={20} variant="Linear" color="var(--color-text-secondary)" />
                   )}
                 </button>
               </div>
@@ -130,12 +130,18 @@ export const Login = ({ onLogin }) => {
         </div>
       </div>
 
-      {/* Colonne droite - Image */}
-      <div
-        className="login-hero"
-        style={{ backgroundImage: `url(${loginBg})` }}
-        aria-hidden="true"
-      />
+      {/* Colonne droite - Image.
+          Un <img> plutôt qu'un CSS background-image : ce dernier produisait,
+          par intermittence, un bandeau blanc net sur la gauche de la photo au
+          lieu de la recadrer entièrement — reproduit hors app, en CSS pur,
+          identique fichier, identique boîte : le défaut réapparaissait ou
+          disparaissait sans rien changer, signature d'un raté de composition
+          GPU du navigateur sur ce chemin de rendu précis, pas d'un bug du
+          fichier ni du CSS de mise en page. Un <img> avec object-fit passe
+          par un chemin de peinture différent, plus robuste pour ce cas. */}
+      <div className="login-hero" aria-hidden="true">
+        <img src={loginBg} alt="" className="login-hero-image" />
+      </div>
     </div>
   );
 };

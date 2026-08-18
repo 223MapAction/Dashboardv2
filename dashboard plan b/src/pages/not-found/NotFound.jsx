@@ -52,7 +52,7 @@ export const NotFound = ({ message, showBackToHome = true }) => {
               className="btn btn-primary not-found-btn not-found-btn-primary"
               onClick={handleGoHome}
             >
-              <Home3 size={16} variant="Bold" color='#fff' />
+              <Home3 size={16} variant="Bold" color='var(--color-surface)' />
               {isAuthenticated ? "Accueil" : "Connexion"}
             </button>
           )}

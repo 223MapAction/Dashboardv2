@@ -47,7 +47,7 @@ export const RequestIncidentDetailModal = ({ incident, onClose }) => {
                           maxHeight: '240px',
                           objectFit: 'cover',
                           borderRadius: '8px',
-                          border: '1px solid #eaecf0',
+                          border: '1px solid var(--color-border)',
                         }}
                       />
                     </div>
@@ -68,7 +68,7 @@ export const RequestIncidentDetailModal = ({ incident, onClose }) => {
                           maxHeight: '240px',
                           objectFit: 'cover',
                           borderRadius: '8px',
-                          border: '1px solid #eaecf0',
+                          border: '1px solid var(--color-border)',
                           display: videoLoaded ? 'block' : 'none'
                         }}
                       />
@@ -80,8 +80,8 @@ export const RequestIncidentDetailModal = ({ incident, onClose }) => {
 
             {/* General info */}
             <div style={{ marginBottom: '24px' }}>
-              <h4 style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>Informations Générales</h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '14px', color: '#344054' }}>
+              <h4 style={{ fontSize: 'var(--font-size-caption)', fontWeight: 600, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>Informations Générales</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: 'var(--font-size-body)', color: 'var(--color-text-secondary)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--color-background)', paddingBottom: '6px' }}>
                   <span style={{ color: 'var(--color-text-muted)' }}>Description</span>
                   <span style={{ textAlign: 'right', fontWeight: 500, maxWidth: '60%' }}>{details.description || "Aucune description fournie."}</span>
@@ -116,12 +116,12 @@ export const RequestIncidentDetailModal = ({ incident, onClose }) => {
             {/* AI Analysis */}
             {prediction.analysis && (
               <div style={{ marginBottom: '24px' }}>
-                <h4 style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>Analyse Intelligente (IA)</h4>
-                <div style={{ background: '#f9fafb', border: '1px solid #eaecf0', padding: '16px', borderRadius: '8px', fontSize: '14px', color: '#344054', lineHeight: '1.5' }}>
+                <h4 style={{ fontSize: 'var(--font-size-caption)', fontWeight: 600, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>Analyse Intelligente (IA)</h4>
+                <div style={{ background: 'var(--color-background)', border: '1px solid var(--color-border)', padding: '16px', borderRadius: '8px', fontSize: 'var(--font-size-body)', color: 'var(--color-text-secondary)', lineHeight: '1.5' }}>
                   <p style={{ margin: '0 0 12px 0' }}>{prediction.analysis}</p>
                   {prediction.recommendation && (
-                    <div style={{ borderTop: '1px solid #eaecf0', paddingTop: '12px' }}>
-                      <strong style={{ color: '#101828' }}>Recommandation : </strong>
+                    <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '12px' }}>
+                      <strong style={{ color: 'var(--color-text-primary)' }}>Recommandation : </strong>
                       {prediction.recommendation}
                     </div>
                   )}
@@ -132,8 +132,8 @@ export const RequestIncidentDetailModal = ({ incident, onClose }) => {
             {/* Environmental data */}
             {prediction.topography && (
               <div style={{ marginBottom: '24px' }}>
-                <h4 style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>Données Environnementales</h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '14px', color: '#344054' }}>
+                <h4 style={{ fontSize: 'var(--font-size-caption)', fontWeight: 600, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>Données Environnementales</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: 'var(--font-size-body)', color: 'var(--color-text-secondary)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--color-background)', paddingBottom: '6px' }}>
                     <span style={{ color: 'var(--color-text-muted)' }}>Température</span>
                     <span style={{ fontWeight: 500 }}>{prediction.topography.temperature_celsius ?? "N/A"} °C</span>
@@ -157,8 +157,8 @@ export const RequestIncidentDetailModal = ({ incident, onClose }) => {
             {/* Human Exposure */}
             {prediction.human_impact && (
               <div style={{ marginBottom: '24px' }}>
-                <h4 style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>Impact Humain Estimé</h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '14px', color: '#344054' }}>
+                <h4 style={{ fontSize: 'var(--font-size-caption)', fontWeight: 600, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>Impact Humain Estimé</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: 'var(--font-size-body)', color: 'var(--color-text-secondary)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--color-background)', paddingBottom: '6px' }}>
                     <span style={{ color: 'var(--color-text-muted)' }}>Population totale exposée</span>
                     <span style={{ fontWeight: 500 }}>{prediction.human_impact.total_population_exposed ?? 0} personnes</span>

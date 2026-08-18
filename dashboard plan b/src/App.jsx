@@ -1,9 +1,10 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { SWRConfig } from 'swr';
 import { Login, ForgotPassword, ResetPassword } from './pages/auth';
 import { ProtectedRoute } from './components/auth';
-import { authService } from './pages/auth/services/authService';
+import { FrontiereChargementPage } from './components/atoms/FrontiereChargementPage';
+import { ChargementPage } from './components/atoms/ChargementPage';
 
 // Les pages protégées sont chargées à la demande : sans ça, mapbox-gl et
 // recharts partent dans le bundle initial et se téléchargent dès le login.
@@ -29,18 +30,12 @@ const RedirectionSignalement = () => {
 };
 
 function App() {
-  const [isAuthChecked, setIsAuthChecked] = useState(false);
-
-  // Vérifie l'authentification au chargement de l'app
-  useEffect(() => {
-    authService.isAuthenticated();
-    setIsAuthChecked(true);
-  }, []);
-
-  if (!isAuthChecked) {
-    return null; // ou un loader
-  }
-
+  // Il y avait ici un effet qui appelait authService.isAuthenticated(), jetait
+  // le resultat, puis basculait un drapeau — l'application rendait donc `null`
+  // au premier passage, avant de se rendre une seconde fois. Un ecran blanc a
+  // chaque ouverture, pour rien : isAuthenticated() lit sessionStorage, c'est
+  // synchrone, et personne n'utilisait sa reponse. C'est ProtectedRoute qui
+  // decide reellement de l'acces a chaque route.
   return (
     <SWRConfig
       value={{
@@ -55,7 +50,11 @@ function App() {
       }}
     >
     <BrowserRouter>
-      <Suspense fallback={null}>
+      {/* Les pages arrivent a la demande. La frontiere rattrape l'echec de
+          cette recuperation — deploiement en cours, connexion coupee — qui
+          laissait jusqu'ici un ecran blanc et une erreur non rattrapee. */}
+      <FrontiereChargementPage>
+      <Suspense fallback={<ChargementPage />}>
       <Routes>
         {/* Route publique - Login */}
         <Route path="/login" element={<Login onLogin={() => {}} />} />
@@ -175,6 +174,7 @@ function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
       </Suspense>
+      </FrontiereChargementPage>
     </BrowserRouter>
     </SWRConfig>
   );

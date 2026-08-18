@@ -1,3 +1,7 @@
+// La palette d'avatars est partagee avec les pages signalements et
+// interventions : elle vit desormais dans src/utils.
+export { AVATAR_COLORS } from '../../../utils/couleursAvatar';
+
 // Fake data — liste des agents
 
 export const ROLES = [
@@ -25,8 +29,3 @@ export const ROLES = [
 ];
 
 
-export const AVATAR_COLORS = [
-  '#EF4444', '#F97316', '#F59E0B', '#22C55E',
-  '#3AA2DD', '#1E40AF', '#A855F7', '#EC4899',
-  '#10B981', '#6366F1',
-];

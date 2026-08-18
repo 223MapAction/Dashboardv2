@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import useSWRInfinite from 'swr/infinite';
 import debounce from 'lodash.debounce';
-import { useCollaborationDetail } from '../context/CollaborationDetailContext';
+import { useCollaborationDetail } from '../context/collaborationDetailContexte';
 import {
   CloseCircle,
   Crown1,
@@ -15,6 +15,7 @@ import {
 import { getOtherOrganisationsService } from '../service/collab_detail_service';
 
 import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
+import { AVATAR_COULEUR_DEFAUT } from '../../../utils/couleursAvatar';
 export const SuggestOrgModal = () => {
   const {
     collaboration,
@@ -137,7 +138,7 @@ export const SuggestOrgModal = () => {
   };
 
   const getOrgColor = (org) => {
-    return org.primary_color || '#3AA2DD';
+    return org.primary_color || AVATAR_COULEUR_DEFAUT;
   };
 
   // Sélection d'une organisation : on l'ajoute, on vide la recherche
@@ -194,7 +195,7 @@ export const SuggestOrgModal = () => {
           )}
           {/* Bandeau d'info */}
           <div className="suggest-info-banner">
-            <Crown1 size={18} variant="Bold" color="#F59E0B" />
+            <Crown1 size={18} variant="Bold" color="var(--color-warning-text)" />
             <span>
               En tant que <strong>{collaboration.role == "leader" ? "Leader" : "Contributeur"}</strong>, vous pouvez
               {collaboration?.role == "leader" ? "inviter des organisations" : "suggérer des organisations"}
@@ -210,7 +211,7 @@ export const SuggestOrgModal = () => {
             </label>
             <div className="suggest-search-wrapper" ref={searchWrapperRef}>
               <div className="suggest-search">
-                <SearchNormal1 size={16} variant="Linear" color="#6C7278" />
+                <SearchNormal1 size={16} variant="Linear" color="var(--color-text-secondary)" />
                 <input
                   type="text"
                   className="suggest-search-input"
@@ -225,7 +226,7 @@ export const SuggestOrgModal = () => {
                     className="suggest-search-clear"
                     onClick={() => { setSuggestSearch(''); setShowDropdown(false); }}
                   >
-                    <CloseCircle size={16} variant="Linear" color="#6C7278" />
+                    <CloseCircle size={16} variant="Linear" color="var(--color-text-secondary)" />
                   </button>
                 )}
               </div>
@@ -247,7 +248,7 @@ export const SuggestOrgModal = () => {
                       </div>
                     ) : orgsError ? (
                       <div className="suggest-search-empty">
-                        <Buildings2 size={20} variant="Linear" color="#EF4444" />
+                        <Buildings2 size={20} variant="Linear" color="var(--color-danger-text)" />
                         <span>Erreur de chargement</span>
                       </div>
                     ) : selectableOrgs.length === 0 ? (
@@ -281,8 +282,8 @@ export const SuggestOrgModal = () => {
                       className="suggest-search-results-footer"
                       style={{
                         flexShrink: 0,
-                        borderTop: '1px solid rgba(0, 0, 0, 0.06)',
-                        background: 'var(--color-surface, #ffffff)'
+                        borderTop: '1px solid rgba(var(--rgb-ombre), 0.06)',
+                        background: 'var(--color-surface)'
                       }}
                     >
                       <button
@@ -299,7 +300,7 @@ export const SuggestOrgModal = () => {
                           padding: '10px',
                           margin: 0
                         }}
-                        onMouseEnter={(e) => !isLoadingMore && (e.currentTarget.style.backgroundColor = 'rgba(58, 162, 221, 0.08)')}
+                        onMouseEnter={(e) => !isLoadingMore && (e.currentTarget.style.backgroundColor = 'rgba(var(--rgb-primary), 0.08)')}
                         onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                       >
                         {isLoadingMore ? (
@@ -321,7 +322,7 @@ export const SuggestOrgModal = () => {
           {/* Organisations sélectionnées */}
           <div className="suggest-section">
             <label className="suggest-section-label">
-              <People size={16} variant="Bold" color="#3AA2DD" />
+              <People size={16} variant="Bold" color="var(--color-primary-text)" />
               Sélectionnées ({suggestedOrgs.length})
             </label>
 
@@ -352,7 +353,7 @@ export const SuggestOrgModal = () => {
                           onClick={() => toggleSuggestedOrg(org)}
                           title="Retirer"
                         >
-                          <CloseCircle size={18} variant="Linear" color="#EF4444" />
+                          <CloseCircle size={18} variant="Linear" color="var(--color-danger-text)" />
                         </button>
                       </div>
 
@@ -377,7 +378,7 @@ export const SuggestOrgModal = () => {
                                 <RoleIcon
                                   size={12}
                                   variant={isRoleSel ? 'Bold' : 'Linear'}
-                                  color={isRoleSel ? role.color : '#6C7278'}
+                                  color={isRoleSel ? role.color : 'var(--color-text-secondary)'}
                                 />
                                 {role.label}
                               </button>

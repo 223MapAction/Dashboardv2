@@ -14,6 +14,8 @@ import { FiltersBar } from '../../../../components/molecules/FiltersBar';
 import './incident-list.css';
 
 import { TableActionsMenu } from '../../../../components/molecules/TableActionsMenu';
+import { BadgeGravite } from '../../../../components/atoms/BadgeGravite';
+import { gravite, couleurGravite } from '../../../../utils/gravite';
 // Composant shimmer pour le chargement (version table)
 
 export const IncidentList = ({
@@ -96,9 +98,9 @@ export const IncidentList = ({
           <span className="incident-table-title">
             {incident.title || 'Sans titre'}
             {incident.isOwner ? (
-              <span className="incident-owner-tag" style={{ marginLeft: '8px', fontSize: '10px', padding: '2px 6px', background: 'var(--color-primary-text)', color: 'white', borderRadius: '4px' }}>Moi</span>
+              <span className="incident-owner-tag" style={{ marginLeft: '8px', fontSize: 'var(--font-size-micro)', padding: '2px 6px', background: 'var(--color-primary-text)', color: 'white', borderRadius: '4px' }}>Moi</span>
             ) : incident.takenBy ? (
-              <span className="incident-owner-tag" style={{ marginLeft: '8px', fontSize: '10px', padding: '2px 6px', background: 'var(--color-text-muted)', color: 'white', borderRadius: '4px' }}>Autre</span>
+              <span className="incident-owner-tag" style={{ marginLeft: '8px', fontSize: 'var(--font-size-micro)', padding: '2px 6px', background: 'var(--color-text-muted)', color: 'white', borderRadius: '4px' }}>Autre</span>
             ) : null}
           </span>
           {incident.description
@@ -117,9 +119,9 @@ export const IncidentList = ({
                                 <span className="incident-table-title">
                                   {incident.title || 'Sans titre'}
                                   {incident.isOwner ? (
-                                    <span className="incident-owner-tag" style={{ marginLeft: '8px', fontSize: '10px', padding: '2px 6px', background: 'var(--color-primary-text)', color: 'white', borderRadius: '4px' }}>Moi</span>
+                                    <span className="incident-owner-tag" style={{ marginLeft: '8px', fontSize: 'var(--font-size-micro)', padding: '2px 6px', background: 'var(--color-primary-text)', color: 'white', borderRadius: '4px' }}>Moi</span>
                                   ) : incident.takenBy ? (
-                                    <span className="incident-owner-tag" style={{ marginLeft: '8px', fontSize: '10px', padding: '2px 6px', background: 'var(--color-text-muted)', color: 'white', borderRadius: '4px' }}>Autre</span>
+                                    <span className="incident-owner-tag" style={{ marginLeft: '8px', fontSize: 'var(--font-size-micro)', padding: '2px 6px', background: 'var(--color-text-muted)', color: 'white', borderRadius: '4px' }}>Autre</span>
                                   ) : null}
                                 </span>
                                 <span className="incident-table-subtitle">{incident.description?.substring(0, 50)}...</span>
@@ -133,7 +135,7 @@ export const IncidentList = ({
         <span className="incident-table-cell-text">
                             {incident.location || 'Inconnue'}
                             {incident.coordinates && (
-                              <div style={{ fontSize: '11px', color: 'var(--color-text-muted)', marginTop: '2px' }}>
+                              <div style={{ fontSize: 'var(--font-size-micro)', color: 'var(--color-text-muted)', marginTop: '2px' }}>
                                 {incident.coordinates.lat.toFixed(3)}, {incident.coordinates.lng.toFixed(3)}
                               </div>
                             )}
@@ -167,9 +169,7 @@ export const IncidentList = ({
           {incident.badges?.map((b, idx) => (
             <span key={idx} className={`incident-badge-glow variant-${b.variant}`}>{b.label}</span>
           ))}
-          {incident.severity === 'high' && <span className="incident-badge-glow" style={{ background: 'rgba(239, 68, 68, 0.12)', color: 'var(--color-danger-text)', borderColor: 'rgba(239, 68, 68, 0.3)' }}>Gravité élevée</span>}
-          {incident.severity === 'medium' && <span className="incident-badge-glow" style={{ background: 'rgba(245, 158, 11, 0.12)', color: 'var(--color-warning-text)', borderColor: 'rgba(245, 158, 11, 0.3)' }}>Gravité moyenne</span>}
-          {!['high', 'medium'].includes(incident.severity) && <span className="incident-badge-glow" style={{ background: 'rgba(34, 197, 94, 0.12)', color: 'var(--color-success-text)', borderColor: 'rgba(34, 197, 94, 0.3)' }}>Gravité faible</span>}
+          <BadgeGravite incident={incident} />
         </>
       ),
       rendu: (incident) => (
@@ -182,15 +182,7 @@ export const IncidentList = ({
                                 ))}
                               </div>
                               <div className="incident-table-badges">
-                                {(() => {
-                                  if (incident.severity === 'high') {
-                                    return <span className="incident-badge-glow" style={{ background: 'rgba(239, 68, 68, 0.12)', color: 'var(--color-danger-text)', borderColor: 'rgba(239, 68, 68, 0.3)' }}>Gravité élevée</span>;
-                                  }
-                                  if (incident.severity === 'medium') {
-                                    return <span className="incident-badge-glow" style={{ background: 'rgba(245, 158, 11, 0.12)', color: 'var(--color-warning-text)', borderColor: 'rgba(245, 158, 11, 0.3)' }}>Gravité moyenne</span>;
-                                  }
-                                  return <span className="incident-badge-glow" style={{ background: 'rgba(34, 197, 94, 0.12)', color: 'var(--color-success-text)', borderColor: 'rgba(34, 197, 94, 0.3)' }}>Gravité faible</span>;
-                                })()}
+                                <BadgeGravite incident={incident} />
                               </div>
                             </div>
       ),
@@ -210,12 +202,12 @@ export const IncidentList = ({
                                       <span style={{
                                         display: 'inline-flex',
                                         alignItems: 'center',
-                                        background: 'rgba(34, 197, 94, 0.12)',
+                                        background: 'rgba(var(--rgb-success), 0.12)',
                                         color: 'var(--color-success-text)',
-                                        border: '1px solid rgba(34, 197, 94, 0.3)',
+                                        border: '1px solid rgba(var(--rgb-success), 0.3)',
                                         padding: '2px 8px',
                                         borderRadius: '12px',
-                                        fontSize: '11px',
+                                        fontSize: 'var(--font-size-micro)',
                                         fontWeight: '600'
                                       }}>
                                         Moi
@@ -224,12 +216,12 @@ export const IncidentList = ({
                                       <span style={{
                                         display: 'inline-flex',
                                         alignItems: 'center',
-                                        background: 'rgba(108, 114, 120, 0.12)',
+                                        background: 'rgba(var(--rgb-text-secondary), 0.12)',
                                         color: 'var(--color-text-secondary)',
-                                        border: '1px solid rgba(108, 114, 120, 0.3)',
+                                        border: '1px solid rgba(var(--rgb-text-secondary), 0.3)',
                                         padding: '2px 8px',
                                         borderRadius: '12px',
-                                        fontSize: '11px',
+                                        fontSize: 'var(--font-size-micro)',
                                         fontWeight: '600'
                                       }}>
                                         Autre
@@ -237,7 +229,7 @@ export const IncidentList = ({
                                     )}
                                   </div>
                                   <div style={{
-                                    fontSize: '12px',
+                                    fontSize: 'var(--font-size-caption)',
                                     color: 'var(--color-text-secondary)',
                                     marginTop: '4px',
                                     fontStyle: 'italic',
@@ -264,7 +256,7 @@ export const IncidentList = ({
                                   </div>
                                 </div>
                               ) : (
-                                <span style={{ color: 'var(--color-text-muted)', fontSize: '13px', fontStyle: 'italic' }}>
+                                <span style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-body-small)', fontStyle: 'italic' }}>
                                   Disponible
                                 </span>
                               )}
@@ -296,21 +288,21 @@ export const IncidentList = ({
                                     const isRejected = status === 'rejected' || status === 'refused';
 
                                     let badgeColor = 'var(--color-text-secondary)';
-                                    let badgeBg = 'rgba(108, 114, 120, 0.1)';
-                                    let badgeBorder = 'rgba(108, 114, 120, 0.2)';
+                                    let badgeBg = 'rgba(var(--rgb-text-secondary), 0.1)';
+                                    let badgeBorder = 'rgba(var(--rgb-text-secondary), 0.2)';
 
                                     if (isAccepted) {
                                       badgeColor = 'var(--color-success)';
-                                      badgeBg = 'rgba(34, 197, 94, 0.1)';
-                                      badgeBorder = 'rgba(34, 197, 94, 0.2)';
+                                      badgeBg = 'rgba(var(--rgb-success), 0.1)';
+                                      badgeBorder = 'rgba(var(--rgb-success), 0.2)';
                                     } else if (isPending) {
                                       badgeColor = 'var(--color-warning)';
-                                      badgeBg = 'rgba(245, 158, 11, 0.1)';
-                                      badgeBorder = 'rgba(245, 158, 11, 0.2)';
+                                      badgeBg = 'rgba(var(--rgb-warning), 0.1)';
+                                      badgeBorder = 'rgba(var(--rgb-warning), 0.2)';
                                     } else if (isRejected) {
                                       badgeColor = 'var(--color-danger)';
-                                      badgeBg = 'rgba(239, 68, 68, 0.1)';
-                                      badgeBorder = 'rgba(239, 68, 68, 0.2)';
+                                      badgeBg = 'rgba(var(--rgb-danger), 0.1)';
+                                      badgeBorder = 'rgba(var(--rgb-danger), 0.2)';
                                     }
 
                                     return (
@@ -320,7 +312,7 @@ export const IncidentList = ({
                                         gap: '6px',
                                         padding: '4px 10px',
                                         borderRadius: '6px',
-                                        fontSize: '11px',
+                                        fontSize: 'var(--font-size-micro)',
                                         fontWeight: '600',
                                         color: badgeColor,
                                         backgroundColor: badgeBg,
@@ -348,9 +340,7 @@ export const IncidentList = ({
   // Le lisere colore du bord gauche de la carte double le badge de gravite,
   // il ne le remplace pas : la couleur seule ne doit jamais porter le sens.
   const accentDe = (incident) =>
-    incident.severity === 'high' ? 'var(--color-severity-high)'
-      : incident.severity === 'medium' ? 'var(--color-severity-medium)'
-        : 'var(--color-severity-low)';
+    couleurGravite(gravite(incident));
 
   // Le bandeau de la carte. Sur un signalement environnemental, la photo dit
   // ce qui se passe mieux qu'aucun badge.

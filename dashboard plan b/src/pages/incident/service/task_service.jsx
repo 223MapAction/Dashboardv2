@@ -209,7 +209,6 @@ export const formatTask = (task) => {
     description: task.description,
     state: task.state,
     stateLabel: getStateLabel(task.state),
-    stateColor: getStateColor(task.state),
     startDate: task.start_date,
     endDate: task.end_date,
     assignedTo: task.assigned_to,
@@ -236,21 +235,6 @@ const getStateLabel = (state) => {
     failed: 'Échouée'
   };
   return labels[state] || state;
-};
-
-/**
- * Obtient la couleur associée à un état
- * @param {string} state - État de la tâche
- * @returns {string} Code couleur
- */
-const getStateColor = (state) => {
-  const colors = {
-    pending: '#6C7278',      // gris
-    in_progress: '#3AA2DD',  // bleu (primary)
-    done: '#22C55E',         // vert (success)
-    failed: '#EF4444'        // rouge (danger)
-  };
-  return colors[state] || '#6C7278';
 };
 
 /**

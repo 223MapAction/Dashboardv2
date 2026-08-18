@@ -30,7 +30,7 @@
 .not-found-blob-1 {
   width: 320px;
   height: 320px;
-  background: rgba(58, 162, 221, 0.25);
+  background: rgba(var(--rgb-primary), 0.25);
   top: 15%;
   left: 20%;
 }
@@ -38,7 +38,7 @@
 .not-found-blob-2 {
   width: 420px;
   height: 420px;
-  background: rgba(43, 139, 196, 0.2);
+  background: rgba(var(--rgb-primary-dark), 0.2);
   bottom: 10%;
   right: 15%;
   animation-delay: -5s;
@@ -52,11 +52,11 @@
   z-index: 10;
   width: 100%;
   max-width: 500px;
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(var(--rgb-surface), 0.75);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(var(--rgb-surface), 0.6);
+  box-shadow: 0 20px 40px rgba(var(--rgb-ombre), 0.04);
   border-radius: var(--radius-lg);
   padding: var(--spacing-8);
   text-align: center;
@@ -79,7 +79,11 @@
 }
 
 .not-found-code {
-  font-size: 110px;
+  /* Chiffre decoratif : le seul de l'application au-dessus de l'echelle. Il
+     est fluide plutot que fige a 110px, sinon un « 404 » de cette taille
+     deborde sur un ecran de 320px. Le palier a 80px sous 768px devient donc
+     inutile. */
+  font-size: clamp(72px, 22vw, 110px);
   font-weight: var(--font-weight-bold);
   line-height: 1;
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
@@ -155,7 +159,7 @@
 
 .not-found-btn-primary:hover {
   background: var(--color-primary-dark);
-  box-shadow: 0 8px 20px rgba(58, 162, 221, 0.25);
+  box-shadow: 0 8px 20px rgba(var(--rgb-primary), 0.25);
   transform: translateY(-2px);
 }
 
@@ -185,10 +189,6 @@
   .not-found-card {
     padding: var(--spacing-6) var(--spacing-4);
     border-radius: var(--radius-lg);
-  }
-
-  .not-found-code {
-    font-size: 80px;
   }
 
   .not-found-icon-overlay {

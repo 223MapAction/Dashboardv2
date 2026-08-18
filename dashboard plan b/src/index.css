@@ -8,14 +8,25 @@
   /* Typography - Inter Sans-Serif */
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
-  /* Font Sizes */
+  /* Font Sizes
+     Une seule echelle, du plus grand au plus petit. Toute taille de texte de
+     l'application doit sortir d'ici : une valeur en dur qui ne figure pas dans
+     cette liste finit toujours par diverger de sa voisine.
+
+     --font-size-micro est le PLANCHER. Rien en dessous de 11px : le dashboard
+     est consulte par des agents de terrain sur telephone, souvent en plein
+     soleil. On trouvait avant du 10px, du 9px et meme du 10.5px, ce qui
+     annulait en pratique le travail de contraste fait sur les couleurs. */
+  --font-size-display: 36px;
   --font-size-h1: 32px;
   --font-size-h2: 24px;
+  --font-size-title: 20px;
   --font-size-h3: 18px;
   --font-size-body-large: 16px;
   --font-size-body: 14px;
   --font-size-body-small: 13px;
   --font-size-caption: 12px;
+  --font-size-micro: 11px;
 
   /* Font Weights */
   --font-weight-regular: 400;
@@ -40,9 +51,28 @@
      dessous du seuil WCAG AA de 4.5:1. Illisible sur un écran de téléphone en
      plein soleil, le contexte des agents de terrain. */
   --color-text-muted: #697282;
-  --color-severity-low: #22C55E;
-  --color-severity-medium: #F59E0B;
+  /* ── Échelle de gravité ─────────────────────────────────────────────────────
+     TROIS niveaux — ceux que le serveur émet —, donc trois teintes DISTINCTES.
+     Les seuils et les libellés vivent dans src/utils/gravite.js ; ici, seules
+     les couleurs.
+
+     Cette règle avait été perdue : « faible » valait #22C55E, le vert exact de
+     --color-success, alors que sur la carte le vert signifie déjà « résolu par
+     moi » ; du coup le CSS des marqueurs peignait « faible » en --color-warning,
+     c'est-à-dire dans la même couleur que « moyenne ».
+
+     L'échelle est rouge → orange → jaune, sans vert ni bleu (réservés aux états
+     « résolu »). Les écarts perceptuels (CIE dE76) sont mesurés : élevée↔moyenne
+     34.6, moyenne↔faible 42.4, élevée↔faible 71.9. Une rampe a été écartée sur
+     ce critère : la paire #F59E0B/#EAB308 tombait à 16.4, deux nuances qu'on ne
+     sépare pas d'un coup d'œil sur une carte.
+
+     La gravité ne réutilise plus --color-danger / --color-warning : ce sont des
+     couleurs de STATUT. Les faire coïncider est ce qui avait permis à la dérive
+     de passer inaperçue. */
   --color-severity-high: #EF4444;
+  --color-severity-medium: #F97316;
+  --color-severity-low: #EAB308;
   --color-success: #22C55E;
   --color-warning: #F59E0B;
   --color-danger: #EF4444;
@@ -68,12 +98,70 @@
   --color-warning-text: #9E6606;
   --color-danger-text: #E21313;
   --color-info-text: #1E78AC;
-  --color-severity-low-text: #17833F;
-  --color-severity-medium-text: #9E6606;
+  /* Mêmes teintes, assombries au minimum pour franchir 4.5:1 face au blanc :
+     4.84, 5.64 et 4.77. Le jaune vif ne plafonne qu'à 1.92:1 — il ne peut donc
+     jamais porter du texte, seulement une pastille. */
   --color-severity-high-text: #E21313;
+  --color-severity-medium-text: #B24408;
+  --color-severity-low-text: #8F6E00;
 
-  --bs-btn-disabled-bg: rgba(58, 162, 221, 0.65) !important;
-  --bs-btn-disabled-border-color: rgba(58, 162, 221, 0.65) !important;
+  /* ── Fonds pâles de statut ──────────────────────────────────────────────────
+     Chaque couleur sémantique se décline en trois usages : un aplat vif
+     (--color-x) pour les pastilles et les boutons pleins, un texte sombre
+     (--color-x-text) lisible sur blanc, et un fond très pâle (--color-x-surface)
+     pour les badges. Ce troisième palier manquait, alors chaque page inventait
+     le sien — on trouvait #FEE2E2 ici, #FEF2F2 là, pour le même badge d'erreur. */
+  --color-primary-surface: #E0F2FE;
+  --color-success-surface: #DCFCE7;
+  --color-warning-surface: #FEF3C7;
+  --color-danger-surface: #FEE2E2;
+
+  /* Troisième palier de l'échelle de gravité. Sans lui, les cartes « moyenne »
+     et « faible » des statistiques partageaient --color-warning-surface, ce qui
+     rejouait la collision au niveau des bordures. */
+  --color-severity-high-surface: #FEE2E2;
+  --color-severity-medium-surface: #FFEDD5;
+  --color-severity-low-surface: #FEF9C3;
+
+  /* ── Accent violet ──────────────────────────────────────────────────────────
+     Le violet porte les statuts qui ne sont ni un succès, ni une alerte, ni une
+     erreur : « planifié », « expertise requise ». Il était déjà utilisé sans
+     jamais avoir été nommé, donc décliné au hasard (#A78BFA, #7E22CE, #6D28D9,
+     #818CF8). Le #A78BFA servait de couleur de texte sur fond blanc, à 2.5:1 —
+     pratiquement invisible. --color-accent-text est le seul à franchir 4.5:1. */
+  --color-accent: #8B5CF6;
+  --color-accent-text: #6D28D9;
+  --color-accent-surface: #EDE9FE;
+
+  /* ── Canaux RVB des memes couleurs ──────────────────────────────────────────
+     Un jeton hexadecimal ne peut pas servir dans un rgba() : il faut les trois
+     canaux separement. Sans ces jetons-ci, chaque voile translucide de
+     l'application reecrivait la couleur a la main — on comptait 525 rgba() qui
+     repetaient litteralement les valeurs ci-dessus. Changer la primaire aurait
+     donc laisse derriere elle 147 halos de l'ancienne teinte.
+
+     Ces valeurs DOIVENT rester synchronisees avec les jetons hexadecimaux
+     correspondants ; c'est la meme couleur ecrite dans deux notations, pas une
+     seconde palette.
+
+     Usage : rgba(var(--rgb-primary), 0.12) */
+  --rgb-primary: 58, 162, 221;        /* #3AA2DD */
+  --rgb-primary-dark: 43, 139, 196;   /* #2B8BC4 */
+  --rgb-success: 34, 197, 94;         /* #22C55E */
+  --rgb-warning: 245, 158, 11;        /* #F59E0B */
+  --rgb-danger: 239, 68, 68;          /* #EF4444 */
+  --rgb-accent: 139, 92, 246;         /* #8B5CF6 */
+  --rgb-surface: 255, 255, 255;       /* #FFFFFF */
+  --rgb-background: 248, 250, 252;    /* #F8FAFC */
+  --rgb-text-primary: 26, 28, 30;     /* #1A1C1E */
+  --rgb-text-secondary: 108, 114, 120;/* #6C7278 */
+  --rgb-text-muted: 105, 114, 130;    /* #697282 */
+  /* Les ombres ne sont pas une couleur de la palette : c'est du noir pur,
+     volontairement, pour ne pas teinter ce qu'elles assombrissent. */
+  --rgb-ombre: 0, 0, 0;
+
+  --bs-btn-disabled-bg: rgba(var(--rgb-primary), 0.65) !important;
+  --bs-btn-disabled-border-color: rgba(var(--rgb-primary), 0.65) !important;
 
   /* Spacing Scale - Base 4 */
   --spacing-1: 4px;
@@ -92,9 +180,9 @@
   --radius-full: 9999px;
 
   /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 2px 0 rgba(var(--rgb-ombre), 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(var(--rgb-ombre), 0.1), 0 2px 4px -1px rgba(var(--rgb-ombre), 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(var(--rgb-ombre), 0.1), 0 4px 6px -2px rgba(var(--rgb-ombre), 0.05);
 }
 
 /* === RESET & BASE === */
@@ -230,7 +318,7 @@ h2,
 
 .btn-icon:hover {
   color: var(--color-primary-text);
-  background-color: rgba(58, 162, 221, 0.1);
+  background-color: rgba(var(--rgb-primary), 0.1);
 }
 
 /* === INPUT FIELDS (MOLECULES) === */
@@ -263,7 +351,7 @@ h2,
 .input-field:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(58, 162, 221, 0.1);
+  box-shadow: 0 0 0 3px rgba(var(--rgb-primary), 0.1);
 }
 
 .search-bar {
@@ -317,12 +405,16 @@ h2,
   font-weight: var(--font-weight-medium);
 }
 
+/* Une variation en hausse est un SUCCÈS, pas une gravité faible. Ces deux
+   règles empruntaient l'échelle de gravité parce qu'elle était verte et rouge —
+   un emprunt qui tenait par coïncidence, et qui aurait teint les hausses en
+   jaune dès que « faible » a cessé d'être vert. */
 .metric-delta.positive {
-  color: var(--color-severity-low-text);
+  color: var(--color-success-text);
 }
 
 .metric-delta.negative {
-  color: var(--color-severity-high-text);
+  color: var(--color-danger-text);
 }
 
 /* === CARDS (MOLECULES) === */
@@ -352,13 +444,13 @@ h2,
 }
 
 .nav-item:hover {
-  background-color: rgba(58, 162, 221, 0.05);
+  background-color: rgba(var(--rgb-primary), 0.05);
   color: var(--color-primary-text);
 }
 
 .nav-item.active {
   color: var(--color-primary-text);
-  background-color: rgba(58, 162, 221, 0.1);
+  background-color: rgba(var(--rgb-primary), 0.1);
 }
 
 .nav-item.active::before {
@@ -393,12 +485,22 @@ h2,
 
 }
 
-.activity-item.severity-low {
-  border-left-color: var(--color-severity-low);
-}
-
+/* Les trois niveaux, pas deux : « moyenne » n'avait aucune regle et retombait
+   sur la bordure par defaut — or c'est aujourd'hui le seul niveau que le serveur
+   attribue. Ces classes ne servent que dans ActivityFeed, qui n'est monte nulle
+   part pour l'instant (le tableau de bord affiche ActivityPanel) ; la lacune
+   etait donc invisible, et le serait restee jusqu'au jour ou l'on branche ce
+   composant. */
 .activity-item.severity-high {
   border-left-color: var(--color-severity-high);
+}
+
+.activity-item.severity-medium {
+  border-left-color: var(--color-severity-medium);
+}
+
+.activity-item.severity-low {
+  border-left-color: var(--color-severity-low);
 }
 
 .activity-icon {
@@ -628,7 +730,11 @@ h2,
   align-items: center;
   justify-content: center;
   padding: var(--spacing-4);
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  /* Le fond de la page de connexion partait de deux gris inventes sur place
+     (#f5f7fa, #c3cfe2), sans lien avec la palette. Il descend maintenant du
+     fond de l'application vers une teinte de la primaire : la premiere page
+     que voit l'utilisateur porte enfin les couleurs du produit. */
+  background: linear-gradient(135deg, var(--color-background) 0%, rgba(var(--rgb-primary), 0.22) 100%);
 }
 
 .login-card {
@@ -843,6 +949,20 @@ h2,
   overflow: hidden;
 }
 
+/* Une image cliquable est rendue en <button> pour rester atteignable au
+   clavier. Il faut alors neutraliser l'apparence native du bouton, sinon le
+   navigateur ajoute une bordure, un fond gris et une police differente autour
+   de chaque vignette. */
+button.blurry-image-container {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  display: block;
+}
+
 .blurry-image-placeholder {
   position: absolute;
   top: 0;
@@ -872,19 +992,19 @@ h2,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--color-bg-placeholder, #e2e8f0);
+  background-color: var(--color-border);
 }
 
 /* Pas de photo : neutre et silencieux. C'est un fait, pas un probleme. */
 .blurry-image-vide {
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--color-text-muted);
 }
 
 /* Echec : lisiblement different du vide, et cliquable pour reessayer. */
 .blurry-image-echec {
   padding: 0;
-  border: 1px dashed rgba(239, 68, 68, 0.45);
-  background-color: rgba(239, 68, 68, 0.07);
+  border: 1px dashed rgba(var(--rgb-danger), 0.45);
+  background-color: rgba(var(--rgb-danger), 0.07);
   color: var(--color-danger-text);
   cursor: pointer;
   transition: background-color var(--duree-rapide, 0.15s) ease;
@@ -892,7 +1012,7 @@ h2,
 
 .blurry-image-echec:hover,
 .blurry-image-echec:focus-visible {
-  background-color: rgba(239, 68, 68, 0.14);
+  background-color: rgba(var(--rgb-danger), 0.14);
 }
 
 .blurry-image-el {
@@ -997,7 +1117,19 @@ h2,
 .sidebar-item:focus-visible,
 [class*="-accept"]:focus-visible,
 [class*="-danger"]:focus-visible {
-  outline-color: #FFFFFF !important;
+  outline-color: var(--color-surface) !important;
+}
+
+/* Ces champs ont déjà leur propre indicateur de focus (bordure + halo
+   colorés sur le conteneur, au clic comme au clavier) : l'anneau générique
+   ci-dessus s'ajoutait par-dessus au lieu de le remplacer, doublant le
+   contour. Les navigateurs déclenchent :focus-visible sur un champ texte
+   même au clic souris (contrairement aux boutons/liens) — d'où le doublon
+   visible dès qu'on clique dans une recherche, pas seulement au clavier. */
+.am-filtres-recherche input:focus-visible,
+.agents-search input:focus-visible,
+.field-input input:focus-visible {
+  outline: none !important;
 }
 
 /* ── 2. Mouvement réduit ─────────────────────────────────────────────────────
@@ -1153,9 +1285,30 @@ p {
    la fenêtre, entre un plancher lisible et le plafond d'origine. Le corps de
    texte reste à 14/16 px : en dessous, la lecture souffre et iOS zoome. */
 :root {
+  --font-size-display: clamp(26px, 5.2vw + 12px, 36px);
   --font-size-h1: clamp(22px, 4.2vw + 12px, 32px);
   --font-size-h2: clamp(18px, 2.6vw + 10px, 24px);
+  --font-size-title: clamp(17px, 1.6vw + 12px, 20px);
   --font-size-h3: clamp(16px, 1.4vw + 12px, 18px);
+}
+/* --font-size-micro n'est pas fluide : c'est le plancher de lisibilité, il ne
+   doit jamais descendre sous 11 px, donc il n'y a rien à interpoler.
+
+   En revanche le bas de l'échelle ne s'adaptait PAS du tout au téléphone : les
+   titres rétrécissaient avec la fenêtre pendant que les libellés, les légendes
+   et les compteurs restaient figés à 13, 12 et 11 px. Or c'est l'inverse qu'il
+   faut. Un titre se devine à moitié lu ; un libellé de filtre ou une date de
+   tâche, non — il faut le lire caractère par caractère, souvent à bout de bras
+   et en plein soleil. Sur téléphone on remonte donc le texte courant d'un
+   cran, sans toucher aux titres (déjà fluides ci-dessus) : la hiérarchie est
+   conservée, chaque niveau reste distinct de son voisin. */
+@media (max-width: 767.98px) {
+  :root {
+    --font-size-body: 15px;
+    --font-size-body-small: 14px;
+    --font-size-caption: 13px;
+    --font-size-micro: 12px;
+  }
 }
 
 /* ── 13. Gouttières adaptatives ──────────────────────────────────────────────
@@ -1166,6 +1319,24 @@ p {
     --spacing-6: 16px;
     --spacing-7: 20px;
     --spacing-8: 24px;
+  }
+}
+
+/* ── 14. Zoom automatique d'iOS sur les champs de saisie ─────────────────────
+   Safari sur iPhone zoome la page dès qu'on touche un champ dont le texte fait
+   moins de 16 px : la mise en page saute, le champ visé se retrouve ailleurs,
+   et il faut ensuite dézoomer à la main. Nos champs héritaient de body-small,
+   caption ou body — 13 à 15 px selon l'écran, donc tous concernés.
+
+   Le seuil de 16 px est fixé par le navigateur : ce n'est pas une préférence,
+   on ne peut pas le negocier. `!important` est nécessaire parce que les règles
+   de page ciblent les champs par une classe (`.am-filtres-recherche input`),
+   qui l'emporte sur un sélecteur d'élément. */
+@media (max-width: 767.98px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+  select,
+  textarea {
+    font-size: 16px !important;
   }
 }
 
@@ -1209,8 +1380,8 @@ p {
   /* Assez contrasté pour rester perceptible sur --color-surface comme sur
      --color-background, contrairement au défaut de la bibliothèque
      (#f6f6f6 → #f0f0f0) quasiment invisible. */
-  --shimmer-base: #E6EBF2;
-  --shimmer-eclat: #F3F6FA;
+  --shimmer-base: var(--color-border);
+  --shimmer-eclat: var(--color-background);
   --shimmer-duree: 1.6s;
 }
 
@@ -1306,4 +1477,104 @@ p {
 .trash-subtitle {
   font-size: var(--font-size-body);
   color: var(--color-text-muted);
+}
+
+/* ── 15. Chargement et echec de chargement d'une page ────────────────────────
+   Les pages arrivent a la demande. Ces deux ecrans couvrent le temps
+   d'attente, et le cas ou le code de la page n'arrive jamais. */
+.chargement-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-4);
+  min-height: 100vh;
+  min-height: 100dvh;
+  color: var(--color-text-muted);
+}
+
+.chargement-page-anneau {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: var(--radius-full);
+  animation: rotationChargement 0.8s linear infinite;
+}
+
+/* Le libelle n'apparait qu'au bout d'une demi-seconde. Sur une connexion
+   correcte la page arrive avant : faire clignoter « Chargement… » pour deux
+   dixiemes de seconde donne l'impression d'une application poussive. */
+.chargement-page-texte {
+  font-size: var(--font-size-body-small);
+  opacity: 0;
+  animation: apparitionRetardee 0.3s ease 0.5s forwards;
+}
+
+@keyframes rotationChargement {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes apparitionRetardee {
+  to { opacity: 1; }
+}
+
+/* Une animation qui tourne sans fin peut declencher gene ou nausee chez les
+   personnes sensibles au mouvement. On respecte leur reglage systeme. */
+@media (prefers-reduced-motion: reduce) {
+  .chargement-page-anneau {
+    animation: none;
+    border-top-color: var(--color-border);
+  }
+
+  .chargement-page-texte {
+    opacity: 1;
+    animation: none;
+  }
+}
+
+.frontiere-chargement {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-4);
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: var(--spacing-6);
+  text-align: center;
+}
+
+.frontiere-chargement-titre {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.frontiere-chargement-texte {
+  max-width: 42ch;
+  font-size: var(--font-size-body-large);
+  color: var(--color-text-secondary);
+}
+
+.frontiere-chargement-action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  /* 44px : cible tactile minimale. C'est le seul bouton de l'ecran, et il est
+     souvent appuye sur un telephone dont la connexion vient de flancher. */
+  min-height: 44px;
+  padding: var(--spacing-3) var(--spacing-5);
+  background-color: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--color-surface);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.frontiere-chargement-action:hover {
+  background-color: var(--color-primary-dark);
 }

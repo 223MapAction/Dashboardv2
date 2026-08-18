@@ -4,7 +4,10 @@ import { API_URL_BASE } from '../../../config/api_url_base';
 /**
  * Récupère tous les incidents pour la carte
  */
-export const getIncidentsService = async (filterType = '') => {
+// Le parametre de filtre accepte ici n'a jamais ete transmis a l'API : la
+// requete ci-dessous ne le lit pas. Il est retire pour ne pas laisser croire a
+// un filtrage cote serveur qui n'existe pas.
+export const getIncidentsService = async () => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.get(

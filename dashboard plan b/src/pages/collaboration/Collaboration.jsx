@@ -12,6 +12,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import {
   SearchNormal1,
   ArrowDown2,
+  Filter,
   Calendar,
   CalendarRemove,
   Location,
@@ -39,27 +40,30 @@ import { getCollaborationsService } from './service/collaboration_service';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
 import { BlurryImage } from '../../components/atoms/BlurryImage';
 import './collaboration.css';
+import { useReinitialisationSurChangement } from '../../hooks/useReinitialisationSurChangement';
+import { BandeauErreur } from '../../components/molecules/BandeauErreur';
+
 
 registerLocale('fr', fr);
 
 // Organisations disponibles à suggérer
 const AVAILABLE_ORGS = [
-  { id: 'org-1', name: 'Croix-Rouge Sénégalaise', initials: 'CR', color: '#EF4444' },
-  { id: 'org-2', name: 'OCHA', initials: 'OC', color: '#3AA2DD' },
-  { id: 'org-3', name: 'PNUD Sénégal', initials: 'PN', color: '#22C55E' },
-  { id: 'org-4', name: 'UNICEF', initials: 'UN', color: '#1E40AF' },
-  { id: 'org-5', name: 'Médecins Sans Frontières', initials: 'MS', color: '#F59E0B' },
+  { id: 'org-1', name: 'Croix-Rouge Sénégalaise', initials: 'CR', color: 'var(--color-danger-text)' },
+  { id: 'org-2', name: 'OCHA', initials: 'OC', color: 'var(--color-primary-text)' },
+  { id: 'org-3', name: 'PNUD Sénégal', initials: 'PN', color: 'var(--color-success-text)' },
+  { id: 'org-4', name: 'UNICEF', initials: 'UN', color: 'var(--color-primary-text)' },
+  { id: 'org-5', name: 'Médecins Sans Frontières', initials: 'MS', color: 'var(--color-warning-text)' },
   { id: 'org-6', name: 'Action Contre la Faim', initials: 'AF', color: '#A855F7' },
-  { id: 'org-7', name: 'OXFAM', initials: 'OX', color: '#10B981' },
+  { id: 'org-7', name: 'OXFAM', initials: 'OX', color: 'var(--color-success-text)' },
   { id: 'org-8', name: 'Care International', initials: 'CI', color: '#EC4899' },
-  { id: 'org-9', name: 'Save the Children', initials: 'SC', color: '#F97316' },
+  { id: 'org-9', name: 'Save the Children', initials: 'SC', color: 'var(--color-warning-text)' },
   { id: 'org-10', name: 'World Vision', initials: 'WV', color: '#6366F1' }
 ];
 
 const ROLE_OPTIONS = [
-  { id: 'leader', label: 'Leader', icon: Crown1, color: '#F59E0B', description: 'Pilote l\'action' },
-  { id: 'contributeur', label: 'Contributeur', icon: People, color: '#3AA2DD', description: 'Participe activement' },
-  { id: 'observateur', label: 'Observateur', icon: Eye, color: '#6C7278', description: 'Suit l\'avancement' }
+  { id: 'leader', label: 'Leader', icon: Crown1, color: 'var(--color-warning-text)', description: 'Pilote l\'action' },
+  { id: 'contributeur', label: 'Contributeur', icon: People, color: 'var(--color-primary-text)', description: 'Participe activement' },
+  { id: 'observateur', label: 'Observateur', icon: Eye, color: 'var(--color-text-secondary)', description: 'Suit l\'avancement' }
 ];
 
 export const Collaboration = () => {
@@ -86,7 +90,6 @@ export const Collaboration = () => {
     saisie: searchInput,
     setSaisie: setSearchInput,
     recherche: search,
-    reinitialiser: reinitialiserRecherche,
   } = useRechercheDebouncee();
   const [roleFilter, setRoleFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('accepted');
@@ -95,11 +98,35 @@ export const Collaboration = () => {
   const [dateRange, setDateRange] = useState([null, null]);
   const [dateFrom, dateTo] = dateRange;
 
+  // Role, signalement, acceptation et periode sont repliés derriere « Plus de
+  // filtres » : cette page etait la seule de l'app a afficher 3 menus
+  // deroulants + un selecteur de dates + 3 pastilles en permanence, contre 1 a
+  // 2 filtres ailleurs. On garde la recherche et les pastilles (les plus
+  // utilisees) toujours visibles, et on replie le reste.
+  //
+  // Le panneau s'ouvre tout seul si un filtre replie est deja actif (ex. lien
+  // partage avec ?incident=...) : sinon l'utilisateur verrait une liste
+  // filtree sans savoir pourquoi, ni comment revenir en arriere.
+  const filtresAvancesActifs =
+    statusFilter !== 'all' || Boolean(roleFilter) || Boolean(incidentFilter) ||
+    Boolean(dateFrom) || Boolean(dateTo);
+  const [filtresAvancesOuverts, setFiltresAvancesOuverts] = useState(filtresAvancesActifs);
+  // On n'ouvre le panneau QUE lorsque filtresAvancesActifs passe de faux a
+  // vrai : si l'utilisateur l'a replie a la main, on ne le rouvre pas tout
+  // seul a chaque changement d'un filtre deja actif.
+  useReinitialisationSurChangement([filtresAvancesActifs], () => {
+    if (filtresAvancesActifs) setFiltresAvancesOuverts(true);
+  });
+  const nbFiltresAvancesActifs = [
+    statusFilter !== 'all', Boolean(roleFilter), Boolean(incidentFilter), Boolean(dateFrom) || Boolean(dateTo),
+  ].filter(Boolean).length;
 
-  // Réinitialiser la page à 1 lors du changement de filtre
-  useEffect(() => {
-    setPage(1);
-  }, [search, roleFilter, statusFilter, incidentFilter, dateFrom, dateTo, localStatusFilter]);
+
+  // Retour a la premiere page des qu'un filtre change.
+  useReinitialisationSurChangement(
+    [search, roleFilter, statusFilter, incidentFilter, dateFrom, dateTo, localStatusFilter],
+    () => setPage(1),
+  );
 
   // Les cent signalements qui remplissent la liste déroulante du filtre.
   //
@@ -156,7 +183,6 @@ export const Collaboration = () => {
   const [suggestClosing, setSuggestClosing] = useState(false);
   const [suggestedOrgs, setSuggestedOrgs] = useState([]);
   const [suggestSearch, setSuggestSearch] = useState('');
-  const [suggestMessage, setSuggestMessage] = useState('');
 
   const [isMobile, setIsMobile] = useState(
     typeof window !== 'undefined' ? window.innerWidth < 768 : false
@@ -231,8 +257,6 @@ export const Collaboration = () => {
     ongletPrecedent.current = activeTab;
     if (revient) mutate();
   }, [activeTab, mutate]);
-
-  let shimmerColor = "#acb7c6"
 
   // Mapper les données API vers le format attendu par le composant
   const collaborations = useMemo(() => {
@@ -419,11 +443,6 @@ export const Collaboration = () => {
     }));
   };
 
-  // Bottom sheet mobile
-  const openMobileSheet = (collab) => {
-    setMobileSheet({ open: true, collabId: collab.id });
-  };
-
   const closeMobileSheet = () => {
     setMobileSheetClosing(true);
     setTimeout(() => {
@@ -444,7 +463,6 @@ export const Collaboration = () => {
       setSuggestClosing(false);
       setSuggestedOrgs([]);
       setSuggestSearch('');
-      setSuggestMessage('');
     }, 280);
   };
 
@@ -619,6 +637,12 @@ export const Collaboration = () => {
 
         <main className="collaboration-content">
           <div className="collab-page">
+
+            <BandeauErreur
+              erreur={swrError}
+              onReessayer={mutate}
+              message="Impossible de charger vos collaborations. La liste affichée peut ne plus être à jour."
+            />
             {/* Header avec tabs */}
             <div className="collab-page-header">
               <div>
@@ -657,77 +681,19 @@ export const Collaboration = () => {
             {/* Contenu conditionnel */}
             {activeTab === 'collaborations' ? (
               <>
-                {/* Toolbar */}
+                {/* Toolbar — fixe au defilement : voir .collab-filtres-fixes.
+                    Pas de bouton « Effacer » : chaque filtre a deja sa propre
+                    sortie (une pastille qu'on reclique, un menu qu'on remet a
+                    « Tous », une croix sur la periode) ; un bouton qui les
+                    remet TOUS a zero d'un coup, a cote, ne fait que reinitialiser
+                    par erreur ce qu'on venait de choisir expres. */}
+                <div className="collab-filtres-fixes">
                 <FiltersBar
                   recherche={searchInput}
                   onRecherche={setSearchInput}
                   placeholder="Rechercher un titre, une organisation, un lieu…"
-                  selects={[
-                    { id: 'statut', valeur: statusFilter, onChange: setStatusFilter,
-                      ariaLabel: 'Filtrer par statut', neutre: 'all',
-                      options: [
-                        { value: 'all', label: 'Tous les statuts' },
-                        { value: 'accepted', label: 'Acceptée' },
-                        { value: 'pending', label: 'En attente' },
-                        { value: 'declined', label: 'Refusée' },
-                      ] },
-                    { id: 'role', valeur: roleFilter, onChange: setRoleFilter,
-                      ariaLabel: 'Filtrer par rôle', tousLabel: 'Tous les rôles',
-                      options: [
-                        { value: 'leader', label: 'Leader' },
-                        { value: 'contributor', label: 'Contributeur' },
-                        { value: 'observer', label: 'Observateur' },
-                      ] },
-                    { id: 'signalement', valeur: incidentFilter, onChange: setIncidentFilter,
-                      ariaLabel: 'Filtrer par signalement', tousLabel: 'Tous les signalements',
-                      options: incidentsList.map((inc) => ({ value: inc.id, label: inc.title })) },
-                  ]}
-                  onEffacer={() => {
-                    reinitialiserRecherche();
-                    setStatusFilter('all'); setRoleFilter(''); setIncidentFilter('');
-                    setLocalStatusFilter('all'); resetDateRange();
-                  }}
-                  actifSupplementaire={localStatusFilter !== 'all' || Boolean(dateFrom) || Boolean(dateTo)}
+                  actifSupplementaire={localStatusFilter !== 'all' || filtresAvancesActifs}
                 >
-                    <div className="collab-date-range">
-                      <Calendar size={16} variant="Bold" color="#3AA2DD" />
-                      <span className="collab-date-label">Période :</span>
-                      <DatePicker
-                        selectsRange
-                        startDate={dateFrom}
-                        endDate={dateTo}
-                        onChange={(update) => setDateRange(update)}
-                        locale="fr"
-                        dateFormat="dd MMM yyyy"
-                        placeholderText={
-                          isMobile ? 'Période…' : 'Sélectionner une période…'
-                        }
-                        isClearable={false}
-                        monthsShown={isMobile ? 1 : 2}
-                        withPortal={isMobile}
-                        shouldCloseOnSelect={!isMobile}
-                        className="collab-date-input"
-                        calendarClassName="collab-datepicker"
-                        popperClassName="collab-datepicker-popper"
-                        portalId="collab-datepicker-portal"
-                      />
-                      {(dateFrom || dateTo) && (
-                        <button
-                          type="button"
-                          className="collab-date-clear"
-                          onClick={resetDateRange}
-                          aria-label="Réinitialiser la période"
-                          title="Réinitialiser"
-                        >
-                          <CalendarRemove
-                            size={16}
-                            variant="Bold"
-                            color="#EF4444"
-                          />
-                        </button>
-                      )}
-                    </div>
-
                     <button
                       type="button"
                       className={`collab-filter-pill ${localStatusFilter === 'all' ? 'is-active' : ''}`}
@@ -757,7 +723,111 @@ export const Collaboration = () => {
                       </span>
                     </button>
 
+                    <button
+                      type="button"
+                      className={`collab-filtres-avances-toggle ${filtresAvancesOuverts ? 'is-active' : ''}`}
+                      onClick={() => setFiltresAvancesOuverts((v) => !v)}
+                      aria-expanded={filtresAvancesOuverts}
+                    >
+                      <Filter size={16} variant="Linear" color="currentColor" />
+                      Plus de filtres
+                      {nbFiltresAvancesActifs > 0 && (
+                        <span className="collab-filtres-avances-badge">{nbFiltresAvancesActifs}</span>
+                      )}
+                      <ArrowDown2
+                        size={14}
+                        variant="Linear"
+                        color="currentColor"
+                        style={{ transform: filtresAvancesOuverts ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }}
+                      />
+                    </button>
+
+                    {filtresAvancesOuverts && (
+                      <div className="collab-filtres-avances-panneau">
+                        <div className="am-filtres-select">
+                          <select
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                            aria-label="Filtrer par statut"
+                          >
+                            <option value="all">Tous les statuts</option>
+                            <option value="accepted">Acceptée</option>
+                            <option value="pending">En attente</option>
+                            <option value="declined">Refusée</option>
+                          </select>
+                          <ArrowDown2 size={14} variant="Linear" color="currentColor" aria-hidden="true" />
+                        </div>
+
+                        <div className="am-filtres-select">
+                          <select
+                            value={roleFilter}
+                            onChange={(e) => setRoleFilter(e.target.value)}
+                            aria-label="Filtrer par rôle"
+                          >
+                            <option value="">Tous les rôles</option>
+                            <option value="leader">Leader</option>
+                            <option value="contributor">Contributeur</option>
+                            <option value="observer">Observateur</option>
+                          </select>
+                          <ArrowDown2 size={14} variant="Linear" color="currentColor" aria-hidden="true" />
+                        </div>
+
+                        <div className="am-filtres-select">
+                          <select
+                            value={incidentFilter}
+                            onChange={(e) => setIncidentFilter(e.target.value)}
+                            aria-label="Filtrer par signalement"
+                          >
+                            <option value="">Tous les signalements</option>
+                            {incidentsList.map((inc) => (
+                              <option key={inc.id} value={inc.id}>{inc.title}</option>
+                            ))}
+                          </select>
+                          <ArrowDown2 size={14} variant="Linear" color="currentColor" aria-hidden="true" />
+                        </div>
+
+                        <div className="collab-date-range">
+                          <Calendar size={16} variant="Bold" color="var(--color-primary-text)" />
+                          <span className="collab-date-label">Période :</span>
+                          <DatePicker
+                            selectsRange
+                            startDate={dateFrom}
+                            endDate={dateTo}
+                            onChange={(update) => setDateRange(update)}
+                            locale="fr"
+                            dateFormat="dd MMM yyyy"
+                            placeholderText={
+                              isMobile ? 'Période…' : 'Sélectionner une période…'
+                            }
+                            isClearable={false}
+                            monthsShown={isMobile ? 1 : 2}
+                            withPortal={isMobile}
+                            shouldCloseOnSelect={!isMobile}
+                            className="collab-date-input"
+                            calendarClassName="collab-datepicker"
+                            popperClassName="collab-datepicker-popper"
+                            portalId="collab-datepicker-portal"
+                          />
+                          {(dateFrom || dateTo) && (
+                            <button
+                              type="button"
+                              className="collab-date-clear"
+                              onClick={resetDateRange}
+                              aria-label="Réinitialiser la période"
+                              title="Réinitialiser"
+                            >
+                              <CalendarRemove
+                                size={16}
+                                variant="Bold"
+                                color="var(--color-danger-text)"
+                              />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
                 </FiltersBar>
+                </div>
 
                 {/* État de chargement avec react-shimmer-effects */}
                 {isLoading && (
@@ -854,13 +924,13 @@ export const Collaboration = () => {
                                   <TickCircle
                                     size={14}
                                     variant="Bold"
-                                    color="#FFFFFF"
+                                    color="var(--color-surface)"
                                   />
                                   Terminée
                                 </>
                               ) : (
                                 <>
-                                  <Clock size={14} variant="Bold" color="#FFFFFF" />
+                                  <Clock size={14} variant="Bold" color="var(--color-surface)" />
                                   En cours
                                 </>
                               )}
@@ -873,9 +943,9 @@ export const Collaboration = () => {
                             {/* Badge de rôle */}
                             {c.userRole && (
                               <div className={`collab-role-badge collab-role-${c.userRole}`}>
-                                {c.userRole === 'leader' && <Crown1 size={12} variant="Bold" color="#F59E0B" />}
-                                {c.userRole === 'contributor' && <People size={12} variant="Bold" color="#3AA2DD" />}
-                                {c.userRole === 'observateur' && <Eye size={12} variant="Bold" color="#6C7278" />}
+                                {c.userRole === 'leader' && <Crown1 size={12} variant="Bold" color="var(--color-warning-text)" />}
+                                {c.userRole === 'contributor' && <People size={12} variant="Bold" color="var(--color-primary-text)" />}
+                                {c.userRole === 'observateur' && <Eye size={12} variant="Bold" color="var(--color-text-secondary)" />}
                                 <span>Votre rôle : {c.userRole.charAt(0).toUpperCase() + c.userRole.slice(1)}</span>
                               </div>
                             )}
@@ -886,7 +956,7 @@ export const Collaboration = () => {
                                 <Location
                                   size={14}
                                   variant="Bold"
-                                  color="#6C7278"
+                                  color="var(--color-text-secondary)"
                                 />
                                 <span>{c.location}</span>
                               </div>
@@ -894,7 +964,7 @@ export const Collaboration = () => {
                                 <Calendar
                                   size={14}
                                   variant="Bold"
-                                  color="#6C7278"
+                                  color="var(--color-text-secondary)"
                                 />
                                 <span>
                                   {c.startDate} → {c.endDate}
@@ -904,7 +974,7 @@ export const Collaboration = () => {
                                 <People
                                   size={14}
                                   variant="Bold"
-                                  color="#6C7278"
+                                  color="var(--color-text-secondary)"
                                 />
                                 <span>
                                   {c.participantsCount} {c.participantsCount > 1 ? 'participants' : 'participant'}
@@ -929,7 +999,7 @@ export const Collaboration = () => {
 
                             {isCollabClosed(c.id) && (
                               <div className="collab-closed-badge">
-                                <Lock1 size={14} variant="Bold" color="#FFFFFF" />
+                                <Lock1 size={14} variant="Bold" color="var(--color-surface)" />
                                 Collaboration clôturée
                               </div>
                             )}
@@ -978,9 +1048,10 @@ export const Collaboration = () => {
               <button
                 type="button"
                 className="tasks-modal-close"
+                aria-label="Fermer la liste des tâches"
                 onClick={closeTasksModal}
               >
-                <CloseCircle size={24} variant="Linear" color="#1A1C1E" />
+                <CloseCircle size={24} variant="Linear" color="var(--color-text-primary)" />
               </button>
             </header>
 
@@ -988,7 +1059,7 @@ export const Collaboration = () => {
               {/* Badge clôturée */}
               {isCollabClosed(selectedCollab.id) && (
                 <div className="tasks-closed-banner">
-                  <Lock1 size={18} variant="Bold" color="#22C55E" />
+                  <Lock1 size={18} variant="Bold" color="var(--color-success-text)" />
                   <span>Cette collaboration a été clôturée</span>
                 </div>
               )}
@@ -1029,7 +1100,7 @@ export const Collaboration = () => {
                     className="tasks-update-progress-btn"
                     onClick={() => saveProgress(selectedCollab.id)}
                   >
-                    <Refresh size={16} variant="Bold" color="#FFFFFF" />
+                    <Refresh size={16} variant="Bold" color="var(--color-surface)" />
                     Mettre à jour la progression
                   </button>
                 )}
@@ -1049,7 +1120,7 @@ export const Collaboration = () => {
                           disabled={task.failed}
                         />
                         <span className="task-checkmark">
-                          <TickCircle size={20} variant="Bold" color="#FFFFFF" />
+                          <TickCircle size={20} variant="Bold" color="var(--color-surface)" />
                         </span>
                       </label>
 
@@ -1058,7 +1129,7 @@ export const Collaboration = () => {
                           <div className="task-title">{task.title}</div>
                           {task.failed && (
                             <span className="task-failed-badge">
-                              <Danger size={14} variant="Bold" color="#FFFFFF" />
+                              <Danger size={14} variant="Bold" color="var(--color-surface)" />
                               Échouée
                             </span>
                           )}
@@ -1103,7 +1174,7 @@ export const Collaboration = () => {
                           }}
                           title="Marquer comme échouée"
                         >
-                          <CloseSquare size={18} variant="Bold" color="#EF4444" />
+                          <CloseSquare size={18} variant="Bold" color="var(--color-danger-text)" />
                         </button>
                       )}
 
@@ -1114,7 +1185,7 @@ export const Collaboration = () => {
                           onClick={() => resetTaskStatus(selectedCollab.id, task.id)}
                           title="Réinitialiser la tâche"
                         >
-                          <Add size={18} variant="Bold" color="#6C7278" />
+                          <Add size={18} variant="Bold" color="var(--color-text-secondary)" />
                         </button>
                       )}
                     </div>
@@ -1168,7 +1239,7 @@ export const Collaboration = () => {
                             }}
                             disabled={!failureReason.trim()}
                           >
-                            <Danger size={16} variant="Bold" color="#FFFFFF" />
+                            <Danger size={16} variant="Bold" color="var(--color-surface)" />
                             Marquer comme échouée
                           </button>
                         </div>
@@ -1200,7 +1271,7 @@ export const Collaboration = () => {
                         ) : (
                           <div className="task-proof-upload">
                             <label className="task-proof-btn">
-                              <DocumentUpload size={16} variant="Bold" color="#3AA2DD" />
+                              <DocumentUpload size={16} variant="Bold" color="var(--color-primary-text)" />
                               Ajouter une preuve (image/vidéo)
                               <input
                                 type="file"
@@ -1228,7 +1299,7 @@ export const Collaboration = () => {
                 {confirmClose ? (
                   <div className="tasks-close-confirm">
                     <p className="tasks-close-confirm-text">
-                      <Danger size={18} variant="Bold" color="#F59E0B" />
+                      <Danger size={18} variant="Bold" color="var(--color-warning-text)" />
                       Êtes-vous sûr de vouloir clôturer cette collaboration ? Cette action est irréversible.
                     </p>
                     <div className="tasks-close-confirm-actions">
@@ -1244,7 +1315,7 @@ export const Collaboration = () => {
                         className="tasks-close-confirm-btn"
                         onClick={() => closeCollaboration(selectedCollab.id)}
                       >
-                        <Lock1 size={16} variant="Bold" color="#FFFFFF" />
+                        <Lock1 size={16} variant="Bold" color="var(--color-surface)" />
                         Confirmer la clôture
                       </button>
                     </div>
@@ -1264,7 +1335,7 @@ export const Collaboration = () => {
                       className="tasks-close-collab-btn"
                       onClick={() => setConfirmClose(true)}
                     >
-                      <Lock1 size={16} variant="Bold" color="#FFFFFF" />
+                      <Lock1 size={16} variant="Bold" color="var(--color-surface)" />
                       Clôturer la collab
                     </button>
                   </div>
@@ -1300,9 +1371,10 @@ export const Collaboration = () => {
                 <button
                   type="button"
                   className="tasks-modal-close"
+                  aria-label="Fermer le formulaire de tâche"
                   onClick={closeAddTaskModal}
                 >
-                  <CloseCircle size={24} variant="Linear" color="#1A1C1E" />
+                  <CloseCircle size={24} variant="Linear" color="var(--color-text-primary)" />
                 </button>
               </header>
 
@@ -1343,7 +1415,7 @@ export const Collaboration = () => {
                       onClick={submitNewTask}
                       disabled={!newTaskTitle.trim()}
                     >
-                      <Add size={16} variant="Bold" color="#FFFFFF" />
+                      <Add size={16} variant="Bold" color="var(--color-surface)" />
                       Ajouter à la liste
                     </button>
                   </div>
@@ -1399,7 +1471,7 @@ export const Collaboration = () => {
                                   onClick={() => saveEditTask(addTaskModal.collabId, task.id)}
                                   disabled={!editTaskTitle.trim()}
                                 >
-                                  <TickCircle size={14} variant="Bold" color="#FFFFFF" />
+                                  <TickCircle size={14} variant="Bold" color="var(--color-surface)" />
                                   Enregistrer
                                 </button>
                               </div>
@@ -1411,25 +1483,25 @@ export const Collaboration = () => {
                                 <div className="my-task-meta">
                                   {task.deadline && (
                                     <span className="my-task-deadline">
-                                      <Calendar size={12} variant="Linear" color="#6C7278" />
+                                      <Calendar size={12} variant="Linear" color="var(--color-text-secondary)" />
                                       {task.deadline}
                                     </span>
                                   )}
                                   {task.completed && (
                                     <span className="my-task-status completed">
-                                      <TickCircle size={12} variant="Bold" color="#22C55E" />
+                                      <TickCircle size={12} variant="Bold" color="var(--color-success-text)" />
                                       Terminée
                                     </span>
                                   )}
                                   {task.failed && (
                                     <span className="my-task-status failed">
-                                      <Danger size={12} variant="Bold" color="#EF4444" />
+                                      <Danger size={12} variant="Bold" color="var(--color-danger-text)" />
                                       Échouée
                                     </span>
                                   )}
                                   {!task.completed && !task.failed && (
                                     <span className="my-task-status pending">
-                                      <Clock size={12} variant="Bold" color="#F59E0B" />
+                                      <Clock size={12} variant="Bold" color="var(--color-warning-text)" />
                                       En cours
                                     </span>
                                   )}
@@ -1442,7 +1514,7 @@ export const Collaboration = () => {
                                   onClick={() => startEditTask(task)}
                                   title="Modifier"
                                 >
-                                  <Edit2 size={16} variant="Linear" color="#3AA2DD" />
+                                  <Edit2 size={16} variant="Linear" color="var(--color-primary-text)" />
                                 </button>
                                 <button
                                   type="button"
@@ -1450,7 +1522,7 @@ export const Collaboration = () => {
                                   onClick={() => deleteTask(addTaskModal.collabId, task.id)}
                                   title="Supprimer"
                                 >
-                                  <Trash size={16} variant="Linear" color="#EF4444" />
+                                  <Trash size={16} variant="Linear" color="var(--color-danger-text)" />
                                 </button>
                               </div>
                             </>
@@ -1477,7 +1549,7 @@ export const Collaboration = () => {
                     className="tasks-close-collab-btn"
                     onClick={closeAddTaskModal}
                   >
-                    <TickCircle size={16} variant="Bold" color="#FFFFFF" />
+                    <TickCircle size={16} variant="Bold" color="var(--color-surface)" />
                     Confirmer
                   </button>
                 </div>
@@ -1514,9 +1586,9 @@ export const Collaboration = () => {
                   <h3 className="mobile-sheet-title">{c.title}</h3>
                   {c.userRole && (
                     <div className={`collab-role-badge collab-role-${c.userRole}`}>
-                      {c.userRole === 'leader' && <Crown1 size={12} variant="Bold" color="#F59E0B" />}
-                      {c.userRole === 'contributeur' && <People size={12} variant="Bold" color="#3AA2DD" />}
-                      {c.userRole === 'observateur' && <Eye size={12} variant="Bold" color="#6C7278" />}
+                      {c.userRole === 'leader' && <Crown1 size={12} variant="Bold" color="var(--color-warning-text)" />}
+                      {c.userRole === 'contributeur' && <People size={12} variant="Bold" color="var(--color-primary-text)" />}
+                      {c.userRole === 'observateur' && <Eye size={12} variant="Bold" color="var(--color-text-secondary)" />}
                       <span>{c.userRole.charAt(0).toUpperCase() + c.userRole.slice(1)}</span>
                     </div>
                   )}
@@ -1533,8 +1605,8 @@ export const Collaboration = () => {
                       setTimeout(() => openTasksModal(c), 300);
                     }}
                   >
-                    <div className="mobile-sheet-action-icon" style={{ backgroundColor: 'rgba(58, 162, 221, 0.12)' }}>
-                      <TaskSquare size={20} variant="Bold" color="#3AA2DD" />
+                    <div className="mobile-sheet-action-icon" style={{ backgroundColor: 'rgba(var(--rgb-primary), 0.12)' }}>
+                      <TaskSquare size={20} variant="Bold" color="var(--color-primary-text)" />
                     </div>
                     <div className="mobile-sheet-action-text">
                       <span className="mobile-sheet-action-label">Voir les tâches</span>
@@ -1554,8 +1626,8 @@ export const Collaboration = () => {
                       setTimeout(() => openAddTaskModal(c), 300);
                     }}
                   >
-                    <div className="mobile-sheet-action-icon" style={{ backgroundColor: 'rgba(58, 162, 221, 0.12)' }}>
-                      <Add size={20} variant="Bold" color="#3AA2DD" />
+                    <div className="mobile-sheet-action-icon" style={{ backgroundColor: 'rgba(var(--rgb-primary), 0.12)' }}>
+                      <Add size={20} variant="Bold" color="var(--color-primary-text)" />
                     </div>
                     <div className="mobile-sheet-action-text">
                       <span className="mobile-sheet-action-label">Ajouter une tâche</span>
@@ -1573,8 +1645,8 @@ export const Collaboration = () => {
                       setTimeout(() => openSuggestOrgModal(c), 300);
                     }}
                   >
-                    <div className="mobile-sheet-action-icon" style={{ backgroundColor: 'rgba(245, 158, 11, 0.12)' }}>
-                      <Buildings2 size={20} variant="Bold" color="#F59E0B" />
+                    <div className="mobile-sheet-action-icon" style={{ backgroundColor: 'rgba(var(--rgb-warning), 0.12)' }}>
+                      <Buildings2 size={20} variant="Bold" color="var(--color-warning-text)" />
                     </div>
                     <div className="mobile-sheet-action-text">
                       <span className="mobile-sheet-action-label">Suggérer des organisations</span>
@@ -1585,7 +1657,7 @@ export const Collaboration = () => {
 
                 {closed && (
                   <div className="mobile-sheet-closed-info">
-                    <Lock1 size={20} variant="Bold" color="#22C55E" />
+                    <Lock1 size={20} variant="Bold" color="var(--color-success-text)" />
                     <span>Cette collaboration est clôturée</span>
                   </div>
                 )}
@@ -1625,7 +1697,7 @@ export const Collaboration = () => {
                     <Crown1
                       size={20}
                       variant="Bold"
-                      color="#F59E0B"
+                      color="var(--color-warning-text)"
                       style={{ marginRight: 6, verticalAlign: 'middle' }}
                     />
                     Suggérer des organisations
@@ -1637,16 +1709,17 @@ export const Collaboration = () => {
                 <button
                   type="button"
                   className="tasks-modal-close"
+                  aria-label="Fermer la suggestion d’organisation"
                   onClick={closeSuggestOrgModal}
                 >
-                  <CloseCircle size={24} variant="Linear" color="#1A1C1E" />
+                  <CloseCircle size={24} variant="Linear" color="var(--color-text-primary)" />
                 </button>
               </header>
 
               <div className="tasks-modal-body">
                 {/* Bandeau d'info */}
                 <div className="suggest-info-banner">
-                  <Crown1 size={18} variant="Bold" color="#F59E0B" />
+                  <Crown1 size={18} variant="Bold" color="var(--color-warning-text)" />
                   <span>
                     En tant que <strong>leader</strong>, vous pouvez suggérer d'autres
                     organisations et leur attribuer un rôle.
@@ -1660,7 +1733,7 @@ export const Collaboration = () => {
                   </label>
                   <div className="suggest-search-wrapper">
                     <div className="suggest-search">
-                      <SearchNormal1 size={16} variant="Linear" color="#6C7278" />
+                      <SearchNormal1 size={16} variant="Linear" color="var(--color-text-secondary)" />
                       <input
                         type="text"
                         className="suggest-search-input"
@@ -1674,7 +1747,7 @@ export const Collaboration = () => {
                           className="suggest-search-clear"
                           onClick={() => setSuggestSearch('')}
                         >
-                          <CloseCircle size={16} variant="Linear" color="#6C7278" />
+                          <CloseCircle size={16} variant="Linear" color="var(--color-text-secondary)" />
                         </button>
                       )}
                     </div>
@@ -1704,7 +1777,7 @@ export const Collaboration = () => {
                                   {org.initials}
                                 </div>
                                 <span className="suggest-org-name">{org.name}</span>
-                                <Add size={18} variant="Linear" color="#3AA2DD" />
+                                <Add size={18} variant="Linear" color="var(--color-primary-text)" />
                               </button>
                             ))
                         )}
@@ -1716,7 +1789,7 @@ export const Collaboration = () => {
                 {/* Organisations sélectionnées avec rôles */}
                 <div className="suggest-section">
                   <label className="suggest-section-label">
-                    <People size={16} variant="Bold" color="#3AA2DD" />
+                    <People size={16} variant="Bold" color="var(--color-primary-text)" />
                     Sélectionnées ({suggestedOrgs.length})
                   </label>
 
@@ -1747,7 +1820,7 @@ export const Collaboration = () => {
                                 onClick={() => toggleSuggestedOrg(org)}
                                 title="Retirer"
                               >
-                                <CloseCircle size={18} variant="Linear" color="#EF4444" />
+                                <CloseCircle size={18} variant="Linear" color="var(--color-danger-text)" />
                               </button>
                             </div>
 
@@ -1772,7 +1845,7 @@ export const Collaboration = () => {
                                       <RoleIcon
                                         size={12}
                                         variant={isRoleSel ? 'Bold' : 'Linear'}
-                                        color={isRoleSel ? role.color : '#6C7278'}
+                                        color={isRoleSel ? role.color : 'var(--color-text-secondary)'}
                                       />
                                       {role.label}
                                     </button>
@@ -1790,7 +1863,7 @@ export const Collaboration = () => {
                             {/* Commentaire par org */}
                             <div className="suggest-role-comment">
                               <label className="suggest-role-attribution-label">
-                                <Edit2 size={12} variant="Bold" color="#3AA2DD" />
+                                <Edit2 size={12} variant="Bold" color="var(--color-primary-text)" />
                                 Commentaire (optionnel)
                               </label>
                               <textarea
@@ -1825,7 +1898,7 @@ export const Collaboration = () => {
                     onClick={submitSuggestions}
                     disabled={suggestedOrgs.length === 0}
                   >
-                    <Buildings2 size={16} variant="Bold" color="#FFFFFF" />
+                    <Buildings2 size={16} variant="Bold" color="var(--color-surface)" />
                     Envoyer ({suggestedOrgs.length})
                   </button>
                 </div>

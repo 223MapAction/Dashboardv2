@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { useCollaborationDetail } from '../context/CollaborationDetailContext';
+import { useCollaborationDetail } from '../context/collaborationDetailContexte';
 import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
 import {
   CloseSquare,
@@ -174,7 +174,7 @@ export const TaskModal = () => {
                 onClick={addDraftTask}
                 disabled={!newTaskTitle.trim() || taskSubmitSaving}
               >
-                <Add size={16} color="#FFFFFF" />
+                <Add size={16} color="var(--color-surface)" />
                 Ajouter à la liste
               </button>
             </div>
@@ -182,7 +182,7 @@ export const TaskModal = () => {
 
           {/* Liste des tâches en cours de création (draft) */}
           {draftTasks.length > 0 && (
-            <div className="draft-tasks-section" style={{ marginTop: 'var(--spacing-4)', marginBottom: 'var(--spacing-4)', padding: 'var(--spacing-3)', backgroundColor: 'rgba(58, 162, 221, 0.05)', border: '1.5px dashed var(--color-primary)', borderRadius: 'var(--radius-md)' }}>
+            <div className="draft-tasks-section" style={{ marginTop: 'var(--spacing-4)', marginBottom: 'var(--spacing-4)', padding: 'var(--spacing-3)', backgroundColor: 'rgba(var(--rgb-primary), 0.05)', border: '1.5px dashed var(--color-primary)', borderRadius: 'var(--radius-md)' }}>
               <h4 className="draft-tasks-title" style={{ fontSize: 'var(--font-size-body-large)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-primary-text)', marginBottom: 'var(--spacing-3)' }}>
                 Tâches à ajouter ({draftTasks.length})
               </h4>
@@ -232,7 +232,7 @@ export const TaskModal = () => {
                     className={`my-task-item ${task.completed ? 'is-completed' : ''} ${task.failed ? 'is-failed' : ''}`}
                   >
                     {editingTaskId === task.id ? (
-                      <div className="my-task-edit" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)', width: '100%', padding: 'var(--spacing-3)', backgroundColor: 'rgba(58, 162, 221, 0.03)', borderRadius: 'var(--radius-md)', border: '1.5px solid var(--color-primary)' }}>
+                      <div className="my-task-edit" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)', width: '100%', padding: 'var(--spacing-3)', backgroundColor: 'rgba(var(--rgb-primary), 0.03)', borderRadius: 'var(--radius-md)', border: '1.5px solid var(--color-primary)' }}>
                         {taskAlert && (
                           <div className={`am-alert am-alert--${taskAlert.type === 'success' ? 'success' : 'danger'}`} role="alert" style={{ margin: 0, padding: '8px 12px', fontSize: 'var(--font-size-body-small)', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                             {taskAlert.type === 'success' ? (
@@ -240,7 +240,7 @@ export const TaskModal = () => {
                             ) : (
                               <CloseCircle size={16} variant="Bold" color="var(--color-danger)" style={{ flexShrink: 0 }} />
                             )}
-                            <span className="am-alert__message" style={{ margin: 0, fontSize: '13px' }}>{taskAlert.message}</span>
+                            <span className="am-alert__message" style={{ margin: 0, fontSize: 'var(--font-size-body-small)' }}>{taskAlert.message}</span>
                           </div>
                         )}
 
@@ -312,12 +312,12 @@ export const TaskModal = () => {
                           >
                             {editTaskSaving ? (
                               <>
-                                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" style={{ width: '12px', height: '12px', border: '2px solid transparent', borderTopColor: '#ffffff', borderRightColor: '#ffffff', borderRadius: '50%', animation: 'spin 0.75s linear infinite', marginRight: '4px' }}></span>
+                                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" style={{ width: '12px', height: '12px', border: '2px solid transparent', borderTopColor: 'var(--color-surface)', borderRightColor: 'var(--color-surface)', borderRadius: '50%', animation: 'spin 0.75s linear infinite', marginRight: '4px' }}></span>
                                 <span>Enregistrement...</span>
                               </>
                             ) : (
                               <>
-                                <TickCircle size={14} variant="Bold" color="#FFFFFF" />
+                                <TickCircle size={14} variant="Bold" color="var(--color-surface)" />
                                 <span>Enregistrer</span>
                               </>
                             )}
@@ -331,25 +331,25 @@ export const TaskModal = () => {
                           <div className="my-task-meta">
                             {task.deadline && (
                               <span className="my-task-deadline">
-                                <Calendar size={12} variant="Linear" color="#6C7278" />
+                                <Calendar size={12} variant="Linear" color="var(--color-text-secondary)" />
                                 {task.deadline}
                               </span>
                             )}
                             {task.completed && (
                               <span className="my-task-status completed">
-                                <TickCircle size={12} variant="Bold" color="#22C55E" />
+                                <TickCircle size={12} variant="Bold" color="var(--color-success-text)" />
                                 Terminée
                               </span>
                             )}
                             {task.failed && (
                               <span className="my-task-status failed">
-                                <Danger size={12} variant="Bold" color="#EF4444" />
+                                <Danger size={12} variant="Bold" color="var(--color-danger-text)" />
                                 Échouée
                               </span>
                             )}
                             {!task.completed && !task.failed && (
                               <span className="my-task-status pending">
-                                <Clock size={12} variant="Bold" color="#F59E0B" />
+                                <Clock size={12} variant="Bold" color="var(--color-warning-text)" />
                                 En cours
                               </span>
                             )}
@@ -364,7 +364,7 @@ export const TaskModal = () => {
                               title="Modifier"
                               disabled={deletingTaskIds.includes(task.id)}
                             >
-                              <Edit2 size={16} variant="Linear" color="#3AA2DD" />
+                              <Edit2 size={16} variant="Linear" color="var(--color-primary-text)" />
                             </button>
                           )}
                           <button
@@ -378,7 +378,7 @@ export const TaskModal = () => {
                             {deletingTaskIds.includes(task.id) ? (
                               <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" style={{ width: '12px', height: '12px', border: '2px solid transparent', borderTopColor: 'var(--color-danger)', borderRightColor: 'var(--color-danger)', borderRadius: '50%', animation: 'spin 0.75s linear infinite' }}></span>
                             ) : (
-                              <Trash size={16} variant="Linear" color="#EF4444" />
+                              <Trash size={16} variant="Linear" color="var(--color-danger-text)" />
                             )}
                           </button>
                         </div>
@@ -414,7 +414,7 @@ export const TaskModal = () => {
               </>
             ) : (
               <>
-                <TickCircle size={16} variant="Bold" color="#FFFFFF" className="me-2" />
+                <TickCircle size={16} variant="Bold" color="var(--color-surface)" className="me-2" />
                 Confirmer
               </>
             )}
