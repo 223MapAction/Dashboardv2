@@ -140,6 +140,12 @@ tests, build et audit des dépendances
 ([`.github/workflows/ci.yml`](./.github/workflows/ci.yml)). Lancez-les en
 local avant d'ouvrir une PR.
 
+- [Guide de contribution](https://github.com/223MapAction/.github/blob/main/CONTRIBUTING.md) et [code de conduite](https://github.com/223MapAction/.github/blob/main/CODE_OF_CONDUCT.md) — au niveau de l'organisation
+- [Signaler une vulnérabilité](./SECURITY.md)
+- [Mainteneurs et gouvernance](./MAINTAINERS.md)
+- [Données personnelles, GPS et visibilité par rôle](./docs/DONNEES-PERSONNELLES.md)
+- [Dossier Digital Public Good](./docs/DPG.md)
+
 ## Licence
 
 Distribué sous licence **AGPL-3.0** — voir [LICENSE](./LICENSE).
