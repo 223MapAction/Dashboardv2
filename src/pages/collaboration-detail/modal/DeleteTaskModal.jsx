@@ -10,7 +10,7 @@ export const DeleteTaskModal = ({
   onConfirm,
   taskTitle,
   taskId,
-  signalementId,
+  incidentId,
   isDeleting: propIsDeleting
 }) => {
   const [shouldRender, setShouldRender] = useState(isOpen);
@@ -54,7 +54,7 @@ export const DeleteTaskModal = ({
     setDeleteAlert(null);
     try {
       setLocalIsDeleting(true);
-      await deleteTaskService(signalementId, taskId);
+      await deleteTaskService(incidentId, taskId);
       if (onConfirm) {
         await onConfirm(taskId);
       }

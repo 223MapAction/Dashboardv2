@@ -24,7 +24,7 @@ export const Dashboard = () => {
   const [activityModalClosing, setActivityModalClosing] = useState(false);
 
   // Les compteurs, widgets et la carte tirent leurs données de leurs propres
-  // sources : `dashboard-stats` ici, et l'endpoint paginé `signalement-filter`
+  // sources : `dashboard-stats` ici, et l'endpoint paginé `incident-filter`
   // directement dans MapContainer. SWR sert le cache immédiatement puis
   // revalide en arrière-plan.
   const { data: statsData } = useSWR(

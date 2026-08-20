@@ -1,4 +1,4 @@
-// Export tous les services d'signalement
+// Export tous les services d'incident
 export * from './signalement_service';
 export * from './task_service';
 export * from './suggestion_service';

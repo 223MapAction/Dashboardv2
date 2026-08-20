@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import useSWR from 'swr';
 import { useMesInterventionsModalContext } from '../mesInterventionsModalContexte';
 import { CloseCircle, Profile, Edit2 } from 'iconsax-react';
-import { getSignalementAssignmentsService } from '../../signalement/service/signalement_service';
+import { getIncidentAssignmentsService } from '../../signalement/service/signalement_service';
 
 import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
 import { AVATAR_COLORS, AVATAR_COULEUR_DEFAUT } from '../../../utils/couleursAvatar';
@@ -38,12 +38,12 @@ export const SignalementAgentsListModal = () => {
     openAssignModal
   } = useMesInterventionsModalContext();
 
-  const currentSignalement = agentsModal.incident;
+  const currentIncident = agentsModal.incident;
 
   // Fetch real assignments dynamically using SWR
   const { data: assignmentsData, isLoading } = useSWR(
-    agentsModal.open && currentSignalement ? `incident_assignments_${currentSignalement.id}` : null,
-    () => getSignalementAssignmentsService(currentSignalement.id),
+    agentsModal.open && currentIncident ? `incident_assignments_${currentIncident.id}` : null,
+    () => getIncidentAssignmentsService(currentIncident.id),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
@@ -87,7 +87,7 @@ export const SignalementAgentsListModal = () => {
     });
   }, [assignmentsData]);
 
-  if (!agentsModal.open || !currentSignalement) return null;
+  if (!agentsModal.open || !currentIncident) return null;
 
   const handleOverlayClick = () => {
     closeAgentsModal();
@@ -95,9 +95,9 @@ export const SignalementAgentsListModal = () => {
 
   const handleOpenEditModal = () => {
     closeAgentsModal();
-    // Ouvrir le modal d'assignation pour ce même signalement après la fermeture du premier modal
+    // Ouvrir le modal d'assignation pour ce même incident après la fermeture du premier modal
     setTimeout(() => {
-      openAssignModal(currentSignalement);
+      openAssignModal(currentIncident);
     }, 300);
   };
 
@@ -106,7 +106,7 @@ export const SignalementAgentsListModal = () => {
       onClose={handleOverlayClick}
       isClosing={Boolean(agentsClosing)}
       title="Équipe sur le terrain"
-      subtitle={currentSignalement.title || 'Sans titre'}
+      subtitle={currentIncident.title || 'Sans titre'}
       ariaLabel="Liste des agents assignés"
       closeVariant="plain"
     >
@@ -125,7 +125,7 @@ export const SignalementAgentsListModal = () => {
                   Aucun agent sur le terrain
                 </span>
                 <span className="text-muted d-block mt-1" style={{ fontSize: 'var(--font-size-caption)' }}>
-                  Aucun collaborateur n'est assigné à cet signalement pour le moment.
+                  Aucun collaborateur n'est assigné à cet incident pour le moment.
                 </span>
               </div>
               <button
@@ -139,7 +139,7 @@ export const SignalementAgentsListModal = () => {
               </button>
             </div>
           ) : (
-            <div className="signalements-agents-list">
+            <div className="incidents-agents-list">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                 <span style={{ fontSize: 'var(--font-size-body-small)', fontWeight: '600', color: 'var(--color-text-secondary)' }}>
                   Collaborateur(s) actif(s) ({assignedAgents.length})
@@ -159,7 +159,7 @@ export const SignalementAgentsListModal = () => {
                 {assignedAgents.map((agent) => (
                   <div
                     key={agent.id}
-                    className="signalements-agent-item"
+                    className="incidents-agent-item"
                     style={{
                       display: 'flex',
                       flexDirection: 'column',

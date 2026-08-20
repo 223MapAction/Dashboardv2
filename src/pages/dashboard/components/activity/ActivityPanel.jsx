@@ -8,9 +8,9 @@ export const ActivityPanel = ({ activities: propActivities, isLoading, nextUrl, 
     const iconProps = { size: 20, variant: "Bold" };
 
     switch (type) {
-      case 'signalement-taken':
+      case 'incident-taken':
         return <DocumentText {...iconProps} color="var(--color-primary-text)" />;
-      case 'signalement-resolved':
+      case 'incident-resolved':
         return <TickCircle {...iconProps} color="var(--color-success-text)" />;
       case 'collaboration':
         return <People {...iconProps} color="var(--color-warning-text)" />;
@@ -60,8 +60,8 @@ export const ActivityPanel = ({ activities: propActivities, isLoading, nextUrl, 
 
   const getTypeFromAction = (action = '') => {
     const act = action.toLowerCase();
-    if (act.includes('pris en compte') || act.includes('charge')) return 'signalement-taken';
-    if (act.includes('résolu') || act.includes('clôt')) return 'signalement-resolved';
+    if (act.includes('pris en compte') || act.includes('charge')) return 'incident-taken';
+    if (act.includes('résolu') || act.includes('clôt')) return 'incident-resolved';
     if (act.includes('collab') || act.includes('organis')) return 'collaboration';
     if (act.includes('rapport') || act.includes('terrain') || act.includes('photo')) return 'report';
     if (act.includes('tâche') || act.includes('valid')) return 'task';

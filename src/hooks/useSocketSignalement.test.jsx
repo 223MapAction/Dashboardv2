@@ -17,8 +17,8 @@ class SocketFactice {
   simulerFermeture(code) { this.onclose?.({ code }); }
 }
 
-const Sonde = ({ signalementId, canal = 'discussion', onMessage = () => {}, socketRef }) => {
-  useSocketSignalement(signalementId, canal, onMessage, { socketRef });
+const Sonde = ({ incidentId, canal = 'discussion', onMessage = () => {}, socketRef }) => {
+  useSocketSignalement(incidentId, canal, onMessage, { socketRef });
   return null;
 };
 
@@ -35,13 +35,13 @@ afterEach(() => {
 });
 
 describe('connexion', () => {
-  it('n’ouvre rien tant que l’signalement est inconnu', () => {
-    render(<Sonde signalementId={null} />);
+  it('n’ouvre rien tant que l’incident est inconnu', () => {
+    render(<Sonde incidentId={null} />);
     expect(SocketFactice.instances).toHaveLength(0);
   });
 
   it('ouvre le canal demandé en ws, pas en http', () => {
-    render(<Sonde signalementId={7} canal="tasks" />);
+    render(<Sonde incidentId={7} canal="tasks" />);
     expect(SocketFactice.instances).toHaveLength(1);
     expect(SocketFactice.instances[0].url).toMatch(/^wss?:\/\//);
     expect(SocketFactice.instances[0].url).toContain('/ws/incidents/7/tasks/');
@@ -49,21 +49,21 @@ describe('connexion', () => {
 
   it('transmet les messages reçus', () => {
     const onMessage = vi.fn();
-    render(<Sonde signalementId={7} onMessage={onMessage} />);
+    render(<Sonde incidentId={7} onMessage={onMessage} />);
     SocketFactice.instances[0].simulerMessage('coucou');
     expect(onMessage).toHaveBeenCalledWith({ data: 'coucou' });
   });
 
   it('expose la socket courante quand une ref est fournie', () => {
     const socketRef = { current: null };
-    render(<Sonde signalementId={7} socketRef={socketRef} />);
+    render(<Sonde incidentId={7} socketRef={socketRef} />);
     expect(socketRef.current).toBe(SocketFactice.instances[0]);
   });
 });
 
 describe('reconnexion', () => {
   it('retente après une coupure, avec un délai qui double', () => {
-    render(<Sonde signalementId={7} />);
+    render(<Sonde incidentId={7} />);
     SocketFactice.instances[0].simulerFermeture(1006); // coupure anormale
 
     vi.advanceTimersByTime(2999);
@@ -80,7 +80,7 @@ describe('reconnexion', () => {
   });
 
   it('repart d’un délai court après une reconnexion réussie', () => {
-    render(<Sonde signalementId={7} />);
+    render(<Sonde incidentId={7} />);
     SocketFactice.instances[0].simulerFermeture(1006);
     vi.advanceTimersByTime(3000);
     SocketFactice.instances[1].simulerOuverture();
@@ -93,7 +93,7 @@ describe('reconnexion', () => {
   it.each([1000, 4001, 4003, 4004])('ne retente pas sur le code %i', (code) => {
     // 1000 est une fermeture normale, les 400x sont des refus d'accès.
     // Reessayer boucle sans jamais aboutir, en consommant les données mobiles.
-    render(<Sonde signalementId={7} />);
+    render(<Sonde incidentId={7} />);
     SocketFactice.instances[0].simulerFermeture(code);
     vi.advanceTimersByTime(60000);
     expect(SocketFactice.instances).toHaveLength(1);
@@ -102,7 +102,7 @@ describe('reconnexion', () => {
 
 describe('démontage', () => {
   it('ferme la socket', () => {
-    const { unmount } = render(<Sonde signalementId={7} />);
+    const { unmount } = render(<Sonde incidentId={7} />);
     const socket = SocketFactice.instances[0];
     unmount();
     expect(socket.close).toHaveBeenCalled();
@@ -111,7 +111,7 @@ describe('démontage', () => {
   it('annule une reconnexion déjà programmée', () => {
     // Sans annulation du minuteur, la reconnexion se declenche apres le
     // demontage et ouvre une socket que plus personne ne fermera.
-    const { unmount } = render(<Sonde signalementId={7} />);
+    const { unmount } = render(<Sonde incidentId={7} />);
     SocketFactice.instances[0].simulerFermeture(1006);
     unmount();
     vi.advanceTimersByTime(60000);
@@ -120,7 +120,7 @@ describe('démontage', () => {
 
   it('libère la ref exposée', () => {
     const socketRef = { current: null };
-    const { unmount } = render(<Sonde signalementId={7} socketRef={socketRef} />);
+    const { unmount } = render(<Sonde incidentId={7} socketRef={socketRef} />);
     unmount();
     expect(socketRef.current).toBeNull();
   });

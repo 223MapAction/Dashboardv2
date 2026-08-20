@@ -18,7 +18,7 @@ export const ALLOWED_WEB_ROLES = [SUPER_ADMIN, ORG_ADMIN, BUREAU_AGENT];
 export const NAV_IDS = [
   'dashboard',
   'collaboration',
-  'signalements',
+  'incidents',
   'mes-interventions',
   'organisations',
   'agents',
@@ -31,7 +31,7 @@ export const NAV_IDS = [
 const RESTRICTED_NAV_IDS = [
   'dashboard',
   'collaboration',
-  'signalements',
+  'incidents',
   'mes-interventions',
   'agents',
   'impact',

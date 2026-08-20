@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import useSWRInfinite from 'swr/infinite';
 import debounce from 'lodash.debounce';
-import { useSignalementDetail } from '../SignalementDetailContext';
+import { useIncidentDetail } from '../SignalementDetailContext';
 import {
   CloseCircle,
   SearchNormal1,
@@ -19,7 +19,7 @@ export const InviteOrgModal = () => {
     joinOpen,
     joinClosing,
     closeJoinModal,
-    safeSignalement,
+    safeIncident,
     handleJoinSubmit,
     alertMessage,
     alertType,
@@ -45,7 +45,7 @@ export const InviteOrgModal = () => {
     workMode,
     setWorkMode,
     hasAcceptedRole
-  } = useSignalementDetail();
+  } = useIncidentDetail();
 
   const searchWrapperRef = useRef(null);
   const pageSize = 10;
@@ -174,31 +174,31 @@ export const InviteOrgModal = () => {
     <OffcanvasModal
       onClose={closeJoinModal}
       isClosing={Boolean(joinClosing)}
-      title={safeSignalement.isOwner || hasAcceptedRole ? 'Inviter des organisations' : "Rejoindre l'action"}
-      subtitle={safeSignalement.title}
-      ariaLabel={safeSignalement.isOwner || hasAcceptedRole ? 'Inviter des organisations' : "Rejoindre l'action"}
+      title={safeIncident.isOwner || hasAcceptedRole ? 'Inviter des organisations' : "Rejoindre l'action"}
+      subtitle={safeIncident.title}
+      ariaLabel={safeIncident.isOwner || hasAcceptedRole ? 'Inviter des organisations' : "Rejoindre l'action"}
       closeVariant="plain"
     >
 
         <form onSubmit={handleJoinSubmit} id="invite-org-form" className="am-offcanvas-body" noValidate>
 
 
-          {!safeSignalement.isOwner && !hasAcceptedRole && (
+          {!safeIncident.isOwner && !hasAcceptedRole && (
             <>
-              {/* Choix du mode de travail si l'signalement n'est pas encore pris en charge (déclaré) ou s'il a déjà un mode de prise en charge */}
-              {(safeSignalement?.etat === 'declared' || safeSignalement?.take_in_charge_mode) && (
+              {/* Choix du mode de travail si l'incident n'est pas encore pris en charge (déclaré) ou s'il a déjà un mode de prise en charge */}
+              {(safeIncident?.etat === 'declared' || safeIncident?.take_in_charge_mode) && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)', marginBottom: 'var(--spacing-5)' }}>
                   <label className="join-modal-label">
                     Mode de travail <span className="required">*</span>
                   </label>
                   <p className="join-modal-help">
-                    Choisissez comment vous souhaitez être impliquer dans cet signalement.
+                    Choisissez comment vous souhaitez être impliquer dans cet incident.
                   </p>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-3)' }}>
                     <button
                       type="button"
-                      disabled={!!safeSignalement?.take_in_charge_mode}
+                      disabled={!!safeIncident?.take_in_charge_mode}
                       className={`work-mode-option ${workMode === 'interne' ? 'is-selected' : ''}`}
                       onClick={() => {
                         setWorkMode('interne');
@@ -214,9 +214,9 @@ export const InviteOrgModal = () => {
                         backgroundColor: workMode === 'interne' ? 'rgba(var(--rgb-primary), 0.08)' : 'var(--color-surface)',
                         borderRadius: 'var(--radius-md)',
                         border: workMode === 'interne' ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
-                        cursor: safeSignalement?.take_in_charge_mode ? 'not-allowed' : 'pointer',
-                        opacity: safeSignalement?.take_in_charge_mode ? 0.5 : 1,
-                        pointerEvents: safeSignalement?.take_in_charge_mode ? 'none' : 'auto',
+                        cursor: safeIncident?.take_in_charge_mode ? 'not-allowed' : 'pointer',
+                        opacity: safeIncident?.take_in_charge_mode ? 0.5 : 1,
+                        pointerEvents: safeIncident?.take_in_charge_mode ? 'none' : 'auto',
                         transition: 'all 0.2s ease',
                         gap: '8px',
                         minHeight: '100px'
@@ -277,7 +277,7 @@ export const InviteOrgModal = () => {
               )}
 
               {/* Sélecteur de rôle pour soi-même - MASQUÉ si travail en interne */}
-              {(safeSignalement?.etat !== 'declared' || workMode === 'collaboration') && (
+              {(safeIncident?.etat !== 'declared' || workMode === 'collaboration') && (
                 <div className="self-role-section" style={{ marginBottom: 'var(--spacing-5)' }}>
                   <label className="join-modal-label">
                     Rôle souhaité <span className="required">*</span>
@@ -286,13 +286,13 @@ export const InviteOrgModal = () => {
                     Choisissez le rôle que vous souhaitez avoir dans ce projet.
                   </p>
                   <div className="role-options">
-                    {/* Le rôle leader n'est disponible que si l'signalement est déclaré et non pris en charge en interne */}
+                    {/* Le rôle leader n'est disponible que si l'incident est déclaré et non pris en charge en interne */}
                     {ROLE_OPTIONS.filter((role) => {
-                      const isInternal = safeSignalement?.take_in_charge_mode === 'internal' || safeSignalement?.take_in_charge_mode === 'interne';
+                      const isInternal = safeIncident?.take_in_charge_mode === 'internal' || safeIncident?.take_in_charge_mode === 'interne';
                       if (isInternal) {
                         return role.id !== 'leader';
                       }
-                      return safeSignalement?.etat === 'declared' || role.id !== 'leader';
+                      return safeIncident?.etat === 'declared' || role.id !== 'leader';
                     }).map((role) => {
                       const RoleIcon = role.icon;
                       const isSelected = selfRole === role.id;
@@ -326,8 +326,8 @@ export const InviteOrgModal = () => {
                 </div>
               )}
 
-              {/* Si l'signalement est en cours de prise en charge et qu'on travaille en interne */}
-              {safeSignalement?.etat === 'declared' && workMode === 'interne' && (
+              {/* Si l'incident est en cours de prise en charge et qu'on travaille en interne */}
+              {safeIncident?.etat === 'declared' && workMode === 'interne' && (
                 <div style={{
                   padding: 'var(--spacing-5)',
                   backgroundColor: 'rgba(var(--rgb-primary), 0.08)',
@@ -337,13 +337,13 @@ export const InviteOrgModal = () => {
                 }}>
                   <p style={{ margin: 0, color: 'var(--color-primary-text)', fontSize: 'var(--font-size-body)', lineHeight: '1.6' }}>
                     <strong>Agir en interne</strong><br />
-                    Vous allez prendre en charge cet signalement en interne. Vous le gérerez avec vos propres équipes simplement sans qu'il ne devienne privé.
+                    Vous allez prendre en charge cet incident en interne. Vous le gérerez avec vos propres équipes simplement sans qu'il ne devienne privé.
                   </p>
                 </div>
               )}
 
-              {/* Si l'signalement est en cours de prise en charge, qu'on travaille en collaboration et qu'on a choisi d'être leader */}
-              {safeSignalement?.etat === 'declared' && workMode === 'collaboration' && selfRole === 'leader' && (
+              {/* Si l'incident est en cours de prise en charge, qu'on travaille en collaboration et qu'on a choisi d'être leader */}
+              {safeIncident?.etat === 'declared' && workMode === 'collaboration' && selfRole === 'leader' && (
                 <div style={{
                   padding: 'var(--spacing-5)',
                   backgroundColor: 'var(--color-background)',
@@ -353,7 +353,7 @@ export const InviteOrgModal = () => {
                 }}>
                   <p style={{ margin: 0, color: 'var(--color-info-text)', fontSize: 'var(--font-size-body)', lineHeight: '1.6' }}>
                     <strong>Prendre en compte en collaboration (Public)</strong><br />
-                    En confirmant, vous deviendrez le <strong>leader</strong> de cet signalement public. Vous serez responsable de sa coordination et de la collaboration avec les autres organisations partenaires.
+                    En confirmant, vous deviendrez le <strong>leader</strong> de cet incident public. Vous serez responsable de sa coordination et de la collaboration avec les autres organisations partenaires.
                   </p>
                 </div>
               )}
@@ -394,8 +394,8 @@ export const InviteOrgModal = () => {
           )}
 
           {/* Section Inviter des organisations - pour le propriétaire ou les contributeurs acceptés */}
-          {(safeSignalement.isOwner || hasAcceptedRole) && (
-            <div className={`invite-orgs-section ${safeSignalement.isOwner ? 'is-owner' : ''}`}>
+          {(safeIncident.isOwner || hasAcceptedRole) && (
+            <div className={`invite-orgs-section ${safeIncident.isOwner ? 'is-owner' : ''}`}>
               <div className="invite-orgs-header">
                 <div>
                   <label className="join-modal-label">
@@ -615,7 +615,7 @@ export const InviteOrgModal = () => {
             className="am-btn am-btn--primary"
             disabled={
               isSubmitting ||
-              (safeSignalement.isOwner || hasAcceptedRole
+              (safeIncident.isOwner || hasAcceptedRole
                 ? invitedOrgs.length === 0
                 : selfRole === 'contributeur' && !motif.trim())
             }
@@ -627,7 +627,7 @@ export const InviteOrgModal = () => {
               </>
             ) : (
               <>
-                {safeSignalement.isOwner || hasAcceptedRole
+                {safeIncident.isOwner || hasAcceptedRole
                   ? 'Envoyer les invitations'
                   : selfRole === 'leader'
                     ? 'Être impliqué'

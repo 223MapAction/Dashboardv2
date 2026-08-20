@@ -20,7 +20,7 @@ import {
 } from 'iconsax-react';
 import { Header, Sidebar } from '../../components/layout';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
-import { getGlobalImpactService, getImpactSignalementsService } from './service/impact_service';
+import { getGlobalImpactService, getImpactIncidentsService } from './service/impact_service';
 import { authService } from '../auth/services/authService';
 import Pagination from '../../components/molecules/Pagination';
 import './impact.css';
@@ -45,12 +45,12 @@ const STRUCTURE_LABELS = {
 // Les libelles, les seuils et les couleurs viennent maintenant de
 // utils/gravite.js. Cette page etait la seule a distinguer quatre paliers, mais
 // elle les peignait en rouge / orange / BLEU / VERT — soit, pour les deux
-// derniers, les teintes que la carte reserve aux signalements resolus. Un meme
-// signalement changeait de code couleur d'une page a l'autre.
+// derniers, les teintes que la carte reserve aux incidents resolus. Un meme
+// incident changeait de code couleur d'une page a l'autre.
 //
 // On lit les variantes -text : le libelle s'affiche en blanc PAR-DESSUS cette
 // couleur, et le contraste etant symetrique, elles tiennent dans les deux roles.
-const getSeverity = (signalement, prediction) => gravite(signalement, prediction);
+const getSeverity = (incident, prediction) => gravite(incident, prediction);
 
 const formatDate = (iso) => {
   if (!iso) return '—';
@@ -94,10 +94,10 @@ export const Impact = () => {
     }
   );
 
-  // Appel API pour récupérer les signalements d'impact filtrés et paginés
-  const { data: impactSignalementsData, error: incidentsError, isLoading: isLoadingSignalements } = useSWR(
+  // Appel API pour récupérer les incidents d'impact filtrés et paginés
+  const { data: impactIncidentsData, error: incidentsError, isLoading: isLoadingIncidents } = useSWR(
     ['/MapApi/impact/incidents/', statusApiValue, periodFilter, search, currentPage],
-    () => getImpactSignalementsService(statusApiValue, periodFilter, search, currentPage, 10),
+    () => getImpactIncidentsService(statusApiValue, periodFilter, search, currentPage, 10),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: true,
@@ -110,7 +110,7 @@ export const Impact = () => {
   }, [apiError, incidentsError]);
 
   // Utiliser les vraies données ou fallback sur MOCK
-  const loadingSignalements = isLoadingImpact || isLoadingSignalements;
+  const loadingIncidents = isLoadingImpact || isLoadingIncidents;
   const loadingDetails = false;
   const error = apiError || incidentsError;
 
@@ -129,18 +129,18 @@ export const Impact = () => {
     )
   );
 
-  // Normaliser les signalements (gérer pagination API)
+  // Normaliser les incidents (gérer pagination API)
   // Memoise : sans cela, chaque rendu produisait un tableau neuf et les useMemo
   // qui en dependent recalculaient tout a chaque fois.
   const incidentsList = useMemo(() => (
-    impactSignalementsData
-      ? (Array.isArray(impactSignalementsData)
-        ? impactSignalementsData
-        : (impactSignalementsData.results || []))
+    impactIncidentsData
+      ? (Array.isArray(impactIncidentsData)
+        ? impactIncidentsData
+        : (impactIncidentsData.results || []))
       : EMPTY_ARRAY
-  ), [impactSignalementsData]);
+  ), [impactIncidentsData]);
 
-  const totalSignalementsCount = impactSignalementsData?.count || 0;
+  const totalIncidentsCount = impactIncidentsData?.count || 0;
 
   // Structure type filtering logic
   const matchesStructureType = (inc, typeFilter) => {
@@ -162,7 +162,7 @@ export const Impact = () => {
   };
 
   // Filtered dataset for statistics & final list display
-  const filteredSignalements = useMemo(() => {
+  const filteredIncidents = useMemo(() => {
     return incidentsList.filter((inc) => matchesStructureType(inc, structureFilter));
   }, [incidentsList, structureFilter]);
 
@@ -257,7 +257,7 @@ export const Impact = () => {
   }, [globalImpactData]);
 
   // Main isLoading flag combining SWR loading and details loading
-  const isDataLoading = loadingSignalements || (incidentsList.length > 0 && loadingDetails);
+  const isDataLoading = loadingIncidents || (incidentsList.length > 0 && loadingDetails);
 
   const directTotal = globals.direct?.total || 0;
   const directMenPercent = directTotal > 0 ? Math.round((globals.direct?.men / directTotal) * 100) : 0;
@@ -374,7 +374,7 @@ export const Impact = () => {
                       aria-pressed={statusFilter === 'resolved'}
                       onClick={() => setStatusFilter('resolved')}
                     >
-                      Signalements résolus
+                      Incidents résolus
                     </button>
                     <button
                       type="button"
@@ -574,7 +574,7 @@ export const Impact = () => {
                         </div>
                       </div>
                       <div className="impact-kpi-subtext">
-                        Signalements en attente d'estimation d'impact.
+                        Incidents en attente d'estimation d'impact.
                       </div>
                     </div>
                   )}
@@ -684,15 +684,15 @@ export const Impact = () => {
                   </div>
                 )}
 
-                {/* Section 4: Filtered Signalements List */}
+                {/* Section 4: Filtered Incidents List */}
                 <div className="impact-section">
                   <div className="impact-section-header">
                     <p className="impact-section-title">
-                      Signalements filtrés ({filteredSignalements.length})
+                      Incidents filtrés ({filteredIncidents.length})
                     </p>
                   </div>
 
-                  {/* Search signalement input */}
+                  {/* Search incident input */}
                   <div className="impact-toolbar">
                     <div className="impact-search">
                       <SearchNormal1 size={18} variant="Linear" color="var(--color-text-secondary)" />
@@ -705,20 +705,20 @@ export const Impact = () => {
                     </div>
                   </div>
 
-                  {filteredSignalements.length === 0 ? (
+                  {filteredIncidents.length === 0 ? (
                     <div className="impact-empty">
                       <Award size={48} variant="Linear" color="var(--color-text-muted)" />
                       <p>Aucun signalement ne correspond à vos critères et filtres actuels.</p>
                     </div>
                   ) : (
                     <div className="impact-list">
-                      {filteredSignalements.map((inc) => {
+                      {filteredIncidents.map((inc) => {
                         const pred = inc.prediction;
                         const incTasks = inc.tasks || [];
                         const severity = getSeverity(inc, pred);
                         const isOpen = expanded === inc.id;
 
-                        // Extraire les agents de terrain uniques depuis les tâches de l'signalement
+                        // Extraire les agents de terrain uniques depuis les tâches de l'incident
                         const uniqueAssignees = new Map();
                         incTasks.forEach(t => {
                           if (t.assigned_to) {
@@ -742,7 +742,7 @@ export const Impact = () => {
                         return (
                           <article
                             key={inc.id}
-                            className={`impact-signalement-card ${isOpen ? 'is-open' : ''}`}
+                            className={`impact-incident-card ${isOpen ? 'is-open' : ''}`}
                           >
                             <div
                               className="impact-card-main"
@@ -780,11 +780,11 @@ export const Impact = () => {
 
                                 <h3 className="impact-card-title">{inc.title || 'Signalement sans titre'}</h3>
                                 <p className="impact-card-summary">
-                                  {inc.description || 'Aucune description disponible pour cet signalement.'}
+                                  {inc.description || 'Aucune description disponible pour cet incident.'}
                                 </p>
 
                                 {/* Inline metadata badges */}
-                                <div className="impact-signalement-meta-inline">
+                                <div className="impact-incident-meta-inline">
                                   {pred && (
                                     <>
                                       <div className="impact-card-metric text-primary">
@@ -1018,7 +1018,7 @@ export const Impact = () => {
                         <Pagination
                           page={currentPage}
                           pageSize={10}
-                          count={totalSignalementsCount}
+                          count={totalIncidentsCount}
                           onChange={setCurrentPage}
                         />
                       </div>

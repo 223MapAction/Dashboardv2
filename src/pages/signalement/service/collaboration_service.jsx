@@ -21,8 +21,8 @@ export const getCollaborationsService = async () => {
 };
 
 /**qe
- * Demander à rejoindre un signalement
- * @param {object} data - { signalement, role, motivation, end_date }
+ * Demander à rejoindre un incident
+ * @param {object} data - { incident, role, motivation, end_date }
  * @returns 
  */
 export const requestCollaborationService = async (data) => {

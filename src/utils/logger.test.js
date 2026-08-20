@@ -19,7 +19,7 @@ describe('masquage des champs sensibles', () => {
     expect(texte).not.toContain('cle-api-privee');
   });
 
-  it('masque les coordonnées GPS d’un signalement', () => {
+  it('masque les coordonnées GPS d’un incident', () => {
     const sortie = nettoyer({ id: 42, lat: 12.6392, lng: -8.0029 });
     const texte = JSON.stringify(sortie);
     expect(texte).not.toContain('12.6392');
@@ -35,9 +35,9 @@ describe('masquage des champs sensibles', () => {
   it('ne masque pas un champ dont le nom contient par hasard une clé courte', () => {
     // `lat` est cherché en correspondance exacte : `translated` et `related`
     // ne doivent pas être touchés.
-    const sortie = nettoyer({ translated: 'bonjour', related: 'signalement-3' });
+    const sortie = nettoyer({ translated: 'bonjour', related: 'incident-3' });
     expect(sortie.translated).toBe('bonjour');
-    expect(sortie.related).toBe('signalement-3');
+    expect(sortie.related).toBe('incident-3');
   });
 });
 

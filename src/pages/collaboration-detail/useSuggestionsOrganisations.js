@@ -70,8 +70,8 @@ export function useSuggestionsOrganisations(collaboration) {
 
     const results = await Promise.allSettled(
       suggestedOrgs.map(org =>
-        createSuggestionService(collaboration.signalementId, {
-          incident: collaboration.signalementId,
+        createSuggestionService(collaboration.incidentId, {
+          incident: collaboration.incidentId,
           suggested_organisation: org.id,
           suggested_role: org.role === 'observateur' ? 'observer' : 'contributor',
           justification: org.comment || ''
@@ -83,7 +83,7 @@ export function useSuggestionsOrganisations(collaboration) {
               if (data.non_field_errors && Array.isArray(data.non_field_errors)) {
                 const msg = data.non_field_errors[0];
                 errorDetail = msg.includes('unique set')
-                  ? 'déjà invitée ou suggérée pour cet signalement'
+                  ? 'déjà invitée ou suggérée pour cet incident'
                   : msg;
               } else if (data.detail) {
                 errorDetail = data.detail;
@@ -95,7 +95,7 @@ export function useSuggestionsOrganisations(collaboration) {
                   const val = data[keys[0]];
                   const msg = Array.isArray(val) ? val[0] : String(val);
                   errorDetail = msg.includes('unique set')
-                    ? 'déjà invitée ou suggérée pour cet signalement'
+                    ? 'déjà invitée ou suggérée pour cet incident'
                     : msg;
                 } else {
                   errorDetail = err?.message || 'Erreur inconnue';

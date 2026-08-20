@@ -22,8 +22,8 @@ export const SignalementStats = ({ stats }) => {
     return [];
   }, [stats]);
 
-  // 3. Top 5 des signalements par catégorie
-  const topSignalements = useMemo(() => {
+  // 3. Top 5 des incidents par catégorie
+  const topIncidents = useMemo(() => {
     if (stats?.by_category && Array.isArray(stats.by_category) && stats.by_category.length > 0) {
       const total = stats.total_alerts || 1;
       return stats.by_category.map(cat => ({
@@ -45,7 +45,7 @@ export const SignalementStats = ({ stats }) => {
   const niveaux = useMemo(() => lireRepartitionApi(stats?.by_severity), [stats]);
 
   return (
-    <div className="signalement-stats-container">
+    <div className="incident-stats-container">
       {/* Section 1: Statistiques de statut */}
       <div className="stats-section">
         <h2 className="stats-section-title">
@@ -107,7 +107,7 @@ export const SignalementStats = ({ stats }) => {
               <div key={index} className="location-stat-item">
                 <div className="location-rank">{index + 1}</div>
                 <div className="location-name">{location.name}</div>
-                <div className="location-count">{location.count} signalements</div>
+                <div className="location-count">{location.count} incidents</div>
               </div>
             ))
           ) : (
@@ -116,24 +116,24 @@ export const SignalementStats = ({ stats }) => {
         </div>
       </div>
 
-      {/* Section 3: Top 5 Signalements */}
+      {/* Section 3: Top 5 Incidents */}
       <div className="stats-section">
         <h2 className="stats-section-title">
           <Chart2 size={24} variant="Bold" />
-          Top 5 Types d'Signalements
+          Top 5 Types d'Incidents
         </h2>
-        <div className="top-signalements-list">
-          {topSignalements.length > 0 ? (
-            topSignalements.map((signalement, index) => (
-              <div key={index} className="top-signalement-item">
-                <div className="signalement-header">
-                  <span className="signalement-name">{signalement.name}</span>
-                  <span className="signalement-stats">{signalement.count} ({signalement.percentage}%)</span>
+        <div className="top-incidents-list">
+          {topIncidents.length > 0 ? (
+            topIncidents.map((incident, index) => (
+              <div key={index} className="top-incident-item">
+                <div className="incident-header">
+                  <span className="incident-name">{incident.name}</span>
+                  <span className="incident-stats">{incident.count} ({incident.percentage}%)</span>
                 </div>
-                <div className="signalement-progress-bar">
+                <div className="incident-progress-bar">
                   <div
-                    className="signalement-progress-fill"
-                    style={{ width: `${signalement.percentage}%` }}
+                    className="incident-progress-fill"
+                    style={{ width: `${incident.percentage}%` }}
                   />
                 </div>
               </div>
@@ -169,12 +169,12 @@ export const SignalementStats = ({ stats }) => {
                   <span className="severity-percentage">{percentage}%</span>
                 </div>
                 <div className="severity-count">
-                  {count} signalement{count > 1 ? 's' : ''}
+                  {count} incident{count > 1 ? 's' : ''}
                 </div>
                 <div
                   className="severity-bar"
                   role="img"
-                  aria-label={`Gravité ${libelle.toLowerCase()} : ${percentage}% des signalements`}
+                  aria-label={`Gravité ${libelle.toLowerCase()} : ${percentage}% des incidents`}
                 >
                   <div
                     className={`severity-bar-fill ${cle}`}

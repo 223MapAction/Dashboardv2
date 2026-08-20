@@ -12,10 +12,10 @@ export const MesInterventionsModalProvider = ({ children }) => {
   // States required for the assignment form and feedback
   const [isAssigning, setIsAssigning] = useState(false);
   const [assignAlert, setAssignAlert] = useState({ type: null, message: null });
-  const [mutateSignalements, setMutateSignalements] = useState(null);
+  const [mutateIncidents, setMutateIncidents] = useState(null);
 
-  const openAssignModal = (signalement) => {
-    setAssignModal({ open: true, signalement });
+  const openAssignModal = (incident) => {
+    setAssignModal({ open: true, incident });
     setAssignAlert({ type: null, message: null });
     setAssignClosing(false);
   };
@@ -29,8 +29,8 @@ export const MesInterventionsModalProvider = ({ children }) => {
     }, 280);
   };
 
-  const openAgentsModal = (signalement) => {
-    setAgentsModal({ open: true, signalement });
+  const openAgentsModal = (incident) => {
+    setAgentsModal({ open: true, incident });
     setAgentsClosing(false);
   };
 
@@ -42,8 +42,8 @@ export const MesInterventionsModalProvider = ({ children }) => {
     }, 280);
   };
 
-  const openReportsModal = (signalement, reports) => {
-    setReportsModal({ open: true, signalement, reports });
+  const openReportsModal = (incident, reports) => {
+    setReportsModal({ open: true, incident, reports });
     setReportsClosing(false);
   };
 
@@ -77,8 +77,8 @@ export const MesInterventionsModalProvider = ({ children }) => {
         setIsAssigning,
         assignAlert,
         setAssignAlert,
-        mutateSignalements,
-        setMutateSignalements
+        mutateIncidents,
+        setMutateIncidents
       }}
     >
       {children}

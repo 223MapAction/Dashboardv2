@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { closeSignalementService } from '../signalement/service/signalement_service';
+import { closeIncidentService } from '../signalement/service/signalement_service';
 import { logger } from '../../utils/logger';
 
 /**
@@ -10,7 +10,7 @@ import { logger } from '../../utils/logger';
  * @param {Function} mutateCollaboration rafraichit la collaboration apres cloture
  */
 export function useClotureSignalement(collaboration, mutateCollaboration) {
-  // États pour le modal de clôture d'signalement
+  // États pour le modal de clôture d'incident
   const [showCloseModal, setShowCloseModal] = useState(false);
   const [closeModalShowing, setCloseModalShowing] = useState(false);
   const [resolutionStartDate, setResolutionStartDate] = useState('');
@@ -19,7 +19,7 @@ export function useClotureSignalement(collaboration, mutateCollaboration) {
   const [closeAlert, setCloseAlert] = useState(null);
   const [isClosing, setIsClosing] = useState(false);
 
-  // Ouvrir le modal de clôture d'signalement
+  // Ouvrir le modal de clôture d'incident
   const openCloseModal = () => {
     setShowCloseModal(true);
     setResolutionStartDate('');
@@ -31,7 +31,7 @@ export function useClotureSignalement(collaboration, mutateCollaboration) {
     }, 10);
   };
 
-  // Fermer le modal de clôture d'signalement
+  // Fermer le modal de clôture d'incident
   const closeCloseModal = () => {
     setCloseModalShowing(false);
     setTimeout(() => {
@@ -43,8 +43,8 @@ export function useClotureSignalement(collaboration, mutateCollaboration) {
     }, 300);
   };
 
-  // Clôturer l'signalement
-  const handleCloseSignalement = async () => {
+  // Clôturer l'incident
+  const handleCloseIncident = async () => {
     if (!resolutionStartDate || !resolutionEndDate) {
       setCloseAlert({ type: 'danger', message: 'Veuillez renseigner les deux dates.' });
       return;
@@ -59,7 +59,7 @@ export function useClotureSignalement(collaboration, mutateCollaboration) {
     setCloseAlert(null);
 
     try {
-      await closeSignalementService(collaboration.signalementId, {
+      await closeIncidentService(collaboration.incidentId, {
         resolution_start_date: resolutionStartDate,
         resolution_end_date: resolutionEndDate,
         resolution_file: resolutionFile
@@ -70,8 +70,8 @@ export function useClotureSignalement(collaboration, mutateCollaboration) {
         mutateCollaboration(); // Recharger uniquement les données SWR au lieu de la page entière
       }, 2000);
     } catch (err) {
-      logger.error('[CloseSignalement] Erreur:', err);
-      const errorMsg = err?.detail || err?.message || 'Erreur lors de la résolution de l\'signalement.';
+      logger.error('[CloseIncident] Erreur:', err);
+      const errorMsg = err?.detail || err?.message || 'Erreur lors de la résolution de l\'incident.';
       setCloseAlert({ type: 'danger', message: errorMsg });
     } finally {
       setIsClosing(false);
@@ -81,7 +81,7 @@ export function useClotureSignalement(collaboration, mutateCollaboration) {
   return {
     showCloseModal,
     closeModalShowing,
-    openCloseModal, closeCloseModal, handleCloseSignalement,
+    openCloseModal, closeCloseModal, handleCloseIncident,
     resolutionStartDate, setResolutionStartDate,
     resolutionEndDate, setResolutionEndDate,
     resolutionFile, setResolutionFile,

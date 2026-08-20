@@ -7,7 +7,7 @@ import {
   InfoCircle, CloseCircle, Grid2, HambergerMenu
 } from 'iconsax-react';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
-import { getTrashSignalementsService, restoreSignalementService, deleteSignalementService } from '../signalement/service/signalement_service';
+import { getTrashIncidentsService, restoreIncidentService, deleteIncidentService } from '../signalement/service/signalement_service';
 import { BlurryImage } from '../../components/atoms/BlurryImage';
 import { FiltersBar } from '../../components/molecules/FiltersBar';
 import { useRechercheDebouncee } from '../../hooks/useRechercheDebouncee';
@@ -15,7 +15,7 @@ import { OffcanvasModal } from '../../components/molecules/OffcanvasModal';
 import './trash.css';
 import { logger } from '../../utils/logger';
 
-// Composant Shimmer Skeleton pour le chargement des signalements de la corbeille
+// Composant Shimmer Skeleton pour le chargement des incidents de la corbeille
 const TrashSkeleton = ({ viewMode = 'list' }) => {
   if (viewMode === 'grid') {
     return (
@@ -82,9 +82,9 @@ const TrashSkeleton = ({ viewMode = 'list' }) => {
   );
 };
 
-// Fonction d'adaptation des données de l'signalement pour la corbeille
-const adaptTrashSignalementData = (signalement) => {
-  if (!signalement) return null;
+// Fonction d'adaptation des données de l'incident pour la corbeille
+const adaptTrashIncidentData = (incident) => {
+  if (!incident) return null;
 
   const getBadgeFromEtat = (etat) => {
     const badges = {
@@ -95,26 +95,26 @@ const adaptTrashSignalementData = (signalement) => {
     return badges[etat] || { label: 'EN COURS', variant: 'in-progress' };
   };
 
-  const badge = getBadgeFromEtat(signalement.etat);
+  const badge = getBadgeFromEtat(incident.etat);
 
   // Calcul du nombre de jours restants avant suppression définitive (30 jours max)
-  const createdDate = new Date(signalement.created_at || Date.now());
+  const createdDate = new Date(incident.created_at || Date.now());
   const now = new Date();
   const diffTime = Math.abs(now - createdDate);
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   const expiresIn = Math.max(1, 30 - diffDays);
 
   return {
-    ...signalement,
-    title: signalement.title || 'Sans titre',
-    description: signalement.description || 'Aucune description disponible',
+    ...incident,
+    title: incident.title || 'Sans titre',
+    description: incident.description || 'Aucune description disponible',
     // Pas de photo de remplacement : BlurryImage affiche son propre etat
     // « aucune photo ». Une image de banque d'images faisait croire a une
     // vraie photo du signalement, en plus d'appeler un CDN externe.
-    image: signalement.photo || '',
-    type: signalement.zone || 'Non spécifié',
-    location: signalement.zone || 'Localisation non spécifiée',
-    deletedAt: signalement.created_at ? new Date(signalement.created_at).toLocaleDateString('fr-FR') : 'Non spécifiée',
+    image: incident.photo || '',
+    type: incident.zone || 'Non spécifié',
+    location: incident.zone || 'Localisation non spécifiée',
+    deletedAt: incident.created_at ? new Date(incident.created_at).toLocaleDateString('fr-FR') : 'Non spécifiée',
     badgeLabel: badge.label,
     badgeVariant: badge.variant,
     expiresIn: expiresIn
@@ -129,16 +129,16 @@ export const TrashPage = () => {
     setCollapsed: setSidebarCollapsed,
   } = useSidebarState();
 
-  // Utiliser useSWR pour charger les signalements supprimés
+  // Utiliser useSWR pour charger les incidents supprimés
   const { data: incidentsData, error: incidentsError, isLoading, mutate } = useSWR(
-    'trash-signalements',
-    getTrashSignalementsService,
+    'trash-incidents',
+    getTrashIncidentsService,
     {
       revalidateOnFocus: false
     }
   );
 
-  const signalements = useMemo(() => {
+  const incidents = useMemo(() => {
     const rawList = incidentsData
       ? Array.isArray(incidentsData)
         ? incidentsData
@@ -146,7 +146,7 @@ export const TrashPage = () => {
           ? incidentsData.results
           : []
       : [];
-    return rawList.map(adaptTrashSignalementData);
+    return rawList.map(adaptTrashIncidentData);
   }, [incidentsData]);
 
   const {
@@ -162,10 +162,10 @@ export const TrashPage = () => {
   const [selected, setSelected] = useState(new Set());
   const [viewMode, setViewMode] = useState('list'); // 'list' | 'grid'
 
-  const types = useMemo(() => [...new Set(signalements.map((i) => i.type).filter(Boolean))], [signalements]);
+  const types = useMemo(() => [...new Set(incidents.map((i) => i.type).filter(Boolean))], [incidents]);
 
   const filtered = useMemo(() => {
-    return signalements.filter((i) => {
+    return incidents.filter((i) => {
       const matchSearch =
         !search ||
         i.title?.toLowerCase().includes(search.toLowerCase()) ||
@@ -173,7 +173,7 @@ export const TrashPage = () => {
       const matchType = !typeFilter || i.type === typeFilter;
       return matchSearch && matchType;
     });
-  }, [signalements, search, typeFilter]);
+  }, [incidents, search, typeFilter]);
 
   const closeConfirmModal = () => {
     setConfirmClosing(true);
@@ -183,11 +183,11 @@ export const TrashPage = () => {
     }, 280);
   };
 
-  // ── Restaurer un signalement ──────────────────────────────
+  // ── Restaurer un incident ──────────────────────────────
   const handleRestore = async (id) => {
-    const item = signalements.find((i) => i.id === id);
+    const item = incidents.find((i) => i.id === id);
     try {
-      await restoreSignalementService(id);
+      await restoreIncidentService(id);
       await mutate();
       setSelected((prev) => { const s = new Set(prev); s.delete(id); return s; });
       showToast(`"${item?.title}" a été restauré.`);
@@ -201,12 +201,12 @@ export const TrashPage = () => {
   const handleDeletePermanent = async (id) => {
     try {
       if (id === 'batch') {
-        await Promise.all([...selected].map(selectedId => deleteSignalementService(selectedId)));
+        await Promise.all([...selected].map(selectedId => deleteIncidentService(selectedId)));
         await mutate();
         setSelected(new Set());
-        showToast('Signalements sélectionnés supprimés définitivement.');
+        showToast('Incidents sélectionnés supprimés définitivement.');
       } else {
-        await deleteSignalementService(id);
+        await deleteIncidentService(id);
         await mutate();
         setSelected((prev) => { const s = new Set(prev); s.delete(id); return s; });
         showToast('Signalement supprimé définitivement.');
@@ -222,10 +222,10 @@ export const TrashPage = () => {
   // ── Restaurer tous les sélectionnés ───────────────────
   const handleRestoreSelected = async () => {
     try {
-      await Promise.all([...selected].map(selectedId => restoreSignalementService(selectedId)));
+      await Promise.all([...selected].map(selectedId => restoreIncidentService(selectedId)));
       const count = selected.size;
       await mutate();
-      showToast(`${count} signalement(s) restauré(s).`);
+      showToast(`${count} incident(s) restauré(s).`);
       setSelected(new Set());
     } catch (error) {
       logger.error('Erreur lors de la restauration:', error);
@@ -259,9 +259,9 @@ export const TrashPage = () => {
   const allSelected = filtered.length > 0 && selected.size === filtered.length;
 
   // ── Composant carte réutilisable ─────────────────────
-  const SignalementItem = ({ signalement }) => {
-    const isChecked = selected.has(signalement.id);
-    const urgent = signalement.expiresIn <= 5;
+  const IncidentItem = ({ incident }) => {
+    const isChecked = selected.has(incident.id);
+    const urgent = incident.expiresIn <= 5;
 
     if (viewMode === 'list') {
       return (
@@ -270,34 +270,34 @@ export const TrashPage = () => {
             type="checkbox"
             className="trash-row-checkbox"
             checked={isChecked}
-            onChange={() => toggleSelect(signalement.id)}
+            onChange={() => toggleSelect(incident.id)}
           />
 
           <div className="trash-row-thumb">
-            <BlurryImage src={signalement.image} alt={signalement.title} />
+            <BlurryImage src={incident.image} alt={incident.title} />
           </div>
 
           <div className="trash-row-main">
             <div className="trash-row-top">
-              <span className={`trash-badge trash-badge-${signalement.badgeVariant}`}>
-                {signalement.badgeLabel}
+              <span className={`trash-badge trash-badge-${incident.badgeVariant}`}>
+                {incident.badgeLabel}
               </span>
-              <span className="trash-card-type">{signalement.type}</span>
+              <span className="trash-card-type">{incident.type}</span>
             </div>
-            <h3 className="trash-row-title">{signalement.title}</h3>
-            <p className="trash-row-desc">{signalement.description}</p>
+            <h3 className="trash-row-title">{incident.title}</h3>
+            <p className="trash-row-desc">{incident.description}</p>
           </div>
 
           <div className="trash-row-meta">
-            <span className="trash-card-location">{signalement.location}</span>
-            <span className="trash-card-date">{signalement.deletedAt}</span>
+            <span className="trash-card-location">{incident.location}</span>
+            <span className="trash-card-date">{incident.deletedAt}</span>
             <div className="trash-card-expiry">
               <span
                 className="trash-expiry-dot"
                 style={{ backgroundColor: urgent ? 'var(--color-danger)' : 'var(--color-warning)' }}
               />
               <span style={{ color: urgent ? 'var(--color-danger)' : 'inherit' }}>
-                {signalement.expiresIn}j restant{signalement.expiresIn > 1 ? 's' : ''}
+                {incident.expiresIn}j restant{incident.expiresIn > 1 ? 's' : ''}
               </span>
             </div>
           </div>
@@ -305,7 +305,7 @@ export const TrashPage = () => {
           <div className="trash-row-actions">
             <button
               className="trash-btn-restore"
-              onClick={() => handleRestore(signalement.id)}
+              onClick={() => handleRestore(incident.id)}
               title="Restaurer"
             >
               <RotateLeft size={15} variant="Linear" color="var(--color-primary)" />
@@ -313,7 +313,7 @@ export const TrashPage = () => {
             </button>
             <button
               className="trash-btn-delete"
-              onClick={() => setConfirmId(signalement.id)}
+              onClick={() => setConfirmId(incident.id)}
               title="Supprimer définitivement"
             >
               <Trash size={15} variant="Linear" color="var(--color-danger)" />
@@ -331,28 +331,28 @@ export const TrashPage = () => {
           type="checkbox"
           className="trash-card-checkbox"
           checked={isChecked}
-          onChange={() => toggleSelect(signalement.id)}
+          onChange={() => toggleSelect(incident.id)}
         />
 
         <div className="trash-card-thumb">
-          <BlurryImage src={signalement.image} alt={signalement.title} />
+          <BlurryImage src={incident.image} alt={incident.title} />
           <div className="trash-card-overlay" aria-hidden="true" />
         </div>
 
         <div className="trash-card-body">
           <div className="trash-card-meta">
-            <span className={`trash-badge trash-badge-${signalement.badgeVariant}`}>
-              {signalement.badgeLabel}
+            <span className={`trash-badge trash-badge-${incident.badgeVariant}`}>
+              {incident.badgeLabel}
             </span>
-            <span className="trash-card-type">{signalement.type}</span>
+            <span className="trash-card-type">{incident.type}</span>
           </div>
 
-          <h3 className="trash-card-title">{signalement.title}</h3>
-          <p className="trash-card-desc">{signalement.description}</p>
+          <h3 className="trash-card-title">{incident.title}</h3>
+          <p className="trash-card-desc">{incident.description}</p>
 
           <div className="trash-card-info-row">
-            <span className="trash-card-location">📍 {signalement.location}</span>
-            <span className="trash-card-date">🗑 Supprimé le {signalement.deletedAt}</span>
+            <span className="trash-card-location">📍 {incident.location}</span>
+            <span className="trash-card-date">🗑 Supprimé le {incident.deletedAt}</span>
           </div>
 
           <div className="trash-card-expiry">
@@ -360,14 +360,14 @@ export const TrashPage = () => {
               className="trash-expiry-dot"
               style={{ backgroundColor: urgent ? 'var(--color-danger)' : 'var(--color-warning)' }}
             />
-            Expire dans <strong>{signalement.expiresIn} jour{signalement.expiresIn > 1 ? 's' : ''}</strong>
+            Expire dans <strong>{incident.expiresIn} jour{incident.expiresIn > 1 ? 's' : ''}</strong>
           </div>
         </div>
 
         <div className="trash-card-actions">
           <button
             className="trash-btn-restore"
-            onClick={() => handleRestore(signalement.id)}
+            onClick={() => handleRestore(incident.id)}
             title="Restaurer cet signalement"
           >
             <RotateLeft size={16} variant="Linear" color="var(--color-primary)" />
@@ -375,7 +375,7 @@ export const TrashPage = () => {
           </button>
           <button
             className="trash-btn-delete"
-            onClick={() => setConfirmId(signalement.id)}
+            onClick={() => setConfirmId(incident.id)}
             title="Supprimer définitivement"
           >
             <Trash size={15} variant="Linear" color="var(--color-danger)" />
@@ -431,7 +431,7 @@ export const TrashPage = () => {
                   <div>
                     <h1 className="trash-title">Corbeille</h1>
                     <p className="trash-subtitle">
-                      Les signalements supprimés sont conservés pendant <strong>30 jours</strong> avant d'être définitivement effacés.
+                      Les incidents supprimés sont conservés pendant <strong>30 jours</strong> avant d'être définitivement effacés.
                     </p>
                   </div>
                 </div>
@@ -455,7 +455,7 @@ export const TrashPage = () => {
               {/* ── Bannière info ── */}
               <div className="trash-info-banner">
                 <InfoCircle size={16} variant="Linear" color="var(--color-primary)" />
-                <span>{signalements.length} signalement(s) dans la corbeille. La suppression définitive est irréversible.</span>
+                <span>{incidents.length} incident(s) dans la corbeille. La suppression définitive est irréversible.</span>
               </div>
 
               {/* ── Filtres — fixe au defilement : voir .trash-filtres-fixes. ── */}
@@ -527,14 +527,14 @@ export const TrashPage = () => {
                 </div>
               ) : viewMode === 'grid' ? (
                 <div className="trash-grid">
-                  {filtered.map((signalement) => (
-                    <SignalementItem key={signalement.id} signalement={signalement} />
+                  {filtered.map((incident) => (
+                    <IncidentItem key={incident.id} incident={incident} />
                   ))}
                 </div>
               ) : (
                 <div className="trash-list">
-                  {filtered.map((signalement) => (
-                    <SignalementItem key={signalement.id} signalement={signalement} />
+                  {filtered.map((incident) => (
+                    <IncidentItem key={incident.id} incident={incident} />
                   ))}
                 </div>
               )}
@@ -584,8 +584,8 @@ export const TrashPage = () => {
             <p className="am-delete-text">
               Cette action est <strong>irréversible</strong>.<br />
               {confirmId === 'batch'
-                ? `Vous êtes sur le point de supprimer définitivement ${selected.size} signalement(s) sélectionnés.`
-                : "Vous êtes sur le point de supprimer définitivement cet signalement."
+                ? `Vous êtes sur le point de supprimer définitivement ${selected.size} incident(s) sélectionnés.`
+                : "Vous êtes sur le point de supprimer définitivement cet incident."
               } Ils ne pourront pas être récupérés.
             </p>
           </div>

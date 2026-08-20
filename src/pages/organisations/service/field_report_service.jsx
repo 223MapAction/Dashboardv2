@@ -7,7 +7,7 @@ import { logger } from '../../../utils/logger';
 // ─────────────────────────────────────────────────────────
 
 /**
- * Créer un rapport de terrain pour un signalement
+ * Créer un rapport de terrain pour un incident
  * POST /MapApi/field-reports/
  * @param {{
  *   incident_id: number,

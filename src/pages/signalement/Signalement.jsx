@@ -5,7 +5,7 @@ import debounce from 'lodash.debounce';
 import { useSidebarState } from '../../hooks/useSidebarState';
 import { Header, Sidebar } from '../../components/layout';
 import SignalementList from './components/SignalementList/SignalementList';
-import { getSignalementsService } from './service/signalement_service';
+import { getIncidentsService } from './service/signalement_service';
 import SignalementModalContext from './modale/SignalementModalContext';
 import SignalementDeleteModal from './modale/SignalementDeleteModal';
 import SignalementAssignModal from './modale/SignalementAssignModal';
@@ -16,23 +16,23 @@ import { logger } from '../../utils/logger';
 
 
 // Fonction pour adapter les données de l'API au format attendu
-const adaptSignalementData = (signalement, currentUserId = null) => {
-  if (!signalement) return null;
+const adaptIncidentData = (incident, currentUserId = null) => {
+  if (!incident) return null;
 
-  const isOwner = currentUserId && signalement.taken_by ? parseInt(signalement.taken_by) === parseInt(currentUserId) : false;
+  const isOwner = currentUserId && incident.taken_by ? parseInt(incident.taken_by) === parseInt(currentUserId) : false;
 
-  // Mapper l'état de l'signalement vers un badge en prenant en compte le propriétaire
+  // Mapper l'état de l'incident vers un badge en prenant en compte le propriétaire
   const getBadgeFromEtat = (etat) => {
     if (etat === 'taken_into_account') {
       return {
-        label: isOwner ? 'PRIS EN COMPTE (PAR MOI)' : signalement.taken_by ? 'PRIS EN COMPTE (PAR AUTRE)' : 'PRIS EN COMPTE',
-        variant: isOwner ? 'taken-me' : signalement.taken_by ? 'taken-other' : 'taken'
+        label: isOwner ? 'PRIS EN COMPTE (PAR MOI)' : incident.taken_by ? 'PRIS EN COMPTE (PAR AUTRE)' : 'PRIS EN COMPTE',
+        variant: isOwner ? 'taken-me' : incident.taken_by ? 'taken-other' : 'taken'
       };
     }
     if (etat === 'resolved') {
       return {
-        label: isOwner ? 'RÉSOLU (PAR MOI)' : signalement.taken_by ? 'RÉSOLU (PAR AUTRE)' : 'RÉSOLU',
-        variant: isOwner ? 'resolved-me' : signalement.taken_by ? 'resolved-other' : 'resolved'
+        label: isOwner ? 'RÉSOLU (PAR MOI)' : incident.taken_by ? 'RÉSOLU (PAR AUTRE)' : 'RÉSOLU',
+        variant: isOwner ? 'resolved-me' : incident.taken_by ? 'resolved-other' : 'resolved'
       };
     }
     if (etat === 'declared') {
@@ -42,38 +42,38 @@ const adaptSignalementData = (signalement, currentUserId = null) => {
   };
 
   return {
-    ...signalement,
+    ...incident,
     // Adapter les champs pour la carte et le détail
-    location: signalement.zone || signalement.location || 'Localisation non spécifiée',
-    type: signalement.zone || signalement.type || 'Non spécifié',
-    image: signalement.photo || signalement.image,
-    photo: signalement.photo || signalement.image, // Pour SignalementCard
-    organisation_name: signalement.organisation_name || signalement.user_id?.organisation_name || 'Non spécifié',
-    user_full_name: signalement.user_full_name || (signalement.user_id ? `${signalement.user_id.first_name} ${signalement.user_id.last_name}` : 'Non spécifié'),
-    badges: [getBadgeFromEtat(signalement.etat)],
-    description: signalement.description || 'Aucune description disponible',
+    location: incident.zone || incident.location || 'Localisation non spécifiée',
+    type: incident.zone || incident.type || 'Non spécifié',
+    image: incident.photo || incident.image,
+    photo: incident.photo || incident.image, // Pour IncidentCard
+    organisation_name: incident.organisation_name || incident.user_id?.organisation_name || 'Non spécifié',
+    user_full_name: incident.user_full_name || (incident.user_id ? `${incident.user_id.first_name} ${incident.user_id.last_name}` : 'Non spécifié'),
+    badges: [getBadgeFromEtat(incident.etat)],
+    description: incident.description || 'Aucune description disponible',
     // Ajouter les coordonnées formatées
     coordinates: (() => {
-      const lat = parseFloat(signalement.lattitude);
-      const lng = parseFloat(signalement.longitude);
+      const lat = parseFloat(incident.lattitude);
+      const lng = parseFloat(incident.longitude);
       if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
         return { lat, lng };
       }
       return null;
     })(),
     // Dates formatées
-    startDate: signalement.created_at ? new Date(signalement.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }) + ', ' + new Date(signalement.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }).replace(':', 'h') : 'Non spécifié',
-    endDate: signalement.resolution_end_date ? new Date(signalement.resolution_end_date).toLocaleDateString('fr-FR') : 'En cours',
+    startDate: incident.created_at ? new Date(incident.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }) + ', ' + new Date(incident.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }).replace(':', 'h') : 'Non spécifié',
+    endDate: incident.resolution_end_date ? new Date(incident.resolution_end_date).toLocaleDateString('fr-FR') : 'En cours',
     // Informations supplémentaires
-    objectives: signalement.objectives || [],
-    participants: signalement.participants || [],
+    objectives: incident.objectives || [],
+    participants: incident.participants || [],
     // taken_by est l'ID de la personne qui a pris en charge, pas le nombre
-    participantsCount: signalement.participants?.length || 0,
+    participantsCount: incident.participants?.length || 0,
     extraParticipants: 0,
-    // taken_by contient l'ID de l'utilisateur qui a pris en charge l'signalement
-    takenBy: signalement.taken_by,
-    // Déterminer si l'utilisateur connecté est propriétaire de l'signalement
-    isOwner: currentUserId ? signalement.taken_by === parseInt(currentUserId) : false
+    // taken_by contient l'ID de l'utilisateur qui a pris en charge l'incident
+    takenBy: incident.taken_by,
+    // Déterminer si l'utilisateur connecté est propriétaire de l'incident
+    isOwner: currentUserId ? incident.taken_by === parseInt(currentUserId) : false
   };
 };
 
@@ -87,7 +87,7 @@ export const Signalement = () => {
   } = useSidebarState();
 
   const workspaceClass = [
-    'signalement-workspace',
+    'incident-workspace',
   ].join(' ');
 
   // Récupérer l'ID de l'utilisateur connecté
@@ -115,19 +115,19 @@ export const Signalement = () => {
   // Retour a la premiere page des qu'un filtre change.
   useReinitialisationSurChangement([search, statusFilter], () => setPage(1));
 
-  // Charger la liste des signalements avec useSWR
+  // Charger la liste des incidents avec useSWR
   const {
-    data: rawSignalements,
-    error: erreurSignalements,
-    isLoading: isLoadingSignalements,
-    mutate: mutateSignalements
+    data: rawIncidents,
+    error: erreurIncidents,
+    isLoading: isLoadingIncidents,
+    mutate: mutateIncidents
   } = useSWR(
     // statusFilter fait partie de la cle : sans lui, changer de statut ne
     // redemandait rien au serveur et le filtre ne s'appliquait qu'aux lignes
     // deja recues — soit la page courante, pendant que la pagination
     // continuait d'annoncer le total complet.
     ['/incidents/all', page, search, statusFilter],
-    () => getSignalementsService(page, pageSize, search, statusFilter),
+    () => getIncidentsService(page, pageSize, search, statusFilter),
     {
       revalidateOnReconnect: true,
       onError: (error) => {
@@ -136,18 +136,18 @@ export const Signalement = () => {
     }
   );
 
-  // Adapter les données des signalements avec l'ID de l'utilisateur
-  const rawList = rawSignalements
-    ? Array.isArray(rawSignalements)
-      ? rawSignalements
-      : Array.isArray(rawSignalements.results)
-        ? rawSignalements.results
+  // Adapter les données des incidents avec l'ID de l'utilisateur
+  const rawList = rawIncidents
+    ? Array.isArray(rawIncidents)
+      ? rawIncidents
+      : Array.isArray(rawIncidents.results)
+        ? rawIncidents.results
         : []
     : [];
 
-  const signalements = rawList.map((inc) => adaptSignalementData(inc, currentUserId));
+  const incidents = rawList.map((inc) => adaptIncidentData(inc, currentUserId));
 
-  // ── États locaux pour la gestion des modales d'signalements ─────────────────────
+  // ── États locaux pour la gestion des modales d'incidents ─────────────────────
   const [deleteModal, setDeleteModal] = useState({ open: false, incident: null });
   const [assignModal, setAssignModal] = useState({ open: false, incident: null });
   const [deleteAlert, setDeleteAlert] = useState({ type: null, message: null });
@@ -157,8 +157,8 @@ export const Signalement = () => {
   const [deleteClosing, setDeleteClosing] = useState(false);
   const [assignClosing, setAssignClosing] = useState(false);
 
-  const openDeleteModal = (signalement) => {
-    setDeleteModal({ open: true, signalement });
+  const openDeleteModal = (incident) => {
+    setDeleteModal({ open: true, incident });
     setDeleteAlert({ type: null, message: null });
     setDeleteClosing(false);
   };
@@ -172,8 +172,8 @@ export const Signalement = () => {
     }, 280);
   };
 
-  const openAssignModal = (signalement) => {
-    setAssignModal({ open: true, signalement });
+  const openAssignModal = (incident) => {
+    setAssignModal({ open: true, incident });
     setAssignAlert({ type: null, message: null });
     setAssignClosing(false);
   };
@@ -204,7 +204,7 @@ export const Signalement = () => {
     setDeleteClosing,
     assignClosing,
     setAssignClosing,
-    mutateSignalements,
+    mutateIncidents,
     openDeleteModal,
     closeDeleteModal,
     openAssignModal,
@@ -213,7 +213,7 @@ export const Signalement = () => {
 
   return (
     <SignalementModalContext.Provider value={contextValue}>
-      <div className="signalement-page">
+      <div className="incident-page">
         <Sidebar
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
@@ -221,7 +221,7 @@ export const Signalement = () => {
           onCollapsedChange={setSidebarCollapsed}
         />
 
-        <div className={`signalement-page-main ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+        <div className={`incident-page-main ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
           <Header
             onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
             sidebarCollapsed={sidebarCollapsed}
@@ -229,15 +229,15 @@ export const Signalement = () => {
 
           <div className={workspaceClass}>
             <BandeauErreur
-              erreur={erreurSignalements}
-              onReessayer={mutateSignalements}
+              erreur={erreurIncidents}
+              onReessayer={mutateIncidents}
               message="Impossible de charger les signalements. La liste affichée peut ne plus être à jour."
             />
-            {/* Liste des signalements (Pleine largeur) */}
+            {/* Liste des incidents (Pleine largeur) */}
             <SignalementList
-              signalements={signalements}
-              isLoading={isLoadingSignalements}
-              onSelectSignalement={(signalement) => navigate(`/signalements/${signalement.id}`, { state: { signalement } })}
+              incidents={incidents}
+              isLoading={isLoadingIncidents}
+              onSelectIncident={(incident) => navigate(`/signalements/${incident.id}`, { state: { incident } })}
               search={searchInput}
               setSearch={(val) => {
                 setSearchInput(val);
@@ -248,12 +248,12 @@ export const Signalement = () => {
               page={page}
               setPage={setPage}
               pageSize={pageSize}
-              count={rawSignalements?.count || 0}
+              count={rawIncidents?.count || 0}
             />
           </div>
         </div>
 
-        {/* Modales d'actions d'signalements */}
+        {/* Modales d'actions d'incidents */}
         <SignalementAssignModal />
         <SignalementDeleteModal />
       </div>

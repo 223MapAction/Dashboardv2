@@ -3,12 +3,12 @@ import { API_URL_BASE } from '../../../config/api_url_base';
 import { logger } from '../../../utils/logger';
 
 /**
- * Récupère tous les signalements pour la carte
+ * Récupère tous les incidents pour la carte
  */
 // Le parametre de filtre accepte ici n'a jamais ete transmis a l'API : la
 // requete ci-dessous ne le lit pas. Il est retire pour ne pas laisser croire a
 // un filtrage cote serveur qui n'existe pas.
-export const getSignalementsService = async () => {
+export const getIncidentsService = async () => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.get(
@@ -37,14 +37,14 @@ export const getDashboardStatsService = async () => {
 };
 
 /**
- * Récupère les signalements filtrés pour la carte (léger, paginé)
+ * Récupère les incidents filtrés pour la carte (léger, paginé)
  * @param {Object} params - Paramètres de requête
  * @param {string} params.scope - Scope: 'resolved' | 'unresolved' | 'all' | 'mine'
  * @param {number} params.page - Numéro de page (défaut: 1)
  * @param {number} params.page_size - Taille de page (max: 100, défaut: 100)
  * @returns {Promise<Object>} { count, next, previous, results }
  */
-export const getSignalementsFilteredService = async (params = {}) => {
+export const getIncidentsFilteredService = async (params = {}) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const queryParams = {
@@ -56,37 +56,37 @@ export const getSignalementsFilteredService = async (params = {}) => {
     const response = await axios.get(`${API_URL_BASE}/MapApi/incident-filter/`, { params: queryParams });
     return response.data;
   } catch (error) {
-    logger.error('[DASHBOARD] Erreur récupération signalements filtrés:', error.response?.status, error.response?.data);
+    logger.error('[DASHBOARD] Erreur récupération incidents filtrés:', error.response?.status, error.response?.data);
     throw error;
   }
 };
 
 /**
- * Récupère la liste des signalements non résolus
- * @deprecated Utiliser getSignalementsFilteredService avec scope='unresolved' pour la carte
+ * Récupère la liste des incidents non résolus
+ * @deprecated Utiliser getIncidentsFilteredService avec scope='unresolved' pour la carte
  */
-export const getSignalementsNotResolvedService = async (params = {}) => {
+export const getIncidentsNotResolvedService = async (params = {}) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.get(`${API_URL_BASE}/MapApi/incidentNotResolved/`, { params });
     return response.data;
   } catch (error) {
-    logger.error('[DASHBOARD] Erreur récupération signalements non résolus:', error.response?.status, error.response?.data);
+    logger.error('[DASHBOARD] Erreur récupération incidents non résolus:', error.response?.status, error.response?.data);
     throw error;
   }
 };
 
 /**
- * Récupère la liste des signalements résolus
- * @deprecated Utiliser getSignalementsFilteredService avec scope='resolved' pour la carte
+ * Récupère la liste des incidents résolus
+ * @deprecated Utiliser getIncidentsFilteredService avec scope='resolved' pour la carte
  */
-export const getSignalementsResolvedService = async (params = {}) => {
+export const getIncidentsResolvedService = async (params = {}) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.get(`${API_URL_BASE}/MapApi/incidentResolved/`, { params });
     return response.data;
   } catch (error) {
-    logger.error('[DASHBOARD] Erreur récupération signalements résolus:', error.response?.status, error.response?.data);
+    logger.error('[DASHBOARD] Erreur récupération incidents résolus:', error.response?.status, error.response?.data);
     throw error;
   }
 };

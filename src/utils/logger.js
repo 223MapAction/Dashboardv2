@@ -70,7 +70,7 @@ const nettoyer = (donnee, profondeur = 0, vus = new WeakSet()) => {
   if (Array.isArray(donnee)) {
     if (vus.has(donnee)) return '[Circulaire]';
     vus.add(donnee);
-    // Un tableau de 500 signalements n'apprend rien de plus que ses premiers
+    // Un tableau de 500 incidents n'apprend rien de plus que ses premiers
     // éléments, et son affichage noie le reste du message.
     const apercu = donnee.slice(0, 10).map((e) => nettoyer(e, profondeur + 1, vus));
     return donnee.length > 10

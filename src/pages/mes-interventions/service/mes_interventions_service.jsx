@@ -4,11 +4,11 @@ import { logger } from '../../../utils/logger';
 
 
 /**
- * Récupère les signalements internes de l'organisation
+ * Récupère les incidents internes de l'organisation
  * @param {string} filter - 'agents_or_internal' | 'internal' | 'agents'
   * @returns {Promise<Object>}
  */
-export const getOrgInternalSignalementsService = async (filters = {}) => {
+export const getOrgInternalIncidentsService = async (filters = {}) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const params = {};
@@ -38,25 +38,25 @@ export const getOrgInternalSignalementsService = async (filters = {}) => {
       }
     }
 
-    const response = await axios.get(`${API_URL_BASE}/MapApi/org-signalements/`, {
+    const response = await axios.get(`${API_URL_BASE}/MapApi/org-incidents/`, {
       params
     });
     return response.data;
   } catch (error) {
-    logger.error('[MesInterventions] Erreur récupération signalements internes org:', error.response?.status, error.response?.data);
+    logger.error('[MesInterventions] Erreur récupération incidents internes org:', error.response?.status, error.response?.data);
     throw error;
   }
 };
 
 /**
- * Bascule la visibilité publique d'un signalement
- * @param {number|string} signalementId - ID de l'signalement
+ * Bascule la visibilité publique d'un incident
+ * @param {number|string} incidentId - ID de l'incident
  * @returns {Promise<Object>}
  */
-export const toggleSignalementPublicService = async (signalementId) => {
+export const toggleIncidentPublicService = async (incidentId) => {
   try {
     const axios = authService.createAuthenticatedAxios();
-    const response = await axios.post(`${API_URL_BASE}/MapApi/incidents/${signalementId}/toggle-public/`);
+    const response = await axios.post(`${API_URL_BASE}/MapApi/incidents/${incidentId}/toggle-public/`);
     return response.data;
   } catch (error) {
     logger.error('[MesInterventions] Erreur basculement visibilité publique:', error.response?.status, error.response?.data);
@@ -94,8 +94,8 @@ export const getFieldReportsService = async (filters = {}) => {
   }
 };
 /**
- * Mes rapport dans mes signalements interne / agents
- * @param {number|string} signalementId - ID de l'signalement
+ * Mes rapport dans mes incidents interne / agents
+ * @param {number|string} incidentId - ID de l'incident
  * @returns {Promise<Object>}
  */
 

@@ -6,9 +6,9 @@ import { NIVEAUX_GRAVITE, gravite, couleurGravite } from '../../../../utils/grav
 import Map, { Marker, Popup } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
-import { getSignalementService } from '../../../signalement/service/signalement_service';
-import { getOrgInternalSignalementsService } from '../../../mes-interventions/service/mes_interventions_service';
-import { getSignalementsFilteredService } from '../../service/dashboard_service';
+import { getIncidentService } from '../../../signalement/service/signalement_service';
+import { getOrgInternalIncidentsService } from '../../../mes-interventions/service/mes_interventions_service';
+import { getIncidentsFilteredService } from '../../service/dashboard_service';
 import { BlurryImage } from '../../../../components/atoms/BlurryImage';
 import { COUNTRIES } from '../../../organisations/data/organisations';
 import { OSM_STYLE, MAPBOX_SATELLITE_STYLE, HAS_MAPBOX_SATELLITE } from '../../../../config/mapStyles';
@@ -18,14 +18,14 @@ import { logger } from '../../../../utils/logger';
 
 
 // Calcule la classe de couleur du marqueur en fonction de son statut et de l'utilisateur connecté
-const getMarkerColorClass = (signalement, currentUserId) => {
-  const isResolved = signalement.etat === 'resolved';
+const getMarkerColorClass = (incident, currentUserId) => {
+  const isResolved = incident.etat === 'resolved';
   if (isResolved) {
     let takenById = null;
-    if (signalement.taken_by && typeof signalement.taken_by === 'object') {
-      takenById = signalement.taken_by.id;
+    if (incident.taken_by && typeof incident.taken_by === 'object') {
+      takenById = incident.taken_by.id;
     } else {
-      takenById = signalement.taken_by || signalement.takenBy;
+      takenById = incident.taken_by || incident.takenBy;
     }
     const takenBy = parseInt(takenById);
     const me = parseInt(currentUserId);
@@ -35,11 +35,11 @@ const getMarkerColorClass = (signalement, currentUserId) => {
     return 'resolved-others'; // Bleu
   }
 
-  // Si l'signalement est actif, sa couleur dépend de sa gravité (sans bleu ni vert).
+  // Si l'incident est actif, sa couleur dépend de sa gravité (sans bleu ni vert).
   // Les niveaux viennent de utils/gravite.js, qui lit le champ `severity` decide
   // par le serveur. La carte les recalculait avec ses propres seuils, si bien
-  // qu'un signalement pouvait etre « moyen » ici et « eleve » sur la page Impact.
-  return `active-${gravite(signalement)}`;
+  // qu'un incident pouvait etre « moyen » ici et « eleve » sur la page Impact.
+  return `active-${gravite(incident)}`;
 };
 
 const INCIDENT_STATUS_STEPS = [
@@ -72,7 +72,7 @@ const MAP_STYLES = {
 const DEFAULT_MALI_LAT = 12.65; // Bamako
 const DEFAULT_MALI_LNG = -8.0;
 
-// Traduit l'état de l'signalement en français
+// Traduit l'état de l'incident en français
 const translateEtat = (etat) => {
   switch (etat) {
     case 'resolved':
@@ -89,14 +89,14 @@ const translateEtat = (etat) => {
 };
 
 export const MapContainer = () => {
-  const [selectedSignalementId, setSelectedSignalementId] = useState(null);
+  const [selectedIncidentId, setSelectedIncidentId] = useState(null);
   const [modalClosing, setModalClosing] = useState(false);
   const [modalShowing, setModalShowing] = useState(false);
   const navigate = useNavigate();
 
   // Bloquer le scroll du body quand le modal est ouvert
   useEffect(() => {
-    if (selectedSignalementId) {
+    if (selectedIncidentId) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
@@ -104,7 +104,7 @@ export const MapContainer = () => {
     return () => {
       document.body.style.overflow = '';
     };
-  }, [selectedSignalementId]);
+  }, [selectedIncidentId]);
   const [activeStyle, setActiveStyle] = useState('humanitarian');
 
   // ── États locaux pour les filtres de la carte ────────────────────────────────
@@ -116,10 +116,10 @@ export const MapContainer = () => {
   // Récupérer le pays de l'organisation de l'utilisateur
   const userOrgCountry = sessionStorage.getItem('organisation_country') || '';
 
-  // Utiliser useSWR pour récupérer les détails de l'signalement sélectionné
-  const { data: selectedSignalement, isLoading: isLoadingSignalement } = useSWR(
-    selectedSignalementId ? `/incident/${selectedSignalementId}` : null,
-    () => getSignalementService(selectedSignalementId),
+  // Utiliser useSWR pour récupérer les détails de l'incident sélectionné
+  const { data: selectedIncident, isLoading: isLoadingIncident } = useSWR(
+    selectedIncidentId ? `/incident/${selectedIncidentId}` : null,
+    () => getIncidentService(selectedIncidentId),
     {
       revalidateOnFocus: false,
 
@@ -129,8 +129,8 @@ export const MapContainer = () => {
     }
   );
 
-  // ── Chargement progressif des signalements ──────────────────────────────────────
-  const [allSignalements, setAllSignalements] = useState([]);
+  // ── Chargement progressif des incidents ──────────────────────────────────────
+  const [allIncidents, setAllIncidents] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMorePages, setHasMorePages] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -162,24 +162,24 @@ export const MapContainer = () => {
 
   const scope = getScope();
 
-  // Repartir d'une liste vide des qu'un filtre change : les signalements deja
+  // Repartir d'une liste vide des qu'un filtre change : les incidents deja
   // charges appartiennent au filtre precedent.
   useReinitialisationSurChangement([ownershipFilter, statusFilter, countryFilter], () => {
-    setAllSignalements([]);
+    setAllIncidents([]);
     setCurrentPage(1);
     setHasMorePages(true);
     loadedPagesRef.current = new Set();
   });
 
-  // Charger une page d'signalements
+  // Charger une page d'incidents
   const { data: pageData, isLoading: isLoadingPage } = useSWR(
     ownershipFilter === 'mine'
-      ? (currentPage === 1 ? '/org-signalements' : null) // Pour "mine", utiliser l'ancien endpoint
-      : `/map-signalements-${scope}-${countryFilter || 'all'}-page-${currentPage}`,
+      ? (currentPage === 1 ? '/org-incidents' : null) // Pour "mine", utiliser l'ancien endpoint
+      : `/map-incidents-${scope}-${countryFilter || 'all'}-page-${currentPage}`,
     async () => {
       if (ownershipFilter === 'mine') {
-        // Pour "Mes signalements", utiliser l'ancien service
-        return getOrgInternalSignalementsService();
+        // Pour "Mes incidents", utiliser l'ancien service
+        return getOrgInternalIncidentsService();
       }
       // Pour les autres, utiliser le nouvel endpoint paginé
       const params = {
@@ -191,7 +191,7 @@ export const MapContainer = () => {
       if (countryFilter) {
         params.country = countryFilter;
       }
-      return getSignalementsFilteredService(params);
+      return getIncidentsFilteredService(params);
     },
     {
       revalidateOnFocus: false,
@@ -208,7 +208,7 @@ export const MapContainer = () => {
   //
   // `onSuccess` ne se déclenche qu'au retour d'une requête réseau. Quand on
   // quittait le tableau de bord puis qu'on y revenait, SWR servait sa valeur en
-  // cache sans refetch — donc sans `onSuccess` — tandis que `allSignalements`,
+  // cache sans refetch — donc sans `onSuccess` — tandis que `allIncidents`,
   // qui est un état de composant, repartait à zéro au remontage. La carte
   // restait vide alors que la donnée était là, dans le cache.
   //
@@ -227,7 +227,7 @@ export const MapContainer = () => {
 
     const results = pageData.results || (Array.isArray(pageData) ? pageData : []);
 
-    setAllSignalements((prev) => {
+    setAllIncidents((prev) => {
       const dejaLa = new Set(prev.map((inc) => inc.id));
       return [...prev, ...results.filter((inc) => !dejaLa.has(inc.id))];
     });
@@ -238,18 +238,18 @@ export const MapContainer = () => {
   /* eslint-enable react-hooks/set-state-in-effect */
 
   // Fonction pour charger la page suivante
-  const loadMoreSignalements = useCallback(() => {
+  const loadMoreIncidents = useCallback(() => {
     if (!hasMorePages || isLoadingMore || isLoadingPage) return;
     setIsLoadingMore(true);
     setCurrentPage(prev => prev + 1);
   }, [hasMorePages, isLoadingMore, isLoadingPage]);
 
-  const normalizedSignalements = allSignalements;
+  const normalizedIncidents = allIncidents;
 
 
 
-  // Filtre uniquement les signalements avec coordonnées valides et selon les critères de filtres
-  const validSignalements = useMemo(() => normalizedSignalements.map((inc) => {
+  // Filtre uniquement les incidents avec coordonnées valides et selon les critères de filtres
+  const validIncidents = useMemo(() => normalizedIncidents.map((inc) => {
     const latVal = inc.lattitude !== undefined ? inc.lattitude : inc.latitude;
     const lat = parseFloat(latVal);
     const lng = parseFloat(inc.longitude);
@@ -261,7 +261,7 @@ export const MapContainer = () => {
 
     if (!hasValidCoords) {
       hasFallbackCoords = true;
-      // Ajout d'une petite variation déterministe basée sur l'ID de l'signalement pour éviter la superposition parfaite
+      // Ajout d'une petite variation déterministe basée sur l'ID de l'incident pour éviter la superposition parfaite
       const offsetId = inc.id || 0;
       let offsetNum = 0;
       if (typeof offsetId === 'number') {
@@ -288,7 +288,7 @@ export const MapContainer = () => {
       _hasFallbackCoords: hasFallbackCoords
     };
   }).filter((inc) => {
-    // 2. Filtre d'attribution (Tous vs Mes signalements)
+    // 2. Filtre d'attribution (Tous vs Mes incidents)
     if (ownershipFilter === 'mine') {
       const takenBy = inc?.taken_by;
       if (!takenBy || !currentUserId || String(takenBy).toLowerCase() !== String(currentUserId).toLowerCase()) {
@@ -299,13 +299,13 @@ export const MapContainer = () => {
 
     // 3. Filtre de statut (Actifs vs Résolus)
     const isResolved = inc?.etat == 'resolved';
-    // Si le filtre est 'resolved', on n'affiche que les signalements résolus.
+    // Si le filtre est 'resolved', on n'affiche que les incidents résolus.
     // Si le filtre est 'active', on affiche tout (actifs et résolus confondus).
     if (statusFilter === 'resolved' && !isResolved) {
       return false;
     }
 
-    // 4. Filtrer les signalements supprimés
+    // 4. Filtrer les incidents supprimés
     if (inc?.is_deleted || inc?.isDeleted) {
       // console.log(`[MAP] Signalement ID ${inc.id} ("${inc.title}") rejeté: Signalement marqué comme supprimé (is_deleted: ${inc.is_deleted}, isDeleted: ${inc.isDeleted})`);
       return false;
@@ -317,20 +317,20 @@ export const MapContainer = () => {
       // console.log(`[MAP] Signalement ID ${inc.id} ("${inc.title}") ACCEPTE et affiché avec coordonnées réelles : [${inc._lat}, ${inc._lng}]`);
     }
     return true;
-  }), [normalizedSignalements, ownershipFilter, statusFilter, currentUserId]);
+  }), [normalizedIncidents, ownershipFilter, statusFilter, currentUserId]);
 
-  // Plusieurs signalements peuvent partager exactement la même position (même site
+  // Plusieurs incidents peuvent partager exactement la même position (même site
   // signalé plusieurs fois). Sans regroupement, les marqueurs se dessinent l'un
   // sur l'autre et seul le dernier est visible : la carte semble alors perdre
-  // des signalements. On rend donc un marqueur par position, porteur du nombre
-  // d'signalements qu'il représente.
+  // des incidents. On rend donc un marqueur par position, porteur du nombre
+  // d'incidents qu'il représente.
   // Attention : `Map` est ici le composant react-map-gl importé en tête de
   // fichier, pas la structure de données JavaScript. On indexe donc avec un
   // objet simple pour éviter toute ambiguïté.
   const incidentGroups = useMemo(() => {
     const parPosition = Object.create(null);
     const ordre = [];
-    for (const inc of validSignalements) {
+    for (const inc of validIncidents) {
       const cle = `${inc._lat}|${inc._lng}`;
       if (parPosition[cle]) {
         parPosition[cle].incidents.push(inc);
@@ -340,15 +340,15 @@ export const MapContainer = () => {
       }
     }
     return ordre.map((cle) => parPosition[cle]);
-  }, [validSignalements]);
+  }, [validIncidents]);
 
-  // Position dont la liste d'signalements est ouverte (uniquement si elle en a
+  // Position dont la liste d'incidents est ouverte (uniquement si elle en a
   // plusieurs — un marqueur isolé ouvre directement le détail).
   const [groupeOuvert, setGroupeOuvert] = useState(null);
 
-  const openModal = (signalement) => {
+  const openModal = (incident) => {
     setModalClosing(false);
-    setSelectedSignalementId(signalement.id);
+    setSelectedIncidentId(incident.id);
     // Délai pour permettre l'animation CSS
     setTimeout(() => {
       setModalShowing(true);
@@ -359,15 +359,15 @@ export const MapContainer = () => {
     setModalShowing(false);
     setModalClosing(true);
     setTimeout(() => {
-      setSelectedSignalementId(null);
+      setSelectedIncidentId(null);
       setModalClosing(false);
     }, 300);
   };
 
   // Centre de la carte basé sur la moyenne des coordonnées
   const center = (() => {
-    if (validSignalements.length === 0) return { lng: -8.0, lat: 12.65 };
-    const avg = validSignalements.reduce(
+    if (validIncidents.length === 0) return { lng: -8.0, lat: 12.65 };
+    const avg = validIncidents.reduce(
       (acc, inc) => {
         return {
           lng: acc.lng + inc._lng,
@@ -377,22 +377,22 @@ export const MapContainer = () => {
       { lng: 0, lat: 0 }
     );
     return {
-      lng: avg.lng / validSignalements.length,
-      lat: avg.lat / validSignalements.length
+      lng: avg.lng / validIncidents.length,
+      lat: avg.lat / validIncidents.length
     };
   })();
 
   // Index de l'étape de statut courante
-  const statusIndex = selectedSignalement
+  const statusIndex = selectedIncident
     ? Math.max(
       0,
       INCIDENT_STATUS_STEPS.findIndex(
-        (s) => s.id === (selectedSignalement.etat || 'declared')
+        (s) => s.id === (selectedIncident.etat || 'declared')
       )
     )
     : 0;
 
-  const isMapLoading = isLoadingPage && allSignalements.length === 0;
+  const isMapLoading = isLoadingPage && allIncidents.length === 0;
 
   return (
     <div className="card">
@@ -422,21 +422,21 @@ export const MapContainer = () => {
           minZoom={2}
           maxZoom={18}
           onMoveEnd={() => {
-            // Charger automatiquement plus d'signalements quand l'utilisateur déplace/zoom la carte
-            if (hasMorePages && !isLoadingMore && !isLoadingPage && validSignalements.length > 0) {
-              loadMoreSignalements();
+            // Charger automatiquement plus d'incidents quand l'utilisateur déplace/zoom la carte
+            if (hasMorePages && !isLoadingMore && !isLoadingPage && validIncidents.length > 0) {
+              loadMoreIncidents();
             }
           }}
         >
 
-          {/* Markers d'signalements — un par position, pas un par signalement */}
+          {/* Markers d'incidents — un par position, pas un par incident */}
           {!isMapLoading && incidentGroups.map((groupe) => {
             const principal = groupe.incidents[0];
             const nombre = groupe.incidents.length;
             const colorClass = getMarkerColorClass(principal, currentUserId);
             const libelle = nombre > 1
-              ? `${nombre} signalements à cet emplacement`
-              : `Voir l'signalement ${principal.title}`;
+              ? `${nombre} incidents à cet emplacement`
+              : `Voir l'incident ${principal.title}`;
 
             return (
               <Marker
@@ -447,7 +447,7 @@ export const MapContainer = () => {
               >
                 <button
                   type="button"
-                  className={`signalement-marker severity-${colorClass}`}
+                  className={`incident-marker severity-${colorClass}`}
                   onClick={(e) => {
                     e.stopPropagation();
                     if (nombre > 1) {
@@ -459,17 +459,17 @@ export const MapContainer = () => {
                   aria-label={libelle}
                   title={libelle}
                 >
-                  <span className="signalement-marker-pulse" />
-                  <span className="signalement-marker-dot" />
+                  <span className="incident-marker-pulse" />
+                  <span className="incident-marker-dot" />
                   {nombre > 1 && (
-                    <span className="signalement-marker-count">{nombre}</span>
+                    <span className="incident-marker-count">{nombre}</span>
                   )}
                 </button>
               </Marker>
             );
           })}
 
-          {/* Liste des signalements partageant une même position */}
+          {/* Liste des incidents partageant une même position */}
           {groupeOuvert && (
             <Popup
               longitude={groupeOuvert.lng}
@@ -478,27 +478,27 @@ export const MapContainer = () => {
               offset={18}
               closeOnClick={false}
               onClose={() => setGroupeOuvert(null)}
-              className="signalement-group-popup"
+              className="incident-group-popup"
             >
-              <p className="signalement-group-title">
-                {groupeOuvert.incidents.length} signalements à cet emplacement
+              <p className="incident-group-title">
+                {groupeOuvert.incidents.length} incidents à cet emplacement
               </p>
-              <ul className="signalement-group-list">
+              <ul className="incident-group-list">
                 {groupeOuvert.incidents.map((inc) => (
                   <li key={inc.id}>
                     <button
                       type="button"
-                      className={`signalement-group-item severity-${getMarkerColorClass(inc, currentUserId)}`}
+                      className={`incident-group-item severity-${getMarkerColorClass(inc, currentUserId)}`}
                       onClick={() => {
                         setGroupeOuvert(null);
                         openModal(inc);
                       }}
                     >
-                      <span className="signalement-group-dot" />
-                      <span className="signalement-group-label">
+                      <span className="incident-group-dot" />
+                      <span className="incident-group-label">
                         {inc.title || 'Signalement sans titre'}
                       </span>
-                      <span className="signalement-group-etat">{translateEtat(inc.etat)}</span>
+                      <span className="incident-group-etat">{translateEtat(inc.etat)}</span>
                     </button>
                   </li>
                 ))}
@@ -623,16 +623,16 @@ export const MapContainer = () => {
         {/* Indicateur de chargement progressif et bouton "Charger plus" */}
         {!isMapLoading && (
           <div className="map-status-stack">
-            {/* Compteur d'signalements affichés */}
-            <div className="map-signalements-count">
-              {validSignalements.length} signalement{validSignalements.length > 1 ? 's' : ''} affiché{validSignalements.length > 1 ? 's' : ''}
+            {/* Compteur d'incidents affichés */}
+            <div className="map-incidents-count">
+              {validIncidents.length} incident{validIncidents.length > 1 ? 's' : ''} affiché{validIncidents.length > 1 ? 's' : ''}
             </div>
 
             {/* Bouton "Charger plus" si des pages restent */}
             {hasMorePages && (
               <button
                 type="button"
-                onClick={loadMoreSignalements}
+                onClick={loadMoreIncidents}
                 disabled={isLoadingMore || isLoadingPage}
                 className="btn btn-primary btn-sm"
                 style={{
@@ -656,7 +656,7 @@ export const MapContainer = () => {
                     Chargement...
                   </>
                 ) : (
-                  'Charger plus d\'signalements'
+                  'Charger plus d\'incidents'
                 )}
               </button>
             )}
@@ -664,8 +664,8 @@ export const MapContainer = () => {
         )}
       </div>
 
-      {/* Modal d'signalement (Bootstrap modal) */}
-      {selectedSignalementId && (
+      {/* Modal d'incident (Bootstrap modal) */}
+      {selectedIncidentId && (
         <>
           <div
             className={`modal fade ${modalShowing && !modalClosing ? 'show' : ''}`}
@@ -684,17 +684,17 @@ export const MapContainer = () => {
                 <div className="modal-header">
                   <div className="d-flex flex-column" style={{ minWidth: 0, flex: 1 }}>
                     <h5 className="modal-title fw-bold">
-                      {isLoadingSignalement ? (
+                      {isLoadingIncident ? (
                         <ShimmerTitle line={1} gap={10} variant="primary" />
                       ) : (
-                        selectedSignalement?.title || 'Chargement...'
+                        selectedIncident?.title || 'Chargement...'
                       )}
                     </h5>
                     <small className="text-muted mt-1">
-                      {isLoadingSignalement ? (
+                      {isLoadingIncident ? (
                         <ShimmerText line={1} gap={10} />
                       ) : (
-                        <>{selectedSignalement?.zone} • {translateEtat(selectedSignalement?.etat)}</>
+                        <>{selectedIncident?.zone} • {translateEtat(selectedIncident?.etat)}</>
                       )}
                     </small>
                   </div>
@@ -708,7 +708,7 @@ export const MapContainer = () => {
 
                 {/* Body scrollable */}
                 <div className="modal-body">
-                  {isLoadingSignalement || !selectedSignalement ? (
+                  {isLoadingIncident || !selectedIncident ? (
                     <div>
                       <ShimmerThumbnail height={240} rounded />
                       <div style={{ marginTop: '1rem', marginBottom: '1.5rem' }}>
@@ -725,10 +725,10 @@ export const MapContainer = () => {
                   ) : (
                     <>
                       {/* Cover image */}
-                      {selectedSignalement.photo && (
+                      {selectedIncident.photo && (
                         <BlurryImage
-                          src={selectedSignalement.photo}
-                          alt={selectedSignalement.title}
+                          src={selectedIncident.photo}
+                          alt={selectedIncident.title}
                           className="img-fluid rounded mb-3 w-100"
                           style={{ maxHeight: '300px', objectFit: 'cover' }}
                         />
@@ -736,35 +736,35 @@ export const MapContainer = () => {
 
                       {/* Badges */}
                       <div className="d-flex flex-wrap gap-2 mb-3">
-                        <span className={`badge ${selectedSignalement.etat === 'resolved'
+                        <span className={`badge ${selectedIncident.etat === 'resolved'
                           ? 'badge-status-resolved'
-                          : selectedSignalement.etat === 'taken_into_account'
+                          : selectedIncident.etat === 'taken_into_account'
                             ? 'badge-status-taken_into_account'
-                            : selectedSignalement.etat === 'pending'
+                            : selectedIncident.etat === 'pending'
                               ? 'badge-status-pending'
                               : 'badge-status-declared'
                           }`}>
                           STATUT : {
-                            selectedSignalement.etat === 'resolved'
+                            selectedIncident.etat === 'resolved'
                               ? 'RÉSOLU'
-                              : selectedSignalement.etat === 'taken_into_account'
+                              : selectedIncident.etat === 'taken_into_account'
                                 ? 'PRIS EN COMPTE'
-                                : selectedSignalement.etat === 'pending'
+                                : selectedIncident.etat === 'pending'
                                   ? 'EN ATTENTE'
                                   : 'DÉCLARÉ'
                           }
                         </span>
-                        {selectedSignalement.zone && (
+                        {selectedIncident.zone && (
                           <span className="badge bg-info text-dark">
-                            {selectedSignalement.zone}
+                            {selectedIncident.zone}
                           </span>
                         )}
                       </div>
 
                       {/* Description */}
-                      {selectedSignalement.description && (
+                      {selectedIncident.description && (
                         <p className="text-secondary mb-3">
-                          {selectedSignalement.description}
+                          {selectedIncident.description}
                         </p>
                       )}
 
@@ -772,7 +772,7 @@ export const MapContainer = () => {
                       <ul className="list-group list-group-flush mb-3">
                         <li className="list-group-item px-0">
                           <strong>Créé le :</strong>{' '}
-                          {new Date(selectedSignalement.created_at).toLocaleDateString('fr-FR', {
+                          {new Date(selectedIncident.created_at).toLocaleDateString('fr-FR', {
                             day: '2-digit',
                             month: 'long',
                             year: 'numeric',
@@ -783,9 +783,9 @@ export const MapContainer = () => {
                         <li className="list-group-item px-0">
                           <strong>Coordonnées :</strong>{' '}
                           {(() => {
-                            const latVal = selectedSignalement.lattitude !== undefined ? selectedSignalement.lattitude : selectedSignalement.latitude;
+                            const latVal = selectedIncident.lattitude !== undefined ? selectedIncident.lattitude : selectedIncident.latitude;
                             const lat = parseFloat(latVal);
-                            const lng = parseFloat(selectedSignalement.longitude);
+                            const lng = parseFloat(selectedIncident.longitude);
                             if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) {
                               return "Non spécifiées (Mali par défaut)";
                             }
@@ -794,26 +794,26 @@ export const MapContainer = () => {
                         </li>
                       </ul>
 
-                      {/* Statut de l'signalement */}
-                      <div className={`mb-4 status-stepper-${selectedSignalement?.etat || 'declared'}`}>
+                      {/* Statut de l'incident */}
+                      <div className={`mb-4 status-stepper-${selectedIncident?.etat || 'declared'}`}>
                         <h6 className="section-title mb-3">STATUT DE L'INCIDENT</h6>
-                        <div className="signalement-modal-status-bar">
+                        <div className="incident-modal-status-bar">
                           {INCIDENT_STATUS_STEPS.map((step, idx) => (
                             <div
                               key={step.id}
-                              className={`signalement-modal-status-segment ${idx < statusIndex ? 'is-done' : ''
+                              className={`incident-modal-status-segment ${idx < statusIndex ? 'is-done' : ''
                                 } ${idx === statusIndex ? 'is-current' : ''}`}
                             />
                           ))}
                         </div>
-                        <div className="signalement-modal-status-steps">
+                        <div className="incident-modal-status-steps">
                           {INCIDENT_STATUS_STEPS.map((step, idx) => (
                             <div
                               key={step.id}
-                              className={`signalement-modal-status-step ${idx < statusIndex ? 'is-done' : ''
+                              className={`incident-modal-status-step ${idx < statusIndex ? 'is-done' : ''
                                 } ${idx === statusIndex ? 'is-current' : ''}`}
                             >
-                              <span className="signalement-modal-status-dot" />
+                              <span className="incident-modal-status-dot" />
                               <span>{step.label.toUpperCase()}</span>
                             </div>
                           ))}
@@ -821,18 +821,18 @@ export const MapContainer = () => {
                       </div>
 
                       {/* Audio */}
-                      {selectedSignalement.audio && (
+                      {selectedIncident.audio && (
                         <div className="mb-4">
                           <h6 className="section-title mb-2">AUDIO</h6>
                           <audio controls className="w-100">
-                            <source src={selectedSignalement.audio} type="audio/mpeg" />
+                            <source src={selectedIncident.audio} type="audio/mpeg" />
                             Votre navigateur ne supporte pas l'élément audio.
                           </audio>
                         </div>
                       )}
 
                       {/* Vidéo */}
-                      {selectedSignalement.video && (
+                      {selectedIncident.video && (
                         <div className="mb-4">
                           <h6 className="section-title mb-2">VIDÉO DE PRÉSENTATION</h6>
                           <video
@@ -840,18 +840,18 @@ export const MapContainer = () => {
                             className="w-100 rounded"
                             style={{ maxHeight: '400px' }}
                           >
-                            <source src={selectedSignalement.video} type="video/mp4" />
+                            <source src={selectedIncident.video} type="video/mp4" />
                             Votre navigateur ne supporte pas la lecture de vidéos.
                           </video>
                         </div>
                       )}
 
                       {/* Organisations participantes */}
-                      {selectedSignalement.participants?.length > 0 && (
+                      {selectedIncident.participants?.length > 0 && (
                         <div className="mb-3">
                           <h6 className="section-title mb-3">ORGANISATIONS MOBILISÉES</h6>
                           <div className="d-flex flex-wrap gap-3 mb-3">
-                            {selectedSignalement.participants.map((p, idx) => (
+                            {selectedIncident.participants.map((p, idx) => (
                               <div key={idx} className="d-flex align-items-center gap-2">
                                 <div
                                   className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
@@ -867,7 +867,7 @@ export const MapContainer = () => {
                                 <span>{p.name}</span>
                               </div>
                             ))}
-                            {selectedSignalement.extraParticipants > 0 && (
+                            {selectedIncident.extraParticipants > 0 && (
                               <div className="d-flex align-items-center gap-2">
                                 <div
                                   className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
@@ -878,7 +878,7 @@ export const MapContainer = () => {
                                     fontSize: 'var(--font-size-body-small)'
                                   }}
                                 >
-                                  +{selectedSignalement.extraParticipants}
+                                  +{selectedIncident.extraParticipants}
                                 </div>
                                 <span>Autres organisations</span>
                               </div>
@@ -891,7 +891,7 @@ export const MapContainer = () => {
                 </div>
 
                 {/* Footer avec bouton Savoir plus */}
-                {!isLoadingSignalement && selectedSignalement && (
+                {!isLoadingIncident && selectedIncident && (
                   <div className="modal-footer">
                     <button
                       type="button"
@@ -904,7 +904,7 @@ export const MapContainer = () => {
                       type="button"
                       className="btn btn-primary"
                       onClick={() => {
-                        navigate(`/signalements/${selectedSignalement.id}`, { state: { from: '/dashboard' } });
+                        navigate(`/signalements/${selectedIncident.id}`, { state: { from: '/dashboard' } });
                       }}
                     >
                       Savoir plus

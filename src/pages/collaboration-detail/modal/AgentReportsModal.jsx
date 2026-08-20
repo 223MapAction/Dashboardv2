@@ -25,7 +25,7 @@ const formatDate = (isoString) => {
   }
 };
 
-export const AgentReportsModal = ({ isOpen, onClose, signalementId, incidentTitle }) => {
+export const AgentReportsModal = ({ isOpen, onClose, incidentId, incidentTitle }) => {
   const [shouldRender, setShouldRender] = useState(isOpen);
   const [isClosing, setIsClosing] = useState(false);
 
@@ -49,8 +49,8 @@ export const AgentReportsModal = ({ isOpen, onClose, signalementId, incidentTitl
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const { data: initialData, error, isLoading } = useSWR(
-    isOpen && signalementId ? `field-reports-${signalementId}` : null,
-    () => getFieldReportsService({ incident_id: signalementId, page_size: 10 }),
+    isOpen && incidentId ? `field-reports-${incidentId}` : null,
+    () => getFieldReportsService({ incident_id: incidentId, page_size: 10 }),
     { revalidateOnFocus: false }
   );
 
@@ -99,9 +99,9 @@ export const AgentReportsModal = ({ isOpen, onClose, signalementId, incidentTitl
 
 
   const displayedReports = (reportsList || []).filter(report => {
-    const reportSignalementId = report.incident ?? report.incident_id;
-    if (reportSignalementId === undefined || reportSignalementId === null) return false;
-    return String(reportSignalementId).toLowerCase() === String(signalementId).toLowerCase();
+    const reportIncidentId = report.incident ?? report.incident_id;
+    if (reportIncidentId === undefined || reportIncidentId === null) return false;
+    return String(reportIncidentId).toLowerCase() === String(incidentId).toLowerCase();
   });
 
   return (
@@ -109,7 +109,7 @@ export const AgentReportsModal = ({ isOpen, onClose, signalementId, incidentTitl
       onClose={handleClose}
       isClosing={isClosing}
       title="Rapports des agents"
-      subtitle={incidentTitle || `Signalement #${signalementId}`}
+      subtitle={incidentTitle || `Signalement #${incidentId}`}
       ariaLabel="Liste des rapports de terrain des agents"
       closeVariant="plain"
     >
@@ -171,12 +171,12 @@ export const AgentReportsModal = ({ isOpen, onClose, signalementId, incidentTitl
                   Aucun rapport disponible
                 </span>
                 <span className="text-muted d-block mt-1" style={{ fontSize: 'var(--font-size-caption)' }}>
-                  Aucun rapport de terrain n'a encore été remonté pour cet signalement.
+                  Aucun rapport de terrain n'a encore été remonté pour cet incident.
                 </span>
               </div>
             </div>
           ) : (
-            <div className="signalements-reports-list" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div className="incidents-reports-list" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: 'var(--font-size-body-small)', fontWeight: '600', color: 'var(--color-text-secondary)' }}>
                   {displayedReports.length} rapport(s) de terrain trouvé(s)
@@ -187,7 +187,7 @@ export const AgentReportsModal = ({ isOpen, onClose, signalementId, incidentTitl
                 {displayedReports.map((report) => (
                   <div
                     key={report.id}
-                    className="signalements-report-item"
+                    className="incidents-report-item"
                     style={{
                       display: 'flex',
                       flexDirection: 'column',
@@ -248,7 +248,7 @@ export const AgentReportsModal = ({ isOpen, onClose, signalementId, incidentTitl
                       {report.distance_meters && (
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                           <span style={{ color: 'var(--color-text-muted)' }}>Précision de localisation :</span>
-                          <span style={{ fontWeight: '500' }}>± {report.distance_meters}m de l'signalement</span>
+                          <span style={{ fontWeight: '500' }}>± {report.distance_meters}m de l'incident</span>
                         </div>
                       )}
                     </div>

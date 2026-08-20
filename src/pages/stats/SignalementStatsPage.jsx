@@ -52,7 +52,7 @@ export const SignalementStatsPage = () => {
           <div className="stats-page-header">
             <h1 className="stats-page-title">Statistiques des Signalements</h1>
             <p className="stats-page-subtitle">
-              Vue d'ensemble complète des signalements par statut, localité, type et gravité
+              Vue d'ensemble complète des incidents par statut, localité, type et gravité
             </p>
           </div>
 

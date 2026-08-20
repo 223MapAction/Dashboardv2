@@ -5,14 +5,14 @@ import { logger } from '../../../utils/logger';
 const DISCUSSION_URL = 'discussion';
 
 /**
- * Récupère les messages de discussion d'un signalement avec pagination
- * @param {number} signalementId - ID de l'signalement
+ * Récupère les messages de discussion d'un incident avec pagination
+ * @param {number} incidentId - ID de l'incident
  * @param {Object} options - Options de pagination
  * @param {number} [options.limit] - Nombre de messages à récupérer (par défaut: tous)
  * @param {number} [options.before] - ID du message avant lequel récupérer (pour charger les messages plus anciens)
  * @returns {Promise<Object>} { results: Array, has_more: boolean, next_before: number|null }
  */
-export const getDiscussionMessagesService = async (signalementId, options = {}) => {
+export const getDiscussionMessagesService = async (incidentId, options = {}) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     
@@ -25,7 +25,7 @@ export const getDiscussionMessagesService = async (signalementId, options = {}) 
       params.before = options.before;
     }
     
-    const response = await axios.get(`${API_URL_BASE}/MapApi/${DISCUSSION_URL}/${signalementId}/`, { params });
+    const response = await axios.get(`${API_URL_BASE}/MapApi/${DISCUSSION_URL}/${incidentId}/`, { params });
 
     const data = response?.data;
 
@@ -68,17 +68,17 @@ export const getDiscussionMessagesService = async (signalementId, options = {}) 
 
 /**
  * Envoie un message texte dans la discussion
- * @param {number} signalementId - ID de l'signalement
+ * @param {number} incidentId - ID de l'incident
  * @param {Object} data - Données du message
  * @param {string} data.message - Contenu du message
  * @param {number} [data.recipient] - ID du destinataire (optionnel)
  * @returns {Promise<Object>} Message créé
  */
-export const sendTextMessageService = async (signalementId, data) => {
+export const sendTextMessageService = async (incidentId, data) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.post(
-      `${API_URL_BASE}/MapApi/${DISCUSSION_URL}/${signalementId}/`,
+      `${API_URL_BASE}/MapApi/${DISCUSSION_URL}/${incidentId}/`,
       {
         message: data.message,
         ...(data.recipient && { recipient: data.recipient })
@@ -99,13 +99,13 @@ export const sendTextMessageService = async (signalementId, data) => {
 
 /**
  * Envoie un message audio dans la discussion
- * @param {number} signalementId - ID de l'signalement
+ * @param {number} incidentId - ID de l'incident
  * @param {Object} data - Données du message
  * @param {File} data.audio - Fichier audio (mp3, wav, etc.)
  * @param {number} [data.recipient] - ID du destinataire (optionnel)
  * @returns {Promise<Object>} Message créé
  */
-export const sendAudioMessageService = async (signalementId, data) => {
+export const sendAudioMessageService = async (incidentId, data) => {
   try {
     const axios = authService.createAuthenticatedAxios();
 
@@ -116,7 +116,7 @@ export const sendAudioMessageService = async (signalementId, data) => {
     }
 
     const response = await axios.post(
-      `${API_URL_BASE}/MapApi/${DISCUSSION_URL}/${signalementId}/`,
+      `${API_URL_BASE}/MapApi/${DISCUSSION_URL}/${incidentId}/`,
       formData,
       {
         headers: {
@@ -134,13 +134,13 @@ export const sendAudioMessageService = async (signalementId, data) => {
 
 /**
  * Envoie un fichier joint dans la discussion
- * @param {number} signalementId - ID de l'signalement
+ * @param {number} incidentId - ID de l'incident
  * @param {Object} data - Données du message
  * @param {File} data.attachment - Fichier joint (pdf, doc, docx, xls, xlsx)
  * @param {number} [data.recipient] - ID du destinataire (optionnel)
  * @returns {Promise<Object>} Message créé
  */
-export const sendAttachmentMessageService = async (signalementId, data) => {
+export const sendAttachmentMessageService = async (incidentId, data) => {
   try {
     const axios = authService.createAuthenticatedAxios();
 
@@ -151,7 +151,7 @@ export const sendAttachmentMessageService = async (signalementId, data) => {
     }
 
     const response = await axios.post(
-      `${API_URL_BASE}/MapApi/${DISCUSSION_URL}/${signalementId}/`,
+      `${API_URL_BASE}/MapApi/${DISCUSSION_URL}/${incidentId}/`,
       formData,
       {
         headers: {
@@ -169,7 +169,7 @@ export const sendAttachmentMessageService = async (signalementId, data) => {
 
 /**
  * Envoie un message avec texte et fichier joint
- * @param {number} signalementId - ID de l'signalement
+ * @param {number} incidentId - ID de l'incident
  * @param {Object} data - Données du message
  * @param {string} [data.message] - Contenu du message (optionnel)
  * @param {File} [data.attachment] - Fichier joint (optionnel)
@@ -177,18 +177,18 @@ export const sendAttachmentMessageService = async (signalementId, data) => {
  * @param {number} [data.recipient] - ID du destinataire (optionnel)
  * @returns {Promise<Object>} Message créé
  */
-export const sendMessageService = async (signalementId, data) => {
+export const sendMessageService = async (incidentId, data) => {
   try {
     const axios = authService.createAuthenticatedAxios();
 
     // Si c'est un message texte simple
     if (data.message && !data.attachment && !data.audio) {
-      return await sendTextMessageService(signalementId, data);
+      return await sendTextMessageService(incidentId, data);
     }
 
     // Si c'est un fichier audio
     if (data.audio) {
-      return await sendAudioMessageService(signalementId, data);
+      return await sendAudioMessageService(incidentId, data);
     }
 
     // Si c'est un fichier joint (avec ou sans message)
@@ -203,7 +203,7 @@ export const sendMessageService = async (signalementId, data) => {
       }
 
       const response = await axios.post(
-        `${API_URL_BASE}/MapApi/${DISCUSSION_URL}/${signalementId}/`,
+        `${API_URL_BASE}/MapApi/${DISCUSSION_URL}/${incidentId}/`,
         formData,
         {
           headers: {
@@ -224,17 +224,17 @@ export const sendMessageService = async (signalementId, data) => {
 
 /**
  * Modifier un message de discussion
- * PATCH /MapApi/discussion/<signalementId>/<messageId>/
- * @param {string} signalementId - ID de l'signalement
+ * PATCH /MapApi/discussion/<incidentId>/<messageId>/
+ * @param {string} incidentId - ID de l'incident
  * @param {string} messageId - ID du message
  * @param {string} message - Nouveau contenu du message
  * @returns {Promise<Object>} Message modifié
  */
-export const updateDiscussionMessageService = async (signalementId, messageId, message) => {
+export const updateDiscussionMessageService = async (incidentId, messageId, message) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.patch(
-      `${API_URL_BASE}/MapApi/${DISCUSSION_URL}/${signalementId}/${messageId}/`,
+      `${API_URL_BASE}/MapApi/${DISCUSSION_URL}/${incidentId}/${messageId}/`,
       { message },
       { headers: { 'Content-Type': 'application/json' } }
     );
@@ -247,15 +247,15 @@ export const updateDiscussionMessageService = async (signalementId, messageId, m
 
 /**
  * Supprimer un message de discussion
- * DELETE /MapApi/discussion/<signalementId>/<messageId>/
- * @param {string} signalementId - ID de l'signalement
+ * DELETE /MapApi/discussion/<incidentId>/<messageId>/
+ * @param {string} incidentId - ID de l'incident
  * @param {string} messageId - ID du message
  * @returns {Promise<void>}
  */
-export const deleteDiscussionMessageService = async (signalementId, messageId) => {
+export const deleteDiscussionMessageService = async (incidentId, messageId) => {
   try {
     const axios = authService.createAuthenticatedAxios();
-    await axios.delete(`${API_URL_BASE}/MapApi/${DISCUSSION_URL}/${signalementId}/${messageId}/`);
+    await axios.delete(`${API_URL_BASE}/MapApi/${DISCUSSION_URL}/${incidentId}/${messageId}/`);
   } catch (error) {
     logger.error('[Discussion] Erreur suppression message:', error?.response?.status, error?.response?.data);
     throw error;
@@ -387,18 +387,18 @@ export const groupMessagesByDate = (messages) => {
 
 /**
  * Suggère une organisation partenaire pour une collaboration
- * @param {number} signalementId - ID de la collaboration
+ * @param {number} incidentId - ID de la collaboration
  * @param {Object} data - Données de la suggestion
  * @param {string} data.suggested_organisation - UUID de l'organisation
  * @param {string} data.suggested_role - 'contributor' | 'observer'
  * @param {string} data.justification - Motif de la suggestion
  * @returns {Promise<Object>} Résultat de la suggestion
  */
-export const suggestCollaborationPartnerService = async (signalementId, data) => {
+export const suggestCollaborationPartnerService = async (incidentId, data) => {
   try {
     const axios = authService.createAuthenticatedAxios();
     const response = await axios.post(
-      `${API_URL_BASE}/MapApi/incidents/${signalementId}/suggestions/`,
+      `${API_URL_BASE}/MapApi/incidents/${incidentId}/suggestions/`,
       data,
       { headers: { 'Content-Type': 'application/json' } }
     );

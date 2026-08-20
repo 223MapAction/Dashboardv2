@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, afterEach } from 'vitest';
 import { render, cleanup } from '@testing-library/react';
-import { SignalementDetailSkeleton } from './SqueletteDetail';
+import { IncidentDetailSkeleton } from './SqueletteDetail';
 
 afterEach(cleanup);
 
@@ -13,7 +13,7 @@ describe('squelette de chargement du signalement', () => {
     // composant JSX absent n'echoue qu'a l'execution, et seulement sur l'ecran
     // de chargement, que personne ne regarde longtemps. Le rendre une fois
     // suffit a fermer cette porte.
-    const { container } = render(<SignalementDetailSkeleton />);
+    const { container } = render(<IncidentDetailSkeleton />);
     expect(container.querySelector('.project-detail')).toBeTruthy();
   });
 });

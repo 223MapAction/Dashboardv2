@@ -7,9 +7,9 @@ import { logger } from '../../../utils/logger';
 // ─────────────────────────────────────────────────────────
 
 /**
- * Lister les suggestions de partenaires pour un signalement
+ * Lister les suggestions de partenaires pour un incident
  * GET /MapApi/incidents/<incident_id>/suggestions/
- * @param {number|string} signalementId
+ * @param {number|string} incidentId
  * @returns {Promise<Array>}
  */
 export const listPartnerSuggestionsService = async (params = {}) => {
@@ -26,9 +26,9 @@ export const listPartnerSuggestionsService = async (params = {}) => {
 };
 
 /**
- * Suggérer un partenaire pour collaboration sur un signalement
+ * Suggérer un partenaire pour collaboration sur un incident
  * POST /MapApi/incidents/<incident_id>/suggestions/
- * @param {number|string} signalementId
+ * @param {number|string} incidentId
  * @param {{
  *   suggested_organisation: string,
  *   suggested_role?: 'leader' | 'contributor' | 'observer',
@@ -36,10 +36,10 @@ export const listPartnerSuggestionsService = async (params = {}) => {
  * }} data
  * @returns {Promise<Object>}
  */
-export const createPartnerSuggestionService = async (signalementId, data) => {
+export const createPartnerSuggestionService = async (incidentId, data) => {
     try {
         const axios = authService.createAuthenticatedAxios();
-        const response = await axios.post(`${API_URL_BASE}/MapApi/incidents/${signalementId}/suggestions/`, data);
+        const response = await axios.post(`${API_URL_BASE}/MapApi/incidents/${incidentId}/suggestions/`, data);
         return response?.data || {};
     } catch (error) {
         logger.error('[PartnerSuggestion] Erreur création suggestion:', error?.response?.status, error?.response?.data);
@@ -50,14 +50,14 @@ export const createPartnerSuggestionService = async (signalementId, data) => {
 /**
  * Détails d'une suggestion de partenaire
  * GET /MapApi/incidents/<incident_id>/suggestions/<suggestion_id>/
- * @param {number|string} signalementId
+ * @param {number|string} incidentId
  * @param {number|string} suggestionId
  * @returns {Promise<Object>}
  */
-export const getPartnerSuggestionService = async (signalementId, suggestionId) => {
+export const getPartnerSuggestionService = async (incidentId, suggestionId) => {
     try {
         const axios = authService.createAuthenticatedAxios();
-        const response = await axios.get(`${API_URL_BASE}/MapApi/incidents/${signalementId}/suggestions/${suggestionId}/`);
+        const response = await axios.get(`${API_URL_BASE}/MapApi/incidents/${incidentId}/suggestions/${suggestionId}/`);
         return response?.data || {};
     } catch (error) {
         logger.error('[PartnerSuggestion] Erreur détail suggestion:', error?.response?.status, error?.response?.data);
@@ -69,15 +69,15 @@ export const getPartnerSuggestionService = async (signalementId, suggestionId) =
 /**
  * Accepter une suggestion de partenaire
  * POST /MapApi/incidents/<incident_id>/suggestions/<suggestion_id>/accept/
- * @param {number|string} signalementId
+ * @param {number|string} incidentId
  * @param {number|string} suggestionId
  * @returns {Promise<Object>}
  */
-export const acceptPartnerSuggestionService = async (signalementId, suggestionId) => {
+export const acceptPartnerSuggestionService = async (incidentId, suggestionId) => {
     try {
         const axios = authService.createAuthenticatedAxios();
         const response = await axios.post(
-            `${API_URL_BASE}/MapApi/incidents/${signalementId}/suggestions/${suggestionId}/accept/`
+            `${API_URL_BASE}/MapApi/incidents/${incidentId}/suggestions/${suggestionId}/accept/`
         );
         return response?.data || {};
     } catch (error) {
@@ -89,15 +89,15 @@ export const acceptPartnerSuggestionService = async (signalementId, suggestionId
 /**
  * Rejeter une suggestion de partenaire
  * POST /MapApi/incidents/<incident_id>/suggestions/<suggestion_id>/reject/
- * @param {number|string} signalementId
+ * @param {number|string} incidentId
  * @param {number|string} suggestionId
  * @returns {Promise<Object>}
  */
-export const rejectPartnerSuggestionService = async (signalementId, suggestionId) => {
+export const rejectPartnerSuggestionService = async (incidentId, suggestionId) => {
     try {
         const axios = authService.createAuthenticatedAxios();
         const response = await axios.post(
-            `${API_URL_BASE}/MapApi/incidents/${signalementId}/suggestions/${suggestionId}/reject/`
+            `${API_URL_BASE}/MapApi/incidents/${incidentId}/suggestions/${suggestionId}/reject/`
         );
         return response?.data || {};
     } catch (error) {
@@ -155,35 +155,35 @@ export const getMyPendingContributorInvitationsService = async () => {
 };
 
 /**
- * Lister les suggestions acceptées pour un signalement spécifique
- * GET /MapApi/incidents/<signalementId>/suggestions/?status=accepted
- * @param {number|string} signalementId
+ * Lister les suggestions acceptées pour un incident spécifique
+ * GET /MapApi/incidents/<incidentId>/suggestions/?status=accepted
+ * @param {number|string} incidentId
  * @returns {Promise<Array>}
  */
-export const getAcceptedSignalementSuggestionsService = async (signalementId) => {
+export const getAcceptedIncidentSuggestionsService = async (incidentId) => {
     try {
         const axios = authService.createAuthenticatedAxios();
-        const response = await axios.get(`${API_URL_BASE}/MapApi/incidents/${signalementId}/suggestions/?status=accepted`);
+        const response = await axios.get(`${API_URL_BASE}/MapApi/incidents/${incidentId}/suggestions/?status=accepted`);
         return response?.data?.results || response?.data || [];
     } catch (error) {
-        logger.error(`[PartnerSuggestion] Erreur suggestions acceptées signalement ${signalementId}:`, error?.response?.status, error?.response?.data);
+        logger.error(`[PartnerSuggestion] Erreur suggestions acceptées incident ${incidentId}:`, error?.response?.status, error?.response?.data);
         throw error;
     }
 };
 
 /**
- * Lister toutes mes collaborations sur un signalement spécifique
- * GET /MapApi/collaboration/?incident_id=<signalementId>
- * @param {number|string} signalementId
+ * Lister toutes mes collaborations sur un incident spécifique
+ * GET /MapApi/collaboration/?incident_id=<incidentId>
+ * @param {number|string} incidentId
  * @returns {Promise<Array>}
  */
-export const getSignalementCollaborationsService = async (signalementId) => {
+export const getIncidentCollaborationsService = async (incidentId) => {
     try {
         const axios = authService.createAuthenticatedAxios();
-        const response = await axios.get(`${API_URL_BASE}/MapApi/collaboration/?incident_id=${signalementId}`);
+        const response = await axios.get(`${API_URL_BASE}/MapApi/collaboration/?incident_id=${incidentId}`);
         return response?.data?.results || response?.data || [];
     } catch (error) {
-        logger.error(`[Collaboration] Erreur collabs signalement ${signalementId}:`, error?.response?.status, error?.response?.data);
+        logger.error(`[Collaboration] Erreur collabs incident ${incidentId}:`, error?.response?.status, error?.response?.data);
         throw error;
     }
 };
@@ -326,8 +326,8 @@ export default {
     getMyPendingReceivedSuggestionsService,
     getMyActiveCollaborationsService,
     getMyPendingContributorInvitationsService,
-    getAcceptedSignalementSuggestionsService,
-    getSignalementCollaborationsService,
+    getAcceptedIncidentSuggestionsService,
+    getIncidentCollaborationsService,
     listDemandeDeCollaborationsService,
     getCollaborationDashboardService,
     getCollaborationDetailService,
