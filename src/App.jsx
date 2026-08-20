@@ -12,8 +12,8 @@ import { ChargementPage } from './components/atoms/ChargementPage';
 const Dashboard = lazy(() => import('./pages/dashboard').then((m) => ({ default: m.Dashboard })));
 const Collaboration = lazy(() => import('./pages/collaboration').then((m) => ({ default: m.Collaboration })));
 const CollaborationDetail = lazy(() => import('./pages/collaboration-detail').then((m) => ({ default: m.CollaborationDetail })));
-const Signalement = lazy(() => import('./pages/signalement').then((m) => ({ default: m.Signalement })));
-const SignalementDetailPage = lazy(() => import('./pages/signalement').then((m) => ({ default: m.SignalementDetailPage })));
+const Incident = lazy(() => import('./pages/incident').then((m) => ({ default: m.Incident })));
+const IncidentDetailPage = lazy(() => import('./pages/incident').then((m) => ({ default: m.IncidentDetailPage })));
 const Impact = lazy(() => import('./pages/impact').then((m) => ({ default: m.Impact })));
 const Profile = lazy(() => import('./pages/profile').then((m) => ({ default: m.Profile })));
 const TrashPage = lazy(() => import('./pages/trash').then((m) => ({ default: m.TrashPage })));
@@ -98,7 +98,7 @@ function App() {
           path="/signalements"
           element={
             <ProtectedRoute>
-              <Signalement />
+              <Incident />
             </ProtectedRoute>
           }
         />
@@ -106,7 +106,7 @@ function App() {
           path="/signalements/:id"
           element={
             <ProtectedRoute>
-              <SignalementDetailPage />
+              <IncidentDetailPage />
             </ProtectedRoute>
           }
         />

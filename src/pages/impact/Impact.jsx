@@ -778,7 +778,7 @@ export const Impact = () => {
                                   </span>
                                 </div>
 
-                                <h3 className="impact-card-title">{inc.title || 'Signalement sans titre'}</h3>
+                                <h3 className="impact-card-title">{inc.title || 'Incident sans titre'}</h3>
                                 <p className="impact-card-summary">
                                   {inc.description || 'Aucune description disponible pour cet incident.'}
                                 </p>

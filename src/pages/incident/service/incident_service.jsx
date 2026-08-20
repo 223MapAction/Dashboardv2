@@ -39,10 +39,10 @@ export const getIncidentsService = async (page = null, pageSize = null, search =
       `${API_URL_BASE}/MapApi/incident/${queryString}`
     );
 
-    logger.warn('[Signalement]url Incidents récupérés:', `${API_URL_BASE}/MapApi/incident/${queryString}`);
+    logger.warn('[Incident]url Incidents récupérés:', `${API_URL_BASE}/MapApi/incident/${queryString}`);
     return response.data;
   } catch (error) {
-    logger.error('[Signalement] Erreur récupération incidents:', error.response?.status, error.response?.data);
+    logger.error('[Incident] Erreur récupération incidents:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -61,7 +61,7 @@ export const getResolvedIncidentsService = async () => {
 
     return response.data;
   } catch (error) {
-    logger.error('[Signalement] Erreur récupération incidents résolus:', error.response?.status, error.response?.data);
+    logger.error('[Incident] Erreur récupération incidents résolus:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -83,7 +83,7 @@ export const getIncidentService = async (id) => {
 
     return response.data;
   } catch (error) {
-    logger.error('[Signalement] Erreur récupération incident:', error.response?.status, error.response?.data);
+    logger.error('[Incident] Erreur récupération incident:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -102,7 +102,7 @@ export const getIncidentService = async (id) => {
  * @param {File} incidentData.photo - Fichier photo
  * @param {File} incidentData.video - Fichier vidéo
  * @param {File} incidentData.audio - Fichier audio
- * @returns {Promise<Object>} Signalement créé
+ * @returns {Promise<Object>} Incident créé
  */
 export const createIncidentService = async (incidentData) => {
   try {
@@ -128,7 +128,7 @@ export const createIncidentService = async (incidentData) => {
 
     return response.data;
   } catch (error) {
-    logger.error('[Signalement] Erreur création incident:', error.response?.status, error.response?.data);
+    logger.error('[Incident] Erreur création incident:', error.response?.status, error.response?.data);
     throw error?.response?.data || error;
   }
 };
@@ -137,7 +137,7 @@ export const createIncidentService = async (incidentData) => {
  * Met à jour un incident
  * @param {number} id - ID de l'incident
  * @param {Object} updates - Données à mettre à jour
- * @returns {Promise<Object>} Signalement mis à jour
+ * @returns {Promise<Object>} Incident mis à jour
  */
 export const updateIncidentService = async (id, updates) => {
   try {
@@ -149,7 +149,7 @@ export const updateIncidentService = async (id, updates) => {
 
     return response.data;
   } catch (error) {
-    logger.error('[Signalement] Erreur mise à jour incident:', error.response?.status, error.response?.data);
+    logger.error('[Incident] Erreur mise à jour incident:', error.response?.status, error.response?.data);
     throw error?.response?.data || error;
   }
 };
@@ -165,7 +165,7 @@ export const deleteIncidentService = async (id) => {
     await axios.delete(`${API_URL_BASE}/MapApi/${INCIDENT_URL}/${id}`);
 
   } catch (error) {
-    logger.error('[Signalement] Erreur suppression incident:', error.response?.status, error.response?.data);
+    logger.error('[Incident] Erreur suppression incident:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -185,7 +185,7 @@ export const takeInChargeIncidentService = async (incidentId, data = null) => {
 
     return response.data;
   } catch (error) {
-    logger.error('[Prise en charge Signalement] Erreur:', error.response?.status, error.response?.data);
+    logger.error('[Prise en charge Incident] Erreur:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -204,7 +204,7 @@ export const getIncidentsByZoneService = async (zone) => {
 
     return response.data?.results || response.data || [];
   } catch (error) {
-    logger.error('[Signalement] Erreur récupération incidents par zone:', error.response?.status, error.response?.data);
+    logger.error('[Incident] Erreur récupération incidents par zone:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -223,7 +223,7 @@ export const getIncidentsByCategoryService = async (categoryId) => {
 
     return response.data?.results || response.data || [];
   } catch (error) {
-    logger.error('[Signalement] Erreur récupération incidents par catégorie:', error.response?.status, error.response?.data);
+    logger.error('[Incident] Erreur récupération incidents par catégorie:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -245,7 +245,7 @@ export const getOrgIncidentsService = async (source = 'agents') => {
 
     return response.data?.results || response.data || [];
   } catch (error) {
-    logger.error('[Signalement] Erreur récupération incidents organisation:', error.response?.status, error.response?.data);
+    logger.error('[Incident] Erreur récupération incidents organisation:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -264,7 +264,7 @@ export const togglePublicIncidentService = async (incidentId) => {
 
     return response.data;
   } catch (error) {
-    logger.error('[Signalement] Erreur basculement visibilité:', error.response?.status, error.response?.data);
+    logger.error('[Incident] Erreur basculement visibilité:', error.response?.status, error.response?.data);
     throw error?.response?.data || error;
   }
 };
@@ -297,7 +297,7 @@ export const getAssignIncidentToAgentService = async (incidentId = null, data = 
     return response.data?.results || response.data || [];
   } catch (error) {
     logger.error(
-      `[Signalement] Erreur ${incidentId ? 'assignation' : 'récupération'} incidents assignés:`,
+      `[Incident] Erreur ${incidentId ? 'assignation' : 'récupération'} incidents assignés:`,
       error.response?.status,
       error.response?.data
     );
@@ -320,7 +320,7 @@ export const getAssignIncidentToAgentService = async (incidentId = null, data = 
  */
 export const assignIncidentToAgentService = async (incidentId, data = null) => {
   if (!incidentId) {
-    throw new Error('[Signalement] assignIncidentToAgentService : incidentId est requis');
+    throw new Error('[Incident] assignIncidentToAgentService : incidentId est requis');
   }
 
   try {
@@ -332,7 +332,7 @@ export const assignIncidentToAgentService = async (incidentId, data = null) => {
     return response.data;
   } catch (error) {
     logger.error(
-      '[Signalement] Erreur assignation incident:',
+      '[Incident] Erreur assignation incident:',
       error.response?.status,
       error.response?.data
     );
@@ -354,7 +354,7 @@ export const getIncidentAssignmentsService = async (incidentId) => {
     return response.data?.results || response.data || [];
   } catch (error) {
     logger.error(
-      `[Signalement] Erreur récupération assignations pour l'incident ${incidentId}:`,
+      `[Incident] Erreur récupération assignations pour l'incident ${incidentId}:`,
       error.response?.status,
       error.response?.data
     );
@@ -366,7 +366,7 @@ export const getIncidentAssignmentsService = async (incidentId) => {
  * Clôture un incident (leader uniquement)
  * @param {number} incidentId - ID de l'incident
  * @param {Object} data - { resolution_start_date, resolution_end_date }
- * @returns {Promise<Object>} Signalement clôturé
+ * @returns {Promise<Object>} Incident clôturé
  */
 export const closeIncidentService = async (incidentId, data) => {
   try {
@@ -392,7 +392,7 @@ export const closeIncidentService = async (incidentId, data) => {
 
     return response.data;
   } catch (error) {
-    logger.error('[Signalement] Erreur clôture incident:', error.response?.status, error.response?.data);
+    logger.error('[Incident] Erreur clôture incident:', error.response?.status, error.response?.data);
     throw error?.response?.data || error;
   }
 };
@@ -410,7 +410,7 @@ export const getTrashIncidentsService = async () => {
 
     return response.data?.results || response.data || [];
   } catch (error) {
-    logger.error('[Signalement] Erreur récupération corbeille:', error.response?.status, error.response?.data);
+    logger.error('[Incident] Erreur récupération corbeille:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -418,7 +418,7 @@ export const getTrashIncidentsService = async () => {
 /**
  * Restaure un incident supprimé
  * @param {number} incidentId - ID de l'incident
- * @returns {Promise<Object>} Signalement restauré
+ * @returns {Promise<Object>} Incident restauré
  */
 export const restoreIncidentService = async (incidentId) => {
   try {
@@ -429,7 +429,7 @@ export const restoreIncidentService = async (incidentId) => {
 
     return response.data;
   } catch (error) {
-    logger.error('[Signalement] Erreur restauration incident:', error.response?.status, error.response?.data);
+    logger.error('[Incident] Erreur restauration incident:', error.response?.status, error.response?.data);
     throw error?.response?.data || error;
   }
 };
@@ -448,7 +448,7 @@ export const getIncidentPredictionService = async (id) => {
 
     return response.data;
   } catch (error) {
-    logger.error('[Signalement] Erreur récupération prédiction:', error.response?.status, error.response?.data);
+    logger.error('[Incident] Erreur récupération prédiction:', error.response?.status, error.response?.data);
     throw error;
   }
 };
@@ -456,7 +456,7 @@ export const getIncidentPredictionService = async (id) => {
 /**
  * Formate un incident pour l'affichage
  * @param {Object} incident - Données brutes de l'incident
- * @returns {Object} Signalement formaté
+ * @returns {Object} Incident formaté
  */
 export const formatIncident = (incident) => {
   if (!incident) return null;

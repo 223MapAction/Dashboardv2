@@ -2,13 +2,13 @@ import React from 'react';
 import useSWR from 'swr';
 import { useSidebarState } from '../../hooks/useSidebarState';
 import { Header, Sidebar } from '../../components/layout';
-import { SignalementStats } from '../dashboard/components/stats/SignalementStats';
+import { IncidentStats } from '../dashboard/components/stats/IncidentStats';
 import { getDashboardStatsService } from '../dashboard/service/dashboard_service';
 import { ShimmerThumbnail, ShimmerTitle } from 'react-shimmer-effects';
-import './signalement-stats-page.css';
+import './incident-stats-page.css';
 import { logger } from '../../utils/logger';
 
-export const SignalementStatsPage = () => {
+export const IncidentStatsPage = () => {
   const {
     isOpen: sidebarOpen,
     setOpen: setSidebarOpen,
@@ -69,7 +69,7 @@ export const SignalementStatsPage = () => {
               <button onClick={() => window.location.reload()}>Réessayer</button>
             </div>
           ) : (
-            <SignalementStats stats={stats} />
+            <IncidentStats stats={stats} />
           )}
         </main>
       </div>
@@ -77,4 +77,4 @@ export const SignalementStatsPage = () => {
   );
 };
 
-export default SignalementStatsPage;
+export default IncidentStatsPage;

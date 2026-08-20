@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import useSWR from 'swr';
 import { useMesInterventionsModalContext } from '../mesInterventionsModalContexte';
 import { CloseCircle, Profile, Edit2 } from 'iconsax-react';
-import { getIncidentAssignmentsService } from '../../signalement/service/signalement_service';
+import { getIncidentAssignmentsService } from '../../incident/service/incident_service';
 
 import { OffcanvasModal } from '../../../components/molecules/OffcanvasModal';
 import { AVATAR_COLORS, AVATAR_COULEUR_DEFAUT } from '../../../utils/couleursAvatar';
@@ -30,7 +30,7 @@ const formatDate = (isoString) => {
   }
 };
 
-export const SignalementAgentsListModal = () => {
+export const IncidentAgentsListModal = () => {
   const {
     agentsModal,
     agentsClosing,
@@ -252,4 +252,4 @@ export const SignalementAgentsListModal = () => {
   );
 };
 
-export default SignalementAgentsListModal;
+export default IncidentAgentsListModal;

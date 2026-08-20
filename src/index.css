@@ -1367,7 +1367,7 @@ p {
 
    Trois traitements divergents coexistaient : le dégradé bleu-gris sombre
    d'App.css, le dégradé clair de map.css, et un aplat sans dégradé dans
-   signalement-detail.css — ce dernier ne scintillait donc pas du tout. Pire,
+   incident-detail.css — ce dernier ne scintillait donc pas du tout. Pire,
    deux `@keyframes shimmer` concurrents étaient définis, l'un en pourcentages
    et l'autre en pixels : le dernier chargé s'appliquait aux deux, cassant
    forcément l'un des rendus.

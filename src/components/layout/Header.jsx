@@ -301,7 +301,7 @@ export const Header = ({ onMenuToggle, user }) => {
                           {formatNotificationMessage(notification.message)}
                           {notification.incident_title && (
                             <span className="notification-incident-tag" style={{ display: 'block', fontSize: 'var(--font-size-micro)', color: 'var(--color-text-secondary)', marginTop: '2px', fontStyle: 'italic' }}>
-                              Signalement : {notification.incident_title}
+                              Incident : {notification.incident_title}
                             </span>
                           )}
                         </div>

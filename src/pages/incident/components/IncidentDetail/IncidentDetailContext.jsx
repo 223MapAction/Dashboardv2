@@ -1,9 +1,9 @@
 import React, { createContext, useContext } from 'react';
 
-export const SignalementDetailContext = createContext(null);
+export const IncidentDetailContext = createContext(null);
 
 export const useIncidentDetail = () => {
-  const context = useContext(SignalementDetailContext);
+  const context = useContext(IncidentDetailContext);
   if (!context) {
     throw new Error('useIncidentDetail must be used within an IncidentDetailProvider');
   }

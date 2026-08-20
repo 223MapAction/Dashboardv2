@@ -78,7 +78,7 @@ export const calculateTopIncidents = (incidents, limit = 5) => {
   const categoryMap = {};
   
   normalized.forEach(inc => {
-    const category = inc.title || 'Signalement anonyme';
+    const category = inc.title || 'Incident anonyme';
     categoryMap[category] = (categoryMap[category] || 0) + 1;
   });
   

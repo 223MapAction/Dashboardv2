@@ -2,10 +2,10 @@ import React from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useSidebarState } from '../../hooks/useSidebarState';
 import { Header, Sidebar } from '../../components/layout';
-import { SignalementDetail } from './components/SignalementDetail/SignalementDetail';
-import './signalement.css';
+import { IncidentDetail } from './components/IncidentDetail/IncidentDetail';
+import './incident.css';
 
-export const SignalementDetailPage = () => {
+export const IncidentDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -43,7 +43,7 @@ export const SignalementDetailPage = () => {
 
         <div className="incident-workspace">
           {/* On rend le composant détail existant. Il gère déjà useSWR pour charger ses données. */}
-          <SignalementDetail
+          <IncidentDetail
             incident={incidentFromState || { id: id }}
             onBack={handleBack}
             isLoading={false}

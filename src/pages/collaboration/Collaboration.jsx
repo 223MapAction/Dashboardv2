@@ -5,7 +5,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import useSWR from 'swr';
 import { useSidebarState } from '../../hooks/useSidebarState';
 import Pagination from '../../components/molecules/Pagination';
-import { getIncidentsService } from '../signalement/service/signalement_service';
+import { getIncidentsService } from '../incident/service/incident_service';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import { fr } from 'date-fns/locale/fr';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -267,7 +267,7 @@ export const Collaboration = () => {
       const createdDate = new Date(collab.created_at);
       const startDate = collab.start_date ? new Date(collab.start_date) : null;
       const endDate = collab.end_date ? new Date(collab.end_date) : null;
-      const incidentTitle = collab.incident_details?.title || collab.incident_title || `Signalement`;
+      const incidentTitle = collab.incident_details?.title || collab.incident_title || `Incident`;
       const incidentImage = collab.incident_photo || collab.incident_thumbnail || collab.photo || collab.thumbnail || collab.incident_details?.photo || collab.incident_details?.image || '';
       const orgName = collab.organisation_name || collab.user_full_name || ``;
       const incidentLocation = collab.incident_details?.zone || collab.incident_zone || 'À définir';

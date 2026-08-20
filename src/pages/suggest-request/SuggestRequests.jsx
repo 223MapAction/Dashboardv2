@@ -29,7 +29,7 @@ import {
   acceptPartnerSuggestionService,
   rejectPartnerSuggestionService
 } from './service/suggest_service';
-import { RequestSignalementDetailModal } from '../../components/collaboration/RequestSignalementDetailModal';
+import { RequestIncidentDetailModal } from '../../components/collaboration/RequestIncidentDetailModal';
 import { RequestDecisionModal } from '../../components/collaboration/RequestDecisionModal';
 import { authService } from '../auth/services/authService';
 import { API_URL_BASE } from '../../config/api_url_base';
@@ -256,7 +256,7 @@ export const SuggestRequests = ({ embedded = false }) => {
               id: `ws_${reqId}`,
               type: 'invitation',
               direction,
-              projectTitle: data.incident_title || `Signalement #${data.incident}`,
+              projectTitle: data.incident_title || `Incident #${data.incident}`,
               projectImage: '',
               organisation: orgName,
               organisationInitials: getInitials(orgName),
@@ -323,7 +323,7 @@ export const SuggestRequests = ({ embedded = false }) => {
           id: `inv_received_${item.id}`,
           type: 'invitation',
           direction,
-          projectTitle: item.incident_title || details?.title || 'Signalement sans titre',
+          projectTitle: item.incident_title || details?.title || 'Incident sans titre',
           projectImage: details?.thumbnail || details?.photo || item.incident_photo || item.incident_thumbnail || '',
           organisation: partnerName,
           organisationInitials: getInitials(partnerName),
@@ -351,7 +351,7 @@ export const SuggestRequests = ({ embedded = false }) => {
         id: `sug_received_${item.id}`,
         type: 'suggestion',
         direction,
-        projectTitle: item.incident_title || details?.title || 'Signalement sans titre',
+        projectTitle: item.incident_title || details?.title || 'Incident sans titre',
         projectImage: details?.thumbnail || details?.photo || item.incident_photo || '',
         organisation: partnerName,
         organisationInitials: getInitials(partnerName),
@@ -382,7 +382,7 @@ export const SuggestRequests = ({ embedded = false }) => {
         id: `sug_sent_${item.id}`,
         type: 'suggestion',
         direction: 'sent',
-        projectTitle: item.incident_title || details?.title || 'Signalement sans titre',
+        projectTitle: item.incident_title || details?.title || 'Incident sans titre',
         projectImage: details?.thumbnail || details?.photo || item.incident_photo || '',
         organisation: partnerName,
         organisationInitials: getInitials(partnerName),
@@ -784,9 +784,9 @@ export const SuggestRequests = ({ embedded = false }) => {
         />
       )}
 
-      {/* Signalement Detail Modal */}
+      {/* Incident Detail Modal */}
       {selectedIncident && (
-        <RequestSignalementDetailModal
+        <RequestIncidentDetailModal
           incident={selectedIncident}
           onClose={() => setSelectedIncident(null)}
         />

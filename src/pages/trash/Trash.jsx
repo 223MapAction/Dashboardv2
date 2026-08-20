@@ -7,7 +7,7 @@ import {
   InfoCircle, CloseCircle, Grid2, HambergerMenu
 } from 'iconsax-react';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
-import { getTrashIncidentsService, restoreIncidentService, deleteIncidentService } from '../signalement/service/signalement_service';
+import { getTrashIncidentsService, restoreIncidentService, deleteIncidentService } from '../incident/service/incident_service';
 import { BlurryImage } from '../../components/atoms/BlurryImage';
 import { FiltersBar } from '../../components/molecules/FiltersBar';
 import { useRechercheDebouncee } from '../../hooks/useRechercheDebouncee';
@@ -209,7 +209,7 @@ export const TrashPage = () => {
         await deleteIncidentService(id);
         await mutate();
         setSelected((prev) => { const s = new Set(prev); s.delete(id); return s; });
-        showToast('Signalement supprimé définitivement.');
+        showToast('Incident supprimé définitivement.');
       }
       closeConfirmModal();
     } catch (error) {

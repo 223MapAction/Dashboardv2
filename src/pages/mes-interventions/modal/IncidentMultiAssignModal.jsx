@@ -11,7 +11,7 @@ const getInitials = (name = '') =>
     .map((n) => n[0]?.toUpperCase() || '')
     .join('');
 
-export const SignalementMultiAssignModal = () => {
+export const IncidentMultiAssignModal = () => {
   const {
     assignModal,
     assignClosing,
@@ -230,4 +230,4 @@ export const SignalementMultiAssignModal = () => {
   );
 };
 
-export default SignalementMultiAssignModal;
+export default IncidentMultiAssignModal;

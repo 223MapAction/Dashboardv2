@@ -442,7 +442,7 @@
   cursor: not-allowed;
 }
 
-/* Les styles pour la modal des rapports sont maintenant dans le composant SignalementReportsModal 
+/* Les styles pour la modal des rapports sont maintenant dans le composant IncidentReportsModal 
    qui utilise les classes am-offcanvas existantes */
 
 /* ── Responsive ──────────────────────────── */

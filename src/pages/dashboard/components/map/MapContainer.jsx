@@ -6,7 +6,7 @@ import { NIVEAUX_GRAVITE, gravite, couleurGravite } from '../../../../utils/grav
 import Map, { Marker, Popup } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
-import { getIncidentService } from '../../../signalement/service/signalement_service';
+import { getIncidentService } from '../../../incident/service/incident_service';
 import { getOrgInternalIncidentsService } from '../../../mes-interventions/service/mes_interventions_service';
 import { getIncidentsFilteredService } from '../../service/dashboard_service';
 import { BlurryImage } from '../../../../components/atoms/BlurryImage';
@@ -292,7 +292,7 @@ export const MapContainer = () => {
     if (ownershipFilter === 'mine') {
       const takenBy = inc?.taken_by;
       if (!takenBy || !currentUserId || String(takenBy).toLowerCase() !== String(currentUserId).toLowerCase()) {
-        // console.log(`[MAP] Signalement ID ${inc.id} ("${inc.title}") rejeté: Filtre 'mine' actif mais taken_by (${takenBy}) ne correspond pas à l'utilisateur actuel (${currentUserId})`);
+        // console.log(`[MAP] Incident ID ${inc.id} ("${inc.title}") rejeté: Filtre 'mine' actif mais taken_by (${takenBy}) ne correspond pas à l'utilisateur actuel (${currentUserId})`);
         return false;
       }
     }
@@ -307,14 +307,14 @@ export const MapContainer = () => {
 
     // 4. Filtrer les incidents supprimés
     if (inc?.is_deleted || inc?.isDeleted) {
-      // console.log(`[MAP] Signalement ID ${inc.id} ("${inc.title}") rejeté: Signalement marqué comme supprimé (is_deleted: ${inc.is_deleted}, isDeleted: ${inc.isDeleted})`);
+      // console.log(`[MAP] Incident ID ${inc.id} ("${inc.title}") rejeté: Incident marqué comme supprimé (is_deleted: ${inc.is_deleted}, isDeleted: ${inc.isDeleted})`);
       return false;
     }
 
     if (inc._hasFallbackCoords) {
-      // console.log(`[MAP] Signalement ID ${inc.id} ("${inc.title}") ACCEPTE et affiché avec coordonnées par défaut du Mali : [${inc._lat}, ${inc._lng}]`);
+      // console.log(`[MAP] Incident ID ${inc.id} ("${inc.title}") ACCEPTE et affiché avec coordonnées par défaut du Mali : [${inc._lat}, ${inc._lng}]`);
     } else {
-      // console.log(`[MAP] Signalement ID ${inc.id} ("${inc.title}") ACCEPTE et affiché avec coordonnées réelles : [${inc._lat}, ${inc._lng}]`);
+      // console.log(`[MAP] Incident ID ${inc.id} ("${inc.title}") ACCEPTE et affiché avec coordonnées réelles : [${inc._lat}, ${inc._lng}]`);
     }
     return true;
   }), [normalizedIncidents, ownershipFilter, statusFilter, currentUserId]);
@@ -496,7 +496,7 @@ export const MapContainer = () => {
                     >
                       <span className="incident-group-dot" />
                       <span className="incident-group-label">
-                        {inc.title || 'Signalement sans titre'}
+                        {inc.title || 'Incident sans titre'}
                       </span>
                       <span className="incident-group-etat">{translateEtat(inc.etat)}</span>
                     </button>

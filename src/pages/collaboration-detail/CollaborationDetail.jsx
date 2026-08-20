@@ -8,7 +8,7 @@ import { CollaborationDetailProvider } from './context/CollaborationDetailContex
 import { useDiscussion } from './useDiscussion';
 import { useTaches } from './useTaches';
 import { useSuggestionsOrganisations } from './useSuggestionsOrganisations';
-import { useClotureSignalement } from './useClotureSignalement';
+import { useClotureIncident } from './useClotureIncident';
 import { TaskModal } from './modal/TaskModal';
 import { SuggestOrgModal } from './modal/SuggestOrgModal';
 import { DeleteTaskModal } from './modal/DeleteTaskModal';
@@ -18,7 +18,7 @@ import { getCollaborationService } from '../collaboration/service/collaboration_
 import { BlurryImage } from '../../components/atoms/BlurryImage';
 import { API_URL_BASE } from '../../config/api_url_base';
 import { authService } from '../auth/services/authService';
-import { getTasksService, deleteTaskService } from '../signalement/service/task_service';
+import { getTasksService, deleteTaskService } from '../incident/service/task_service';
 import {
   ArrowLeft2,
   Location,
@@ -168,7 +168,7 @@ export const CollaborationDetail = () => {
   const collaboration = useMemo(() => (collaborationData ? {
     id: collaborationData.id,
     userRole: collaborationData.role,
-    title: collaborationData.incident_details?.title || collaborationData.incident_title || `Signalement #${collaborationData.incident}`,
+    title: collaborationData.incident_details?.title || collaborationData.incident_title || `Incident #${collaborationData.incident}`,
     incidentId: collaborationData.incident,
     userId: collaborationData.user,
     status: collaborationData.status,
@@ -260,7 +260,7 @@ export const CollaborationDetail = () => {
     resolutionFile, setResolutionFile,
     closeAlert,
     isClosing,
-  } = useClotureSignalement(collaboration, mutateCollaboration);
+  } = useClotureIncident(collaboration, mutateCollaboration);
 
   // Ces deux effets lisent des valeurs fournies par les hooks ci-dessus, ils
   // doivent donc etre declares APRES eux. Leurs tableaux de dependances sont
@@ -339,7 +339,7 @@ export const CollaborationDetail = () => {
                         <ShimmerThumbnail height={8} rounded />
                       </div>
 
-                      {/* Subsection 1: L'Signalement */}
+                      {/* Subsection 1: L'Incident */}
                       <div className="collab-detail-subsection">
                         <h4 className="collab-detail-subsection-title">L'Signalement</h4>
                         <div className="collab-detail-meta-group">
@@ -643,7 +643,7 @@ export const CollaborationDetail = () => {
                 {isIncidentResolved ? (
                   <div className="collab-detail-closed-badge" style={{ backgroundColor: 'var(--color-success)', color: 'var(--color-surface)' }}>
                     <TickCircle size={16} variant="Bold" color="var(--color-surface)" />
-                    Signalement Résolu
+                    Incident Résolu
                   </div>
                 ) : collaboration?.userRole === 'leader' && (
                   <button
@@ -711,7 +711,7 @@ export const CollaborationDetail = () => {
                         </div>
                       </div>
 
-                      {/* Subsection 1: L'Signalement (Most Important) */}
+                      {/* Subsection 1: L'Incident (Most Important) */}
                       <div className="collab-detail-subsection">
                         <h4 className="collab-detail-subsection-title">L'Signalement</h4>
                         <div className="collab-detail-meta-group">

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import useSWR from 'swr';
-import { useSocketSignalement } from '../../hooks/useSocketSignalement';
+import { useSocketIncident } from '../../hooks/useSocketIncident';
 import sendMessageSound from '../../assets/send_message.mp3';
 import {
   getDiscussionMessagesService,
@@ -116,8 +116,8 @@ export function useDiscussion(incidentId) {
 
   // Temps reel : a chaque notification du serveur, on redemande la page de
   // messages a SWR. L'effet ci-dessus se charge de n'ajouter que les nouveaux.
-  // La reconnexion et sa temporisation vivent dans useSocketSignalement.
-  useSocketSignalement(incidentId, 'discussion', () => mutateMessages());
+  // La reconnexion et sa temporisation vivent dans useSocketIncident.
+  useSocketIncident(incidentId, 'discussion', () => mutateMessages());
 
   // Fonction pour charger plus de messages (messages plus anciens)
   //

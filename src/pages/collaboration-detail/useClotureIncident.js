@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { closeIncidentService } from '../signalement/service/signalement_service';
+import { closeIncidentService } from '../incident/service/incident_service';
 import { logger } from '../../utils/logger';
 
 /**
@@ -9,7 +9,7 @@ import { logger } from '../../utils/logger';
  * @param {object|null} collaboration collaboration formatee
  * @param {Function} mutateCollaboration rafraichit la collaboration apres cloture
  */
-export function useClotureSignalement(collaboration, mutateCollaboration) {
+export function useClotureIncident(collaboration, mutateCollaboration) {
   // États pour le modal de clôture d'incident
   const [showCloseModal, setShowCloseModal] = useState(false);
   const [closeModalShowing, setCloseModalShowing] = useState(false);

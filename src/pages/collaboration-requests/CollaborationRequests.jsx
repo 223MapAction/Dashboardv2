@@ -36,7 +36,7 @@ import {
   acceptCollaborationService,
   rejectCollaborationService
 } from './service/partner_service';
-import { RequestSignalementDetailModal } from '../../components/collaboration/RequestSignalementDetailModal';
+import { RequestIncidentDetailModal } from '../../components/collaboration/RequestIncidentDetailModal';
 import { RequestDecisionModal } from '../../components/collaboration/RequestDecisionModal';
 import { authService } from '../auth/services/authService';
 import { API_URL_BASE } from '../../config/api_url_base';
@@ -294,7 +294,7 @@ export const CollaborationRequests = ({
                 id: `collab_ws_${reqId}`,
                 type: 'invitation',
                 direction: calculatedDirection,
-                projectTitle: data.incident_title || `Signalement #${data.incident}`,
+                projectTitle: data.incident_title || `Incident #${data.incident}`,
                 projectImage: '',
                 organisation: orgName,
                 organisationInitials: getInitials(orgName),
@@ -442,7 +442,7 @@ export const CollaborationRequests = ({
           id: `sug_received_${item.id}`,
           type: 'suggestion',
           direction: 'received',
-          projectTitle: details?.title || item.incident_title || (item.incident_id ? `Signalement #${item.incident_id}` : 'Signalement sans titre'),
+          projectTitle: details?.title || item.incident_title || (item.incident_id ? `Incident #${item.incident_id}` : 'Incident sans titre'),
           projectImage: projImg,
           organisation: orgName,
           organisationInitials: getInitials(orgName),
@@ -475,7 +475,7 @@ export const CollaborationRequests = ({
       }),
       ...(activeCollabs?.results || []).map((item) => {
         const details = item.incident_details || item.incident_detail;
-        const projTitle = details?.title || item.incident_title || (item.incident_id ? `Signalement #${item.incident_id}` : 'Signalement sans titre');
+        const projTitle = details?.title || item.incident_title || (item.incident_id ? `Incident #${item.incident_id}` : 'Incident sans titre');
         const projImg = item?.incident_thumbnail || '';
 
         const currUser = authService.getCurrentUser();
@@ -537,7 +537,7 @@ export const CollaborationRequests = ({
       }),
       ...(pendingInvitations || []).map((item) => {
         const details = item.incident_details || item.incident_detail;
-        const projTitle = details?.title || item.incident_title || (item.incident_id ? `Signalement #${item.incident_id}` : 'Signalement sans titre');
+        const projTitle = details?.title || item.incident_title || (item.incident_id ? `Incident #${item.incident_id}` : 'Incident sans titre');
         const projImg = item?.incident_thumbnail || '';
 
         const currUser = authService.getCurrentUser();
@@ -634,7 +634,7 @@ export const CollaborationRequests = ({
     );
   });
 
-  // Signalement-centric grouping
+  // Incident-centric grouping
   const groupedIncidents = [];
   const incidentsMap = {};
 
@@ -643,7 +643,7 @@ export const CollaborationRequests = ({
     if (!incidentsMap[incidentId]) {
       incidentsMap[incidentId] = {
         id: incidentId,
-        projectTitle: r.projectTitle || 'Signalement sans titre',
+        projectTitle: r.projectTitle || 'Incident sans titre',
         projectImage: r.projectImage || '',
         leader: null,
         userCollab: null,
@@ -820,7 +820,7 @@ export const CollaborationRequests = ({
         </div>
       )}
 
-      {/* Grouped Signalement List */}
+      {/* Grouped Incident List */}
       {isDataLoading ? (
         <RequestCardSkeleton />
       ) : groupedIncidents.length === 0 ? (
@@ -858,7 +858,7 @@ export const CollaborationRequests = ({
                 key={incident.id}
                 className={`incident-group-card ${isExpanded ? 'is-expanded' : ''} ${hasLeader ? 'has-leader' : 'no-leader'}`}
               >
-                {/* Signalement Group Header */}
+                {/* Incident Group Header */}
                 <header
                   className="incident-group-header"
                   onClick={() => setExpandedIncident(isExpanded ? null : incident.id)}
@@ -1202,9 +1202,9 @@ export const CollaborationRequests = ({
           initialAction={decisionAction}
         />
       )}
-      {/* Signalement Detail Modal */}
+      {/* Incident Detail Modal */}
       {selectedIncidentForModal && (
-        <RequestSignalementDetailModal
+        <RequestIncidentDetailModal
           incident={selectedIncidentForModal}
           onClose={() => setSelectedIncidentForModal(null)}
         />
