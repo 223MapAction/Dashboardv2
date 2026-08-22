@@ -302,16 +302,14 @@ export const MapContainer = () => {
    * initialViewState, lui, ne doit servir qu'à
    * l'initialisation de la carte.
    */
-  const initialViewStateRef =
-    useRef({
-      longitude:
-        DEFAULT_MALI_LNG,
-
-      latitude:
-        DEFAULT_MALI_LAT,
-
+  const initialViewState = useMemo(
+    () => ({
+      longitude: DEFAULT_MALI_LNG,
+      latitude: DEFAULT_MALI_LAT,
       zoom: 6,
-    });
+    }),
+    []
+  );
 
 
   /* --------------------------------------------------------------------------
@@ -473,7 +471,6 @@ export const MapContainer = () => {
    * ------------------------------------------------------------------------ */
 
   const {
-    data: pageData,
     isLoading: isLoadingPage,
   } = useSWR(
     ownershipFilter === 'mine'
@@ -517,6 +514,66 @@ export const MapContainer = () => {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
 
+      // Fusion de la page recue dans allIncidents. Fait ici plutot que dans
+      // un effet qui observe pageData : useSWR est le systeme externe, ce
+      // callback EST la synchronisation, pas un rendu qui en declenche une
+      // autre.
+      onSuccess: (data) => {
+        const pageKey =
+          `${scope}-${
+            countryFilter || 'all'
+          }-${currentPage}`;
+
+        if (
+          loadedPagesRef.current.has(
+            pageKey
+          )
+        ) {
+          return;
+        }
+
+        loadedPagesRef.current.add(
+          pageKey
+        );
+
+        const results =
+          data?.results ||
+          (Array.isArray(data)
+            ? data
+            : []);
+
+        setAllIncidents((previous) => {
+          const existingIds =
+            new Set(
+              previous.map(
+                (incident) =>
+                  incident.id
+              )
+            );
+
+          const newIncidents =
+            results.filter(
+              (incident) =>
+                !existingIds.has(
+                  incident.id
+                )
+            );
+
+          return [
+            ...previous,
+            ...newIncidents,
+          ];
+        });
+
+        setHasMorePages(
+          ownershipFilter === 'mine'
+            ? false
+            : Boolean(data?.next)
+        );
+
+        setIsLoadingMore(false);
+      },
+
       onError: (error) => {
         logger.error(
           '[MAP] Erreur chargement incidents:',
@@ -527,77 +584,6 @@ export const MapContainer = () => {
       },
     }
   );
-
-
-  /* --------------------------------------------------------------------------
-   * Ajout des pages dans allIncidents
-   * ------------------------------------------------------------------------ */
-
-  useEffect(() => {
-    if (!pageData) {
-      return;
-    }
-
-    const pageKey =
-      `${scope}-${
-        countryFilter || 'all'
-      }-${currentPage}`;
-
-    if (
-      loadedPagesRef.current.has(
-        pageKey
-      )
-    ) {
-      return;
-    }
-
-    loadedPagesRef.current.add(
-      pageKey
-    );
-
-    const results =
-      pageData?.results ||
-      (Array.isArray(pageData)
-        ? pageData
-        : []);
-
-    setAllIncidents((previous) => {
-      const existingIds =
-        new Set(
-          previous.map(
-            (incident) =>
-              incident.id
-          )
-        );
-
-      const newIncidents =
-        results.filter(
-          (incident) =>
-            !existingIds.has(
-              incident.id
-            )
-        );
-
-      return [
-        ...previous,
-        ...newIncidents,
-      ];
-    });
-
-    setHasMorePages(
-      ownershipFilter === 'mine'
-        ? false
-        : Boolean(pageData?.next)
-    );
-
-    setIsLoadingMore(false);
-  }, [
-    pageData,
-    scope,
-    countryFilter,
-    currentPage,
-    ownershipFilter,
-  ]);
 
 
   /* --------------------------------------------------------------------------
@@ -613,9 +599,6 @@ export const MapContainer = () => {
 
     isLoadingPageRef.current =
       isLoadingPage;
-
-    validIncidentsLengthRef.current =
-      validIncidentsLengthRef.current;
   }, [
     hasMorePages,
     isLoadingMore,
@@ -858,57 +841,6 @@ export const MapContainer = () => {
 
 
   /* --------------------------------------------------------------------------
-   * Centre calculé
-   * ------------------------------------------------------------------------ */
-
-  const center = useMemo(() => {
-    if (
-      validIncidents.length ===
-      0
-    ) {
-      return {
-        lng:
-          DEFAULT_MALI_LNG,
-
-        lat:
-          DEFAULT_MALI_LAT,
-      };
-    }
-
-    const average =
-      validIncidents.reduce(
-        (accumulator, incident) => {
-          return {
-            lng:
-              accumulator.lng +
-              incident._lng,
-
-            lat:
-              accumulator.lat +
-              incident._lat,
-          };
-        },
-        {
-          lng: 0,
-          lat: 0,
-        }
-      );
-
-    return {
-      lng:
-        average.lng /
-        validIncidents.length,
-
-      lat:
-        average.lat /
-        validIncidents.length,
-    };
-  }, [
-    validIncidents,
-  ]);
-
-
-  /* --------------------------------------------------------------------------
    * Changement de style
    * ------------------------------------------------------------------------ */
 
@@ -1088,7 +1020,7 @@ export const MapContainer = () => {
           return (
             <MapView
               carteRef={carteRef}
-              initialViewState={initialViewStateRef.current}
+              initialViewState={initialViewState}
               mapStyle={MAP_STYLES[activeStyle]?.style || OSM_STYLE}
               onMoveEnd={onMapMoveEnd}
               isMapLoading={isMapLoading}

@@ -9,7 +9,7 @@ import { activerGestesCooperatifs } from '../../../../utils/gestesCarte';
  *
  * Separee de MapViewMapLibre.jsx a dessein : react-map-gl/maplibre et
  * react-map-gl/mapbox sont deux paquets distincts, chacun avec ses propres
- * <Map>/<Marker>/<Popup>, incompatibles entre eux dans un meme composant.
+ * Map/Marker/Popup, incompatibles entre eux dans un meme composant.
  * MapContainer choisit laquelle des deux rendre via IS_MAPBOX et lui passe
  * les memes props/donnees.
  */
