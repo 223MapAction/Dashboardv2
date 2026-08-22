@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import Map, { Marker, NavigationControl, FullscreenControl } from 'react-map-gl/maplibre';
+import { IS_MAPBOX } from '../../../../config/mapEngine';
+import { MapDetailViewMapLibre } from './MapDetailViewMapLibre';
+import { MapDetailViewMapbox } from './MapDetailViewMapbox';
 import { activerGestesCooperatifs } from '../../../../utils/gestesCarte';
-import 'maplibre-gl/dist/maplibre-gl.css';
-import { OSM_STYLE, MAPBOX_SATELLITE_STYLE, HAS_MAPBOX_SATELLITE } from '../../../../config/mapStyles';
+import { OSM_STYLE, MAPBOX_SATELLITE_STYLE, HAS_SATELLITE_STYLE as HAS_MAPBOX_SATELLITE } from '../../../../config/mapStyles';
 import useSWR from 'swr';
 import {
   ShimmerThumbnail,
@@ -1197,24 +1198,17 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
                   </div>
                   {/* Mini-carte détaillée */}
                   <div className="detail-geo-map" style={{ marginTop: '12px', height: '320px', borderRadius: '8px', overflow: 'hidden', position: 'relative' }}>
-                    <Map
-                      ref={carteDetailRef}
-                      initialViewState={{
-                        longitude: safeIncident.coordinates.lng,
-                        latitude: safeIncident.coordinates.lat,
-                        zoom: 14
-                      }}
-                      style={{ width: '100%', height: '100%' }}
-                      mapStyle={detailMapStyle === 'satellite' && MAPBOX_SATELLITE_STYLE ? MAPBOX_SATELLITE_STYLE : OSM_STYLE}
-                    >
-                      <Marker longitude={safeIncident.coordinates.lng} latitude={safeIncident.coordinates.lat} anchor="bottom">
-                        <div className="project-map-marker">
-                          <Location size={24} variant="Bold" color="var(--color-danger)" />
-                        </div>
-                      </Marker>
-                      <NavigationControl position="top-right" />
-                      <FullscreenControl position="top-left" />
-                    </Map>
+                    {(() => {
+                      const MapDetailView = IS_MAPBOX ? MapDetailViewMapbox : MapDetailViewMapLibre;
+                      return (
+                        <MapDetailView
+                          carteRef={carteDetailRef}
+                          longitude={safeIncident.coordinates.lng}
+                          latitude={safeIncident.coordinates.lat}
+                          mapStyle={detailMapStyle === 'satellite' && MAPBOX_SATELLITE_STYLE ? MAPBOX_SATELLITE_STYLE : OSM_STYLE}
+                        />
+                      );
+                    })()}
 
                     {/* Sélecteur de style de carte */}
                     <div style={{

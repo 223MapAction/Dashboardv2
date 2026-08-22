@@ -59,7 +59,7 @@ Toutes sont décrites dans [`.env.example`](./.env.example).
 |---|---|---|
 | `VITE_API_BASE_URL` | **Oui** | Adresse de l'API Map Action. Sert aussi de base aux WebSocket : le préfixe `ws://` ou `wss://` en est déduit, il n'y a rien d'autre à configurer. |
 | `VITE_OSM_TILE_URLS` | Non | Serveur de tuiles OpenStreetMap. Par défaut, les tuiles publiques `openstreetmap.fr`. À renseigner pour auto-héberger ses tuiles. |
-| `VITE_MAPBOX_TOKEN` | Non | Active le fond de carte satellite. Sans jeton, la carte fonctionne avec OpenStreetMap et le bouton « Satellite » n'apparaît pas. |
+| `VITE_MAPBOX_TOKEN` | Non | Sa présence décide du moteur cartographique : absent, MapLibre/OpenStreetMap (aucun compte tiers requis) ; présent, moteur Mapbox et fond de carte « Satellite » en plus d'OpenStreetMap. |
 | `VITE_BASE_PATH` | Non | Préfixe d'URL si l'application n'est pas servie à la racine d'un domaine. Le déploiement GitHub Pages le renseigne automatiquement. |
 
 `.env` n'est jamais versionné.
@@ -111,7 +111,7 @@ construit l'application et la publie sur GitHub Pages.
 Deux secrets se règlent dans **Settings → Secrets and variables → Actions** :
 
 - `VITE_API_BASE_URL` — requis, sinon le site publié refuse de démarrer ;
-- `VITE_MAPBOX_TOKEN` — facultatif.
+- `VITE_MAPBOX_TOKEN` — facultatif, décide aussi du moteur cartographique (voir plus haut).
 
 Pour héberger ailleurs, `npm run build` produit un `dist/` statique à servir
 par n'importe quel serveur web. Si l'application n'est pas à la racine du
@@ -121,7 +121,11 @@ domaine, renseignez `VITE_BASE_PATH` au moment du build.
 
 - **React 19** et **Vite**, routage avec **React Router v7** ([`src/App.jsx`](./src/App.jsx)).
 - **Cartographie : MapLibre GL** via `react-map-gl/maplibre`, sur des tuiles
-  OpenStreetMap ouvertes. Aucune dépendance obligatoire à un service payant.
+  OpenStreetMap ouvertes par défaut — aucune dépendance obligatoire à un
+  service payant. Un `VITE_MAPBOX_TOKEN` bascule sur Mapbox GL
+  (`react-map-gl/mapbox`) et débloque le fond « Satellite ». Les deux moteurs
+  sont deux paquets `react-map-gl` distincts : ils ne partagent jamais un
+  même composant (`src/config/mapEngine.js`, `MapView*.jsx`).
 - Formulaires avec `react-hook-form` et `yup`, données via `axios` et `swr`,
   graphiques avec `recharts`.
 - Chaque domaine métier vit dans `src/pages/<domaine>/`, avec son propre
