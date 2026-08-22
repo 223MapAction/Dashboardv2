@@ -1,925 +1,2039 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import useSWR from 'swr';
-import { activerGestesCooperatifs } from '../../../../utils/gestesCarte';
-import { NIVEAUX_GRAVITE, gravite, couleurGravite } from '../../../../utils/gravite';
-import Map, { Marker, Popup } from 'react-map-gl/maplibre';
-import 'maplibre-gl/dist/maplibre-gl.css';
-import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effects';
+
+import {
+  NIVEAUX_GRAVITE,
+  gravite,
+  couleurGravite,
+} from '../../../../utils/gravite';
+
+import { MapViewMapLibre } from './MapViewMapLibre';
+import { MapViewMapbox } from './MapViewMapbox';
+
+import {
+  ShimmerThumbnail,
+  ShimmerTitle,
+  ShimmerText,
+} from 'react-shimmer-effects';
+
 import { getIncidentService } from '../../../incident/service/incident_service';
-import { getOrgInternalIncidentsService } from '../../../mes-interventions/service/mes_interventions_service';
-import { getIncidentsFilteredService } from '../../service/dashboard_service';
+
+import {
+  getOrgInternalIncidentsService,
+} from '../../../mes-interventions/service/mes_interventions_service';
+
+import {
+  getIncidentsFilteredService,
+} from '../../service/dashboard_service';
+
 import { BlurryImage } from '../../../../components/atoms/BlurryImage';
-import { COUNTRIES } from '../../../organisations/data/organisations';
-import { OSM_STYLE, MAPBOX_SATELLITE_STYLE, HAS_MAPBOX_SATELLITE } from '../../../../config/mapStyles';
+
+import {
+  COUNTRIES,
+} from '../../../organisations/data/organisations';
+
+import {
+  OSM_STYLE,
+  MAPBOX_SATELLITE_STYLE,
+  HAS_MAPBOX_TOKEN,
+} from '../../../../config/mapStyles';
+
+import {
+  IS_MAPBOX,
+} from '../../../../config/mapEngine';
+
 import './map.css';
-import { useReinitialisationSurChangement } from '../../../../hooks/useReinitialisationSurChangement';
+
+import {
+  useReinitialisationSurChangement,
+} from '../../../../hooks/useReinitialisationSurChangement';
+
 import { logger } from '../../../../utils/logger';
 
 
-// Calcule la classe de couleur du marqueur en fonction de son statut et de l'utilisateur connecté
-const getMarkerColorClass = (incident, currentUserId) => {
-  const isResolved = incident.etat === 'resolved';
-  if (isResolved) {
-    let takenById = null;
-    if (incident.taken_by && typeof incident.taken_by === 'object') {
-      takenById = incident.taken_by.id;
-    } else {
-      takenById = incident.taken_by || incident.takenBy;
-    }
-    const takenBy = parseInt(takenById);
-    const me = parseInt(currentUserId);
-    if (!isNaN(takenBy) && !isNaN(me) && takenBy === me) {
-      return 'resolved-mine'; // Vert
-    }
-    return 'resolved-others'; // Bleu
-  }
+/* ============================================================================
+ * CONSTANTES
+ * ========================================================================== */
 
-  // Si l'incident est actif, sa couleur dépend de sa gravité (sans bleu ni vert).
-  // Les niveaux viennent de utils/gravite.js, qui lit le champ `severity` decide
-  // par le serveur. La carte les recalculait avec ses propres seuils, si bien
-  // qu'un incident pouvait etre « moyen » ici et « eleve » sur la page Impact.
-  return `active-${gravite(incident)}`;
-};
+const DEFAULT_MALI_LAT = 12.65;
+const DEFAULT_MALI_LNG = -8.0;
 
 const INCIDENT_STATUS_STEPS = [
-  { id: 'declared', label: 'Déclaré', },
-  { id: 'taken_into_account', label: 'Pris en compte', },
-
-  { id: 'resolved', label: 'Résolu' }
+  {
+    id: 'declared',
+    label: 'Déclaré',
+  },
+  {
+    id: 'taken_into_account',
+    label: 'Pris en compte',
+  },
+  {
+    id: 'resolved',
+    label: 'Résolu',
+  },
 ];
 
-// Style "Humanitaire" par defaut : tuiles OpenStreetMap HOT ouvertes,
-// aucune dependance a un service tiers payant. Satellite optionnel,
-// disponible uniquement si un token Mapbox est configure.
+
+/* ============================================================================
+ * STYLES DE CARTE
+ * ========================================================================== */
+
 const MAP_STYLES = {
   humanitarian: {
     id: 'humanitarian',
     label: 'Carte',
-    style: OSM_STYLE
+    style: OSM_STYLE,
   },
-  ...(HAS_MAPBOX_SATELLITE
+
+  ...(IS_MAPBOX && HAS_MAPBOX_TOKEN
     ? {
         satellite: {
           id: 'satellite',
           label: 'Satellite',
-          style: MAPBOX_SATELLITE_STYLE
-        }
+          style: MAPBOX_SATELLITE_STYLE,
+        },
       }
-    : {})
+    : {}),
 };
 
-const DEFAULT_MALI_LAT = 12.65; // Bamako
-const DEFAULT_MALI_LNG = -8.0;
 
-// Traduit l'état de l'incident en français
+/* ============================================================================
+ * HELPERS
+ * ========================================================================== */
+
+/**
+ * Retourne la classe CSS du marker selon :
+ * - le statut de l'incident ;
+ * - la personne ayant pris en charge l'incident.
+ */
+const getMarkerColorClass = (
+  incident,
+  currentUserId
+) => {
+  const isResolved =
+    incident?.etat === 'resolved';
+
+  if (isResolved) {
+    let takenById = null;
+
+    if (
+      incident?.taken_by &&
+      typeof incident.taken_by === 'object'
+    ) {
+      takenById =
+        incident.taken_by.id;
+    } else {
+      takenById =
+        incident?.taken_by ??
+        incident?.takenBy;
+    }
+
+    const takenBy = String(
+      takenById ?? ''
+    );
+
+    const me = String(
+      currentUserId ?? ''
+    );
+
+    if (
+      takenBy &&
+      me &&
+      takenBy === me
+    ) {
+      return 'resolved-mine';
+    }
+
+    return 'resolved-others';
+  }
+
+  return `active-${gravite(incident)}`;
+};
+
+
+/**
+ * Traduit l'état d'un incident.
+ */
 const translateEtat = (etat) => {
   switch (etat) {
     case 'resolved':
       return 'Résolu';
+
     case 'taken_into_account':
       return 'Pris en compte';
+
     case 'pending':
       return 'En attente';
+
     case 'declared':
       return 'Déclaré';
+
     default:
       return etat || '';
   }
 };
 
+
+/**
+ * Récupère les coordonnées d'un incident.
+ *
+ * Le backend semble parfois utiliser "lattitude"
+ * et parfois "latitude", donc on accepte les deux.
+ */
+const getIncidentCoordinates = (
+  incident
+) => {
+  const latitude = Number(
+    incident?.latitude ??
+    incident?.lattitude
+  );
+
+  const longitude = Number(
+    incident?.longitude
+  );
+
+  const valid =
+    Number.isFinite(latitude) &&
+    Number.isFinite(longitude) &&
+    latitude !== 0 &&
+    longitude !== 0;
+
+  return {
+    latitude,
+    longitude,
+    valid,
+  };
+};
+
+
+/**
+ * Génère des coordonnées de secours stables
+ * lorsque l'incident ne possède pas de coordonnées.
+ *
+ * Cela évite de mettre plusieurs incidents
+ * directement au centre du Mali.
+ */
+const getFallbackCoordinates = (
+  incident
+) => {
+  const id = String(
+    incident?.id ?? ''
+  );
+
+  let hash = 0;
+
+  for (let i = 0; i < id.length; i++) {
+    hash =
+      (hash << 5) -
+      hash +
+      id.charCodeAt(i);
+
+    hash |= 0;
+  }
+
+  return {
+    lat:
+      DEFAULT_MALI_LAT +
+      Math.sin(hash) * 0.005,
+
+    lng:
+      DEFAULT_MALI_LNG +
+      Math.cos(hash) * 0.005,
+  };
+};
+
+
+/* ============================================================================
+ * COMPOSANT
+ * ========================================================================== */
+
 export const MapContainer = () => {
-  const [selectedIncidentId, setSelectedIncidentId] = useState(null);
-  const [modalClosing, setModalClosing] = useState(false);
-  const [modalShowing, setModalShowing] = useState(false);
   const navigate = useNavigate();
 
-  // Bloquer le scroll du body quand le modal est ouvert
-  useEffect(() => {
-    if (selectedIncidentId) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
+  /* --------------------------------------------------------------------------
+   * Modal
+   * ------------------------------------------------------------------------ */
+
+  const [
+    selectedIncidentId,
+    setSelectedIncidentId,
+  ] = useState(null);
+
+  const [
+    modalClosing,
+    setModalClosing,
+  ] = useState(false);
+
+  const [
+    modalShowing,
+    setModalShowing,
+  ] = useState(false);
+
+  const modalTimerRef =
+    useRef(null);
+
+
+  /* --------------------------------------------------------------------------
+   * Carte
+   * ------------------------------------------------------------------------ */
+
+  const carteRef =
+    useRef(null);
+
+  const [
+    activeStyle,
+    setActiveStyle,
+  ] = useState('humanitarian');
+
+  /**
+   * Important :
+   *
+   * initialViewState ne doit pas dépendre de "center".
+   *
+   * center change quand les incidents arrivent.
+   * initialViewState, lui, ne doit servir qu'à
+   * l'initialisation de la carte.
+   */
+  const initialViewStateRef =
+    useRef({
+      longitude:
+        DEFAULT_MALI_LNG,
+
+      latitude:
+        DEFAULT_MALI_LAT,
+
+      zoom: 6,
+    });
+
+
+  /* --------------------------------------------------------------------------
+   * Filtres
+   * ------------------------------------------------------------------------ */
+
+  const currentUserId =
+    sessionStorage.getItem('user_id');
+
+  const userOrgCountry =
+    sessionStorage.getItem(
+      'organisation_country'
+    ) || '';
+
+  const [
+    ownershipFilter,
+    setOwnershipFilter,
+  ] = useState('all');
+
+  const [
+    statusFilter,
+    setStatusFilter,
+  ] = useState('active');
+
+  const [
+    countryFilter,
+    setCountryFilter,
+  ] = useState('');
+
+
+  /* --------------------------------------------------------------------------
+   * Groupe de markers
+   * ------------------------------------------------------------------------ */
+
+  const [
+    groupeOuvert,
+    setGroupeOuvert,
+  ] = useState(null);
+
+
+  /* --------------------------------------------------------------------------
+   * Pagination
+   * ------------------------------------------------------------------------ */
+
+  const [
+    allIncidents,
+    setAllIncidents,
+  ] = useState([]);
+
+  const [
+    currentPage,
+    setCurrentPage,
+  ] = useState(1);
+
+  const [
+    hasMorePages,
+    setHasMorePages,
+  ] = useState(true);
+
+  const [
+    isLoadingMore,
+    setIsLoadingMore,
+  ] = useState(false);
+
+  const loadedPagesRef =
+    useRef(new Set());
+
+  const hasMorePagesRef =
+    useRef(true);
+
+  const isLoadingMoreRef =
+    useRef(false);
+
+  const isLoadingPageRef =
+    useRef(false);
+
+  const validIncidentsLengthRef =
+    useRef(0);
+
+
+  /* --------------------------------------------------------------------------
+   * Scope API
+   * ------------------------------------------------------------------------ */
+
+  const scope = useMemo(() => {
+    if (ownershipFilter === 'mine') {
+      return 'mine';
     }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [selectedIncidentId]);
-  const [activeStyle, setActiveStyle] = useState('humanitarian');
 
-  // ── États locaux pour les filtres de la carte ────────────────────────────────
-  const currentUserId = sessionStorage.getItem('user_id');
-  const [ownershipFilter, setOwnershipFilter] = useState('all'); // 'all' | 'mine'
-  const [statusFilter, setStatusFilter] = useState('active'); // 'active' | 'resolved'
-  const [countryFilter, setCountryFilter] = useState(''); // Filtre pays (vide = tous les pays)
+    if (statusFilter === 'resolved') {
+      return 'resolved';
+    }
 
-  // Récupérer le pays de l'organisation de l'utilisateur
-  const userOrgCountry = sessionStorage.getItem('organisation_country') || '';
+    if (statusFilter === 'active') {
+      return 'unresolved';
+    }
 
-  // Utiliser useSWR pour récupérer les détails de l'incident sélectionné
-  const { data: selectedIncident, isLoading: isLoadingIncident } = useSWR(
-    selectedIncidentId ? `/incident/${selectedIncidentId}` : null,
-    () => getIncidentService(selectedIncidentId),
-    {
-      revalidateOnFocus: false,
+    return 'all';
+  }, [
+    ownershipFilter,
+    statusFilter,
+  ]);
 
-      onError: (err) => {
-        logger.error('[MAP] Erreur chargement incident:', err);
-      }
+
+  /* --------------------------------------------------------------------------
+   * Réinitialisation lors des changements de filtres
+   * ------------------------------------------------------------------------ */
+
+  useReinitialisationSurChangement(
+    [
+      ownershipFilter,
+      statusFilter,
+      countryFilter,
+    ],
+    () => {
+      setAllIncidents([]);
+      setCurrentPage(1);
+      setHasMorePages(true);
+      setIsLoadingMore(false);
+
+      loadedPagesRef.current =
+        new Set();
     }
   );
 
-  // ── Chargement progressif des incidents ──────────────────────────────────────
-  const [allIncidents, setAllIncidents] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [hasMorePages, setHasMorePages] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const loadedPagesRef = useRef(new Set());
-  const carteRef = useRef(null);
 
-  // On passe par la reference et non par `onLoad` : cet evenement ne se
-  // declenche pas de facon fiable ici — verifie, la carte s'affiche sans qu'il
-  // parte jamais. La reference, elle, est posee des le montage.
-  useEffect(() => {
-    let annule = false;
-    const essayer = () => {
-      if (annule) return;
-      const carte = carteRef.current?.getMap?.();
-      if (carte) { activerGestesCooperatifs(carte); return; }
-      setTimeout(essayer, 300);
-    };
-    essayer();
-    return () => { annule = true; };
-  }, []);
+  /* --------------------------------------------------------------------------
+   * Incident sélectionné
+   * ------------------------------------------------------------------------ */
 
-  // Déterminer le scope en fonction des filtres
-  const getScope = () => {
-    if (ownershipFilter === 'mine') return 'mine';
-    if (statusFilter === 'resolved') return 'resolved';
-    if (statusFilter === 'active') return 'unresolved';
-    return 'all';
-  };
+  const {
+    data: selectedIncident,
+    isLoading: isLoadingIncident,
+  } = useSWR(
+    selectedIncidentId
+      ? `/incident/${selectedIncidentId}`
+      : null,
 
-  const scope = getScope();
+    () =>
+      getIncidentService(
+        selectedIncidentId
+      ),
 
-  // Repartir d'une liste vide des qu'un filtre change : les incidents deja
-  // charges appartiennent au filtre precedent.
-  useReinitialisationSurChangement([ownershipFilter, statusFilter, countryFilter], () => {
-    setAllIncidents([]);
-    setCurrentPage(1);
-    setHasMorePages(true);
-    loadedPagesRef.current = new Set();
-  });
+    {
+      revalidateOnFocus: false,
 
-  // Charger une page d'incidents
-  const { data: pageData, isLoading: isLoadingPage } = useSWR(
+      onError: (error) => {
+        logger.error(
+          '[MAP] Erreur chargement incident:',
+          error
+        );
+      },
+    }
+  );
+
+
+  /* --------------------------------------------------------------------------
+   * Chargement des incidents
+   * ------------------------------------------------------------------------ */
+
+  const {
+    data: pageData,
+    isLoading: isLoadingPage,
+  } = useSWR(
     ownershipFilter === 'mine'
-      ? (currentPage === 1 ? '/org-incidents' : null) // Pour "mine", utiliser l'ancien endpoint
-      : `/map-incidents-${scope}-${countryFilter || 'all'}-page-${currentPage}`,
+      ? currentPage === 1
+        ? '/org-incidents'
+        : null
+      : `/map-incidents-${scope}-${
+          countryFilter || 'all'
+        }-page-${currentPage}`,
+
     async () => {
-      if (ownershipFilter === 'mine') {
-        // Pour "Mes incidents", utiliser l'ancien service
+      /**
+       * Cas "Mes signalements".
+       *
+       * Ce service retourne déjà les incidents
+       * de l'organisation/utilisateur.
+       */
+      if (
+        ownershipFilter === 'mine'
+      ) {
         return getOrgInternalIncidentsService();
       }
-      // Pour les autres, utiliser le nouvel endpoint paginé
+
       const params = {
         scope,
         page: currentPage,
-        page_size: 30
+        page_size: 30,
       };
-      // Ajouter le filtre pays si défini
+
       if (countryFilter) {
-        params.country = countryFilter;
+        params.country =
+          countryFilter;
       }
-      return getIncidentsFilteredService(params);
+
+      return getIncidentsFilteredService(
+        params
+      );
     },
+
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
-      onError: (err) => {
-        logger.error('[MAP] Erreur chargement incidents:', err);
+
+      onError: (error) => {
+        logger.error(
+          '[MAP] Erreur chargement incidents:',
+          error
+        );
+
         setIsLoadingMore(false);
-      }
+      },
     }
   );
 
-  // L'accumulation se fait ici, à partir de `data`, et non plus dans le
-  // `onSuccess` de SWR.
-  //
-  // `onSuccess` ne se déclenche qu'au retour d'une requête réseau. Quand on
-  // quittait le tableau de bord puis qu'on y revenait, SWR servait sa valeur en
-  // cache sans refetch — donc sans `onSuccess` — tandis que `allIncidents`,
-  // qui est un état de composant, repartait à zéro au remontage. La carte
-  // restait vide alors que la donnée était là, dans le cache.
-  //
-  // Un effet sur `data` couvre les deux cas : réponse réseau ET valeur servie
-  // depuis le cache au montage.
-  /* eslint-disable react-hooks/set-state-in-effect --
-     On synchronise ici une source exterieure a React (le cache SWR) vers un
-     accumulateur local : c'est l'usage prevu d'un effet. Le garde-fou
-     `loadedPagesRef` empeche toute boucle, une page deja integree est ignoree. */
+
+  /* --------------------------------------------------------------------------
+   * Ajout des pages dans allIncidents
+   * ------------------------------------------------------------------------ */
+
   useEffect(() => {
-    if (!pageData) return;
+    if (!pageData) {
+      return;
+    }
 
-    const pageKey = `${scope}-${countryFilter || 'all'}-${currentPage}`;
-    if (loadedPagesRef.current.has(pageKey)) return;
-    loadedPagesRef.current.add(pageKey);
+    const pageKey =
+      `${scope}-${
+        countryFilter || 'all'
+      }-${currentPage}`;
 
-    const results = pageData.results || (Array.isArray(pageData) ? pageData : []);
+    if (
+      loadedPagesRef.current.has(
+        pageKey
+      )
+    ) {
+      return;
+    }
 
-    setAllIncidents((prev) => {
-      const dejaLa = new Set(prev.map((inc) => inc.id));
-      return [...prev, ...results.filter((inc) => !dejaLa.has(inc.id))];
+    loadedPagesRef.current.add(
+      pageKey
+    );
+
+    const results =
+      pageData?.results ||
+      (Array.isArray(pageData)
+        ? pageData
+        : []);
+
+    setAllIncidents((previous) => {
+      const existingIds =
+        new Set(
+          previous.map(
+            (incident) =>
+              incident.id
+          )
+        );
+
+      const newIncidents =
+        results.filter(
+          (incident) =>
+            !existingIds.has(
+              incident.id
+            )
+        );
+
+      return [
+        ...previous,
+        ...newIncidents,
+      ];
     });
 
-    setHasMorePages(ownershipFilter === 'mine' ? false : !!pageData.next);
+    setHasMorePages(
+      ownershipFilter === 'mine'
+        ? false
+        : Boolean(pageData?.next)
+    );
+
     setIsLoadingMore(false);
-  }, [pageData, scope, countryFilter, currentPage, ownershipFilter]);
-  /* eslint-enable react-hooks/set-state-in-effect */
-
-  // Fonction pour charger la page suivante
-  const loadMoreIncidents = useCallback(() => {
-    if (!hasMorePages || isLoadingMore || isLoadingPage) return;
-    setIsLoadingMore(true);
-    setCurrentPage(prev => prev + 1);
-  }, [hasMorePages, isLoadingMore, isLoadingPage]);
-
-  const normalizedIncidents = allIncidents;
+  }, [
+    pageData,
+    scope,
+    countryFilter,
+    currentPage,
+    ownershipFilter,
+  ]);
 
 
+  /* --------------------------------------------------------------------------
+   * Refs pagination
+   * ------------------------------------------------------------------------ */
 
-  // Filtre uniquement les incidents avec coordonnées valides et selon les critères de filtres
-  const validIncidents = useMemo(() => normalizedIncidents.map((inc) => {
-    const latVal = inc.lattitude !== undefined ? inc.lattitude : inc.latitude;
-    const lat = parseFloat(latVal);
-    const lng = parseFloat(inc.longitude);
-    const hasValidCoords = !isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0;
+  useEffect(() => {
+    hasMorePagesRef.current =
+      hasMorePages;
 
-    let finalLat = lat;
-    let finalLng = lng;
-    let hasFallbackCoords = false;
+    isLoadingMoreRef.current =
+      isLoadingMore;
 
-    if (!hasValidCoords) {
-      hasFallbackCoords = true;
-      // Ajout d'une petite variation déterministe basée sur l'ID de l'incident pour éviter la superposition parfaite
-      const offsetId = inc.id || 0;
-      let offsetNum = 0;
-      if (typeof offsetId === 'number') {
-        offsetNum = offsetId;
-      } else if (typeof offsetId === 'string') {
-        for (let i = 0; i < offsetId.length; i++) {
-          offsetNum = (offsetNum << 5) - offsetNum + offsetId.charCodeAt(i);
-          offsetNum |= 0; // Convert to 32bit integer
+    isLoadingPageRef.current =
+      isLoadingPage;
+
+    validIncidentsLengthRef.current =
+      validIncidentsLengthRef.current;
+  }, [
+    hasMorePages,
+    isLoadingMore,
+    isLoadingPage,
+  ]);
+
+
+  /* --------------------------------------------------------------------------
+   * Chargement page suivante
+   * ------------------------------------------------------------------------ */
+
+  const loadMoreIncidents =
+    useCallback(() => {
+      if (
+        !hasMorePagesRef.current ||
+        isLoadingMoreRef.current ||
+        isLoadingPageRef.current
+      ) {
+        return;
+      }
+
+      setIsLoadingMore(true);
+
+      setCurrentPage(
+        (previous) =>
+          previous + 1
+      );
+    }, []);
+
+
+  /* --------------------------------------------------------------------------
+   * MoveEnd stable
+   * ------------------------------------------------------------------------ */
+
+  const onMapMoveEnd =
+    useCallback(() => {
+      if (
+        hasMorePagesRef.current &&
+        !isLoadingMoreRef.current &&
+        !isLoadingPageRef.current &&
+        validIncidentsLengthRef.current >
+          0
+      ) {
+        loadMoreIncidents();
+      }
+    }, [
+      loadMoreIncidents,
+    ]);
+
+
+  /* --------------------------------------------------------------------------
+   * Validation des incidents
+   * ------------------------------------------------------------------------ */
+
+  const validIncidents =
+    useMemo(() => {
+      return allIncidents
+        .map((incident) => {
+          const {
+            latitude,
+            longitude,
+            valid,
+          } =
+            getIncidentCoordinates(
+              incident
+            );
+
+          let finalLat =
+            latitude;
+
+          let finalLng =
+            longitude;
+
+          let hasFallbackCoords =
+            false;
+
+          if (!valid) {
+            const fallback =
+              getFallbackCoordinates(
+                incident
+              );
+
+            finalLat =
+              fallback.lat;
+
+            finalLng =
+              fallback.lng;
+
+            hasFallbackCoords =
+              true;
+          }
+
+          if (
+            !Number.isFinite(
+              finalLat
+            ) ||
+            !Number.isFinite(
+              finalLng
+            )
+          ) {
+            finalLat =
+              DEFAULT_MALI_LAT;
+
+            finalLng =
+              DEFAULT_MALI_LNG;
+          }
+
+          return {
+            ...incident,
+
+            _lat: finalLat,
+            _lng: finalLng,
+
+            _hasFallbackCoords:
+              hasFallbackCoords,
+          };
+        })
+
+        .filter((incident) => {
+          /**
+           * Mes signalements.
+           */
+          if (
+            ownershipFilter === 'mine'
+          ) {
+            let takenBy =
+              incident?.taken_by;
+
+            if (
+              takenBy &&
+              typeof takenBy ===
+                'object'
+            ) {
+              takenBy =
+                takenBy.id;
+            }
+
+            if (
+              !takenBy ||
+              !currentUserId ||
+              String(takenBy) !==
+                String(currentUserId)
+            ) {
+              return false;
+            }
+          }
+
+          /**
+           * Filtre résolu.
+           */
+          const isResolved =
+            incident?.etat ===
+            'resolved';
+
+          if (
+            statusFilter ===
+              'resolved' &&
+            !isResolved
+          ) {
+            return false;
+          }
+
+          /**
+           * Les incidents supprimés
+           * ne doivent jamais apparaître.
+           */
+          if (
+            incident?.is_deleted ||
+            incident?.isDeleted
+          ) {
+            return false;
+          }
+
+          return true;
+        });
+    }, [
+      allIncidents,
+      ownershipFilter,
+      statusFilter,
+      currentUserId,
+    ]);
+
+
+  /* --------------------------------------------------------------------------
+   * Mise à jour de la ref du nombre d'incidents
+   * ------------------------------------------------------------------------ */
+
+  useEffect(() => {
+    validIncidentsLengthRef.current =
+      validIncidents.length;
+  }, [
+    validIncidents.length,
+  ]);
+
+
+  /* --------------------------------------------------------------------------
+   * Groupement des incidents
+   * ------------------------------------------------------------------------ */
+
+  const incidentGroups =
+    useMemo(() => {
+      const grouped =
+        Object.create(null);
+
+      const order = [];
+
+      for (
+        const incident of validIncidents
+      ) {
+        const key =
+          `${incident._lat}|${incident._lng}`;
+
+        if (grouped[key]) {
+          grouped[
+            key
+          ].incidents.push(
+            incident
+          );
+        } else {
+          grouped[key] = {
+            cle: key,
+            lat: incident._lat,
+            lng: incident._lng,
+            incidents: [
+              incident,
+            ],
+          };
+
+          order.push(key);
         }
       }
-      finalLat = DEFAULT_MALI_LAT + (Math.sin(offsetNum) * 0.005);
-      finalLng = DEFAULT_MALI_LNG + (Math.cos(offsetNum) * 0.005);
+
+      return order.map(
+        (key) =>
+          grouped[key]
+      );
+    }, [
+      validIncidents,
+    ]);
+
+
+  /* --------------------------------------------------------------------------
+   * Centre calculé
+   * ------------------------------------------------------------------------ */
+
+  const center = useMemo(() => {
+    if (
+      validIncidents.length ===
+      0
+    ) {
+      return {
+        lng:
+          DEFAULT_MALI_LNG,
+
+        lat:
+          DEFAULT_MALI_LAT,
+      };
     }
 
-    if (isNaN(finalLat) || isNaN(finalLng)) {
-      finalLat = DEFAULT_MALI_LAT;
-      finalLng = DEFAULT_MALI_LNG;
-    }
+    const average =
+      validIncidents.reduce(
+        (accumulator, incident) => {
+          return {
+            lng:
+              accumulator.lng +
+              incident._lng,
+
+            lat:
+              accumulator.lat +
+              incident._lat,
+          };
+        },
+        {
+          lng: 0,
+          lat: 0,
+        }
+      );
 
     return {
-      ...inc,
-      _lat: finalLat,
-      _lng: finalLng,
-      _hasFallbackCoords: hasFallbackCoords
+      lng:
+        average.lng /
+        validIncidents.length,
+
+      lat:
+        average.lat /
+        validIncidents.length,
     };
-  }).filter((inc) => {
-    // 2. Filtre d'attribution (Tous vs Mes incidents)
-    if (ownershipFilter === 'mine') {
-      const takenBy = inc?.taken_by;
-      if (!takenBy || !currentUserId || String(takenBy).toLowerCase() !== String(currentUserId).toLowerCase()) {
-        // console.log(`[MAP] Incident ID ${inc.id} ("${inc.title}") rejeté: Filtre 'mine' actif mais taken_by (${takenBy}) ne correspond pas à l'utilisateur actuel (${currentUserId})`);
-        return false;
+  }, [
+    validIncidents,
+  ]);
+
+
+  /* --------------------------------------------------------------------------
+   * Changement de style
+   * ------------------------------------------------------------------------ */
+
+  const handleStyleChange =
+    useCallback((styleId) => {
+      if (
+        !MAP_STYLES[styleId]
+      ) {
+        logger.warn(
+          `[MAP] Style inconnu: ${styleId}`
+        );
+
+        return;
       }
-    }
 
-    // 3. Filtre de statut (Actifs vs Résolus)
-    const isResolved = inc?.etat == 'resolved';
-    // Si le filtre est 'resolved', on n'affiche que les incidents résolus.
-    // Si le filtre est 'active', on affiche tout (actifs et résolus confondus).
-    if (statusFilter === 'resolved' && !isResolved) {
-      return false;
-    }
+      setActiveStyle(
+        styleId
+      );
+    }, []);
 
-    // 4. Filtrer les incidents supprimés
-    if (inc?.is_deleted || inc?.isDeleted) {
-      // console.log(`[MAP] Incident ID ${inc.id} ("${inc.title}") rejeté: Incident marqué comme supprimé (is_deleted: ${inc.is_deleted}, isDeleted: ${inc.isDeleted})`);
-      return false;
-    }
 
-    if (inc._hasFallbackCoords) {
-      // console.log(`[MAP] Incident ID ${inc.id} ("${inc.title}") ACCEPTE et affiché avec coordonnées par défaut du Mali : [${inc._lat}, ${inc._lng}]`);
-    } else {
-      // console.log(`[MAP] Incident ID ${inc.id} ("${inc.title}") ACCEPTE et affiché avec coordonnées réelles : [${inc._lat}, ${inc._lng}]`);
-    }
-    return true;
-  }), [normalizedIncidents, ownershipFilter, statusFilter, currentUserId]);
+  /* --------------------------------------------------------------------------
+   * Modal
+   * ------------------------------------------------------------------------ */
 
-  // Plusieurs incidents peuvent partager exactement la même position (même site
-  // signalé plusieurs fois). Sans regroupement, les marqueurs se dessinent l'un
-  // sur l'autre et seul le dernier est visible : la carte semble alors perdre
-  // des incidents. On rend donc un marqueur par position, porteur du nombre
-  // d'incidents qu'il représente.
-  // Attention : `Map` est ici le composant react-map-gl importé en tête de
-  // fichier, pas la structure de données JavaScript. On indexe donc avec un
-  // objet simple pour éviter toute ambiguïté.
-  const incidentGroups = useMemo(() => {
-    const parPosition = Object.create(null);
-    const ordre = [];
-    for (const inc of validIncidents) {
-      const cle = `${inc._lat}|${inc._lng}`;
-      if (parPosition[cle]) {
-        parPosition[cle].incidents.push(inc);
-      } else {
-        parPosition[cle] = { cle, lat: inc._lat, lng: inc._lng, incidents: [inc] };
-        ordre.push(cle);
+  const openModal =
+    useCallback((incident) => {
+      if (!incident?.id) {
+        return;
       }
-    }
-    return ordre.map((cle) => parPosition[cle]);
-  }, [validIncidents]);
 
-  // Position dont la liste d'incidents est ouverte (uniquement si elle en a
-  // plusieurs — un marqueur isolé ouvre directement le détail).
-  const [groupeOuvert, setGroupeOuvert] = useState(null);
+      if (
+        modalTimerRef.current
+      ) {
+        clearTimeout(
+          modalTimerRef.current
+        );
+      }
 
-  const openModal = (incident) => {
-    setModalClosing(false);
-    setSelectedIncidentId(incident.id);
-    // Délai pour permettre l'animation CSS
-    setTimeout(() => {
-      setModalShowing(true);
-    }, 10);
-  };
-
-  const closeModal = () => {
-    setModalShowing(false);
-    setModalClosing(true);
-    setTimeout(() => {
-      setSelectedIncidentId(null);
       setModalClosing(false);
-    }, 300);
-  };
 
-  // Centre de la carte basé sur la moyenne des coordonnées
-  const center = (() => {
-    if (validIncidents.length === 0) return { lng: -8.0, lat: 12.65 };
-    const avg = validIncidents.reduce(
-      (acc, inc) => {
-        return {
-          lng: acc.lng + inc._lng,
-          lat: acc.lat + inc._lat
-        };
-      },
-      { lng: 0, lat: 0 }
-    );
-    return {
-      lng: avg.lng / validIncidents.length,
-      lat: avg.lat / validIncidents.length
+      setSelectedIncidentId(
+        incident.id
+      );
+
+      modalTimerRef.current =
+        setTimeout(() => {
+          setModalShowing(true);
+        }, 10);
+    }, []);
+
+
+  const closeModal =
+    useCallback(() => {
+      if (
+        modalTimerRef.current
+      ) {
+        clearTimeout(
+          modalTimerRef.current
+        );
+      }
+
+      setModalShowing(false);
+      setModalClosing(true);
+
+      modalTimerRef.current =
+        setTimeout(() => {
+          setSelectedIncidentId(
+            null
+          );
+
+          setModalClosing(false);
+        }, 300);
+    }, []);
+
+
+  /* --------------------------------------------------------------------------
+   * Nettoyage modal
+   * ------------------------------------------------------------------------ */
+
+  useEffect(() => {
+    return () => {
+      if (
+        modalTimerRef.current
+      ) {
+        clearTimeout(
+          modalTimerRef.current
+        );
+      }
     };
-  })();
+  }, []);
 
-  // Index de l'étape de statut courante
-  const statusIndex = selectedIncident
-    ? Math.max(
-      0,
-      INCIDENT_STATUS_STEPS.findIndex(
-        (s) => s.id === (selectedIncident.etat || 'declared')
-      )
-    )
-    : 0;
 
-  const isMapLoading = isLoadingPage && allIncidents.length === 0;
+  /* --------------------------------------------------------------------------
+   * Blocage du scroll body
+   * ------------------------------------------------------------------------ */
+
+  useEffect(() => {
+    if (selectedIncidentId) {
+      document.body.style.overflow =
+        'hidden';
+    } else {
+      document.body.style.overflow =
+        '';
+    }
+
+    return () => {
+      document.body.style.overflow =
+        '';
+    };
+  }, [
+    selectedIncidentId,
+  ]);
+
+
+  /* --------------------------------------------------------------------------
+   * Status de l'incident sélectionné
+   * ------------------------------------------------------------------------ */
+
+  const statusIndex =
+    selectedIncident
+      ? Math.max(
+          0,
+          INCIDENT_STATUS_STEPS.findIndex(
+            (step) =>
+              step.id ===
+              (
+                selectedIncident.etat ||
+                'declared'
+              )
+          )
+        )
+      : 0;
+
+
+  /* --------------------------------------------------------------------------
+   * Chargement carte
+   * ------------------------------------------------------------------------ */
+
+  const isMapLoading =
+    isLoadingPage &&
+    allIncidents.length === 0;
+
+
+  /* ==========================================================================
+   * RENDER
+   * ======================================================================== */
 
   return (
     <div className="card">
       <div className="map-container">
-        {/* Loader overlay */}
+
+        {/* ------------------------------------------------------------------
+         * Loading
+         * ---------------------------------------------------------------- */}
+
         {isMapLoading && (
           <div className="map-loading-overlay">
             <div className="map-loading-spinner">
-              <div className="spinner"></div>
-              <p>Chargement des signalements...</p>
+              <div className="spinner" />
+
+              <p>
+                Chargement des
+                signalements...
+              </p>
             </div>
           </div>
         )}
 
-        <Map
-          ref={carteRef}
-          initialViewState={{
-            longitude: center.lng,
-            latitude: center.lat,
-            zoom: 6
-          }}
-          style={{ width: '100%', height: '100%' }}
-          mapStyle={MAP_STYLES[activeStyle].style}
-          cooperativeGestures={true}
-          touchZoomRotate={true}
-          touchPitch={true}
-          minZoom={2}
-          maxZoom={18}
-          onMoveEnd={() => {
-            // Charger automatiquement plus d'incidents quand l'utilisateur déplace/zoom la carte
-            if (hasMorePages && !isLoadingMore && !isLoadingPage && validIncidents.length > 0) {
-              loadMoreIncidents();
-            }
-          }}
-        >
 
-          {/* Markers d'incidents — un par position, pas un par incident */}
-          {!isMapLoading && incidentGroups.map((groupe) => {
-            const principal = groupe.incidents[0];
-            const nombre = groupe.incidents.length;
-            const colorClass = getMarkerColorClass(principal, currentUserId);
-            const libelle = nombre > 1
-              ? `${nombre} incidents à cet emplacement`
-              : `Voir l'incident ${principal.title}`;
+        {/* ------------------------------------------------------------------
+         * MAP
+         * ---------------------------------------------------------------- */}
 
-            return (
-              <Marker
-                key={groupe.cle}
-                longitude={groupe.lng}
-                latitude={groupe.lat}
-                anchor="center"
-              >
-                <button
-                  type="button"
-                  className={`incident-marker severity-${colorClass}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (nombre > 1) {
-                      setGroupeOuvert(groupe);
-                    } else {
-                      openModal(principal);
-                    }
-                  }}
-                  aria-label={libelle}
-                  title={libelle}
-                >
-                  <span className="incident-marker-pulse" />
-                  <span className="incident-marker-dot" />
-                  {nombre > 1 && (
-                    <span className="incident-marker-count">{nombre}</span>
-                  )}
-                </button>
-              </Marker>
-            );
-          })}
-
-          {/* Liste des incidents partageant une même position */}
-          {groupeOuvert && (
-            <Popup
-              longitude={groupeOuvert.lng}
-              latitude={groupeOuvert.lat}
-              anchor="bottom"
-              offset={18}
-              closeOnClick={false}
-              onClose={() => setGroupeOuvert(null)}
-              className="incident-group-popup"
-            >
-              <p className="incident-group-title">
-                {groupeOuvert.incidents.length} incidents à cet emplacement
-              </p>
-              <ul className="incident-group-list">
-                {groupeOuvert.incidents.map((inc) => (
-                  <li key={inc.id}>
-                    <button
-                      type="button"
-                      className={`incident-group-item severity-${getMarkerColorClass(inc, currentUserId)}`}
-                      onClick={() => {
-                        setGroupeOuvert(null);
-                        openModal(inc);
-                      }}
-                    >
-                      <span className="incident-group-dot" />
-                      <span className="incident-group-label">
-                        {inc.title || 'Incident sans titre'}
-                      </span>
-                      <span className="incident-group-etat">{translateEtat(inc.etat)}</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </Popup>
-          )}
-        </Map>
+        {(() => {
+          const MapView = IS_MAPBOX ? MapViewMapbox : MapViewMapLibre;
+          return (
+            <MapView
+              carteRef={carteRef}
+              initialViewState={initialViewStateRef.current}
+              mapStyle={MAP_STYLES[activeStyle]?.style || OSM_STYLE}
+              onMoveEnd={onMapMoveEnd}
+              isMapLoading={isMapLoading}
+              incidentGroups={incidentGroups}
+              groupeOuvert={groupeOuvert}
+              setGroupeOuvert={setGroupeOuvert}
+              currentUserId={currentUserId}
+              getMarkerColorClass={getMarkerColorClass}
+              translateEtat={translateEtat}
+              openModal={openModal}
+            />
+          );
+        })()}
 
 
+        {/* ------------------------------------------------------------------
+         * SWITCHER STYLE
+         * ---------------------------------------------------------------- */}
 
-        {/* Switcher de style de carte */}
         <div className="map-style-switcher">
-          {Object.values(MAP_STYLES).map((s) => (
+          {Object.values(
+            MAP_STYLES
+          ).map((style) => (
             <button
-              key={s.id}
+              key={style.id}
               type="button"
-              className={`map-style-btn ${activeStyle === s.id ? 'is-active' : ''}`}
-              onClick={() => setActiveStyle(s.id)}
+              className={`map-style-btn ${
+                activeStyle ===
+                style.id
+                  ? 'is-active'
+                  : ''
+              }`}
+              onClick={() =>
+                handleStyleChange(
+                  style.id
+                )
+              }
             >
-              {s.label}
+              {style.label}
             </button>
           ))}
         </div>
 
-        {/* Filtres de la carte */}
+
+        {/* ------------------------------------------------------------------
+         * FILTRES
+         * ---------------------------------------------------------------- */}
+
         <div className="map-filters-overlay">
+
+          {/* Attribution */}
           <div className="map-filter-group">
             <select
               className="map-filter-select"
-              value={ownershipFilter}
-              onChange={(e) => setOwnershipFilter(e.target.value)}
+              value={
+                ownershipFilter
+              }
+              onChange={(event) =>
+                setOwnershipFilter(
+                  event.target.value
+                )
+              }
               aria-label="Filtre d'attribution"
             >
-              <option value="all">Tous les signalements</option>
-              <option value="mine">Mes signalements</option>
+              <option value="all">
+                Tous les signalements
+              </option>
+
+              <option value="mine">
+                Mes signalements
+              </option>
             </select>
           </div>
 
+
+          {/* Pays */}
           <div className="map-filter-group">
             <select
               className="map-filter-select"
-              value={countryFilter}
-              onChange={(e) => setCountryFilter(e.target.value)}
+              value={
+                countryFilter
+              }
+              onChange={(event) =>
+                setCountryFilter(
+                  event.target.value
+                )
+              }
               aria-label="Filtre par pays"
             >
-              <option value="">Tous les pays</option>
+              <option value="">
+                Tous les pays
+              </option>
+
               {userOrgCountry && (
-                <option value={userOrgCountry}>
-                  Mon pays ({COUNTRIES.find(c => c.en === userOrgCountry)?.fr || userOrgCountry})
+                <option
+                  value={
+                    userOrgCountry
+                  }
+                >
+                  Mon pays (
+                  {
+                    COUNTRIES.find(
+                      (country) =>
+                        country.en ===
+                        userOrgCountry
+                    )?.fr ||
+                    userOrgCountry
+                  }
+                  )
                 </option>
               )}
-              {COUNTRIES.map((country) => (
-                <option key={country.en} value={country.en}>
-                  {country.fr}
-                </option>
-              ))}
+
+              {COUNTRIES.map(
+                (country) => (
+                  <option
+                    key={
+                      country.en
+                    }
+                    value={
+                      country.en
+                    }
+                  >
+                    {country.fr}
+                  </option>
+                )
+              )}
             </select>
           </div>
 
+
+          {/* Statut */}
           <div className="map-filter-buttons">
+
             <button
               type="button"
-              className={`map-filter-btn ${statusFilter === 'active' ? 'is-active' : ''}`}
-              onClick={() => setStatusFilter('active')}
+              className={`map-filter-btn ${
+                statusFilter ===
+                'active'
+                  ? 'is-active'
+                  : ''
+              }`}
+              onClick={() =>
+                setStatusFilter(
+                  'active'
+                )
+              }
             >
               Actifs
             </button>
+
             <button
               type="button"
-              className={`map-filter-btn ${statusFilter === 'resolved' ? 'is-active' : ''}`}
-              onClick={() => setStatusFilter('resolved')}
+              className={`map-filter-btn ${
+                statusFilter ===
+                'resolved'
+                  ? 'is-active'
+                  : ''
+              }`}
+              onClick={() =>
+                setStatusFilter(
+                  'resolved'
+                )
+              }
             >
               Résolus
             </button>
+
           </div>
         </div>
 
-        {/* Légende stylisée moderne */}
+
+        {/* ------------------------------------------------------------------
+         * LÉGENDE
+         * ---------------------------------------------------------------- */}
+
         <div className="map-legend-modern">
-          {statusFilter === 'active' ? (
+
+          {statusFilter ===
+          'active' ? (
             <>
-              <p className="map-legend-title">Gravité</p>
-              {/* Legende derivee de l'echelle, pas recopiee : c'est une liste
-                  ecrite a la main qui avait fini par afficher deux fois la meme
-                  pastille pour deux niveaux differents. La carte reste la
-                  reference — les autres vues s'alignent sur ces couleurs. */}
+              <p className="map-legend-title">
+                Gravité
+              </p>
+
               <div className="map-legend-list">
-                {NIVEAUX_GRAVITE.map(({ cle, libelle }) => (
-                  <div className="map-legend-item" key={cle}>
-                    <span
-                      className="map-legend-dot"
-                      style={{ backgroundColor: couleurGravite(cle) }}
-                    />
-                    {libelle}
-                  </div>
-                ))}
+                {NIVEAUX_GRAVITE.map(
+                  ({
+                    cle,
+                    libelle,
+                  }) => (
+                    <div
+                      className="map-legend-item"
+                      key={cle}
+                    >
+                      <span
+                        className="map-legend-dot"
+                        style={{
+                          backgroundColor:
+                            couleurGravite(
+                              cle
+                            ),
+                        }}
+                      />
+
+                      {libelle}
+                    </div>
+                  )
+                )}
               </div>
             </>
           ) : (
             <>
-              <p className="map-legend-title">INCIDENTS RÉSOLUS</p>
+              <p className="map-legend-title">
+                INCIDENTS RÉSOLUS
+              </p>
+
               <div className="map-legend-list">
+
                 <div className="map-legend-item">
                   <span
                     className="map-legend-dot"
-                    style={{ backgroundColor: 'var(--color-primary)' }}
+                    style={{
+                      backgroundColor:
+                        'var(--color-primary)',
+                    }}
                   />
+
                   Par d'autres
                 </div>
+
                 <div className="map-legend-item">
                   <span
                     className="map-legend-dot"
-                    style={{ backgroundColor: 'var(--color-success)' }}
+                    style={{
+                      backgroundColor:
+                        'var(--color-success)',
+                    }}
                   />
+
                   Par moi
                 </div>
+
               </div>
             </>
           )}
+
         </div>
 
-        {/* Indicateur de chargement progressif et bouton "Charger plus" */}
+
+        {/* ------------------------------------------------------------------
+         * STATUS PAGINATION
+         * ---------------------------------------------------------------- */}
+
         {!isMapLoading && (
           <div className="map-status-stack">
-            {/* Compteur d'incidents affichés */}
+
             <div className="map-incidents-count">
-              {validIncidents.length} incident{validIncidents.length > 1 ? 's' : ''} affiché{validIncidents.length > 1 ? 's' : ''}
+              {
+                validIncidents.length
+              }{' '}
+              incident
+              {validIncidents.length >
+              1
+                ? 's'
+                : ''}{' '}
+              affiché
+              {validIncidents.length >
+              1
+                ? 's'
+                : ''}
             </div>
 
-            {/* Bouton "Charger plus" si des pages restent */}
+
             {hasMorePages && (
               <button
                 type="button"
-                onClick={loadMoreIncidents}
-                disabled={isLoadingMore || isLoadingPage}
+                onClick={
+                  loadMoreIncidents
+                }
+                disabled={
+                  isLoadingMore ||
+                  isLoadingPage
+                }
                 className="btn btn-primary btn-sm"
                 style={{
                   display: 'flex',
-                  alignItems: 'center',
+                  alignItems:
+                    'center',
                   gap: '8px',
-                  padding: '8px 16px',
-                  fontSize: 'var(--font-size-body-small)',
+                  padding:
+                    '8px 16px',
+                  fontSize:
+                    'var(--font-size-body-small)',
                   fontWeight: '600',
-                  borderRadius: '20px',
-                  boxShadow: '0 2px 8px rgba(var(--rgb-ombre), 0.15)',
-                  cursor: isLoadingMore || isLoadingPage ? 'not-allowed' : 'pointer',
-                  opacity: isLoadingMore || isLoadingPage ? 0.7 : 1
+                  borderRadius:
+                    '20px',
+                  boxShadow:
+                    '0 2px 8px rgba(var(--rgb-ombre), 0.15)',
+                  cursor:
+                    isLoadingMore ||
+                    isLoadingPage
+                      ? 'not-allowed'
+                      : 'pointer',
+                  opacity:
+                    isLoadingMore ||
+                    isLoadingPage
+                      ? 0.7
+                      : 1,
                 }}
               >
-                {isLoadingMore || isLoadingPage ? (
+                {isLoadingMore ||
+                isLoadingPage ? (
                   <>
-                    <div className="spinner-border spinner-border-sm" role="status">
-                      <span className="visually-hidden">Chargement...</span>
+                    <div
+                      className="spinner-border spinner-border-sm"
+                      role="status"
+                    >
+                      <span className="visually-hidden">
+                        Chargement...
+                      </span>
                     </div>
+
                     Chargement...
                   </>
                 ) : (
-                  'Charger plus d\'incidents'
+                  'Charger plus d’incidents'
                 )}
               </button>
             )}
+
           </div>
         )}
+
       </div>
 
-      {/* Modal d'incident (Bootstrap modal) */}
+
+      {/* ======================================================================
+       * MODAL INCIDENT
+       * ==================================================================== */}
+
       {selectedIncidentId && (
         <>
           <div
-            className={`modal fade ${modalShowing && !modalClosing ? 'show' : ''}`}
-            style={{ display: 'block' }}
+            className={`modal fade ${
+              modalShowing &&
+              !modalClosing
+                ? 'show'
+                : ''
+            }`}
+            style={{
+              display: 'block',
+            }}
             tabIndex="-1"
             role="dialog"
-            onClick={closeModal}
+            onClick={
+              closeModal
+            }
           >
             <div
               className="modal-dialog modal-dialog-scrollable"
               role="document"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(event) =>
+                event.stopPropagation()
+              }
             >
               <div className="modal-content">
-                {/* Header */}
+
+                {/* ----------------------------------------------------------
+                 * HEADER
+                 * -------------------------------------------------------- */}
+
                 <div className="modal-header">
-                  <div className="d-flex flex-column" style={{ minWidth: 0, flex: 1 }}>
+
+                  <div
+                    className="d-flex flex-column"
+                    style={{
+                      minWidth: 0,
+                      flex: 1,
+                    }}
+                  >
                     <h5 className="modal-title fw-bold">
+
                       {isLoadingIncident ? (
-                        <ShimmerTitle line={1} gap={10} variant="primary" />
+                        <ShimmerTitle
+                          line={1}
+                          gap={10}
+                          variant="primary"
+                        />
                       ) : (
-                        selectedIncident?.title || 'Chargement...'
+                        selectedIncident?.title ||
+                        'Chargement...'
                       )}
+
                     </h5>
+
                     <small className="text-muted mt-1">
+
                       {isLoadingIncident ? (
-                        <ShimmerText line={1} gap={10} />
+                        <ShimmerText
+                          line={1}
+                          gap={10}
+                        />
                       ) : (
-                        <>{selectedIncident?.zone} • {translateEtat(selectedIncident?.etat)}</>
+                        <>
+                          {
+                            selectedIncident?.zone
+                          }
+
+                          {' • '}
+
+                          {translateEtat(
+                            selectedIncident?.etat
+                          )}
+                        </>
                       )}
+
                     </small>
                   </div>
+
+
                   <button
                     type="button"
                     className="btn-close"
-                    onClick={closeModal}
+                    onClick={
+                      closeModal
+                    }
                     aria-label="Fermer"
                   />
+
                 </div>
 
-                {/* Body scrollable */}
+
+                {/* ----------------------------------------------------------
+                 * BODY
+                 * -------------------------------------------------------- */}
+
                 <div className="modal-body">
-                  {isLoadingIncident || !selectedIncident ? (
+
+                  {isLoadingIncident ||
+                  !selectedIncident ? (
                     <div>
-                      <ShimmerThumbnail height={240} rounded />
-                      <div style={{ marginTop: '1rem', marginBottom: '1.5rem' }}>
-                        <ShimmerTitle line={1} gap={10} variant="secondary" />
+
+                      <ShimmerThumbnail
+                        height={240}
+                        rounded
+                      />
+
+                      <div
+                        style={{
+                          marginTop:
+                            '1rem',
+                          marginBottom:
+                            '1.5rem',
+                        }}
+                      >
+                        <ShimmerTitle
+                          line={1}
+                          gap={10}
+                          variant="secondary"
+                        />
                       </div>
-                      <div style={{ marginBottom: '1.5rem' }}>
-                        <ShimmerText line={3} gap={10} />
+
+                      <div
+                        style={{
+                          marginBottom:
+                            '1.5rem',
+                        }}
+                      >
+                        <ShimmerText
+                          line={3}
+                          gap={10}
+                        />
                       </div>
-                      <div style={{ marginBottom: '1rem' }}>
-                        <ShimmerThumbnail height={120} rounded />
+
+                      <div
+                        style={{
+                          marginBottom:
+                            '1rem',
+                        }}
+                      >
+                        <ShimmerThumbnail
+                          height={120}
+                          rounded
+                        />
                       </div>
-                      <ShimmerText line={5} gap={10} />
+
+                      <ShimmerText
+                        line={5}
+                        gap={10}
+                      />
+
                     </div>
                   ) : (
                     <>
-                      {/* Cover image */}
+
+                      {/* ----------------------------------------------------
+                       * PHOTO
+                       * -------------------------------------------------- */}
+
                       {selectedIncident.photo && (
                         <BlurryImage
-                          src={selectedIncident.photo}
-                          alt={selectedIncident.title}
+                          src={
+                            selectedIncident.photo
+                          }
+                          alt={
+                            selectedIncident.title
+                          }
                           className="img-fluid rounded mb-3 w-100"
-                          style={{ maxHeight: '300px', objectFit: 'cover' }}
+                          style={{
+                            maxHeight:
+                              '300px',
+                            objectFit:
+                              'cover',
+                          }}
                         />
                       )}
 
-                      {/* Badges */}
+
+                      {/* ----------------------------------------------------
+                       * BADGES
+                       * -------------------------------------------------- */}
+
                       <div className="d-flex flex-wrap gap-2 mb-3">
-                        <span className={`badge ${selectedIncident.etat === 'resolved'
-                          ? 'badge-status-resolved'
-                          : selectedIncident.etat === 'taken_into_account'
-                            ? 'badge-status-taken_into_account'
-                            : selectedIncident.etat === 'pending'
+
+                        <span
+                          className={`badge ${
+                            selectedIncident.etat ===
+                            'resolved'
+                              ? 'badge-status-resolved'
+                              : selectedIncident.etat ===
+                                'taken_into_account'
+                              ? 'badge-status-taken_into_account'
+                              : selectedIncident.etat ===
+                                'pending'
                               ? 'badge-status-pending'
                               : 'badge-status-declared'
-                          }`}>
-                          STATUT : {
-                            selectedIncident.etat === 'resolved'
-                              ? 'RÉSOLU'
-                              : selectedIncident.etat === 'taken_into_account'
-                                ? 'PRIS EN COMPTE'
-                                : selectedIncident.etat === 'pending'
-                                  ? 'EN ATTENTE'
-                                  : 'DÉCLARÉ'
-                          }
+                          }`}
+                        >
+                          STATUT :{' '}
+
+                          {selectedIncident.etat ===
+                          'resolved'
+                            ? 'RÉSOLU'
+                            : selectedIncident.etat ===
+                              'taken_into_account'
+                            ? 'PRIS EN COMPTE'
+                            : selectedIncident.etat ===
+                              'pending'
+                            ? 'EN ATTENTE'
+                            : 'DÉCLARÉ'}
                         </span>
+
+
                         {selectedIncident.zone && (
                           <span className="badge bg-info text-dark">
-                            {selectedIncident.zone}
+                            {
+                              selectedIncident.zone
+                            }
                           </span>
                         )}
+
                       </div>
 
-                      {/* Description */}
+
+                      {/* ----------------------------------------------------
+                       * DESCRIPTION
+                       * -------------------------------------------------- */}
+
                       {selectedIncident.description && (
                         <p className="text-secondary mb-3">
-                          {selectedIncident.description}
+                          {
+                            selectedIncident.description
+                          }
                         </p>
                       )}
 
-                      {/* Méta-données */}
+
+                      {/* ----------------------------------------------------
+                       * INFORMATIONS
+                       * -------------------------------------------------- */}
+
                       <ul className="list-group list-group-flush mb-3">
+
                         <li className="list-group-item px-0">
-                          <strong>Créé le :</strong>{' '}
-                          {new Date(selectedIncident.created_at).toLocaleDateString('fr-FR', {
-                            day: '2-digit',
-                            month: 'long',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
+                          <strong>
+                            Créé le :
+                          </strong>{' '}
+
+                          {selectedIncident.created_at
+                            ? new Date(
+                                selectedIncident.created_at
+                              ).toLocaleDateString(
+                                'fr-FR',
+                                {
+                                  day: '2-digit',
+                                  month: 'long',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                }
+                              )
+                            : 'Non spécifié'}
                         </li>
+
+
                         <li className="list-group-item px-0">
-                          <strong>Coordonnées :</strong>{' '}
+
+                          <strong>
+                            Coordonnées :
+                          </strong>{' '}
+
                           {(() => {
-                            const latVal = selectedIncident.lattitude !== undefined ? selectedIncident.lattitude : selectedIncident.latitude;
-                            const lat = parseFloat(latVal);
-                            const lng = parseFloat(selectedIncident.longitude);
-                            if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) {
-                              return "Non spécifiées (Mali par défaut)";
+                            const {
+                              latitude,
+                              longitude,
+                              valid,
+                            } =
+                              getIncidentCoordinates(
+                                selectedIncident
+                              );
+
+                            if (!valid) {
+                              return 'Non spécifiées (Mali par défaut)';
                             }
-                            return `${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E`;
+
+                            return `${latitude.toFixed(
+                              4
+                            )}°N, ${longitude.toFixed(
+                              4
+                            )}°E`;
                           })()}
+
                         </li>
+
                       </ul>
 
-                      {/* Statut de l'incident */}
-                      <div className={`mb-4 status-stepper-${selectedIncident?.etat || 'declared'}`}>
-                        <h6 className="section-title mb-3">STATUT DE L'INCIDENT</h6>
+
+                      {/* ----------------------------------------------------
+                       * STATUS STEPPER
+                       * -------------------------------------------------- */}
+
+                      <div
+                        className={`mb-4 status-stepper-${
+                          selectedIncident?.etat ||
+                          'declared'
+                        }`}
+                      >
+
+                        <h6 className="section-title mb-3">
+                          STATUT DE L'INCIDENT
+                        </h6>
+
                         <div className="incident-modal-status-bar">
-                          {INCIDENT_STATUS_STEPS.map((step, idx) => (
-                            <div
-                              key={step.id}
-                              className={`incident-modal-status-segment ${idx < statusIndex ? 'is-done' : ''
-                                } ${idx === statusIndex ? 'is-current' : ''}`}
-                            />
-                          ))}
+
+                          {INCIDENT_STATUS_STEPS.map(
+                            (
+                              step,
+                              index
+                            ) => (
+                              <div
+                                key={
+                                  step.id
+                                }
+                                className={`incident-modal-status-segment ${
+                                  index <
+                                  statusIndex
+                                    ? 'is-done'
+                                    : ''
+                                } ${
+                                  index ===
+                                  statusIndex
+                                    ? 'is-current'
+                                    : ''
+                                }`}
+                              />
+                            )
+                          )}
+
                         </div>
+
+
                         <div className="incident-modal-status-steps">
-                          {INCIDENT_STATUS_STEPS.map((step, idx) => (
-                            <div
-                              key={step.id}
-                              className={`incident-modal-status-step ${idx < statusIndex ? 'is-done' : ''
-                                } ${idx === statusIndex ? 'is-current' : ''}`}
-                            >
-                              <span className="incident-modal-status-dot" />
-                              <span>{step.label.toUpperCase()}</span>
-                            </div>
-                          ))}
+
+                          {INCIDENT_STATUS_STEPS.map(
+                            (
+                              step,
+                              index
+                            ) => (
+                              <div
+                                key={
+                                  step.id
+                                }
+                                className={`incident-modal-status-step ${
+                                  index <
+                                  statusIndex
+                                    ? 'is-done'
+                                    : ''
+                                } ${
+                                  index ===
+                                  statusIndex
+                                    ? 'is-current'
+                                    : ''
+                                }`}
+                              >
+                                <span className="incident-modal-status-dot" />
+
+                                <span>
+                                  {
+                                    step.label.toUpperCase()
+                                  }
+                                </span>
+                              </div>
+                            )
+                          )}
+
                         </div>
+
                       </div>
 
-                      {/* Audio */}
+
+                      {/* ----------------------------------------------------
+                       * AUDIO
+                       * -------------------------------------------------- */}
+
                       {selectedIncident.audio && (
                         <div className="mb-4">
-                          <h6 className="section-title mb-2">AUDIO</h6>
-                          <audio controls className="w-100">
-                            <source src={selectedIncident.audio} type="audio/mpeg" />
+
+                          <h6 className="section-title mb-2">
+                            AUDIO
+                          </h6>
+
+                          <audio
+                            controls
+                            className="w-100"
+                          >
+                            <source
+                              src={
+                                selectedIncident.audio
+                              }
+                              type="audio/mpeg"
+                            />
+
                             Votre navigateur ne supporte pas l'élément audio.
                           </audio>
+
                         </div>
                       )}
 
-                      {/* Vidéo */}
+
+                      {/* ----------------------------------------------------
+                       * VIDEO
+                       * -------------------------------------------------- */}
+
                       {selectedIncident.video && (
                         <div className="mb-4">
-                          <h6 className="section-title mb-2">VIDÉO DE PRÉSENTATION</h6>
+
+                          <h6 className="section-title mb-2">
+                            VIDÉO DE PRÉSENTATION
+                          </h6>
+
                           <video
                             controls
                             className="w-100 rounded"
-                            style={{ maxHeight: '400px' }}
+                            style={{
+                              maxHeight:
+                                '400px',
+                            }}
                           >
-                            <source src={selectedIncident.video} type="video/mp4" />
+                            <source
+                              src={
+                                selectedIncident.video
+                              }
+                              type="video/mp4"
+                            />
+
                             Votre navigateur ne supporte pas la lecture de vidéos.
                           </video>
+
                         </div>
                       )}
 
-                      {/* Organisations participantes */}
-                      {selectedIncident.participants?.length > 0 && (
+
+                      {/* ----------------------------------------------------
+                       * ORGANISATIONS
+                       * -------------------------------------------------- */}
+
+                      {selectedIncident.participants?.length >
+                        0 && (
                         <div className="mb-3">
-                          <h6 className="section-title mb-3">ORGANISATIONS MOBILISÉES</h6>
+
+                          <h6 className="section-title mb-3">
+                            ORGANISATIONS MOBILISÉES
+                          </h6>
+
                           <div className="d-flex flex-wrap gap-3 mb-3">
-                            {selectedIncident.participants.map((p, idx) => (
-                              <div key={idx} className="d-flex align-items-center gap-2">
+
+                            {selectedIncident.participants.map(
+                              (
+                                participant,
+                                index
+                              ) => (
                                 <div
-                                  className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
-                                  style={{
-                                    backgroundColor: p.color,
-                                    width: '40px',
-                                    height: '40px',
-                                    fontSize: 'var(--font-size-body-small)'
-                                  }}
+                                  key={
+                                    index
+                                  }
+                                  className="d-flex align-items-center gap-2"
                                 >
-                                  {p.initials}
+
+                                  <div
+                                    className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
+                                    style={{
+                                      backgroundColor:
+                                        participant.color,
+
+                                      width:
+                                        '40px',
+
+                                      height:
+                                        '40px',
+
+                                      fontSize:
+                                        'var(--font-size-body-small)',
+                                    }}
+                                  >
+                                    {
+                                      participant.initials
+                                    }
+                                  </div>
+
+                                  <span>
+                                    {
+                                      participant.name
+                                    }
+                                  </span>
+
                                 </div>
-                                <span>{p.name}</span>
-                              </div>
-                            ))}
-                            {selectedIncident.extraParticipants > 0 && (
+                              )
+                            )}
+
+
+                            {selectedIncident.extraParticipants >
+                              0 && (
                               <div className="d-flex align-items-center gap-2">
+
                                 <div
                                   className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
                                   style={{
-                                    backgroundColor: 'var(--color-text-muted)',
-                                    width: '40px',
-                                    height: '40px',
-                                    fontSize: 'var(--font-size-body-small)'
+                                    backgroundColor:
+                                      'var(--color-text-muted)',
+
+                                    width:
+                                      '40px',
+
+                                    height:
+                                      '40px',
+
+                                    fontSize:
+                                      'var(--font-size-body-small)',
                                   }}
                                 >
-                                  +{selectedIncident.extraParticipants}
+                                  +
+                                  {
+                                    selectedIncident.extraParticipants
+                                  }
                                 </div>
-                                <span>Autres organisations</span>
+
+                                <span>
+                                  Autres organisations
+                                </span>
+
                               </div>
                             )}
+
                           </div>
                         </div>
                       )}
+
                     </>
                   )}
+
                 </div>
 
-                {/* Footer avec bouton Savoir plus */}
-                {!isLoadingIncident && selectedIncident && (
-                  <div className="modal-footer">
-                    <button
-                      type="button"
-                      className="btn btn-secondary"
-                      onClick={closeModal}
-                    >
-                      Fermer
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-primary"
-                      onClick={() => {
-                        navigate(`/signalements/${selectedIncident.id}`, { state: { from: '/dashboard' } });
-                      }}
-                    >
-                      Savoir plus
-                    </button>
-                  </div>
-                )}
+
+                {/* ----------------------------------------------------------
+                 * FOOTER
+                 * -------------------------------------------------------- */}
+
+                {!isLoadingIncident &&
+                  selectedIncident && (
+                    <div className="modal-footer">
+
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={
+                          closeModal
+                        }
+                      >
+                        Fermer
+                      </button>
+
+
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={() => {
+                          navigate(
+                            `/signalements/${selectedIncident.id}`,
+                            {
+                              state: {
+                                from:
+                                  '/dashboard',
+                              },
+                            }
+                          );
+                        }}
+                      >
+                        Savoir plus
+                      </button>
+
+                    </div>
+                  )}
+
               </div>
             </div>
           </div>
-          {/* Backdrop */}
-          <div className={`modal-backdrop fade ${modalShowing && !modalClosing ? 'show' : ''}`} />
+
+
+          {/* ----------------------------------------------------------------
+           * BACKDROP
+           * -------------------------------------------------------------- */}
+
+          <div
+            className={`modal-backdrop fade ${
+              modalShowing &&
+              !modalClosing
+                ? 'show'
+                : ''
+            }`}
+          />
         </>
       )}
     </div>
   );
 };
+
 
 export default MapContainer;

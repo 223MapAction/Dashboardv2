@@ -16,17 +16,24 @@
  * sa forme change dans une version ultérieure, on retombe sur le comportement
  * d'avant plutôt que de casser.
  *
- * Uniquement sur pointeur grossier : le mode coopératif impose aussi
- * Ctrl+molette pour zoomer, ce qui n'a pas de sens avec une souris. Le test
- * porte sur `pointer` et non `any-pointer` : c'est le pointeur PRINCIPAL qui
- * compte, sans quoi un portable à écran tactile perdrait son zoom à la molette.
+ * Par defaut, uniquement sur pointeur grossier (tactile) : le mode coopératif
+ * impose aussi Ctrl+molette pour zoomer, ce qui n'a pas toujours de sens avec
+ * une souris. Le test porte sur `pointer` et non `any-pointer` : c'est le
+ * pointeur PRINCIPAL qui compte, sans quoi un portable à écran tactile
+ * perdrait son zoom à la molette.
+ *
+ * Passer `{ touchOnly: false }` pour l'activer aussi au clavier/souris (page
+ * scrollable en dessous d'une petite carte, ex. dashboard) : molette seule
+ * scrolle la page, Ctrl+molette zoome la carte.
  *
  * @param {object} carte instance MapLibre (via `ref.current.getMap()`)
+ * @param {object} [options]
+ * @param {boolean} [options.touchOnly=true]
  * @returns {boolean} true si le mode a pu être activé
  */
-export const activerGestesCooperatifs = (carte) => {
+export const activerGestesCooperatifs = (carte, { touchOnly = true } = {}) => {
   if (!carte || typeof window === 'undefined') return false;
-  if (!window.matchMedia('(pointer: coarse)').matches) return false;
+  if (touchOnly && !window.matchMedia('(pointer: coarse)').matches) return false;
 
   const gestionnaire = carte.cooperativeGestures;
 
@@ -42,7 +49,7 @@ export const activerGestesCooperatifs = (carte) => {
   // transmette — ce qu'on ne peut pas tenir pour acquis, vu le reste.
   const voile = carte
     .getContainer?.()
-    ?.querySelector('.maplibregl-cooperative-gesture-screen');
+    ?.querySelector('.maplibregl-cooperative-gesture-screen, .mapboxgl-cooperative-gesture-screen');
   if (voile) voile.textContent = 'Utilisez deux doigts pour déplacer la carte';
 
   return true;
