@@ -1,5 +1,4 @@
 import React from 'react';
-import useSWR from 'swr';
 import { SearchNormal1 } from 'iconsax-react';
 import { ShimmerThumbnail, ShimmerTitle, ShimmerText, ShimmerCircularImage } from 'react-shimmer-effects';
 import { Eye, Edit2, Trash } from 'iconsax-react';
@@ -7,7 +6,6 @@ import { BlurryImage } from '../../../../components/atoms/BlurryImage';
 import { useIncidentModalContext } from '../../modale/IncidentModalContext';
 import { authService } from '../../../auth/services/authService';
 import { isSuperAdmin as checkSuperAdmin, getAccessibleNavIds } from '../../../../utils/permissions';
-import { getCollaborationsService } from '../../service/collaboration_service';
 import Pagination from '../../../../components/molecules/Pagination';
 import { ResponsiveTable } from '../../../../components/molecules/ResponsiveTable';
 import { FiltersBar } from '../../../../components/molecules/FiltersBar';
@@ -41,24 +39,6 @@ export const IncidentList = ({
   const myOrgId = user?.organisation_member;
   const myOrgName = user?.organisation_name || 'Mon Organisation';
 
-  // /MapApi/collaboration/ met 7 a 16 secondes : la route n'est pas paginee et
-  // renvoie toute la table, alors qu'on n'en tire qu'un badge par ligne. On ne
-  // peut pas supprimer l'appel depuis le front — la reponse de /incident/ ne
-  // porte aucune information de collaboration — mais on peut cesser de le
-  // refaire a chaque visite. Une fois par session suffit : ces demandes ne
-  // changent pas d'une minute a l'autre, et le badge n'est pas critique.
-  // Le correctif propre appartient a l'API (pagination + filtre par signalement).
-  const { data: collaborations } = useSWR(
-    'collaborations',
-    getCollaborationsService,
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      revalidateIfStale: false,
-      dedupingInterval: 30 * 60 * 1000,
-    }
-  );
-
   // Le filtre par statut est desormais applique par le serveur (parametre
   // `etat`), donc sur l'ensemble du jeu de donnees. Le refaire ici ne
   // filtrerait que la page courante tout en laissant la pagination annoncer
@@ -71,9 +51,6 @@ export const IncidentList = ({
   const lignes = filtered.map((incident) => {
     const takenOrgId = incident.taken_by_organisation?.id;
     const estMoi = Boolean(myOrgId && takenOrgId && String(takenOrgId) === String(myOrgId));
-    const collabList = Array.isArray(collaborations)
-      ? collaborations
-      : Array.isArray(collaborations?.results) ? collaborations.results : [];
 
     return {
       ...incident,
@@ -83,7 +60,6 @@ export const IncidentList = ({
           name: estMoi ? myOrgName : (incident.taken_by_organisation?.name || incident.taken_by_name || ''),
         }
         : null,
-      _collabRequest: collabList.find((c) => c.incident === incident.id),
     };
   });
 
@@ -261,77 +237,6 @@ export const IncidentList = ({
                                 </span>
                               )}
 
-                              {incident._collabRequest && (
-                                <div style={{ marginTop: '2px' }}>
-                                  {(() => {
-                                    const role = incident._collabRequest.role || '';
-                                    const status = incident._collabRequest.status || 'pending';
-
-                                    const getRoleLabel = (r) => {
-                                      const norm = r.toLowerCase();
-                                      if (norm === 'leader') return 'Leader';
-                                      if (norm === 'contributor' || norm === 'contributeur') return 'Contributeur';
-                                      if (norm === 'observer' || norm === 'observateur') return 'Observateur';
-                                      return r;
-                                    };
-
-                                    const getStatusLabel = (s) => {
-                                      const norm = s.toLowerCase();
-                                      if (norm === 'accepted' || norm === 'in-progress') return 'Acceptée';
-                                      if (norm === 'pending') return 'En attente';
-                                      if (norm === 'rejected' || norm === 'refused') return 'Refusée';
-                                      return s;
-                                    };
-
-                                    const isAccepted = status === 'accepted' || status === 'in-progress';
-                                    const isPending = status === 'pending';
-                                    const isRejected = status === 'rejected' || status === 'refused';
-
-                                    let badgeColor = 'var(--color-text-secondary)';
-                                    let badgeBg = 'rgba(var(--rgb-text-secondary), 0.1)';
-                                    let badgeBorder = 'rgba(var(--rgb-text-secondary), 0.2)';
-
-                                    if (isAccepted) {
-                                      badgeColor = 'var(--color-success)';
-                                      badgeBg = 'rgba(var(--rgb-success), 0.1)';
-                                      badgeBorder = 'rgba(var(--rgb-success), 0.2)';
-                                    } else if (isPending) {
-                                      badgeColor = 'var(--color-warning)';
-                                      badgeBg = 'rgba(var(--rgb-warning), 0.1)';
-                                      badgeBorder = 'rgba(var(--rgb-warning), 0.2)';
-                                    } else if (isRejected) {
-                                      badgeColor = 'var(--color-danger)';
-                                      badgeBg = 'rgba(var(--rgb-danger), 0.1)';
-                                      badgeBorder = 'rgba(var(--rgb-danger), 0.2)';
-                                    }
-
-                                    return (
-                                      <span style={{
-                                        display: 'inline-flex',
-                                        alignItems: 'center',
-                                        gap: '6px',
-                                        padding: '4px 10px',
-                                        borderRadius: '6px',
-                                        fontSize: 'var(--font-size-micro)',
-                                        fontWeight: '600',
-                                        color: badgeColor,
-                                        backgroundColor: badgeBg,
-                                        borderColor: badgeBorder,
-                                        borderWidth: '1px',
-                                        borderStyle: 'solid'
-                                      }}>
-
-                                        {String(incident._collabRequest.organisation_id) !== String(myOrgId)
-                                          ? (isPending ? "Vous avez des demandes de collaboration en attente" : `Demande de collaboration : ${getStatusLabel(status)}`)
-                                          : getRoleLabel(role) === "Leader" 
-                                            ? "" 
-                                            : `(Moi) j'ai fais une demande en tant que ${getRoleLabel(role)} : ${getStatusLabel(status)}`
-                                        }
-                                      </span>
-                                    );
-                                  })()}
-                                </div>
-                              )}
                             </div>
       ),
     },

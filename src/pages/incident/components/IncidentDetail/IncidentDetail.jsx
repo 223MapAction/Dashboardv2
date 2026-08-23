@@ -122,7 +122,7 @@ export const IncidentDetail = ({ incident, onBack, isLoading = false }) => {
 
   const { data: collaborations, mutate: mutateCollaborations } = useSWR(
     'collaborations',
-    getCollaborationsService,
+    () => getCollaborationsService(),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,

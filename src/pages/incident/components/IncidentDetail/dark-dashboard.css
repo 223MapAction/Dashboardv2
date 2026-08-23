@@ -576,9 +576,20 @@
     width: 100vw;
     height: 100vh;
     height: 100dvh;
+    /* index.css plafonne .chatbot-panel a max-height: min(550px, ...) pour
+       le panneau flottant desktop/tablette. Sur mobile le panneau devient
+       plein ecran (ci-dessus) : ce plafond doit sauter, sinon il prime sur
+       height et le panneau reste coince a 550px. */
+    max-height: none;
     border-radius: 0;
     border: none;
     z-index: 10000;
+  }
+
+  /* Plein ecran : la barre de saisie touche le bas de l'appareil. Sur
+     iPhone a encoche et Android gestuel, une bande est reservee la. */
+  .chatbot-input-area {
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
   }
 }
 
