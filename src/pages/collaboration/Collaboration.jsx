@@ -41,6 +41,7 @@ import { ShimmerThumbnail, ShimmerTitle, ShimmerText } from 'react-shimmer-effec
 import { BlurryImage } from '../../components/atoms/BlurryImage';
 import './collaboration.css';
 import { useReinitialisationSurChangement } from '../../hooks/useReinitialisationSurChangement';
+import { useEnVue } from '../../hooks/useEnVue';
 import { BandeauErreur } from '../../components/molecules/BandeauErreur';
 
 
@@ -65,6 +66,25 @@ const ROLE_OPTIONS = [
   { id: 'contributeur', label: 'Contributeur', icon: People, color: 'var(--color-primary-text)', description: 'Participe activement' },
   { id: 'observateur', label: 'Observateur', icon: Eye, color: 'var(--color-text-secondary)', description: 'Suit l\'avancement' }
 ];
+
+// La vignette de chaque carte est en background-image : `loading="lazy"` ne
+// s'applique qu'a <img>/<iframe>, pas a une div. Sans ce composant, les 20
+// cartes d'une page chargeaient leurs 20 images en meme temps a l'ouverture.
+// Un hook ne peut pas s'appeler dans la boucle .map() de la liste : chaque
+// carte doit donc etre son propre composant pour avoir sa propre instance de
+// useEnVue.
+const CollabCardCover = ({ className, image, children }) => {
+  const [ref, enVue] = useEnVue();
+  return (
+    <div
+      ref={ref}
+      className={className}
+      style={enVue ? { backgroundImage: `url(${image})` } : undefined}
+    >
+      {children}
+    </div>
+  );
+};
 
 export const Collaboration = () => {
   const navigate = useNavigate();
@@ -130,24 +150,28 @@ export const Collaboration = () => {
 
   // Les cent signalements qui remplissent la liste déroulante du filtre.
   //
-  // Mesuré à 9,7 s : c'est cher pour un menu, et cela partait jusqu'ici en même
-  // temps que les collaborations elles-mêmes, sur une API qui rend déjà la main
-  // lentement. On attend donc que le navigateur soit inoccupé — le contenu
-  // principal est affiché à ce moment-là, et la liste est prête bien avant
-  // qu'on ouvre le filtre.
+  // Mesuré à 4,3 s (111 Ko, 35 signalements complets) : c'est cher pour un menu
+  // qui n'affiche qu'un titre par entrée. Cet appel partait jusqu'ici dès que
+  // le navigateur devenait inoccupé, donc à chaque visite, y compris pour les
+  // gens qui n'ouvrent jamais « Plus de filtres » — soit la majorité.
   //
-  // Différer plutôt que réduire : couper à vingt entrées rendrait le filtre
+  // On attend donc que ce menu-là soit ouvert. Se brancher sur le panneau
+  // « Plus de filtres » ne servirait à rien : statusFilter vaut « accepted »
+  // par défaut, donc le panneau s'ouvre de lui-même au premier rendu, pour
+  // tout le monde. Le menu des signalements, lui, reste fermé tant qu'on ne
+  // clique pas dessus.
+  //
+  // Une fois chargée, la liste reste en cache cinq minutes : refermer puis
+  // rouvrir ne relance rien. Le coût est un court délai à la première
+  // ouverture du menu, contre 4 s de trafic épargnées à tous ceux qui ne
+  // filtrent pas par signalement.
+  //
+  // Charger plutôt que réduire : couper à vingt entrées rendrait le filtre
   // menteur, puisqu'il ne proposerait plus tous les signalements existants.
-  const [filtreChargeable, setFiltreChargeable] = useState(false);
-  useEffect(() => {
-    const differer = window.requestIdleCallback || ((cb) => setTimeout(cb, 1200));
-    const annuler = window.cancelIdleCallback || clearTimeout;
-    const id = differer(() => setFiltreChargeable(true), { timeout: 4000 });
-    return () => annuler(id);
-  }, []);
+  const [listeSignalementsDemandee, setListeSignalementsDemandee] = useState(false);
 
-  const { data: rawIncidents } = useSWR(
-    filtreChargeable ? 'incidents_dropdown_list' : null,
+  const { data: rawIncidents, isLoading: chargementListeSignalements } = useSWR(
+    listeSignalementsDemandee ? 'incidents_dropdown_list' : null,
     () => getIncidentsService(1, 100),
     { dedupingInterval: 300000, revalidateIfStale: false, revalidateOnFocus: false }
   );
@@ -268,7 +292,11 @@ export const Collaboration = () => {
       const startDate = collab.start_date ? new Date(collab.start_date) : null;
       const endDate = collab.end_date ? new Date(collab.end_date) : null;
       const incidentTitle = collab.incident_details?.title || collab.incident_title || `Incident`;
-      const incidentImage = collab.incident_photo || collab.incident_thumbnail || collab.photo || collab.thumbnail || collab.incident_details?.photo || collab.incident_details?.image || '';
+      // Vignette d'abord : posee en fond de carte sur quelques centaines de
+      // pixels, alors que incident_photo est l'original — mesure : ~973 Ko en
+      // moyenne contre ~14 Ko pour incident_thumbnail, facteur ~70. L'API
+      // fournit les deux sur chaque ligne ; seul l'ordre de preference change.
+      const incidentImage = collab.incident_thumbnail || collab.thumbnail || collab.incident_photo || collab.photo || collab.incident_details?.image || collab.incident_details?.photo || '';
       const orgName = collab.organisation_name || collab.user_full_name || ``;
       const incidentLocation = collab.incident_details?.zone || collab.incident_zone || 'À définir';
       const incidentDescription = collab.incident_description || collab.incident_details?.description || collab.motivation || 'Aucune description';
@@ -776,9 +804,19 @@ export const Collaboration = () => {
                           <select
                             value={incidentFilter}
                             onChange={(e) => setIncidentFilter(e.target.value)}
+                            // La liste des signalements coûte 4 s à l'API : on
+                            // ne la demande qu'ici, quand ce menu s'ouvre pour
+                            // de bon. `mousedown` précède l'ouverture, `focus`
+                            // couvre le clavier.
+                            onMouseDown={() => setListeSignalementsDemandee(true)}
+                            onFocus={() => setListeSignalementsDemandee(true)}
                             aria-label="Filtrer par signalement"
+                            aria-busy={chargementListeSignalements}
                           >
                             <option value="">Tous les signalements</option>
+                            {chargementListeSignalements && (
+                              <option value="" disabled>Chargement des signalements...</option>
+                            )}
                             {incidentsList.map((inc) => (
                               <option key={inc.id} value={inc.id}>{inc.title}</option>
                             ))}
@@ -912,10 +950,7 @@ export const Collaboration = () => {
                             }
                           }}
                         >
-                          <div
-                            className="collab-card-cover"
-                            style={{ backgroundImage: `url(${c.image})` }}
-                          >
+                          <CollabCardCover className="collab-card-cover" image={c.image}>
                             <span
                               className={`collab-status-badge collab-status-${c.status}`}
                             >
@@ -935,7 +970,7 @@ export const Collaboration = () => {
                                 </>
                               )}
                             </span>
-                          </div>
+                          </CollabCardCover>
 
                           <div className="collab-card-body">
                             <div className="collab-card-org">{c.organisation}</div>

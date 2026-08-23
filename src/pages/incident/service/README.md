@@ -153,8 +153,11 @@ Rejeter une suggestion (leader uniquement)
 
 ### 🤝 Collaboration Service
 
-#### `getCollaborationsService()`
-Liste des collaborations de l'utilisateur
+#### `getCollaborationsService(options?)`
+Liste des collaborations de l'utilisateur. La route est paginée : le service
+parcourt les pages jusqu'à épuisement de `next`, pour que les appelants
+reçoivent la liste complète et non la seule première page.
+- **Params**: `options` (object, optionnel) : `{ pageSize = 100, maxPages = 10 }`
 - **Returns**: Array de collaborations
 
 #### `requestCollaborationService(data)`

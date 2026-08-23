@@ -1156,11 +1156,27 @@ button.blurry-image-container {
   a[role="button"],
   [role="button"],
   .sidebar-item,
-  .am-pagination-btn,
-  input[type="checkbox"],
-  input[type="radio"] {
+  .am-pagination-btn {
     min-height: 44px;
     min-width: 44px;
+  }
+
+  /* Une case à cocher est un élément remplacé : lui imposer 44 px agrandit le
+     carré dessiné, il n'y a pas de zone cliquable séparée de la boîte — d'où
+     la case démesurée sur l'écran de connexion. On la laisse à la taille que
+     lui donne son composant, et on porte la cible tactile sur le libellé qui
+     l'enveloppe : cliquer un label bascule déjà sa case. */
+  input[type="checkbox"],
+  input[type="radio"] {
+    min-height: 0;
+    min-width: 0;
+  }
+
+  label:has(> input[type="checkbox"]),
+  label:has(> input[type="radio"]) {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
   }
 
   /* Les listes déroulantes et les champs de saisie manquaient à l'appel : la
@@ -1258,10 +1274,14 @@ p {
    partiellement intouchable. On décale les surfaces fixées de cette hauteur. */
 .activity-fab,
 .chatbot-fab,
-.chatbot-panel,
 [class$="-fab"] {
   bottom: calc(var(--spacing-6) + env(safe-area-inset-bottom));
 }
+
+/* .chatbot-panel gere son propre bottom dans dark-dashboard.css : 100px
+   (bouton flottant au-dessus) sur desktop/tablette, 0 (plein ecran) sur
+   mobile. Le mettre dans la liste ci-dessus l'ecraserait, avec un resultat
+   qui dependrait de l'ordre de chargement des feuilles de style. */
 
 .am-offcanvas-panel,
 [class*="-sheet"],
@@ -1272,11 +1292,15 @@ p {
 /* ── 11. Panneaux flottants sur petit écran ──────────────────────────────────
    Une largeur fixe supérieure à l'écran déborde. `min()` prend la plus petite
    des deux valeurs : la largeur voulue sur grand écran, la place disponible
-   sinon. */
-.chatbot-panel {
-  width: min(380px, calc(100vw - 2 * var(--spacing-4)));
-  max-height: min(550px, calc(100dvh - 160px));
-  right: max(var(--spacing-4), env(safe-area-inset-right));
+   sinon. Uniquement au-dessus de 767.98px : en dessous, dark-dashboard.css
+   fait passer .chatbot-panel plein ecran (100dvh) — un max-height ici
+   l'emporterait sur ce height et coincerait le panneau a 550px. */
+@media (min-width: 768px) {
+  .chatbot-panel {
+    width: min(380px, calc(100vw - 2 * var(--spacing-4)));
+    max-height: min(550px, calc(100dvh - 160px));
+    right: max(var(--spacing-4), env(safe-area-inset-right));
+  }
 }
 
 /* ── 12. Typographie fluide ──────────────────────────────────────────────────
