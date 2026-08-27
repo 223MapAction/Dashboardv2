@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { FiltersBar } from '../../components/molecules/FiltersBar';
 import { useRechercheDebouncee } from '../../hooks/useRechercheDebouncee';
 import useSWR, { mutate } from 'swr';
@@ -39,9 +39,9 @@ import {
 import { RequestIncidentDetailModal } from '../../components/collaboration/RequestIncidentDetailModal';
 import { RequestDecisionModal } from '../../components/collaboration/RequestDecisionModal';
 import { authService } from '../auth/services/authService';
-import { API_URL_BASE } from '../../config/api_url_base';
 import '../../styles/collaboration-requests.css';
 import { logger } from '../../utils/logger';
+import { useSocketCollaborations } from '../../hooks/useSocketCollaborations';
 
 const STATUS_META = {
   pending: {
@@ -234,128 +234,75 @@ export const CollaborationRequests = ({
     }
   }, [typeFilter, mutatePendingSuggestions, mutateActiveCollabs, mutatePendingInvitations]);
 
- 
-  useEffect(() => {
-    const wsBaseUrl = window.location.protocol === 'https:' || API_URL_BASE.startsWith('https')
-      ? API_URL_BASE.replace(/^https/, 'wss')
-      : API_URL_BASE.replace(/^http/, 'ws');
-    const token = authService.getAccessToken();
-    const query = token ? `?token=${token}` : '';
+  // Reception en direct des demandes de collaboration. La logique de connexion
+  // et de reconnexion vit dans le hook, partagee avec la page « Mes
+  // collaborations » qui ecoute le meme canal.
+  const surMessageCollaboration = useCallback((data) => {
+    if (!data) return;
+    const reqId = data.id;
+    const newStatus = data.status || 'pending';
 
-    let socket = null;
-    let isCleanedUp = false;
-    let delay = 3000;
+    // Mettre à jour l'override de statut pour synchronisation instantanée avec SWR
+    if (reqId) {
+      setStatusOverrides((prev) => ({ ...prev, [reqId]: newStatus }));
+    }
 
-    const shouldRetry = (code) => ![1000, 4001, 4003, 4004].includes(code);
-
-    const connect = () => {
-      if (isCleanedUp) return;
-      socket = new WebSocket(`${wsBaseUrl}/ws/collaborations/${query}`);
-
-      socket.onopen = () => {
-        delay = 3000;
-      };
-
-      socket.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-
-          if (data) {
-            const reqId = data.id;
-            const newStatus = data.status || 'pending';
-
-            // Mettre à jour l'override de statut pour synchronisation instantanée avec SWR
-            if (reqId) {
-              setStatusOverrides((prev) => ({ ...prev, [reqId]: newStatus }));
-            }
-
-            setWsRequests((prev) => {
-              const exists = prev.some((r) => r.apiId === reqId);
-              if (exists) {
-                return prev.map((r) => r.apiId === reqId ? { ...r, status: newStatus } : r);
-              }
-
-              const orgName = data.sender_organisation || 'Organisation';
-              const isLeader = data.role === 'leader';
-              const displayRole = isLeader ? 'Leader' : (data.role === 'observer' ? 'Observateur' : 'Contributeur');
-
-              const currUser = authService.getCurrentUser();
-              const myOrgId = currUser?.organisation_member || currUser?.organisation_id || '';
-              const senderOrgId = data.sender_organisation_id;
-
-              let calculatedDirection = 'received';
-              if (senderOrgId && myOrgId && String(senderOrgId).toLowerCase() === String(myOrgId).toLowerCase()) {
-                calculatedDirection = 'sent';
-              } else if (data.sender_name && currUser?.first_name && data.sender_name.toLowerCase().includes(currUser.first_name.toLowerCase())) {
-                calculatedDirection = 'sent';
-              }
-
-              const newReq = {
-                id: `collab_ws_${reqId}`,
-                type: 'invitation',
-                direction: calculatedDirection,
-                projectTitle: data.incident_title || `Incident #${data.incident}`,
-                projectImage: '',
-                organisation: orgName,
-                organisationInitials: getInitials(orgName),
-                organisationColor: 'var(--color-warning)',
-                role: displayRole,
-                motif: data.justification || data.motivation || `${orgName} a demandé à collaborer sur «${data.incident_title || 'cet incident'}»`,
-                status: newStatus,
-                submittedAt: data.created_at || new Date().toISOString(),
-                respondedAt: null,
-                response: null,
-                incidentId: data.incident,
-                apiId: reqId,
-                incidentDetails: {
-                  id: data.incident,
-                  title: data.incident_title
-                },
-                userFullName: data.sender_name,
-                organisationName: orgName
-              };
-
-              return [newReq, ...prev];
-            });
-
-            // Revalidation globale en arrière-plan
-            mutatePendingSuggestions();
-            mutateActiveCollabs();
-            mutatePendingInvitations();
-          }
-        } catch (e) {
-          logger.error('[WS-Collaborations] Erreur parsing message:', e);
-        }
-      };
-
-      socket.onerror = () => socket.close();
-
-      socket.onclose = (e) => {
-        if (!isCleanedUp && shouldRetry(e.code)) {
-          setTimeout(connect, delay);
-          delay = Math.min(delay * 2, 30000);
-        }
-      };
-    };
-
-    const handleBeforeUnload = () => {
-      isCleanedUp = true;
-      if (socket) {
-        socket.close(1000, "Page unloading");
+    setWsRequests((prev) => {
+      const exists = prev.some((r) => r.apiId === reqId);
+      if (exists) {
+        return prev.map((r) => r.apiId === reqId ? { ...r, status: newStatus } : r);
       }
-    };
-    window.addEventListener('beforeunload', handleBeforeUnload);
 
-    connect();
+      const orgName = data.sender_organisation || 'Organisation';
+      const isLeader = data.role === 'leader';
+      const displayRole = isLeader ? 'Leader' : (data.role === 'observer' ? 'Observateur' : 'Contributeur');
 
-    return () => {
-      isCleanedUp = true;
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      if (socket) {
-        socket.close(1000, "Component unmounting");
+      const currUser = authService.getCurrentUser();
+      const myOrgId = currUser?.organisation_member || currUser?.organisation_id || '';
+      const senderOrgId = data.sender_organisation_id;
+
+      let calculatedDirection = 'received';
+      if (senderOrgId && myOrgId && String(senderOrgId).toLowerCase() === String(myOrgId).toLowerCase()) {
+        calculatedDirection = 'sent';
+      } else if (data.sender_name && currUser?.first_name && data.sender_name.toLowerCase().includes(currUser.first_name.toLowerCase())) {
+        calculatedDirection = 'sent';
       }
-    };
+
+      const newReq = {
+        id: `collab_ws_${reqId}`,
+        type: 'invitation',
+        direction: calculatedDirection,
+        projectTitle: data.incident_title || `Incident #${data.incident}`,
+        projectImage: '',
+        organisation: orgName,
+        organisationInitials: getInitials(orgName),
+        organisationColor: 'var(--color-warning)',
+        role: displayRole,
+        motif: data.justification || data.motivation || `${orgName} a demandé à collaborer sur «${data.incident_title || 'cet incident'}»`,
+        status: newStatus,
+        submittedAt: data.created_at || new Date().toISOString(),
+        respondedAt: null,
+        response: null,
+        incidentId: data.incident,
+        apiId: reqId,
+        incidentDetails: {
+          id: data.incident,
+          title: data.incident_title
+        },
+        userFullName: data.sender_name,
+        organisationName: orgName
+      };
+
+      return [newReq, ...prev];
+    });
+
+    // Revalidation globale en arrière-plan
+    mutatePendingSuggestions();
+    mutateActiveCollabs();
+    mutatePendingInvitations();
   }, [mutatePendingSuggestions, mutateActiveCollabs, mutatePendingInvitations]);
+
+  useSocketCollaborations(surMessageCollaboration);
 
   const openDecision = (request, action = null) => {
     setDecisionRequest(request);

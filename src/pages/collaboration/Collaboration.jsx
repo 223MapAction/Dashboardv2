@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useRef } from 'react';
+import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { FiltersBar } from '../../components/molecules/FiltersBar';
 import { useRechercheDebouncee } from '../../hooks/useRechercheDebouncee';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -43,6 +43,7 @@ import './collaboration.css';
 import { useReinitialisationSurChangement } from '../../hooks/useReinitialisationSurChangement';
 import { useEnVue } from '../../hooks/useEnVue';
 import { BandeauErreur } from '../../components/molecules/BandeauErreur';
+import { useSocketCollaborations } from '../../hooks/useSocketCollaborations';
 
 
 registerLocale('fr', fr);
@@ -282,6 +283,45 @@ export const Collaboration = () => {
     if (revient) mutate();
   }, [activeTab, mutate]);
 
+  // Statuts recus en direct par WebSocket, appliques par-dessus la reponse de
+  // l'API. La route `/MapApi/collaborations/dashboard/` met 8 a 12 secondes :
+  // attendre sa revalidation pour afficher une acceptation laisserait la carte
+  // en « en attente » pendant une dizaine de secondes apres le clic d'en face.
+  const [statutsTempsReel, setStatutsTempsReel] = useState({});
+
+  const surMessageCollaboration = useCallback((donnees) => {
+    const id = donnees.id;
+    const statut = donnees.status;
+    if (id && statut) {
+      setStatutsTempsReel((prec) => ({ ...prec, [id]: statut }));
+    }
+    // Revalidation en fond : le message ne porte pas toute la collaboration
+    // (titre du signalement, vignette, taches). L'affichage est deja correct
+    // grace a l'override ci-dessus, l'appel lent se contente de completer.
+    //
+    // L'override est retire des que l'API renvoie le meme statut : le laisser
+    // en place figerait la carte et masquerait un changement ulterieur venu
+    // d'ailleurs (autre onglet, autre appareil).
+    mutate().then((frais) => {
+      if (!id || !frais) return;
+      const liste = frais.results || (Array.isArray(frais) ? frais : []);
+      const ligne = liste.find((c) => String(c.id) === String(id));
+      if (!ligne || ligne.status !== statut) return;
+      setStatutsTempsReel((prec) => {
+        if (!(id in prec)) return prec;
+        const { [id]: _retire, ...restants } = prec;
+        return restants;
+      });
+    }).catch(() => {
+      // Une revalidation en echec laisse l'override en place : mieux vaut
+      // afficher le statut recu en direct que revenir a l'ancien.
+    });
+  }, [mutate]);
+
+  // L'onglet « Demandes » ouvre deja sa propre connexion sur le meme canal :
+  // on ne branche celle-ci que sur l'onglet des collaborations.
+  useSocketCollaborations(surMessageCollaboration, activeTab === 'collaborations');
+
   // Mapper les données API vers le format attendu par le composant
   const collaborations = useMemo(() => {
     if (!swrData) return [];
@@ -302,6 +342,7 @@ export const Collaboration = () => {
       const incidentDescription = collab.incident_description || collab.incident_details?.description || collab.motivation || 'Aucune description';
       const incidentProgress = collab.incident_progress || 0;
       const participantsCount = collab.participants_count || collab.incident_details?.participants_count || 0;
+      const statutBrut = statutsTempsReel[collab.id] || collab.status;
 
       return {
         id: collab.id,
@@ -309,7 +350,7 @@ export const Collaboration = () => {
         title: incidentTitle,
         incidentId: collab.incident,
         userId: collab.user,
-        status: parseInt(incidentProgress) === 100 ? 'completed' : (collab.status === 'accepted' ? 'in-progress' : collab.status),
+        status: parseInt(incidentProgress) === 100 ? 'completed' : (statutBrut === 'accepted' ? 'in-progress' : statutBrut),
         createdAt: collab.created_at,
         motivation: collab.motivation,
         otherOption: collab.other_option,
@@ -340,7 +381,7 @@ export const Collaboration = () => {
         participantsCount
       };
     });
-  }, [swrData]);
+  }, [swrData, statutsTempsReel]);
 
   // Filtres locaux pour recherche et dates (le filtre de statut est maintenant géré par l'API)
   const filtered = useMemo(() => {
